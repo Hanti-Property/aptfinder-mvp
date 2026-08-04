@@ -28,8 +28,14 @@ export default function NoteWritePage() {
     if (error) {
       alert('저장 실패: ' + error.message)
     } else {
-      alert('리서치 노트가 발행되었습니다!')
-      setForm({ title: '', category: '', content: '', bottom_line: '' })
+      alert('✅ 리서치 노트가 발행되었습니다!')
+      const next = confirm('노트를 계속 작성하시겠습니까?\n\n[확인] → 새 노트 작성\n[취소] → 노트 목록으로 이동')
+      if (next) {
+        setForm({ title: '', category: '', content: '', bottom_line: '' })
+        window.scrollTo(0, 0)
+      } else {
+        window.location.href = '/notes'
+      }
     }
   }
 
