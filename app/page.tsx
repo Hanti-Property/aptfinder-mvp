@@ -17,18 +17,35 @@ interface Listing {
   monthly_rent: number
 }
 
+interface Note {
+  id: string
+  title: string
+  category: string
+  content: string
+  bottom_line: string
+  created_at: string
+}
+
 export default function Home() {
   const [listings, setListings] = useState<Listing[]>([])
+  const [notes, setNotes] = useState<Note[]>([])
 
   useEffect(() => {
     async function fetch() {
-      const { data } = await supabase
+      const { data: listData } = await supabase
         .from('listings')
         .select('*')
         .eq('status', '거래가능')
         .order('created_at', { ascending: false })
         .limit(10)
-      if (data) setListings(data)
+      if (listData) setListings(listData)
+
+      const { data: noteData } = await supabase
+        .from('research_notes')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5)
+      if (noteData) setNotes(noteData)
     }
     fetch()
   }, [])
@@ -74,37 +91,30 @@ export default function Home() {
       </div>
 
       <div className="p-4">
-        {/* 오늘의 리서치 노트 */}
+        {/* 오늘의 리서치 노트 — DB에서 가져옴 */}
         <div className="mb-5">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-sm font-semibold">📋 오늘의 리서치 노트</h3>
             <a href="/notes" className="text-xs text-[#1B3A5C]">더보기 →</a>
           </div>
           <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-2">
-            <div className="p-3 border border-gray-200 rounded-lg">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[9px] bg-red-600 text-white px-1.5 py-0.5 rounded">재건축</span>
-                <span className="text-[10px] text-gray-500">08.02</span>
-              </div>
-              <p className="text-xs text-gray-800 mb-0.5">은마 76㎡ 분담금</p>
-              <p className="text-lg font-bold text-red-600">3.2억 → 3.8억 <span className="text-xs text-gray-500">(+6천만/8개월)</span></p>
-              <p className="text-xs text-[#C49A3C] mt-1">📌 분담금 확정 전 추가 상승 가능</p>
-            </div>
-            <div className="p-3 border border-gray-200 rounded-lg bg-gradient-to-br from-gray-50 to-blue-50">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-7 h-7 bg-[#1B3A5C] rounded-full flex items-center justify-center text-white text-xs font-bold">홍</div>
-                <span className="text-xs font-semibold">홍성욱의 현장 한마디</span>
-                <span className="text-[9px] text-gray-400">08.02</span>
-              </div>
-              <p className="text-sm text-gray-800">&ldquo;이번 주 은마 매수 문의가 체감상 30% 늘었습니다.&rdquo;</p>
-              <p className="text-xs text-[#C49A3C] mt-1">📌 문의 증가 ≠ 거래 증가. 실거래 전환 지켜볼 것</p>
-            </div>
-            <div className="p-3 border border-gray-200 rounded-lg border-l-4 border-l-purple-700">
-              <p className="text-xs text-purple-700 font-semibold mb-1">Q. 자주 묻는 질문</p>
-              <p className="text-sm font-semibold text-gray-800 mb-1">&ldquo;은마 재건축, 지금 사도 될까요?&rdquo;</p>
-              <p className="text-xs text-gray-600">사업시행인가 단계. 총 투자비 32억 수준.</p>
-              <p className="text-xs text-[#C49A3C] mt-1">📌 32억 이하 진입이면 장기적으로 유효</p>
-            </div>
+            {notes.length === 0 ? (
+              <p className="text-xs text-gray-400 text-center py-4">등록된 노트가 없습니다.</p>
+            ) : (
+              notes.map(note => (
+                <div key={note.id} className="p-3 border border-gray-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[9px] bg-[#1B3A5C] text-white px-1.5 py-0.5 rounded">{note.category}</span>
+                    <span className="text-[10px] text-gray-500">{new Date(note.created_at).toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'})}</span>
+                  </div>
+                  <p className="text-sm font-semibold mb-1">{note.title}</p>
+                  <p className="text-xs text-gray-600 line-clamp-2">{note.content}</p>
+                  {note.bottom_line && (
+                    <p className="text-xs text-[#C49A3C] mt-1">📌 {note.bottom_line}</p>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
 
