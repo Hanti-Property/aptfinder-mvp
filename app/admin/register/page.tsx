@@ -15,8 +15,22 @@ interface Complex {
   constructor?: string
 }
 
+interface Agency {
+  id: string
+  name: string
+  representative?: string
+  phone1?: string
+  phone2?: string
+  address?: string
+  registration_no?: string
+}
+
 export default function RegisterPage() {
   const [complexes, setComplexes] = useState<Complex[]>([])
+  const [agencies, setAgencies] = useState<Agency[]>([])
+  const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null)
+  const [showNewAgency, setShowNewAgency] = useState(false)
+  const [newAgency, setNewAgency] = useState({ name: '', representative: '', phone1: '', phone2: '', address: '', registration_no: '' })
   const [selectedDong, setSelectedDong] = useState('')
   const [showNewComplex, setShowNewComplex] = useState(false)
   const [newComplex, setNewComplex] = useState({ name: '', road_address: '', lot_address: '', dong: '' })
@@ -49,6 +63,8 @@ export default function RegisterPage() {
     async function fetch() {
       const { data } = await supabase.from('complexes').select('*').order('name')
       if (data) setComplexes(data)
+      const { data: agencyData } = await supabase.from('agencies').select('*').order('name')
+      if (agencyData) setAgencies(agencyData)
     }
     fetch()
   }, [])
@@ -69,6 +85,53 @@ export default function RegisterPage() {
     const c = complexes.find(x => x.id === id)
     setSelectedComplex(c || null)
     setForm({ ...form, complex_id: id, complex_name: c?.name || '' })
+  }
+
+  // 부동산 선택
+  function handleAgencyChange(id: string) {
+    if (id === '__new__') {
+      setShowNewAgency(true)
+      setSelectedAgency(null)
+      return
+    }
+    setShowNewAgency(false)
+    const a = agencies.find(x => x.id === id)
+    setSelectedAgency(a || null)
+  }
+
+  // 신규 부동산 등록
+  async function registerNewAgency() {
+    if (!newAgency.name || !newAgency.representative || !newAgency.phone1) {
+      alert('상호명, 대표자명, 연락처1은 필수입니다.')
+      return
+    }
+    const { data, error } = await supabase.from('agencies').insert({
+      name: newAgency.name,
+      representative: newAgency.representative,
+      phone1: newAgency.phone1,
+      phone2: newAgency.phone2 || null,
+      address: newAgency.address || null,
+      registration_no: newAgency.registration_no || null,
+    }).select().single()
+
+    if (error) {
+      alert('등록 실패: ' + error.message)
+      return
+    }
+    alert('✅ 부동산 정보가 등록되었습니다!\n다음부터 목록에서 선택할 수 있습니다.')
+    setAgencies([...agencies, data])
+    setSelectedAgency(data)
+    setShowNewAgency(false)
+    setNewAgency({ name: '', representative: '', phone1: '', phone2: '', address: '', registration_no: '' })
+
+    // 관리자에게 이메일 알림 (Supabase Edge Function 또는 외부 서비스)
+    try {
+      await fetch('/api/notify-new-agency', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agency: data }),
+      })
+    } catch (e) { /* 알림 실패해도 등록은 성공 */ }
   }
 
   // 이미지 처리
@@ -118,12 +181,17 @@ export default function RegisterPage() {
       alert('단지와 거래종류는 필수입니다.')
       return
     }
+    if (!selectedAgency) {
+      alert('담당 부동산을 선택해주세요.')
+      return
+    }
     setSaving(true)
 
     // 1. 매물 등록
     const { data: listing, error } = await supabase.from('listings').insert({
       complex_id: form.complex_id || null,
       complex_name: form.complex_name,
+      agency_id: selectedAgency?.id || null,
       building_no: form.building_no,
       unit_no: form.unit_no,
       exclusive_area: form.exclusive_area ? Number(form.exclusive_area) : null,
@@ -206,6 +274,87 @@ export default function RegisterPage() {
       </header>
 
       <div className="p-4 space-y-4">
+        {/* 담당 부동산 선택 */}
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <label className="text-xs text-gray-600 font-semibold">담당 부동산 (중개사무소) *</label>
+          <select
+            className="w-full p-2.5 border border-gray-300 rounded-lg mt-1"
+            value={selectedAgency?.id || ''}
+            onChange={e => handleAgencyChange(e.target.value)}
+          >
+            <option value="">-- 부동산을 선택하세요 --</option>
+            {agencies.map(a => (
+              <option key={a.id} value={a.id}>{a.name} ({a.representative})</option>
+            ))}
+            <option value="__new__">➕ 신규 부동산 등록</option>
+          </select>
+
+          {/* 선택된 부동산 정보 표시 */}
+          {selectedAgency && (
+            <div className="mt-2 p-2 bg-blue-50 rounded-lg text-xs text-gray-700">
+              <p><b>상호:</b> {selectedAgency.name}</p>
+              <p><b>대표:</b> {selectedAgency.representative}</p>
+              <p><b>연락처:</b> {selectedAgency.phone1}{selectedAgency.phone2 ? ` / ${selectedAgency.phone2}` : ''}</p>
+              {selectedAgency.address && <p><b>소재지:</b> {selectedAgency.address}</p>}
+              {selectedAgency.registration_no && <p><b>등록번호:</b> {selectedAgency.registration_no}</p>}
+            </div>
+          )}
+
+          {/* 신규 부동산 등록 폼 */}
+          {showNewAgency && (
+            <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2">
+              <p className="text-xs font-bold text-orange-800">📋 신규 부동산 등록</p>
+              <p className="text-[10px] text-gray-600">한 번만 등록하면 다음부터 선택할 수 있습니다.</p>
+              <div>
+                <label className="text-[11px] text-gray-600">상호명 *</label>
+                <input type="text" placeholder="예) 한티부동산"
+                  className="w-full p-2 border border-gray-300 rounded-lg mt-0.5 text-sm"
+                  value={newAgency.name}
+                  onChange={e => setNewAgency({...newAgency, name: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-600">대표자명 (개업공인중개사) *</label>
+                <input type="text" placeholder="예) 홍성욱"
+                  className="w-full p-2 border border-gray-300 rounded-lg mt-0.5 text-sm"
+                  value={newAgency.representative}
+                  onChange={e => setNewAgency({...newAgency, representative: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-600">연락처1 (모바일) *</label>
+                <input type="tel" placeholder="010-0000-0000"
+                  className="w-full p-2 border border-gray-300 rounded-lg mt-0.5 text-sm"
+                  value={newAgency.phone1}
+                  onChange={e => setNewAgency({...newAgency, phone1: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-600">연락처2 (선택)</label>
+                <input type="tel" placeholder="010-0000-0000 또는 02-000-0000"
+                  className="w-full p-2 border border-gray-300 rounded-lg mt-0.5 text-sm"
+                  value={newAgency.phone2}
+                  onChange={e => setNewAgency({...newAgency, phone2: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-600">사무소 소재지 (선택)</label>
+                <input type="text" placeholder="예) 서울 강남구 역삼로 123"
+                  className="w-full p-2 border border-gray-300 rounded-lg mt-0.5 text-sm"
+                  value={newAgency.address}
+                  onChange={e => setNewAgency({...newAgency, address: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-600">중개등록번호 (선택)</label>
+                <input type="text" placeholder="예) 11680-2024-00123"
+                  className="w-full p-2 border border-gray-300 rounded-lg mt-0.5 text-sm"
+                  value={newAgency.registration_no}
+                  onChange={e => setNewAgency({...newAgency, registration_no: e.target.value})} />
+              </div>
+              <button onClick={registerNewAgency}
+                className="w-full p-2.5 bg-orange-500 text-white rounded-lg text-sm font-semibold">
+                부동산 등록 →
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* 동 선택 */}
         <div>
           <label className="text-xs text-gray-600">동 선택</label>
