@@ -23,7 +23,15 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
 }
+
+/* 전체 폰트 크기 업 */
+.text-xs { font-size: 13px !important; }
+.text-sm { font-size: 15px !important; }
+.text-\[9px\] { font-size: 11px !important; }
+.text-\[10px\] { font-size: 12px !important; }
+.text-\[11px\] { font-size: 13px !important; }
 
 input, select, textarea {
   color: #111827;
