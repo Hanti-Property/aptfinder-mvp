@@ -45,18 +45,18 @@ export default function ListingsPage() {
 
   function formatPrice(l: Listing) {
     if (l.transaction_type === '매매' && l.sale_price) {
-      const억 = Math.floor(l.sale_price / 10000)
-      const 만 = l.sale_price % 10000
-      return `${억}억${만 ? ` ${만.toLocaleString()}만` : ''}`
+      const a = Math.floor(l.sale_price / 10000)
+      const b = l.sale_price % 10000
+      return `${a}억${b ? ` ${b.toLocaleString()}만` : ''}`
     }
     if (l.transaction_type === '전세' && l.deposit) {
-      const억 = Math.floor(l.deposit / 10000)
-      const 만 = l.deposit % 10000
-      return `보증금 ${억}억${만 ? ` ${만.toLocaleString()}만` : ''}`
+      const a = Math.floor(l.deposit / 10000)
+      const b = l.deposit % 10000
+      return `보증금 ${a}억${b ? ` ${b.toLocaleString()}만` : ''}`
     }
     if (l.transaction_type === '월세') {
-      const 보억 = l.deposit ? Math.floor(l.deposit / 10000) : 0
-      return `${보억}억 / 월 ${l.monthly_rent}만`
+      const a = l.deposit ? Math.floor(l.deposit / 10000) : 0
+      return `${a}억 / 월 ${l.monthly_rent}만`
     }
     return ''
   }
