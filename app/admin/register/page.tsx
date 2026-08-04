@@ -166,6 +166,37 @@ export default function RegisterPage() {
 
     setSaving(false)
     alert('✅ 매물이 등록되었습니다!' + (images.length > 0 ? ` (사진 ${images.length}장 업로드)` : ''))
+    
+    const next = confirm('매물을 계속 등록하시겠습니까?\n\n[확인] → 새 매물 등록\n[취소] → 매물 목록으로 이동')
+    if (next) {
+      // 폼 초기화
+      setForm({
+        complex_id: '',
+        complex_name: '',
+        building_no: '',
+        unit_no: '',
+        exclusive_area: '',
+        supply_area: '',
+        room_count: '',
+        bathroom_count: '',
+        direction: '',
+        floor: '',
+        total_floors: '',
+        transaction_type: '',
+        sale_price: '',
+        deposit: '',
+        monthly_rent: '',
+        description: '',
+        features: '',
+      })
+      setImages([])
+      setImagePreviews([])
+      setSelectedComplex(null)
+      setShowNewComplex(false)
+      window.scrollTo(0, 0)
+    } else {
+      window.location.href = '/listings'
+    }
   }
 
   return (
