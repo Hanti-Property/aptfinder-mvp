@@ -92,23 +92,21 @@ export default function RegisterPage() {
 
   // 신규 단지 등록
   async function registerNewComplex() {
-    if (!newComplex.name || !newComplex.road_address || !newComplex.lot_address) {
-      alert('단지명, 도로명주소, 지번주소를 모두 입력해주세요.')
+    if (!newComplex.name) {
+      alert('단지명을 입력해주세요.')
       return
     }
+    const dong = selectedDong || '기타'
     const { data, error } = await supabase.from('complexes').insert({
       name: newComplex.name,
-      dong: newComplex.dong || selectedDong,
-      road_address: newComplex.road_address,
-      lot_address: newComplex.lot_address,
-      verified: false,
+      dong: dong,
     }).select().single()
 
     if (error) {
       alert('단지 등록 실패: ' + error.message)
       return
     }
-    alert('✅ 신규 단지가 등록되었습니다!\n관리자에게 검증 알림이 발송됩니다.')
+    alert('✅ 신규 단지가 등록되었습니다!\n다음부터 목록에서 선택할 수 있습니다.')
     setComplexes([...complexes, data])
     setForm({ ...form, complex_id: data.id, complex_name: data.name })
     setSelectedComplex(data)
@@ -228,9 +226,11 @@ export default function RegisterPage() {
             <div className="flex items-start gap-2 mb-3">
               <span className="text-lg">📍</span>
               <div>
-                <p className="text-sm font-bold text-orange-800">이 단지는 처음 등록되는 단지입니다</p>
-                <p className="text-xs text-gray-600 mt-1">정확한 매물 정보 제공을 위해 주소를 확인해 주세요.<br/>
-                <b>한 번만 입력하시면 다음부터는 자동으로 채워집니다.</b></p>
+                <p className="text-sm font-bold text-orange-800">신규 단지 등록</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  단지명을 입력하면 <b>{selectedDong || '선택된 동'}</b>에 등록됩니다.<br/>
+                  한 번만 등록하면 다음부터 목록에서 선택할 수 있습니다.
+                </p>
               </div>
             </div>
             <div className="space-y-3">
@@ -241,38 +241,19 @@ export default function RegisterPage() {
                   value={newComplex.name}
                   onChange={e => setNewComplex({...newComplex, name: e.target.value})} />
               </div>
-              <div>
-                <label className="text-xs text-gray-600">도로명주소 *</label>
-                <input type="text" placeholder="예) 서울 강남구 삼성로 172"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg mt-1"
-                  value={newComplex.road_address}
-                  onChange={e => setNewComplex({...newComplex, road_address: e.target.value})} />
-                <p className="text-[10px] text-gray-400 mt-1">💡 등기부등본 또는 건축물대장의 도로명주소를 입력하세요</p>
-              </div>
-              <div>
-                <label className="text-xs text-gray-600">지번주소 *</label>
-                <input type="text" placeholder="예) 서울 강남구 대치동 332"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg mt-1"
-                  value={newComplex.lot_address}
-                  onChange={e => setNewComplex({...newComplex, lot_address: e.target.value})} />
-                <p className="text-[10px] text-gray-400 mt-1">💡 &quot;○○동 ○○○&quot; 형태로 입력하세요</p>
-              </div>
-              <div>
-                <label className="text-xs text-gray-600">동 (행정동)</label>
-                <select className="w-full p-2.5 border border-gray-300 rounded-lg mt-1"
-                  value={newComplex.dong}
-                  onChange={e => setNewComplex({...newComplex, dong: e.target.value})}>
-                  <option value="">선택</option>
-                  <option>대치동</option><option>도곡동</option><option>개포동</option>
-                  <option>삼성동</option><option>압구정동</option><option>청담동</option>
-                  <option>역삼동</option><option>논현동</option><option>일원동</option><option>수서동</option>
-                </select>
-              </div>
-              <div className="bg-green-50 p-2 rounded-lg">
-                <p className="text-[11px] text-green-700">✅ 입력하신 주소는 관리자가 검증 후 확정됩니다. 매물 등록은 바로 진행할 수 있습니다.</p>
-              </div>
+              {selectedDong && (
+                <div className="bg-green-50 p-2 rounded-lg">
+                  <p className="text-[11px] text-green-700">✅ 소재지: <b>{selectedDong}</b> (위에서 선택한 동이 자동 적용됩니다)</p>
+                </div>
+              )}
+              {!selectedDong && (
+                <div className="bg-yellow-50 p-2 rounded-lg">
+                  <p className="text-[11px] text-yellow-700">⚠️ 위에서 동을 먼저 선택해주세요.</p>
+                </div>
+              )}
               <button onClick={registerNewComplex}
-                className="w-full p-2.5 bg-orange-500 text-white rounded-lg text-sm font-semibold">
+                disabled={!selectedDong}
+                className="w-full p-2.5 bg-orange-500 text-white rounded-lg text-sm font-semibold disabled:opacity-50">
                 단지 등록 후 계속 →
               </button>
             </div>
