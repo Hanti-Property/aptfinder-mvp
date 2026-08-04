@@ -102,13 +102,14 @@ export default function Home() {
               <p className="text-xs text-gray-400 text-center py-4">등록된 노트가 없습니다.</p>
             ) : (
               notes.map(note => (
-                <div key={note.id} className="p-3 border border-gray-200 rounded-lg">
+                <div key={note.id} onClick={() => window.location.href = `/notes/${note.id}`}
+                  className="p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[9px] bg-[#1B3A5C] text-white px-1.5 py-0.5 rounded">{note.category}</span>
                     <span className="text-[10px] text-gray-500">{new Date(note.created_at).toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'})}</span>
                   </div>
-                  <p className="text-sm font-semibold mb-1">{note.title}</p>
-                  <p className="text-xs text-gray-600 line-clamp-2">{note.content}</p>
+                  <p style={{color:'#111827'}} className="text-sm font-semibold mb-1">{note.title}</p>
+                  <p style={{color:'#374151'}} className="text-xs line-clamp-2">{note.content}</p>
                   {note.bottom_line && (
                     <p className="text-xs text-[#C49A3C] mt-1">📌 {note.bottom_line}</p>
                   )}
@@ -132,7 +133,8 @@ export default function Home() {
               {listings.map(l => {
                 const img = l.listing_images?.find((i: {is_primary: boolean}) => i.is_primary) || l.listing_images?.[0]
                 return (
-                <div key={l.id} className="border border-gray-200 rounded-lg p-2 cursor-pointer hover:shadow-sm">
+                <div key={l.id} onClick={() => window.location.href = `/listings/${l.id}`}
+                  className="border border-gray-200 rounded-lg p-2 cursor-pointer hover:shadow-sm">
                   {img ? (
                     <img src={img.image_url} alt={l.complex_name} className="w-full h-14 object-cover rounded mb-1" />
                   ) : (
