@@ -70,7 +70,7 @@ export default function NotesPage() {
           <p className="text-center text-gray-400 py-8">등록된 노트가 없습니다.</p>
         ) : (
           filtered.map(note => (
-            <div key={note.id} className="border border-gray-200 rounded-lg p-3 mb-2">
+            <a key={note.id} href={`/admin/notes/edit?id=${note.id}`} className="block border border-gray-200 rounded-lg p-3 mb-2 hover:bg-gray-50">
               <div className="flex justify-between items-center mb-1">
                 <span className={`text-[9px] text-white px-1.5 py-0.5 rounded ${getCategoryColor(note.category)}`}>
                   {note.category}
@@ -82,7 +82,8 @@ export default function NotesPage() {
               {note.bottom_line && (
                 <p className="text-xs text-[#C49A3C] mt-1">📌 {note.bottom_line}</p>
               )}
-            </div>
+              <p className="text-[10px] text-blue-500 mt-1">✏️ 클릭하여 수정</p>
+            </a>
           ))
         )}
 
