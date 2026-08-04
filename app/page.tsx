@@ -34,7 +34,7 @@ export default function Home() {
     async function fetch() {
       const { data: listData } = await supabase
         .from('listings')
-        .select('*')
+        .select('*, listing_images(image_url, is_primary)')
         .eq('status', '거래가능')
         .order('created_at', { ascending: false })
         .limit(10)
@@ -129,14 +129,23 @@ export default function Home() {
             <p className="text-xs text-gray-400 text-center py-4">아직 등록된 매물이 없습니다.</p>
           ) : (
             <div className="grid grid-rows-2 grid-flow-col auto-cols-[130px] gap-2 overflow-x-auto pb-2">
-              {listings.map(l => (
+              {listings.map(l => {
+                const img = l.listing_images?.find((i: {is_primary: boolean}) => i.is_primary) || l.listing_images?.[0]
+                return (
                 <div key={l.id} className="border border-gray-200 rounded-lg p-2 cursor-pointer hover:shadow-sm">
-                  <div className="w-full h-14 bg-gray-300 rounded mb-1"></div>
-                  <p className="text-xs font-semibold truncate">{l.complex_name} {l.building_no}동</p>
+                  {img ? (
+                    <img src={img.image_url} alt={l.complex_name} className="w-full h-14 object-cover rounded mb-1" />
+                  ) : (
+                    <div className="w-full h-14 bg-gray-200 rounded mb-1 flex items-center justify-center">
+                      <span className="text-[10px] text-gray-400">사진 없음</span>
+                    </div>
+                  )}
+                  <p style={{color:'#111827'}} className="text-xs font-semibold truncate">{l.complex_name} {l.building_no}동</p>
                   <p className="text-[10px] text-gray-500">{l.exclusive_area}㎡ · {l.direction}</p>
                   <p className={`text-xs font-bold ${getPriceColor(l.transaction_type)}`}>{formatPrice(l)}</p>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
