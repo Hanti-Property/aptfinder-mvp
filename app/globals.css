@@ -27,11 +27,13 @@ body {
 }
 
 /* 전체 폰트 크기 업 */
-.text-xs { font-size: 13px !important; }
-.text-sm { font-size: 15px !important; }
-.text-\[9px\] { font-size: 11px !important; }
-.text-\[10px\] { font-size: 12px !important; }
-.text-\[11px\] { font-size: 13px !important; }
+.text-xs { font-size: 14px !important; }
+.text-sm { font-size: 16px !important; }
+.text-\[9px\] { font-size: 12px !important; }
+.text-\[10px\] { font-size: 13px !important; }
+.text-\[11px\] { font-size: 14px !important; }
+.text-lg { font-size: 20px !important; }
+.text-xl { font-size: 24px !important; }
 
 input, select, textarea {
   color: #111827;
