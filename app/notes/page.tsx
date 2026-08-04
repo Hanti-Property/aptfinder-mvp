@@ -70,15 +70,17 @@ export default function NotesPage() {
           <p className="text-center text-gray-400 py-8">등록된 노트가 없습니다.</p>
         ) : (
           filtered.map(note => (
-            <a key={note.id} href={`/admin/notes/edit?id=${note.id}`} className="block border border-gray-200 rounded-lg p-3 mb-2 hover:bg-gray-50">
+            <a key={note.id} href={`/admin/notes/edit?id=${note.id}`}
+              style={{display:'block', textDecoration:'none', color:'inherit'}}
+              className="border border-gray-200 rounded-lg p-3 mb-2 hover:bg-gray-50 cursor-pointer">
               <div className="flex justify-between items-center mb-1">
                 <span className={`text-[9px] text-white px-1.5 py-0.5 rounded ${getCategoryColor(note.category)}`}>
                   {note.category}
                 </span>
                 <span className="text-[10px] text-gray-400">{formatDate(note.created_at)}</span>
               </div>
-              <p className="text-sm font-semibold mb-1">{note.title}</p>
-              <p className="text-xs text-gray-600 line-clamp-2">{note.content}</p>
+              <p style={{color:'#111827'}} className="text-sm font-semibold mb-1">{note.title}</p>
+              <p style={{color:'#374151'}} className="text-xs line-clamp-2">{note.content}</p>
               {note.bottom_line && (
                 <p className="text-xs text-[#C49A3C] mt-1">📌 {note.bottom_line}</p>
               )}
