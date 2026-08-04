@@ -97,7 +97,8 @@ export default function ListingsPage() {
           <p className="text-center text-gray-400 py-8">등록된 매물이 없습니다.</p>
         ) : (
           filtered.map(l => (
-            <div key={l.id} className="flex gap-3 p-3 border border-gray-200 rounded-lg mb-2">
+            <div key={l.id} className="flex gap-3 p-3 border border-gray-200 rounded-lg mb-2 cursor-pointer"
+              onClick={() => window.location.href = `/admin/edit/${l.id}`}>
               <div className="w-20 h-16 bg-gray-300 rounded-md flex-shrink-0"></div>
               <div className="flex-1">
                 <div className="flex justify-between items-center">
