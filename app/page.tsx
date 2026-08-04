@@ -77,16 +77,16 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 max-w-lg mx-auto">
       {/* Header */}
       <header className="bg-[#1B3A5C] text-white p-4 text-center">
-        <h1 className="text-lg font-semibold">AptFinder</h1>
+        <h1 className="text-xl font-semibold">AptFinder</h1>
       </header>
 
       {/* Hero */}
       <div className="bg-gradient-to-br from-[#1B3A5C] to-[#0d2b45] text-white text-center px-4 py-8 rounded-b-2xl">
-        <p className="text-sm opacity-90 mb-1">강남 부동산 전문가와 함께하는</p>
-        <h2 className="text-xl font-bold mb-4">당신의 투자파트너</h2>
+        <p className="text-base opacity-90 mb-1">강남 부동산 전문가와 함께하는</p>
+        <h2 className="text-2xl font-bold mb-4">당신의 투자파트너</h2>
         <div className="bg-white rounded-lg px-3 py-2 flex items-center">
-          <input type="text" placeholder="검색" className="flex-1 border-none outline-none text-sm text-gray-800" />
-          <span className="text-lg">🔍</span>
+          <input type="text" placeholder="검색" className="flex-1 border-none outline-none text-base text-gray-800" />
+          <span className="text-xl">🔍</span>
         </div>
       </div>
 
@@ -94,8 +94,8 @@ export default function Home() {
         {/* 오늘의 리서치 노트 — DB에서 가져옴 */}
         <div className="mb-5">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-semibold">📋 오늘의 리서치 노트</h3>
-            <a href="/notes" className="text-xs text-[#1B3A5C]">더보기 →</a>
+            <h3 className="text-base font-semibold">📋 오늘의 리서치 노트</h3>
+            <a href="/notes" className="text-sm text-[#1B3A5C]">더보기 →</a>
           </div>
           <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-2">
             {notes.length === 0 ? (
@@ -108,8 +108,8 @@ export default function Home() {
                     <span className="text-[9px] bg-[#1B3A5C] text-white px-1.5 py-0.5 rounded">{note.category}</span>
                     <span className="text-[10px] text-gray-500">{new Date(note.created_at).toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'})}</span>
                   </div>
-                  <p style={{color:'#111827'}} className="text-sm font-semibold mb-1">{note.title}</p>
-                  <p style={{color:'#374151'}} className="text-xs line-clamp-2">{note.content}</p>
+                  <p style={{color:'#111827'}} className="text-base font-semibold mb-1">{note.title}</p>
+                  <p style={{color:'#374151'}} className="text-sm line-clamp-2">{note.content}</p>
                   {note.bottom_line && (
                     <p className="text-xs text-[#C49A3C] mt-1">📌 {note.bottom_line}</p>
                   )}
@@ -122,8 +122,8 @@ export default function Home() {
         {/* 추천 매물 — DB에서 가져온 실제 데이터 */}
         <div className="mb-5">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-semibold">🏠 등록 매물</h3>
-            <a href="/listings" className="text-xs text-[#1B3A5C]">전체보기 →</a>
+            <h3 className="text-base font-semibold">🏠 등록 매물</h3>
+            <a href="/listings" className="text-sm text-[#1B3A5C]">전체보기 →</a>
           </div>
 
           {listings.length === 0 ? (
@@ -142,9 +142,9 @@ export default function Home() {
                       <span className="text-[10px] text-gray-400">🏠</span>
                     </div>
                   )}
-                  <p style={{color:'#111827'}} className="text-xs font-semibold truncate">{l.complex_name} {l.building_no}동</p>
-                  <p className="text-[10px] text-gray-500">{l.exclusive_area}㎡ · {l.direction}</p>
-                  <p className={`text-xs font-bold ${getPriceColor(l.transaction_type)}`}>{formatPrice(l)}</p>
+                  <p style={{color:'#111827'}} className="text-sm font-semibold truncate">{l.complex_name} {l.building_no}동</p>
+                  <p className="text-xs text-gray-500">{l.exclusive_area}㎡ · {l.direction}</p>
+                  <p className={`text-sm font-bold ${getPriceColor(l.transaction_type)}`}>{formatPrice(l)}</p>
                 </div>
                 )
               })}
@@ -154,9 +154,9 @@ export default function Home() {
 
         {/* 전문가 상담 */}
         <div className="bg-[#1B3A5C] p-4 rounded-lg text-center">
-          <p className="text-sm font-semibold text-white mb-1">💬 전문가에게 물어보세요</p>
-          <p className="text-xs text-gray-300 mb-3">강남 재건축·투자 전문 상담</p>
-          <button className="px-6 py-2 bg-white text-[#1B3A5C] rounded-lg text-sm font-semibold">상담 신청하기</button>
+          <p className="text-base font-semibold text-white mb-1">💬 전문가에게 물어보세요</p>
+          <p className="text-sm text-gray-300 mb-3">강남 재건축·투자 전문 상담</p>
+          <button className="px-6 py-2 bg-white text-[#1B3A5C] rounded-lg text-base font-semibold">상담 신청하기</button>
           <p className="mt-2"><a href="#" className="text-xs text-[#C49A3C]">전문가 네트워크 보기 →</a></p>
         </div>
 
