@@ -77,7 +77,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 max-w-2xl mx-auto">
       {/* Header */}
       <header className="bg-[#1B3A5C] text-white p-3 text-center">
-        <h1 className="text-2xl font-bold">AptFinder</h1>
+        <h1 className="text-3xl font-bold">AptFinder</h1>
       </header>
 
       {/* Hero - 70% 높이 */}
@@ -138,8 +138,8 @@ export default function Home() {
                   {img ? (
                     <img src={img.image_url} alt={l.complex_name} className="w-full h-32 object-cover rounded mb-2" />
                   ) : (
-                    <div className="w-full h-32 bg-gray-200 rounded mb-2 flex items-center justify-center">
-                      <span className="text-2xl text-gray-400">🏠</span>
+                    <div className="w-full h-32 bg-[#1B3A5C] rounded mb-2 flex items-center justify-center">
+                      <span className="text-lg font-bold text-white">AptFinder</span>
                     </div>
                   )}
                   <p style={{color:'#111827'}} className="text-base font-semibold truncate">{l.complex_name} {l.building_no}동</p>
