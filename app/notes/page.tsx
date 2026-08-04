@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 interface Note {
@@ -17,6 +18,7 @@ export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([])
   const [filter, setFilter] = useState('')
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     async function fetch() {
@@ -70,8 +72,8 @@ export default function NotesPage() {
           <p className="text-center text-gray-400 py-8">등록된 노트가 없습니다.</p>
         ) : (
           filtered.map(note => (
-            <a key={note.id} href={`/admin/notes/edit?id=${note.id}`}
-              style={{display:'block', textDecoration:'none', color:'inherit'}}
+            <div key={note.id}
+              onClick={() => router.push(`/admin/notes/edit?id=${note.id}`)}
               className="border border-gray-200 rounded-lg p-3 mb-2 hover:bg-gray-50 cursor-pointer">
               <div className="flex justify-between items-center mb-1">
                 <span className={`text-[9px] text-white px-1.5 py-0.5 rounded ${getCategoryColor(note.category)}`}>
@@ -85,7 +87,7 @@ export default function NotesPage() {
                 <p className="text-xs text-[#C49A3C] mt-1">📌 {note.bottom_line}</p>
               )}
               <p className="text-[10px] text-blue-500 mt-1">✏️ 클릭하여 수정</p>
-            </a>
+            </div>
           ))
         )}
 
