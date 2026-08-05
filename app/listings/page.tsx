@@ -32,7 +32,7 @@ export default function ListingsPage() {
     async function fetchListings() {
       const { data } = await supabase
         .from('listings')
-        .select('*, complexes(dong)')
+        .select('*, complexes(dong), listing_images(image_url, is_primary)')
         .order('created_at', { ascending: false })
       if (data) setListings(data)
       setLoading(false)
@@ -147,12 +147,18 @@ export default function ListingsPage() {
         {filtered.length === 0 ? (
           <p className="text-center text-gray-400 py-8">조건에 맞는 매물이 없습니다.</p>
         ) : (
-          filtered.map(l => (
+          filtered.map(l => {
+            const img = l.listing_images?.find((i: {is_primary: boolean}) => i.is_primary) || l.listing_images?.[0]
+            return (
             <div key={l.id} className="flex gap-3 p-3 border border-gray-200 rounded-lg mb-2 cursor-pointer hover:bg-gray-50"
               onClick={() => window.location.href = `/listings/${l.id}`}>
-              <div className="w-24 h-20 bg-[#1B3A5C] rounded-md flex-shrink-0 flex items-center justify-center">
-                <span className="text-xs font-bold text-white">AptFinder</span>
-              </div>
+              {img ? (
+                <img src={img.image_url} alt={l.complex_name} className="w-24 h-20 object-cover rounded-md flex-shrink-0" />
+              ) : (
+                <div className="w-24 h-20 bg-[#1B3A5C] rounded-md flex-shrink-0 flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">AptFinder</span>
+                </div>
+              )}
               <div className="flex-1">
                 <div className="flex justify-between items-center">
                   <strong style={{color:'#111827'}} className="text-base">{l.complex_name} {l.building_no}동</strong>
@@ -171,7 +177,8 @@ export default function ListingsPage() {
                 </div>
               </div>
             </div>
-          ))
+            )
+          })
         )}
 
         <a href="/admin/register"
