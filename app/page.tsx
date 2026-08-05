@@ -171,30 +171,22 @@ export default function Home() {
             <a href="/notes" className="text-base text-[#1B3A5C] font-semibold">더보기 →</a>
           </div>
           <div className="space-y-3">
-            <div onClick={() => window.location.href = '/notes'} className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 border-l-4 border-l-[#C49A3C]">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs bg-[#C49A3C] text-white px-2 py-0.5 rounded">전문가칼럼</span>
-                <span className="text-xs text-gray-400">연재중</span>
+            {[
+              { color: '#C49A3C', title: '강남 재건축 투자 가이드', desc: '은마·미도·압구정 재건축 단지별 사업 진행 현황과 투자 판단 기준을 분석합니다.' },
+              { color: '#7b1fa2', title: '강남 아파트 세무 전략', desc: '양도세·증여세·상속세 절세 타이밍과 실전 사례를 세무 전문가가 분석합니다.' },
+              { color: '#1B3A5C', title: '대치동 학군 리포트', desc: '대치동 학군 배정, 학원가 동향, 학부모 선호도 변화를 정기 분석합니다.' },
+              { color: '#e53935', title: '강남아파트 시장 전망', desc: '금리·정책·수급 데이터로 강남 아파트 시장의 단기·중기 전망을 제시합니다.' },
+              { color: '#00897b', title: '강남 아파트 단지별 리포트', desc: '주요 단지의 시세 흐름, 거래량, 투자 매력도를 비교 분석합니다.' },
+            ].map((item, i) => (
+              <div key={i} onClick={() => window.location.href = '/notes'} className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50" style={{borderLeftWidth:'4px', borderLeftColor: item.color}}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs text-white px-2 py-0.5 rounded" style={{backgroundColor: item.color}}>전문가칼럼</span>
+                  <span className="text-xs text-gray-400">연재중</span>
+                </div>
+                <p style={{color:'#111827'}} className="text-lg font-bold mb-1">{item.title}</p>
+                <p style={{color:'#374151'}} className="text-sm">{item.desc}</p>
               </div>
-              <p style={{color:'#111827'}} className="text-lg font-bold mb-1">강남 재건축 투자 가이드</p>
-              <p style={{color:'#374151'}} className="text-sm">은마·미도·압구정 재건축 단지별 사업 진행 현황과 투자 판단 기준을 분석합니다.</p>
-            </div>
-            <div onClick={() => window.location.href = '/notes'} className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 border-l-4 border-l-[#7b1fa2]">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs bg-[#7b1fa2] text-white px-2 py-0.5 rounded">전문가칼럼</span>
-                <span className="text-xs text-gray-400">연재중</span>
-              </div>
-              <p style={{color:'#111827'}} className="text-lg font-bold mb-1">강남 아파트 세무 전략</p>
-              <p style={{color:'#374151'}} className="text-sm">양도세·증여세·상속세 절세 타이밍과 실전 사례를 세무 전문가가 분석합니다.</p>
-            </div>
-            <div onClick={() => window.location.href = '/notes'} className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 border-l-4 border-l-[#1B3A5C]">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs bg-[#1B3A5C] text-white px-2 py-0.5 rounded">전문가칼럼</span>
-                <span className="text-xs text-gray-400">연재중</span>
-              </div>
-              <p style={{color:'#111827'}} className="text-lg font-bold mb-1">대치동 학군 리포트</p>
-              <p style={{color:'#374151'}} className="text-sm">대치동 학군 배정, 학원가 동향, 학부모 선호도 변화를 정기 분석합니다.</p>
-            </div>
+            ))}
           </div>
         </div>
 
