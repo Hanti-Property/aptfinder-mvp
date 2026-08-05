@@ -18,25 +18,13 @@ export default function ExpertsPage() {
               <div className="w-14 h-14 bg-[#1B3A5C] rounded-full flex items-center justify-center text-[#C49A3C] text-xl font-bold border-2 border-[#C49A3C]">홍</div>
               <div>
                 <p style={{color:'#111827'}} className="text-lg font-bold">홍성욱 대표</p>
-                <p className="text-sm text-gray-500">AptFinder 운영자</p>
+                <p className="text-sm text-gray-500">AptFinder 운영자 · 공인중개사</p>
               </div>
             </div>
-            <p className="text-sm text-[#1B3A5C] font-semibold italic mb-3">&quot;강남 부동산서비스 및 글로벌 비즈니스 30년&quot;</p>
-            <div className="text-sm text-gray-700 space-y-1">
-              <p>· 서강대학교 전자공학과 (1993년 졸업)</p>
-              <p>· 영국 Warwick Business School MBA (2000년 졸업)</p>
-              <p>· LG반도체(현 SK하이닉스), Oracle, Ericsson, Alcatel-Lucent(Nokia)</p>
-              <p>· 현 한티프로퍼티, 한티부동산중개 대표</p>
-              <p>· 현 은마아파트 재건축 조합원 (대치동 20년+ 실거주중)</p>
-              <p>· academyfinder.co.kr 대치동 학원전문 사이트 운영중</p>
-              <p>· 일원동 소재 중동고등학교 (1988년 졸업)</p>
-            </div>
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <p className="text-xs text-gray-500 leading-relaxed">
-                글로벌 테크회사에서 20년간 비즈니스를 경험한 후, 강남 부동산 실무 현장으로 돌아왔습니다.
-                대치동에서 공부하고 성장한 토박이로서, 데이터 분석력과 현장 경험을 결합한 부동산 인사이트를 제공합니다.
-              </p>
-            </div>
+            <p className="text-sm text-[#1B3A5C] font-semibold italic mb-2">&quot;강남 부동산서비스 및 글로벌 비즈니스 30년&quot;</p>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              대치동 20년+ 실거주 · 은마아파트 재건축 조합원 · 강남 재건축·학군 전문
+            </p>
           </div>
         </section>
 
