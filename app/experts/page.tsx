@@ -29,6 +29,7 @@ export default function ExpertsPage() {
               <p>· 현 한티프로퍼티, 한티부동산중개 대표</p>
               <p>· 현 은마아파트 재건축 조합원 (대치동 20년+ 실거주중)</p>
               <p>· academyfinder.co.kr 대치동 학원전문 사이트 운영중</p>
+              <p>· 일원동 소재 중동고등학교 (1988년 졸업)</p>
             </div>
             <div className="mt-3 pt-3 border-t border-gray-200">
               <p className="text-xs text-gray-500 leading-relaxed">
