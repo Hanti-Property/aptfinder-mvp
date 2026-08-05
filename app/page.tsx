@@ -158,7 +158,7 @@ export default function Home() {
           <p className="text-lg font-semibold text-white mb-2">💬 전문가에게 물어보세요</p>
           <p className="text-base text-gray-300 mb-3">강남 재건축·투자 전문 상담</p>
           <button className="px-8 py-3 bg-white text-[#1B3A5C] rounded-lg text-lg font-semibold">상담 신청하기</button>
-          <p className="mt-2"><a href="#" className="text-xs text-[#C49A3C]">전문가 네트워크 보기 →</a></p>
+          <p className="mt-2"><a href="/experts" className="text-xs text-[#C49A3C]">전문가 네트워크 보기 →</a></p>
         </div>
 
         {/* 관리자 링크 */}
