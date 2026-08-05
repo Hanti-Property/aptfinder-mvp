@@ -18,13 +18,10 @@ export default function ExpertsPage() {
               <div className="w-14 h-14 bg-[#1B3A5C] rounded-full flex items-center justify-center text-[#C49A3C] text-xl font-bold border-2 border-[#C49A3C]">홍</div>
               <div>
                 <p style={{color:'#111827'}} className="text-lg font-bold">홍성욱 대표</p>
-                <p className="text-sm text-gray-500">AptFinder 운영자 · 공인중개사</p>
+                <p className="text-sm text-gray-500">AptFinder 운영자</p>
               </div>
             </div>
-            <p className="text-sm text-[#1B3A5C] font-semibold italic mb-2">&quot;강남 부동산서비스 및 글로벌 비즈니스 30년&quot;</p>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              대치동 20년+ 실거주 · 은마아파트 재건축 조합원 · 강남 재건축·학군 전문
-            </p>
+            <p className="text-sm text-[#1B3A5C] font-semibold italic">&quot;강남 부동산서비스 및 글로벌 비즈니스 30년&quot;</p>
           </div>
         </section>
 
