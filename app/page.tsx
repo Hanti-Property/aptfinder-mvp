@@ -140,9 +140,9 @@ export default function Home() {
                 <div key={l.id} onClick={() => window.location.href = `/listings/${l.id}`}
                   className="border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md">
                   {img ? (
-                    <img src={img.image_url} alt={l.complex_name} className="w-full h-32 object-cover rounded mb-2" />
+                    <img src={img.image_url} alt={l.complex_name} className="w-full aspect-[4/3] object-cover rounded mb-2" />
                   ) : (
-                    <div className="w-full h-32 bg-[#1B3A5C] rounded mb-2 flex items-center justify-center">
+                    <div className="w-full aspect-[4/3] bg-[#1B3A5C] rounded mb-2 flex items-center justify-center">
                       <span className="text-lg font-bold text-white">AptFinder</span>
                     </div>
                   )}
