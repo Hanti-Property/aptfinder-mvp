@@ -55,6 +55,7 @@ export default function ExpertsPage() {
                   <p style={{color:'#111827'}} className="text-sm font-bold">{p.name}</p>
                   <p className="text-xs text-gray-500">{p.office}</p>
                   <p className="text-xs text-gray-400">{p.area} · 등록매물 {p.listings}건</p>
+                  <p className="text-xs text-[#C49A3C]">상담 가능</p>
                 </div>
               </div>
             ))}
