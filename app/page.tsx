@@ -145,6 +145,7 @@ export default function Home() {
                   <p style={{color:'#111827'}} className="text-base font-semibold truncate">{l.complex_name} {l.building_no}동</p>
                   <p className="text-sm text-gray-500 mt-0.5">{l.exclusive_area}㎡ · {l.direction}</p>
                   <p className={`text-lg font-bold mt-1 ${getPriceColor(l.transaction_type)}`}>{formatPrice(l)}</p>
+                  <p className="text-xs text-gray-400 mt-1">{new Date(l.created_at).toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</p>
                 </div>
                 )
               })}
