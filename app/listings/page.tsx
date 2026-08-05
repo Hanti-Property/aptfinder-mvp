@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 interface Listing {
@@ -21,12 +22,15 @@ interface Listing {
   complexes?: { dong: string }
 }
 
-export default function ListingsPage() {
+function ListingsContent() {
+  const searchParams = useSearchParams()
+  const queryParam = searchParams.get('q') || ''
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [filterType, setFilterType] = useState('')
   const [filterDong, setFilterDong] = useState('')
   const [filterTime, setFilterTime] = useState('')
+  const [searchText, setSearchText] = useState(queryParam)
 
   useEffect(() => {
     async function fetchListings() {
@@ -61,6 +65,7 @@ export default function ListingsPage() {
   const filtered = listings
     .filter(l => !filterType || l.transaction_type === filterType)
     .filter(l => !filterDong || l.complexes?.dong === filterDong)
+    .filter(l => !searchText || l.complex_name?.toLowerCase().includes(searchText.toLowerCase()))
     .filter(getTimeFilter)
 
   const dongs = [...new Set(listings.map(l => l.complexes?.dong).filter(Boolean))]
@@ -188,5 +193,13 @@ export default function ListingsPage() {
         <a href="/" className="block text-center text-sm text-gray-500 underline mt-3">← 홈으로</a>
       </div>
     </div>
+  )
+}
+
+export default function ListingsPage() {
+  return (
+    <Suspense fallback={<div className="p-4 text-center">로딩 중...</div>}>
+      <ListingsContent />
+    </Suspense>
   )
 }

@@ -29,6 +29,7 @@ interface Note {
 export default function Home() {
   const [listings, setListings] = useState<Listing[]>([])
   const [notes, setNotes] = useState<Note[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     async function fetch() {
@@ -85,8 +86,12 @@ export default function Home() {
         <p className="text-sm opacity-90 mb-0.5">강남 부동산 전문가와 함께하는</p>
         <h2 className="text-xl font-bold mb-2">당신의 투자파트너</h2>
         <div className="bg-white rounded-lg px-3 py-1.5 flex items-center max-w-[70%] mx-auto">
-          <input type="text" placeholder="검색" className="flex-1 border-none outline-none text-sm text-gray-800" />
-          <span className="text-base">🔍</span>
+          <input type="text" placeholder="단지명 검색" className="flex-1 border-none outline-none text-sm text-gray-800"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && searchQuery.trim()) window.location.href = `/listings?q=${encodeURIComponent(searchQuery.trim())}` }} />
+          <span className="text-base cursor-pointer"
+            onClick={() => { if (searchQuery.trim()) window.location.href = `/listings?q=${encodeURIComponent(searchQuery.trim())}` }}>🔍</span>
         </div>
       </div>
 
