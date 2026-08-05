@@ -80,13 +80,13 @@ export default function Home() {
         <h1 className="text-3xl font-bold">AptFinder</h1>
       </header>
 
-      {/* Hero - 70% 높이 */}
-      <div className="bg-gradient-to-br from-[#1B3A5C] to-[#0d2b45] text-white text-center px-4 py-5 rounded-b-2xl">
-        <p className="text-base opacity-90 mb-1">강남 부동산 전문가와 함께하는</p>
-        <h2 className="text-2xl font-bold mb-3">당신의 투자파트너</h2>
-        <div className="bg-white rounded-lg px-4 py-2.5 flex items-center">
-          <input type="text" placeholder="검색" className="flex-1 border-none outline-none text-base text-gray-800" />
-          <span className="text-xl">🔍</span>
+      {/* Hero - 축소 */}
+      <div className="bg-gradient-to-br from-[#1B3A5C] to-[#0d2b45] text-white text-center px-4 py-3 rounded-b-2xl">
+        <p className="text-sm opacity-90 mb-0.5">강남 부동산 전문가와 함께하는</p>
+        <h2 className="text-xl font-bold mb-2">당신의 투자파트너</h2>
+        <div className="bg-white rounded-lg px-3 py-1.5 flex items-center max-w-[70%] mx-auto">
+          <input type="text" placeholder="검색" className="flex-1 border-none outline-none text-sm text-gray-800" />
+          <span className="text-base">🔍</span>
         </div>
       </div>
 
