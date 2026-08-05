@@ -91,6 +91,10 @@ export default function Home() {
       </div>
 
       <div className="p-4">
+        {/* 베타 안내 */}
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 mb-4 text-center">
+          <p className="text-sm text-amber-800">🚀 현재 베타 서비스로 운영 중입니다. 정식 서비스는 추후 안내드립니다.</p>
+        </div>
         {/* 오늘의 리서치 노트 — DB에서 가져옴 */}
         <div className="mb-5">
           <div className="flex justify-between items-center mb-2">
