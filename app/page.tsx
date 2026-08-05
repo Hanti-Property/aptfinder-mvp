@@ -89,9 +89,9 @@ export default function Home() {
           <input type="text" placeholder="단지명 검색" className="flex-1 border-none outline-none text-sm text-gray-800"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && searchQuery.trim()) window.location.href = `/listings?q=${encodeURIComponent(searchQuery.trim())}` }} />
+            onKeyDown={e => { if (e.key === 'Enter' && searchQuery.trim()) window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}` }} />
           <span className="text-base cursor-pointer"
-            onClick={() => { if (searchQuery.trim()) window.location.href = `/listings?q=${encodeURIComponent(searchQuery.trim())}` }}>🔍</span>
+            onClick={() => { if (searchQuery.trim()) window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}` }}>🔍</span>
         </div>
       </div>
 
