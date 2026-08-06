@@ -11,19 +11,20 @@
 <pre id="result" style="background:#f0f0f0; padding:12px; margin-top:12px;"></pre>
 
 <script>
-async function testAPI() {
+function testAPI() {
   var pnu = '1168010300103160000';
-  var url = '/api/vworld?pnu=' + pnu;
+  var key = '97D0838E-CAEE-382F-A158-79AB81275A03';
+  var url = 'https://api.vworld.kr/req/data?service=data&request=GetFeature&data=LP_PA_CBND_BUBUN&key=' + key + '&domain=aptfinder.net&attrFilter=pnu:=:' + pnu + '&type=jsonp&callback=handleResult';
 
   document.getElementById('result').textContent = '조회 중...';
 
-  try {
-    var response = await fetch(url);
-    var data = await response.json();
-    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-  } catch(err) {
-    document.getElementById('result').textContent = '에러: ' + err.message;
-  }
+  var script = document.createElement('script');
+  script.src = url;
+  document.body.appendChild(script);
+}
+
+function handleResult(data) {
+  document.getElementById('result').textContent = JSON.stringify(data, null, 2);
 }
 </script>
 </body>
