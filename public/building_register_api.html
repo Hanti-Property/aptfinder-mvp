@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AptFinder - 건축물대장 조회 모듈</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, 'Malgun Gothic', sans-serif; background:#f5f5f5; }
+.container { max-width:600px; margin:0 auto; background:#fff; min-height:100vh; padding:16px; }
+header { background:#1B3A5C; color:#fff; padding:16px; text-align:center; margin:-16px -16px 16px; }
+header h1 { font-size:18px; font-weight:600; }
+label { font-size:12px; color:#666; display:block; margin-top:12px; }
+input, select { width:100%; padding:10px; margin-top:4px; border:1px solid #ddd; border-radius:6px; font-size:13px; }
+.btn { width:100%; padding:12px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; margin-top:16px; }
+.btn-primary { background:#1B3A5C; color:#fff; }
+.result { margin-top:16px; background:#f0f7ff; padding:12px; border-radius:8px; border-left:3px solid #1B3A5C; display:none; }
+.result h3 { font-size:14px; color:#1B3A5C; margin-bottom:8px; }
+.result p { font-size:12px; color:#333; margin:3px 0; }
+.error { color:#e53935; font-size:12px; margin-top:8px; }
+.loading { text-align:center; color:#666; font-size:13px; margin-top:12px; display:none; }
+</style>
+</head>
+<body>
+<div class="container">
+<header><h1>건축물대장 조회 모듈</h1></header>
+
+<p style="font-size:12px; color:#666; margin-bottom:12px;">시군구코드 + 법정동코드 + 번/지로 건축물대장 정보를 조회합니다.</p>
+
+<label>시군구코드 (5자리)</label>
+<input type="text" id="sigunguCd" value="11680" placeholder="예) 11680 (강남구)">
+<p style="font-size:10px; color:#999; margin-top:2px;">서울 강남구: 11680 / 서울 송파구: 11710</p>
+
+<label>법정동코드 (5자리)</label>
+<input type="text" id="bjdongCd" value="10300" placeholder="예) 10300 (대치동)">
+<p style="font-size:10px; color:#999; margin-top:2px;">대치동: 10300 / 도곡동: 10500 / 개포동: 10800</p>
+
+<label>본번 (지번 앞자리)</label>
+<input type="text" id="bun" value="316" placeholder="예) 316 (은마아파트)">
+
+<label>부번 (지번 뒷자리, 없으면 0)</label>
+<input type="text" id="ji" value="0" placeholder="예) 0">
+
+<button class="btn btn-primary" onclick="searchBuilding()">건축물대장 조회</button>
+
+<div class="loading" id="loading">⏳ 조회 중...</div>
+<div class="error" id="errorMsg"></div>
+
+<div class="result" id="result">
+<h3>📋 조회 결과</h3>
+<div id="resultContent"></div>
+</div>
+
+<div style="margin-top:20px; padding-top:16px; border-top:1px solid #eee;">
+<h3 style="font-size:13px; margin-bottom:8px;">빠른 테스트 (클릭)</h3>
+<button onclick="quickSearch('11680','10300','316','0')" style="padding:6px 10px; margin:2px; border:1px solid #ddd; border-radius:4px; background:#fff; cursor:pointer; font-size:11px;">은마아파트 (대치동 316)</button>
+<button onclick="quickSearch('11680','10300','511','0')" style="padding:6px 10px; margin:2px; border:1px solid #ddd; border-radius:4px; background:#fff; cursor:pointer; font-size:11px;">미도아파트 (대치동 511)</button>
+<button onclick="quickSearch('11680','10300','1027','0')" style="padding:6px 10px; margin:2px; border:1px solid #ddd; border-radius:4px; background:#fff; cursor:pointer; font-size:11px;">래미안대치팰리스 (대치동 1027)</button>
+<button onclick="quickSearch('11680','10800','1284','0')" style="padding:6px 10px; margin:2px; border:1px solid #ddd; border-radius:4px; background:#fff; cursor:pointer; font-size:11px;">개포자이프레지던스 (개포동 1284)</button>
+</div>
+</div>
+
+<script>
+var API_KEY = 'Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
+
+function quickSearch(sigungu, bjdong, bun, ji) {
+  document.getElementById('sigunguCd').value = sigungu;
+  document.getElementById('bjdongCd').value = bjdong;
+  document.getElementById('bun').value = bun;
+  document.getElementById('ji').value = ji;
+  searchBuilding();
+}
+
+async function searchBuilding() {
+  var sigunguCd = document.getElementById('sigunguCd').value;
+  var bjdongCd = document.getElementById('bjdongCd').value;
+  var bun = document.getElementById('bun').value.padStart(4, '0');
+  var ji = document.getElementById('ji').value.padStart(4, '0');
+
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('errorMsg').textContent = '';
+
+  var url = 'https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo' +
+    '?serviceKey=' + API_KEY +
+    '&sigunguCd=' + sigunguCd +
+    '&bjdongCd=' + bjdongCd +
+    '&bun=' + bun +
+    '&ji=' + ji +
+    '&numOfRows=10&pageNo=1&type=json';
+
+  try {
+    var response = await fetch(url);
+    var data = await response.json();
+    document.getElementById('loading').style.display = 'none';
+
+    var items = data.response?.body?.items?.item;
+    if (!items || items.length === 0) {
+      document.getElementById('errorMsg').textContent = '조회 결과가 없습니다. 코드를 확인해주세요.';
+      return;
+    }
+
+    var item = Array.isArray(items) ? items[0] : items;
+    var html = '';
+    html += '<p><b>건물명:</b> ' + (item.bldNm || '-') + '</p>';
+    html += '<p><b>주용도:</b> ' + (item.mainPurpsCdNm || '-') + '</p>';
+    html += '<p><b>대지면적:</b> ' + (item.platArea || '-') + ' ㎡</p>';
+    html += '<p><b>건축면적:</b> ' + (item.archArea || '-') + ' ㎡</p>';
+    html += '<p><b>연면적:</b> ' + (item.totArea || '-') + ' ㎡</p>';
+    html += '<p><b>용적률:</b> ' + (item.vlRat || '-') + ' %</p>';
+    html += '<p><b>건폐율:</b> ' + (item.bcRat || '-') + ' %</p>';
+    html += '<p><b>지상 층수:</b> ' + (item.grndFlrCnt || '-') + '층</p>';
+    html += '<p><b>지하 층수:</b> ' + (item.ugrndFlrCnt || '-') + '층</p>';
+    html += '<p><b>세대수:</b> ' + (item.hhldCnt || item.hoCnt || '-') + '</p>';
+    html += '<p><b>주차대수:</b> ' + (item.indrMechUtcnt + item.indrMechArea + item.oudrMechUtcnt || '-') + '</p>';
+    html += '<p><b>사용승인일:</b> ' + (item.useAprDay || '-') + '</p>';
+    html += '<p><b>구조:</b> ' + (item.strctCdNm || '-') + '</p>';
+    html += '<p><b>지번:</b> ' + sigunguCd + ' ' + bjdongCd + ' ' + bun + '-' + ji + '</p>';
+
+    // 전체 데이터 (디버깅용)
+    html += '<details style="margin-top:8px;"><summary style="font-size:11px; color:#999; cursor:pointer;">전체 응답 데이터 보기</summary>';
+    html += '<pre style="font-size:10px; background:#f9f9f9; padding:8px; border-radius:4px; overflow-x:auto; margin-top:4px;">' + JSON.stringify(item, null, 2) + '</pre></details>';
+
+    document.getElementById('resultContent').innerHTML = html;
+    document.getElementById('result').style.display = 'block';
+
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('errorMsg').textContent = '조회 실패: ' + err.message;
+  }
+}
+</script>
+</body>
+</html>
