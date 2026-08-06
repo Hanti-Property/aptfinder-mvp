@@ -12,9 +12,8 @@
 
 <script>
 async function testAPI() {
-  var key = '97D0838E-CAEE-382F-A158-79AB81275A03';
   var pnu = '1168010300103160000';
-  var url = 'https://api.vworld.kr/req/data?service=data&request=GetFeature&data=LP_PA_CBND_BUBUN&key=' + key + '&domain=aptfinder.net&attrFilter=pnu:=:' + pnu + '&type=json';
+  var url = '/api/vworld?pnu=' + pnu;
 
   document.getElementById('result').textContent = '조회 중...';
 
