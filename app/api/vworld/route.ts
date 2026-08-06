@@ -12,9 +12,14 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(url)
-    const data = await response.json()
-    return NextResponse.json(data)
-  } catch (error) {
-    return NextResponse.json({ error: 'V-World API 호출 실패' }, { status: 500 })
+    const text = await response.text()
+    try {
+      const data = JSON.parse(text)
+      return NextResponse.json(data)
+    } catch {
+      return NextResponse.json({ error: 'JSON 파싱 실패', raw: text }, { status: 500 })
+    }
+  } catch (error: any) {
+    return NextResponse.json({ error: 'V-World API 호출 실패', detail: error.message }, { status: 500 })
   }
 }
