@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export const runtime = 'edge'
-export const preferredRegion = 'icn1'  // 한국(인천) 리전
-
 export async function GET(request: NextRequest) {
   const pnu = request.nextUrl.searchParams.get('pnu')
   
@@ -11,10 +8,15 @@ export async function GET(request: NextRequest) {
   }
 
   const key = '97D0838E-CAEE-382F-A158-79AB81275A03'
-  const url = `https://api.vworld.kr/req/data?service=data&request=GetFeature&data=LP_PA_CBND_BUBUN&key=${key}&attrFilter=pnu:=:${pnu}&type=json`
+  const url = `https://api.vworld.kr/req/data?service=data&request=GetFeature&data=LP_PA_CBND_BUBUN&key=${key}&domain=aptfinder.net&attrFilter=pnu:=:${pnu}&type=json`
 
   try {
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      headers: {
+        'Referer': 'https://aptfinder.net',
+        'Origin': 'https://aptfinder.net'
+      }
+    })
     const text = await response.text()
     try {
       const data = JSON.parse(text)
