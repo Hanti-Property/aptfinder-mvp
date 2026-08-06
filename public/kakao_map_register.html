@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AptFinder - 지도 기반 매물등록</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, 'Malgun Gothic', sans-serif; background:#f5f5f5; }
+.container { max-width:900px; margin:0 auto; background:#fff; min-height:100vh; }
+header { background:#1B3A5C; color:#fff; padding:16px; text-align:center; }
+header h1 { font-size:18px; font-weight:600; }
+#map { width:100%; height:350px; }
+.info-box { background:#f0f7ff; padding:12px; margin:12px; border-radius:8px; border-left:3px solid #1B3A5C; display:none; }
+.info-box h3 { font-size:14px; color:#1B3A5C; margin-bottom:6px; }
+.info-box p { font-size:12px; color:#333; margin:2px 0; }
+.form-area { padding:12px; display:none; }
+.form-area label { font-size:12px; color:#666; display:block; margin-top:10px; }
+.form-area input, .form-area select, .form-area textarea {
+  width:100%; padding:10px; margin-top:4px; border:1px solid #ddd; border-radius:6px; font-size:13px; }
+.form-area textarea { resize:none; }
+.row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.btn { width:100%; padding:14px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; margin-top:12px; }
+.btn-primary { background:#1B3A5C; color:#fff; }
+.btn-secondary { background:#f0f0f0; color:#333; }
+.guide { text-align:center; padding:16px; color:#666; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="container">
+<header><h1>AptFinder - 지도 기반 매물등록</h1></header>
+
+<p class="guide">🗺️ 지도에서 매물 아파트를 클릭하세요</p>
+
+<div id="map"></div>
+
+<!-- 자동 입력 정보 -->
+<div class="info-box" id="infoBox">
+<h3>📍 선택된 위치 정보 (자동 입력)</h3>
+<p id="infoAddress">주소: -</p>
+<p id="infoRoad">도로명: -</p>
+<p id="infoBuildingName">건물명: -</p>
+<p id="infoCoords">좌표: -</p>
+</div>
+
+<!-- 매물 입력 폼 -->
+<div class="form-area" id="formArea">
+<h3 style="font-size:14px; font-weight:600; margin-bottom:8px;">매물 정보 입력</h3>
+
+<div class="row">
+<div>
+<label>동</label>
+<div style="display:flex; align-items:center; gap:4px;">
+<input type="text" id="buildingNo" placeholder="예) 101, A">
+<span style="font-size:13px;">동</span>
+</div>
+</div>
+<div>
+<label>호수</label>
+<div style="display:flex; align-items:center; gap:4px;">
+<input type="text" id="unitNo" placeholder="예) 301" inputmode="numeric">
+<span style="font-size:13px;">호</span>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>전용면적 (㎡)</label>
+<input type="text" id="exclusiveArea" placeholder="예) 84" inputmode="numeric">
+</div>
+<div>
+<label>공급면적 (㎡)</label>
+<input type="text" id="supplyArea" placeholder="예) 114" inputmode="numeric">
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>방 수</label>
+<input type="text" id="roomCount" placeholder="예) 3" inputmode="numeric">
+</div>
+<div>
+<label>욕실 수</label>
+<input type="text" id="bathCount" placeholder="예) 2" inputmode="numeric">
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>방향</label>
+<select id="direction">
+<option value="">선택</option>
+<option>동</option><option>서</option><option>남</option><option>북</option>
+<option>남동</option><option>남서</option><option>북동</option><option>북서</option>
+</select>
+</div>
+<div>
+<label>층수</label>
+<input type="text" id="floor" placeholder="예) 10" inputmode="numeric">
+</div>
+</div>
+
+<label>거래종류</label>
+<div style="display:flex; gap:8px; margin-top:4px;">
+<button type="button" class="deal-btn" onclick="selectDeal('매매')">매매</button>
+<button type="button" class="deal-btn" onclick="selectDeal('전세')">전세</button>
+<button type="button" class="deal-btn" onclick="selectDeal('월세')">월세</button>
+</div>
+<style>
+.deal-btn { flex:1; padding:10px; border:1px solid #ddd; border-radius:6px; background:#fff; cursor:pointer; font-size:13px; }
+.deal-btn.active { background:#1B3A5C; color:#fff; border-color:#1B3A5C; }
+</style>
+
+<div id="priceFields"></div>
+
+<label>매물 설명</label>
+<textarea id="description" rows="3" placeholder="매물 특징을 입력하세요"></textarea>
+
+<div style="display:flex; gap:8px; margin-top:16px;">
+<button class="btn btn-secondary" onclick="alert('임시저장 되었습니다.')">임시저장</button>
+<button class="btn btn-primary" onclick="submitListing()">매물 등록</button>
+</div>
+</div>
+</div>
+
+<!-- 카카오 지도 SDK -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
+<script>
+var map, marker, geocoder;
+var selectedAddress = {};
+
+// 지도 초기화 — 대치동 중심
+var mapContainer = document.getElementById('map');
+var mapOption = {
+  center: new kakao.maps.LatLng(37.4946, 127.0625),
+  level: 4
+};
+map = new kakao.maps.Map(mapContainer, mapOption);
+geocoder = new kakao.maps.services.Geocoder();
+marker = new kakao.maps.Marker({ position: map.getCenter() });
+
+// 지도 클릭 이벤트
+kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+  var latlng = mouseEvent.latLng;
+  marker.setPosition(latlng);
+  marker.setMap(map);
+
+  // Reverse Geocoding — 좌표 → 주소
+  geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function(result, status) {
+    if (status === kakao.maps.services.Status.OK) {
+      var addr = result[0];
+      var jibun = addr.address ? addr.address.address_name : '-';
+      var road = addr.road_address ? addr.road_address.address_name : '-';
+      var building = addr.road_address ? addr.road_address.building_name : '-';
+
+      selectedAddress = {
+        jibun: jibun,
+        road: road,
+        building: building,
+        lat: latlng.getLat(),
+        lng: latlng.getLng()
+      };
+
+      document.getElementById('infoAddress').textContent = '지번: ' + jibun;
+      document.getElementById('infoRoad').textContent = '도로명: ' + road;
+      document.getElementById('infoBuildingName').textContent = '건물명: ' + (building || '(없음)');
+      document.getElementById('infoCoords').textContent = '좌표: ' + latlng.getLat().toFixed(6) + ', ' + latlng.getLng().toFixed(6);
+      document.getElementById('infoBox').style.display = 'block';
+      document.getElementById('formArea').style.display = 'block';
+      document.querySelector('.guide').textContent = '✅ 위치 선택 완료 — 아래 매물 정보를 입력하세요';
+    }
+  });
+});
+
+// 거래종류 선택
+var currentDeal = '';
+function selectDeal(type) {
+  currentDeal = type;
+  document.querySelectorAll('.deal-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  var html = '';
+  if (type === '매매') {
+    html = '<label>매매가 (만원)</label><input type="text" id="salePrice" placeholder="예) 280000" inputmode="numeric">';
+  } else if (type === '전세') {
+    html = '<label>보증금 (만원)</label><input type="text" id="deposit" placeholder="예) 150000" inputmode="numeric">';
+  } else if (type === '월세') {
+    html = '<label>보증금 (만원)</label><input type="text" id="deposit" placeholder="예) 50000" inputmode="numeric">' +
+      '<label>월세 (만원)</label><input type="text" id="monthlyRent" placeholder="예) 300" inputmode="numeric">';
+  }
+  document.getElementById('priceFields').innerHTML = html;
+}
+
+// 매물 등록
+function submitListing() {
+  if (!selectedAddress.jibun) { alert('지도에서 위치를 먼저 선택하세요.'); return; }
+  if (!currentDeal) { alert('거래종류를 선택하세요.'); return; }
+
+  var data = {
+    address: selectedAddress,
+    building_no: document.getElementById('buildingNo').value,
+    unit_no: document.getElementById('unitNo').value,
+    exclusive_area: document.getElementById('exclusiveArea').value,
+    supply_area: document.getElementById('supplyArea').value,
+    room_count: document.getElementById('roomCount').value,
+    bathroom_count: document.getElementById('bathCount').value,
+    direction: document.getElementById('direction').value,
+    floor: document.getElementById('floor').value,
+    transaction_type: currentDeal,
+    sale_price: document.getElementById('salePrice') ? document.getElementById('salePrice').value : null,
+    deposit: document.getElementById('deposit') ? document.getElementById('deposit').value : null,
+    monthly_rent: document.getElementById('monthlyRent') ? document.getElementById('monthlyRent').value : null,
+    description: document.getElementById('description').value
+  };
+
+  console.log('등록 데이터:', data);
+  alert('매물 등록 완료!\n\n' +
+    '건물명: ' + selectedAddress.building + '\n' +
+    '주소: ' + selectedAddress.road + '\n' +
+    '거래: ' + currentDeal + '\n\n' +
+    '(실제 DB 연동 시 Supabase에 저장됩니다)');
+}
+</script>
+</body>
+</html>
