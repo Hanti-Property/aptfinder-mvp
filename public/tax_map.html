@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AptFinder - 지도 기반 보유세 계산기</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, 'Malgun Gothic', sans-serif; background:#f5f5f5; }
+.container { max-width:600px; margin:0 auto; background:#fff; min-height:100vh; }
+header { background:#1B3A5C; color:#fff; padding:16px; text-align:center; }
+header h1 { font-size:17px; font-weight:600; }
+header p { font-size:11px; opacity:0.8; margin-top:2px; }
+#map { width:100%; height:300px; }
+.guide { text-align:center; padding:12px; color:#666; font-size:13px; background:#f9f9f9; }
+.info-box { background:#f0f7ff; padding:12px 16px; border-left:3px solid #1B3A5C; margin:12px 16px; border-radius:6px; display:none; }
+.info-box p { font-size:12px; color:#333; margin:2px 0; }
+.price-list { margin:12px 16px; display:none; }
+.price-list h3 { font-size:14px; color:#1B3A5C; margin-bottom:8px; }
+.price-item { display:flex; justify-content:space-between; padding:8px; border:1px solid #eee; border-radius:6px; margin-bottom:4px; cursor:pointer; }
+.price-item:hover { background:#f0f7ff; }
+.price-item .left { font-size:12px; color:#333; }
+.price-item .right { font-size:12px; font-weight:600; color:#e53935; }
+.calc-box { margin:16px; padding:16px; background:#f9f9f9; border-radius:8px; display:none; }
+.calc-box h3 { font-size:14px; color:#1B3A5C; margin-bottom:10px; }
+.calc-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee; font-size:12px; }
+.calc-row:last-child { border-bottom:none; }
+.calc-total { display:flex; justify-content:space-between; padding:10px 0; margin-top:8px; border-top:2px solid #1B3A5C; }
+.calc-total span:first-child { font-size:14px; font-weight:600; color:#1B3A5C; }
+.calc-total span:last-child { font-size:16px; font-weight:700; color:#e53935; }
+.loading { text-align:center; padding:20px; color:#666; font-size:13px; display:none; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>🗺️ 지도 기반 보유세 계산기</h1>
+<p>지도에서 아파트 클릭 → 공시가격 조회 → 보유세 자동 계산</p>
+</header>
+
+<p class="guide">지도에서 아파트를 클릭하세요</p>
+<div id="map"></div>
+
+<div class="info-box" id="infoBox">
+<p id="infoAddr" style="font-weight:600;"></p>
+<p id="infoBldg"></p>
+</div>
+
+<div class="loading" id="loading">⏳ 공시가격 조회 중...</div>
+
+<div class="price-list" id="priceList">
+<h3>📋 공시가격 조회 결과 <span id="priceCount" style="font-size:11px; color:#999;"></span></h3>
+<div id="priceItems"></div>
+</div>
+
+<div class="calc-box" id="calcBox">
+<h3>📊 보유세 계산 결과</h3>
+<div id="calcResult"></div>
+</div>
+
+<div style="padding:16px; text-align:center;">
+<a href="/" style="font-size:12px; color:#999;">← AptFinder 홈으로</a>
+</div>
+</div>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
+<script>
+// Supabase 직접 호출
+var SUPABASE_URL = 'https://ocfrymsoxqhzzfytdsqr.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jZnJ5bXNveHFoenpmeXRkc3FyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NzUxNTksImV4cCI6MjEwMTM1MTE1OX0._WAikvSuFjwuSPygNYHd8agTgTGGdVzGyTz4YO1ME3k';
+
+var map, marker, geocoder;
+var mapContainer = document.getElementById('map');
+var mapOption = { center: new kakao.maps.LatLng(37.4946, 127.0625), level: 4 };
+map = new kakao.maps.Map(mapContainer, mapOption);
+geocoder = new kakao.maps.services.Geocoder();
+marker = new kakao.maps.Marker();
+
+kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+  var latlng = mouseEvent.latLng;
+  marker.setPosition(latlng);
+  marker.setMap(map);
+
+  geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function(result, status) {
+    if (status === kakao.maps.services.Status.OK) {
+      var addr = result[0];
+      var jibun = addr.address ? addr.address.address_name : '';
+      var building = addr.road_address ? addr.road_address.building_name : '';
+      var dong = addr.address ? addr.address.region_3depth_name : '';
+
+      document.getElementById('infoAddr').textContent = jibun;
+      document.getElementById('infoBldg').textContent = building ? '건물명: ' + building : '';
+      document.getElementById('infoBox').style.display = 'block';
+
+      // 단지명으로 DB 조회
+      if (building) {
+        searchPrice(building);
+      } else if (dong) {
+        document.querySelector('.guide').textContent = '아파트 단지를 클릭하면 공시가격이 조회됩니다';
+      }
+    }
+  });
+});
+
+async function searchPrice(complexName) {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('priceList').style.display = 'none';
+  document.getElementById('calcBox').style.display = 'none';
+
+  // 단지명으로 검색 (부분 일치)
+  var searchName = complexName.replace(/아파트|단지/g, '').trim();
+  var url = SUPABASE_URL + '/rest/v1/public_prices?complex_name=ilike.*' + encodeURIComponent(searchName) + '*&limit=20&order=unit_no';
+  
+  try {
+    var response = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      }
+    });
+    var data = await response.json();
+    document.getElementById('loading').style.display = 'none';
+
+    if (data.length === 0) {
+      document.querySelector('.guide').textContent = '"' + complexName + '" 공시가격 데이터가 없습니다';
+      return;
+    }
+
+    document.querySelector('.guide').textContent = '✅ 공시가격 조회 완료 — 호수를 클릭하면 보유세가 계산됩니다';
+    document.getElementById('priceCount').textContent = '(' + data.length + '건)';
+
+    var html = '';
+    data.forEach(function(item) {
+      var priceMan = Math.round(item.price / 10000);
+      var priceText = priceMan >= 10000 ? (priceMan / 10000).toFixed(1) + '억' : priceMan.toLocaleString() + '만원';
+      html += '<div class="price-item" onclick="calcTax(' + item.price + ')">';
+      html += '<span class="left">' + (item.complex_name||'') + ' ' + (item.building_no||'') + '동 ' + (item.unit_no||'') + '호 (' + (item.exclusive_area||'') + '㎡)</span>';
+      html += '<span class="right">' + priceText + '</span>';
+      html += '</div>';
+    });
+    document.getElementById('priceItems').innerHTML = html;
+    document.getElementById('priceList').style.display = 'block';
+
+  } catch(err) {
+    document.getElementById('loading').style.display = 'none';
+    document.querySelector('.guide').textContent = '조회 실패: ' + err.message;
+  }
+}
+
+function calcTax(pubPrice) {
+  // 재산세 계산
+  var fairRatio = 0.6;
+  var taxBase = pubPrice * fairRatio;
+  var propertyTax = 0;
+  if (taxBase <= 60000000) propertyTax = taxBase * 0.001;
+  else if (taxBase <= 150000000) propertyTax = 60000 + (taxBase - 60000000) * 0.0015;
+  else if (taxBase <= 300000000) propertyTax = 195000 + (taxBase - 150000000) * 0.0025;
+  else propertyTax = 570000 + (taxBase - 300000000) * 0.004;
+
+  var eduTax = propertyTax * 0.2;
+  var cityTax = taxBase * 0.0014;
+  var propertyTotal = propertyTax + eduTax + cityTax;
+
+  // 종부세 (1주택 기준)
+  var deduction = 1200000000;
+  var jongbuBase = (pubPrice - deduction) * 0.6;
+  if (jongbuBase < 0) jongbuBase = 0;
+  var jongbuTax = 0;
+  if (jongbuBase > 0) {
+    if (jongbuBase <= 300000000) jongbuTax = jongbuBase * 0.005;
+    else if (jongbuBase <= 600000000) jongbuTax = 1500000 + (jongbuBase - 300000000) * 0.007;
+    else if (jongbuBase <= 1200000000) jongbuTax = 3600000 + (jongbuBase - 600000000) * 0.01;
+    else jongbuTax = 9600000 + (jongbuBase - 1200000000) * 0.014;
+  }
+  var farmTax = jongbuTax * 0.2;
+  var jongbuTotal = jongbuTax + farmTax;
+  var total = propertyTotal + jongbuTotal;
+
+  var html = '';
+  html += '<div class="calc-row"><span>공시가격</span><span>' + formatWon(pubPrice) + '</span></div>';
+  html += '<div class="calc-row"><span>재산세</span><span>' + formatWon(propertyTax) + '</span></div>';
+  html += '<div class="calc-row"><span>지방교육세</span><span>' + formatWon(eduTax) + '</span></div>';
+  html += '<div class="calc-row"><span>도시지역분</span><span>' + formatWon(cityTax) + '</span></div>';
+  html += '<div class="calc-row"><span>재산세 합계</span><span style="font-weight:600;">' + formatWon(propertyTotal) + '</span></div>';
+  if (jongbuBase > 0) {
+    html += '<div class="calc-row"><span>종부세</span><span>' + formatWon(jongbuTax) + '</span></div>';
+    html += '<div class="calc-row"><span>농어촌특별세</span><span>' + formatWon(farmTax) + '</span></div>';
+    html += '<div class="calc-row"><span>종부세 합계</span><span style="font-weight:600;">' + formatWon(jongbuTotal) + '</span></div>';
+  } else {
+    html += '<div class="calc-row"><span>종부세</span><span style="color:#43a047;">비과세 (공시가 12억 이하)</span></div>';
+  }
+  html += '<div class="calc-total"><span>총 보유세</span><span>' + formatWon(total) + '</span></div>';
+  html += '<p style="font-size:10px; color:#999; margin-top:8px;">※ 1주택 기준 간편 추정치. 실제 세액과 차이 있을 수 있음.</p>';
+
+  document.getElementById('calcResult').innerHTML = html;
+  document.getElementById('calcBox').style.display = 'block';
+  document.getElementById('calcBox').scrollIntoView({ behavior: 'smooth' });
+}
+
+function formatWon(amount) {
+  amount = Math.round(amount);
+  if (amount >= 100000000) {
+    var a = Math.floor(amount / 100000000);
+    var b = Math.floor((amount % 100000000) / 10000);
+    return a + '억' + (b > 0 ? ' ' + b.toLocaleString() + '만원' : '원');
+  } else if (amount >= 10000) {
+    return Math.floor(amount / 10000).toLocaleString() + '만원';
+  }
+  return amount.toLocaleString() + '원';
+}
+</script>
+</body>
+</html>
