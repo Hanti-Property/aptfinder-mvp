@@ -168,7 +168,7 @@ export default function Home() {
         <div className="mb-5">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-xl font-semibold">🎓 전문가 칼럼</h3>
-            <a href="/notes" className="text-base text-[#1B3A5C] font-semibold">더보기 →</a>
+            <a href="/columns" className="text-base text-[#1B3A5C] font-semibold">더보기 →</a>
           </div>
           <div className="space-y-3">
             {[
