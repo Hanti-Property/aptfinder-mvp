@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const runtime = 'edge'
+export const preferredRegion = 'icn1'  // 한국(인천) 리전
+
 export async function GET(request: NextRequest) {
   const pnu = request.nextUrl.searchParams.get('pnu')
   
