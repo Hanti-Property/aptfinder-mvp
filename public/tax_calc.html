@@ -254,18 +254,22 @@ function fetchPrice() {
 }
 
 function showResults(items) {
+  // 동일 연도+동+호 중복 제거 (최신만 유지)
+  var seen={}; var unique=[];
+  for(var i=items.length-1;i>=0;i--){var it=items[i];var yk=((it.stdrYear||it.baseYear||it.pblntfDe||"-").substring(0,4))+"_"+(it.dongNm||it.dong||"")+"_"+(it.hoNm||it.ho||"");if(!seen[yk]){seen[yk]=true;unique.unshift(it);}}
+  items=unique;
   // 테이블 표시
-  var html = '<table style="width:100%;font-size:8px;border-collapse:collapse;">';
-  html += '<tr style="background:#f0f7ff;"><th style="padding:5px;border:1px solid #ddd;">연도</th><th style="padding:5px;border:1px solid #ddd;">동</th><th style="padding:5px;border:1px solid #ddd;">호</th><th style="padding:5px;border:1px solid #ddd;">전용면적</th><th style="padding:5px;border:1px solid #ddd;">공시가격(원)</th></tr>';
+  var html = '<table style="width:100%;font-size:7px;border-collapse:collapse;">';
+  html += '<tr style="background:#f0f7ff;"><th style="padding:5px;border:1px solid #ddd;">연도</th><th style="padding:5px;border:1px solid #ddd;">동</th><th style="padding:5px;border:1px solid #ddd;">호</th><th style="padding:5px;border:1px solid #ddd;">전용</th><th style="padding:5px;border:1px solid #ddd;">공시가격(원)</th></tr>';
   items.forEach(function(it){
     var y=it.stdrYear||it.baseYear||it.pblntfDe||'-';
     if (y && y.length >= 4) y = y.substring(0,4);
     var d=it.dongNm||it.dong||'-', h=it.hoNm||it.ho||'-';
     var a=it.prvuseAr||it.area||'-', p=it.pblntfPc||it.officialPrice||0; var aDisplay=(a!=='-')?a+'㎡':'-';
-    html+='<tr><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+y+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+d+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+h+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+aDisplay+'</td><td style="padding:3px;border:1px solid #ddd;text-align:right;font-weight:bold;">'+Number(p).toLocaleString()+'</td></tr>';
+    html+='<tr><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+y+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+d+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+h+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;white-space:nowrap;">'+aDisplay+'</td><td style="padding:3px;border:1px solid #ddd;text-align:right;font-weight:bold;">'+Number(p).toLocaleString()+'</td></tr>';
   });
   html += '</table>';
-  html += '<p style="font-size:8px;color:#666;margin-top:4px;">조회: '+items.length+'건 (마지막 행 = 최신 공시가격)</p>';
+  html += '<p style="font-size:7px;color:#666;margin-top:4px;">조회: '+items.length+'건 (마지막 행 = 최신 공시가격)</p>';
   document.getElementById('priceInfo').innerHTML = html;
   document.getElementById('priceSection').style.display = 'block';
 
