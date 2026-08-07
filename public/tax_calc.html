@@ -261,8 +261,8 @@ function showResults(items) {
     var y=it.stdrYear||it.baseYear||it.pblntfDe||'-';
     if (y && y.length >= 4) y = y.substring(0,4);
     var d=it.dongNm||it.dong||'-', h=it.hoNm||it.ho||'-';
-    var a=it.prvuseAr||it.area||'-', p=it.pblntfPc||it.officialPrice||0;
-    html+='<tr><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+y+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+d+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+h+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+a+'</td><td style="padding:3px;border:1px solid #ddd;text-align:right;font-weight:bold;">'+Number(p).toLocaleString()+'</td></tr>';
+    var a=it.prvuseAr||it.area||'-', p=it.pblntfPc||it.officialPrice||0; var aDisplay=(a!=='-')?a+'㎡':'-';
+    html+='<tr><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+y+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+d+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+h+'</td><td style="padding:3px;border:1px solid #ddd;text-align:center;">'+aDisplay+'</td><td style="padding:3px;border:1px solid #ddd;text-align:right;font-weight:bold;">'+Number(p).toLocaleString()+'</td></tr>';
   });
   html += '</table>';
   html += '<p style="font-size:9px;color:#666;margin-top:4px;">조회: '+items.length+'건 (마지막 행 = 최신 공시가격)</p>';
