@@ -128,6 +128,20 @@ var LAMBDA_URL = 'https://olbz7w7kbq2ahm2hqfksx77nei0nlxxn.lambda-url.ap-northea
 var map, marker, geocoder, ps;
 var selectedPnu = '';
 
+// 조회 조건 리셋
+function resetResults() {
+  document.getElementById('dongInput').value = '';
+  document.getElementById('hoInput').value = '';
+  document.getElementById('ownerType').value = 'single';
+  document.getElementById('ageSelect').value = '0';
+  document.getElementById('holdSelect').value = '0';
+  document.getElementById('priceSection').style.display = 'none';
+  document.getElementById('taxSection').style.display = 'none';
+  document.getElementById('priceInfo').innerHTML = '';
+  document.getElementById('taxResult').innerHTML = '';
+  selectedPnu = '';
+}
+
 // 지도 초기화
 var mapContainer = document.getElementById('map');
 map = new kakao.maps.Map(mapContainer, { center: new kakao.maps.LatLng(37.4946, 127.0625), level: 5 });
@@ -138,6 +152,7 @@ marker.setMap(map);
 
 // 지도 클릭
 kakao.maps.event.addListener(map, 'click', function(e) {
+  resetResults();
   var latlng = e.latLng;
   marker.setPosition(latlng);
   geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function(result, status) {
@@ -180,6 +195,7 @@ function searchAddress() {
   });
 }
 function selectPlace(lat, lng, name, address) {
+  resetResults();
   map.setCenter(new kakao.maps.LatLng(lat, lng)); map.setLevel(3);
   marker.setPosition(new kakao.maps.LatLng(lat, lng));
   document.getElementById('searchResults').style.display = 'none';
