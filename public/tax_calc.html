@@ -35,6 +35,10 @@ input, select { width:100%; padding:10px; margin-top:4px; border:1px solid #ddd;
 </header>
 
 <div class="form">
+<!-- 카카오 지도 -->
+<div id="map" style="width:100%; height:250px; border-radius:8px; margin-bottom:12px;"></div>
+<p style="font-size:11px; color:#666; text-align:center; margin-bottom:8px;">지도에서 아파트를 클릭하거나, 아래 검색창에 직접 입력하세요</p>
+
 <label>단지명 검색</label>
 <input type="text" id="searchInput" placeholder="예) 은마, 래미안, 미도" oninput="searchComplex()">
 <div id="searchResults" style="max-height:150px; overflow-y:auto; border:1px solid #eee; border-radius:6px; margin-top:4px; display:none;"></div>
@@ -83,11 +87,40 @@ input, select { width:100%; padding:10px; margin-top:4px; border:1px solid #ddd;
 </div>
 </div>
 
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
 <script>
 var SUPABASE_URL = 'https://ocfrymsoxqhzzfytdsqr.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jZnJ5bXNveHFoenpmeXRkc3FyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NzUxNTksImV4cCI6MjEwMTM1MTE1OX0._WAikvSuFjwuSPygNYHd8agTgTGGdVzGyTz4YO1ME3k';
 var allData = [];
 var selectedPrice = 0;
+
+// 카카오 지도 초기화
+var map = new kakao.maps.Map(document.getElementById('map'), {
+  center: new kakao.maps.LatLng(37.4946, 127.0625), level: 4
+});
+var marker = new kakao.maps.Marker();
+var geocoder = new kakao.maps.services.Geocoder();
+
+kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+  var latlng = mouseEvent.latLng;
+  marker.setPosition(latlng);
+  marker.setMap(map);
+
+  geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function(result, status) {
+    if (status === kakao.maps.services.Status.OK) {
+      var building = result[0].road_address ? result[0].road_address.building_name : '';
+      var dong = result[0].address ? result[0].address.region_3depth_name : '';
+      if (building) {
+        // 건물명에서 키워드 추출 후 검색
+        var keyword = building.replace(/아파트|단지|맨션|빌라|타워|\d+동?/g, '').trim();
+        if (keyword.length >= 2) {
+          document.getElementById('searchInput').value = keyword;
+          searchComplex();
+        }
+      }
+    }
+  });
+});
 
 async function searchComplex() {
   var query = document.getElementById('searchInput').value.trim();
