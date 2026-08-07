@@ -30,6 +30,7 @@ export default function Home() {
   const [listings, setListings] = useState<Listing[]>([])
   const [notes, setNotes] = useState<Note[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+  const [fontSize, setFontSize] = useState<'small'|'medium'|'large'>('medium')
 
   useEffect(() => {
     async function fetch() {
@@ -74,8 +75,10 @@ export default function Home() {
     return 'text-orange-500'
   }
 
+  const fontClass = fontSize === 'small' ? 'text-sm' : fontSize === 'large' ? 'text-lg' : 'text-base'
+
   return (
-    <div className="min-h-screen bg-gray-50 max-w-2xl mx-auto">
+    <div className={`min-h-screen bg-gray-50 max-w-2xl mx-auto pb-14 ${fontClass}`}>
       {/* Header */}
       <header className="bg-[#1B3A5C] text-white p-3 text-center">
         <h1 className="text-3xl font-bold">AptFinder</h1>
@@ -202,6 +205,22 @@ export default function Home() {
         <div className="mt-4 text-center">
           <a href="/admin" className="text-xs text-gray-400 underline">관리자</a>
         </div>
+      </div>
+
+      {/* 하단 고정 폰트 크기 조절 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 flex justify-center gap-3 max-w-2xl mx-auto">
+        <button onClick={() => setFontSize('small')}
+          className={`px-4 py-1.5 rounded-lg text-xs font-semibold border ${fontSize==='small' ? 'bg-[#1B3A5C] text-white border-[#1B3A5C]' : 'bg-white text-gray-600 border-gray-300'}`}>
+          가 작게
+        </button>
+        <button onClick={() => setFontSize('medium')}
+          className={`px-4 py-1.5 rounded-lg text-sm font-semibold border ${fontSize==='medium' ? 'bg-[#1B3A5C] text-white border-[#1B3A5C]' : 'bg-white text-gray-600 border-gray-300'}`}>
+          가 보통
+        </button>
+        <button onClick={() => setFontSize('large')}
+          className={`px-4 py-1.5 rounded-lg text-base font-semibold border ${fontSize==='large' ? 'bg-[#1B3A5C] text-white border-[#1B3A5C]' : 'bg-white text-gray-600 border-gray-300'}`}>
+          가 크게
+        </button>
       </div>
     </div>
   )
