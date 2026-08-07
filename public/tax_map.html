@@ -87,44 +87,47 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
       var jibun = addr.address ? addr.address.address_name : '';
       var building = addr.road_address ? addr.road_address.building_name : '';
       var dong = addr.address ? addr.address.region_3depth_name : '';
+      var mainAddr = addr.address ? addr.address.main_address_no : '';
 
       document.getElementById('infoAddr').textContent = jibun;
       document.getElementById('infoBldg').textContent = building ? '건물명: ' + building : '';
       document.getElementById('infoBox').style.display = 'block';
 
-      // 단지명으로 DB 조회
-      if (building) {
-        searchPrice(building);
-      } else if (dong) {
-        document.querySelector('.guide').textContent = '아파트 단지를 클릭하면 공시가격이 조회됩니다';
+      // 법정동 + 번지로 DB 조회
+      if (dong) {
+        searchByAddress(dong, mainAddr);
       }
     }
   });
 });
 
-async function searchPrice(complexName) {
+async function searchByAddress(dong, mainAddr) {
   document.getElementById('loading').style.display = 'block';
   document.getElementById('priceList').style.display = 'none';
   document.getElementById('calcBox').style.display = 'none';
 
-  // 단지명으로 검색 (부분 일치, 핵심 키워드 추출)
-  var searchName = complexName.replace(/아파트|단지|맨션|빌라|타워|빌리지|하우스|\d+/g, '').trim();
-  // 2글자 이상만 검색
-  if (searchName.length < 2) searchName = complexName.substring(0, 4);
-  var url = SUPABASE_URL + '/rest/v1/public_prices?complex_name=ilike.*' + encodeURIComponent(searchName) + '*&limit=30&order=unit_no';
+  // 법정동으로 검색, 도로명주소에 번지 포함
+  var url = SUPABASE_URL + '/rest/v1/public_prices?bjdong=eq.' + encodeURIComponent(dong) + '&road_address=ilike.*' + encodeURIComponent(mainAddr) + '*&limit=30&order=unit_no';
   
   try {
     var response = await fetch(url, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY
-      }
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
     var data = await response.json();
+    
+    // 결과 없으면 법정동만으로 재시도 (번지 범위 넓힘)
+    if (data.length === 0) {
+      url = SUPABASE_URL + '/rest/v1/public_prices?bjdong=eq.' + encodeURIComponent(dong) + '&limit=30&order=complex_name,unit_no';
+      response = await fetch(url, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      });
+      data = await response.json();
+    }
+
     document.getElementById('loading').style.display = 'none';
 
     if (data.length === 0) {
-      document.querySelector('.guide').textContent = '"' + complexName + '" 공시가격 데이터가 없습니다';
+      document.querySelector('.guide').textContent = '"' + dong + '" 공시가격 데이터가 없습니다';
       return;
     }
 
