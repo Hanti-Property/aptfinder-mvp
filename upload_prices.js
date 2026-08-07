@@ -17,16 +17,44 @@ async function upload() {
   const rows = [];
   for (const line of lines) {
     const cols = line.split('|');
-    if (cols.length < 23) continue;
+    if (cols.length < 20) continue;
+    
+    // Y가 있는 위치를 찾아서 공시가격은 그 바로 앞
+    let priceIdx = -1;
+    for (let i = cols.length - 1; i >= 0; i--) {
+      if (cols[i] === 'Y' || cols[i] === 'N') {
+        priceIdx = i - 1;
+        break;
+      }
+    }
+    if (priceIdx < 0) continue;
+    
+    // Y 바로 앞에서 역순: 공시가격, 전용면적, 호수(전체), 호(층내), 층, 동
+    const price = parseInt(cols[priceIdx]);
+    if (!price || price < 10000000) continue;
+    
+    const exclusiveArea = parseFloat(cols[priceIdx - 1]);
+    const unitNo = cols[priceIdx - 2] || '';      // 전체 호수 (106, 1205)
+    const floor = cols[priceIdx - 4] || '';        // 층
+    const buildingNo = cols[priceIdx - 5] || '';   // 동
+    
+    // 단지명: 빈값이 아닌 한글 문자열 찾기 (위치 15~17 사이)
+    let complexName = '';
+    for (let i = 14; i <= 17; i++) {
+      if (cols[i] && /[가-힣]/.test(cols[i]) && cols[i].length >= 2) {
+        complexName = cols[i];
+        break;
+      }
+    }
     
     const row = {
       road_address: cols[6] || '',
       bjdong: cols[9] || '',
-      building_no: cols[13] || '',
-      complex_name: cols[16] || '',
-      unit_no: cols[20] || '',
-      exclusive_area: parseFloat(cols[21]) || null,
-      price: parseInt(cols[22]) || null,
+      building_no: cols[priceIdx - 4] || '',
+      complex_name: complexName,
+      unit_no: unitNo,
+      exclusive_area: exclusiveArea || null,
+      price: price,
       dong: cols[9] || ''
     };
     
