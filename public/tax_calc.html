@@ -6,19 +6,30 @@
 <title>AptFinder - 보유세 계산기</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: -apple-system, 'Malgun Gothic', sans-serif; background:#f5f5f5; }
-.container { max-width:480px; margin:0 auto; background:#fff; min-height:100vh; }
-header { background:#1B3A5C; color:#fff; padding:16px; text-align:center; }
-header h1 { font-size:18px; font-weight:600; }
-header p { font-size:11px; opacity:0.7; margin-top:4px; }
-.search-area { padding:12px; border-bottom:1px solid #eee; }
-.search-row { display:flex; gap:8px; }
-.search-row input { flex:1; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:13px; }
-.search-row button { padding:10px 16px; background:#1B3A5C; color:#fff; border:none;
-  border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
-#map { width:100%; height:250px; }
-.section { padding:12px; border-bottom:1px solid #f0f0f0; }
-.section h3 { font-size:13px; color:#1B3A5C; margin-bottom:8px; font-weight:600; }
+body { font-family: -apple-system, 'Malgun Gothic', sans-serif; background:#f5f5f5; font-size:17px; -webkit-text-size-adjust: 100%; }
+.container { max-width:960px; margin:0 auto; background:#fff; min-height:100vh; }
+header { background:#1B3A5C; color:#fff; padding:32px; text-align:center; position:relative; }
+header h1 { font-size:36px; font-weight:600; }
+header p { font-size:20px; opacity:0.7; margin-top:8px; }
+.font-controls { position:absolute; top:12px; right:12px; display:flex; gap:6px; }
+.font-controls button { padding:6px 12px !important; font-size:16px !important; background:rgba(255,255,255,0.2);
+  color:#fff; border:1px solid rgba(255,255,255,0.5); border-radius:4px; cursor:pointer; }
+.search-area { padding:20px; border-bottom:1px solid #eee; }
+.search-row { display:flex; gap:10px; }
+.search-row input { flex:1; padding:16px 18px; border:1px solid #ddd; border-radius:8px; font-size:22px; }
+.search-row button { padding:16px 28px; background:#1B3A5C; color:#fff; border:none;
+  border-radius:8px; font-size:22px; font-weight:600; cursor:pointer; white-space:nowrap; }
+#map { width:100%; height:400px; }
+.section { padding:20px; border-bottom:1px solid #f0f0f0; }
+.section h3 { font-size:24px; color:#1B3A5C; margin-bottom:12px; font-weight:600; }
+label { font-size:18px !important; }
+input, select, textarea { font-size:20px !important; padding:14px !important; }
+button { font-size:20px !important; padding:16px !important; }
+table { font-size:18px !important; }
+th, td { padding:10px !important; }
+.section p, .section div { font-size:16px !important; line-height:1.6; }
+.section b { font-size:17px; }
+p { font-size:18px; }
 </style>
 </head>
 <body>
@@ -26,10 +37,15 @@ header p { font-size:11px; opacity:0.7; margin-top:4px; }
 <header>
   <h1>보유세 계산기</h1>
   <p>aptfinder.net | 공동주택 공시가격 기반</p>
+  <div style="position:absolute; top:12px; right:12px;">
+    <button onclick="changeFontSize(-1)" style="width:48px;height:48px;border:2px solid #fff;background:rgba(255,255,255,0.25);color:#fff;border-radius:6px;cursor:pointer;font-size:22px;font-weight:bold;">A-</button>
+    <button onclick="changeFontSize(1)" style="width:48px;height:48px;border:2px solid #fff;background:rgba(255,255,255,0.25);color:#fff;border-radius:6px;cursor:pointer;font-size:22px;font-weight:bold;margin-left:6px;">A+</button>
+  </div>
 </header>
 
 <!-- 검색 -->
 <div class="search-area">
+  <p style="font-size:12px; color:#555; margin-bottom:8px;">지도에서 해당 아파트를 터치하시거나 검색창에 아파트 이름을 입력하세요</p>
   <div class="search-row">
     <input type="text" id="searchInput" placeholder="아파트명 또는 주소 검색 (예: 은마아파트)" />
     <button onclick="searchAddress()">검색</button>
@@ -43,42 +59,42 @@ header p { font-size:11px; opacity:0.7; margin-top:4px; }
 <!-- 선택된 아파트 -->
 <div class="section" id="aptInfoSection" style="display:none;">
   <h3>선택된 아파트</h3>
-  <div id="aptInfo" style="font-size:12px; color:#333;"></div>
+  <div id="aptInfo" style="font-size:15px; color:#333;"></div>
 </div>
 
 <!-- 옵션 -->
 <div class="section" id="unitSection" style="display:none;">
   <h3>조회 조건</h3>
   <div style="display:flex; gap:8px;">
-    <div style="flex:1;"><label style="font-size:11px; color:#666;">동</label>
-      <input type="text" id="dongInput" placeholder="예: 101" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:13px; margin-top:4px;" /></div>
-    <div style="flex:1;"><label style="font-size:11px; color:#666;">호</label>
-      <input type="text" id="hoInput" placeholder="예: 1201" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:13px; margin-top:4px;" /></div>
+    <div style="flex:1;"><label style="font-size:14px; color:#666;">동</label>
+      <input type="text" id="dongInput" placeholder="예: 101" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:16px; margin-top:4px;" /></div>
+    <div style="flex:1;"><label style="font-size:14px; color:#666;">호</label>
+      <input type="text" id="hoInput" placeholder="예: 1201" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:16px; margin-top:4px;" /></div>
   </div>
-  <div style="margin-top:8px;"><label style="font-size:11px; color:#666;">소유 형태</label>
-    <select id="ownerType" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:13px; margin-top:4px;">
+  <div style="margin-top:8px;"><label style="font-size:14px; color:#666;">소유 형태</label>
+    <select id="ownerType" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:16px; margin-top:4px;">
       <option value="single" selected>단독 소유 (1세대1주택)</option>
       <option value="joint">부부 공동소유 (50:50)</option>
     </select>
   </div>
-  <div style="margin-top:8px;"><label style="font-size:11px; color:#666;">소유자 연령 (종부세 고령자 공제)</label>
-    <select id="ageSelect" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:13px; margin-top:4px;">
+  <div style="margin-top:8px;"><label style="font-size:14px; color:#666;">소유자 연령 (종부세 고령자 공제)</label>
+    <select id="ageSelect" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:16px; margin-top:4px;">
       <option value="0" selected>60세 미만 (공제 없음)</option>
       <option value="20">60~65세 미만 (20%)</option>
       <option value="30">65~70세 미만 (30%)</option>
       <option value="40">70세 이상 (40%)</option>
     </select>
   </div>
-  <div style="margin-top:8px;"><label style="font-size:11px; color:#666;">보유기간 (종부세 장기보유 공제)</label>
-    <select id="holdSelect" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:13px; margin-top:4px;">
+  <div style="margin-top:8px;"><label style="font-size:14px; color:#666;">보유기간 (종부세 장기보유 공제)</label>
+    <select id="holdSelect" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:16px; margin-top:4px;">
       <option value="0" selected>5년 미만 (공제 없음)</option>
       <option value="20">5~10년 미만 (20%)</option>
       <option value="40">10~15년 미만 (40%)</option>
       <option value="50">15년 이상 (50%)</option>
     </select>
   </div>
-  <button onclick="fetchPrice()" style="width:100%; padding:12px; margin-top:12px; background:#2E7D32;
-    color:#fff; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">
+  <button onclick="fetchPrice()" style="width:100%; padding:14px; margin-top:12px; background:#2E7D32;
+    color:#fff; border:none; border-radius:6px; font-size:18px; font-weight:600; cursor:pointer;">
     공시가격 조회 및 보유세 계산</button>
 </div>
 
@@ -103,6 +119,13 @@ header p { font-size:11px; opacity:0.7; margin-top:4px; }
 
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
 <script>
+// 폰트 크기 조절
+var currentFontSize = 22;
+function changeFontSize(delta) {
+  currentFontSize = Math.max(12, Math.min(32, currentFontSize + delta * 2));
+  document.body.style.fontSize = currentFontSize + 'px';
+}
+
 var LAMBDA_URL = 'https://olbz7w7kbq2ahm2hqfksx77nei0nlxxn.lambda-url.ap-northeast-2.on.aws/';
 var map, marker, geocoder, ps;
 var selectedPnu = '';
