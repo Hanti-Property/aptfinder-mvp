@@ -107,9 +107,11 @@ async function searchPrice(complexName) {
   document.getElementById('priceList').style.display = 'none';
   document.getElementById('calcBox').style.display = 'none';
 
-  // 단지명으로 검색 (부분 일치)
-  var searchName = complexName.replace(/아파트|단지/g, '').trim();
-  var url = SUPABASE_URL + '/rest/v1/public_prices?complex_name=ilike.*' + encodeURIComponent(searchName) + '*&limit=20&order=unit_no';
+  // 단지명으로 검색 (부분 일치, 핵심 키워드 추출)
+  var searchName = complexName.replace(/아파트|단지|맨션|빌라|타워|빌리지|하우스|\d+/g, '').trim();
+  // 2글자 이상만 검색
+  if (searchName.length < 2) searchName = complexName.substring(0, 4);
+  var url = SUPABASE_URL + '/rest/v1/public_prices?complex_name=ilike.*' + encodeURIComponent(searchName) + '*&limit=30&order=unit_no';
   
   try {
     var response = await fetch(url, {
