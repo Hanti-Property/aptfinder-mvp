@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AptFinder - 실거래가 조회</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,'Malgun Gothic',sans-serif; background:#f5f5f5; font-size:15px; }
+.container { max-width:960px; margin:0 auto; background:#fff; min-height:100vh; padding-bottom:20px; }
+header { background:#1B3A5C; color:#fff; padding:18px 32px; text-align:center; }
+header h1 { font-size:28px; font-weight:700; }
+header p { font-size:14px; opacity:0.7; margin-top:4px; }
+.search-area { padding:16px; border-bottom:1px solid #eee; }
+.search-title { font-size:18px; color:#1B3A5C; font-weight:700; text-align:center; margin-bottom:10px; }
+.search-row { display:flex; gap:8px; }
+.search-row input { flex:1; padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; }
+.search-row button { padding:8px 16px; background:#1B3A5C; color:#fff; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+.filters { padding:12px 16px; display:flex; gap:8px; flex-wrap:wrap; border-bottom:1px solid #eee; }
+.filters select { padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; }
+.filters button { padding:6px 14px; border:1px solid #ddd; border-radius:6px; font-size:13px; cursor:pointer; background:#fff; }
+.filters button.active { background:#1B3A5C; color:#fff; border-color:#1B3A5C; }
+#map { width:100%; height:400px; }
+.section { padding:16px; border-bottom:1px solid #f0f0f0; }
+.section h3 { font-size:18px; color:#1B3A5C; margin-bottom:10px; font-weight:600; }
+.trade-card { border:1px solid #eee; border-radius:8px; padding:12px; margin-bottom:8px; }
+.trade-card .price { font-size:18px; font-weight:700; color:#e53935; }
+.trade-card .info { font-size:12px; color:#666; margin-top:4px; }
+.trade-card .date { font-size:11px; color:#999; }
+.notice { padding:12px 16px; background:#fff9c4; margin:12px; border-radius:6px; font-size:11px; color:#666; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <h1>실거래가 조회</h1>
+  <p>aptfinder.net | 국토교통부 실거래 공개 자료</p>
+</header>
+<div class="search-area">
+  <p class="search-title">지도 터치 또는 검색</p>
+  <div class="search-row">
+    <input type="text" id="searchInput" placeholder="아파트명 또는 주소 입력 (예: 은마)" />
+    <button onclick="searchAddress()">검색</button>
+  </div>
+  <div id="searchResults" style="margin-top:8px; display:none;"></div>
+</div>
+<div class="filters">
+  <select id="filterYear">
+    <option value="202607">2026년 7월</option>
+    <option value="202606">2026년 6월</option>
+    <option value="202605">2026년 5월</option>
+  </select>
+  <select id="filterArea">
+    <option value="">전체 면적</option>
+    <option value="60">60㎡ 이하</option>
+    <option value="85">60~85㎡</option>
+    <option value="135">85~135㎡</option>
+  </select>
+</div>
+<div id="map"></div>
+<div class="section" id="aptSection" style="display:none;">
+  <h3 id="aptName">단지명</h3>
+  <div id="aptAddress" style="font-size:13px; color:#666;"></div>
+</div>
+<div class="section" id="tradeSection" style="display:none;">
+  <h3>실거래 내역</h3>
+  <div id="tradeList"></div>
+  <p id="tradeStatus" style="font-size:12px; color:#999; margin-top:8px;"></p>
+</div>
+<div class="notice">
+  * 국토교통부 실거래가 공개시스템 기반. 신고 후 취소 건 포함 가능.<br>
+  * 거래일 = 계약일 기준. 정확한 정보는 실거래가 공개시스템 확인.
+</div>
+</div>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
+<script>
+var API_KEY = 'Q5ESFB1wOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7tlkX3liqloF4A%3D%3D';
+var LAWD_CD = '11680';
+var map = new kakao.maps.Map(document.getElementById('map'), {center:new kakao.maps.LatLng(37.4946,127.0625), level:5});
+var geocoder = new kakao.maps.services.Geocoder();
+var ps = new kakao.maps.services.Places();
+var marker = new kakao.maps.Marker({position:map.getCenter()});
+marker.setMap(map);
+
+kakao.maps.event.addListener(map, 'click', function(e) {
+  marker.setPosition(e.latLng);
+  geocoder.coord2Address(e.latLng.getLng(), e.latLng.getLat(), function(result, status) {
+    if (status !== kakao.maps.services.Status.OK) return;
+    var bldg = (result[0].road_address && result[0].road_address.building_name) || '';
+    showAptInfo(bldg || result[0].address.address_name, result[0].address.address_name);
+    fetchTrades(bldg);
+  });
+});
+
+function searchAddress() {
+  var kw = document.getElementById('searchInput').value.trim();
+  if (!kw) return;
+  ps.keywordSearch(kw, function(data, status) {
+    if (status !== kakao.maps.services.Status.OK) { alert('검색 결과 없음'); return; }
+    var html = '<div style="max-height:150px;overflow-y:auto;">';
+    data.slice(0,8).forEach(function(p) {
+      html += '<div onclick="selectPlace('+p.y+','+p.x+',\''+esc(p.place_name)+'\',\''+esc(p.address_name)+'\')" style="padding:8px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:12px;"><b>'+p.place_name+'</b><br><span style="color:#666;">'+p.address_name+'</span></div>';
+    });
+    document.getElementById('searchResults').innerHTML = html + '</div>';
+    document.getElementById('searchResults').style.display = 'block';
+  });
+}
+function selectPlace(lat, lng, name, address) {
+  map.setCenter(new kakao.maps.LatLng(lat, lng)); map.setLevel(3);
+  marker.setPosition(new kakao.maps.LatLng(lat, lng));
+  document.getElementById('searchResults').style.display = 'none';
+  showAptInfo(name, address);
+  fetchTrades(name);
+}
+function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+document.getElementById('searchInput').addEventListener('keypress',function(e){if(e.key==='Enter')searchAddress();});
+
+function showAptInfo(name, address) {
+  document.getElementById('aptName').textContent = name;
+  document.getElementById('aptAddress').textContent = address;
+  document.getElementById('aptSection').style.display = 'block';
+}
+
+function fetchTrades(aptName) {
+  var ym = document.getElementById('filterYear').value;
+  document.getElementById('tradeSection').style.display = 'block';
+  document.getElementById('tradeList').innerHTML = '<p style="color:#666;">조회 중...</p>';
+  var url = 'https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade?serviceKey='+API_KEY+'&LAWD_CD='+LAWD_CD+'&DEAL_YMD='+ym+'&pageNo=1&numOfRows=50&type=json';
+  fetch(url).then(function(r){return r.json();}).then(function(data){
+    if (data.response && data.response.body && data.response.body.items) {
+      var items = data.response.body.items.item || [];
+      if (!Array.isArray(items)) items = [items];
+      if (aptName) { var kw=aptName.replace(/아파트|단지/g,'').trim(); items=items.filter(function(it){return (it.aptNm||'').includes(kw);}); }
+      renderTrades(items);
+    } else { showDemoData(aptName); }
+  }).catch(function(){ showDemoData(aptName); });
+}
+
+function showDemoData(aptName) {
+  var n = aptName || '은마아파트';
+  var demo = [
+    {aptNm:n, excluUseAr:'76.79', dealAmount:'285,000', dealYear:'2026', dealMonth:'7', dealDay:'15', floor:'14', buildYear:'1979'},
+    {aptNm:n, excluUseAr:'76.79', dealAmount:'280,000', dealYear:'2026', dealMonth:'6', dealDay:'22', floor:'8', buildYear:'1979'},
+    {aptNm:n, excluUseAr:'84.43', dealAmount:'310,000', dealYear:'2026', dealMonth:'6', dealDay:'10', floor:'12', buildYear:'1979'},
+    {aptNm:n, excluUseAr:'76.79', dealAmount:'275,000', dealYear:'2026', dealMonth:'5', dealDay:'28', floor:'3', buildYear:'1979'},
+    {aptNm:n, excluUseAr:'84.43', dealAmount:'295,000', dealYear:'2026', dealMonth:'5', dealDay:'5', floor:'18', buildYear:'1979'},
+  ];
+  renderTrades(demo);
+  document.getElementById('tradeStatus').textContent = '※ API 활성화 대기 중 — 데모 데이터 표시';
+}
+
+function renderTrades(items) {
+  if (!items.length) { document.getElementById('tradeList').innerHTML='<p style="color:#999;">거래 내역 없음</p>'; return; }
+  var html = '';
+  items.forEach(function(it) {
+    var p = Number((it.dealAmount||'').trim().replace(/,/g,''));
+    var pt = p>=10000 ? Math.floor(p/10000)+'억'+(p%10000?' '+(p%10000).toLocaleString()+'만':'') : p.toLocaleString()+'만';
+    var date = (it.dealYear||'')+'.'+String(it.dealMonth||'').padStart(2,'0')+'.'+String(it.dealDay||'').padStart(2,'0');
+    html += '<div class="trade-card"><div style="display:flex;justify-content:space-between;align-items:center;"><span class="price">'+pt+'</span><span style="font-size:11px;color:#999;">'+date+'</span></div>';
+    html += '<div class="info">'+(it.aptNm||'')+' | 전용 '+(it.excluUseAr||'-')+'㎡ | '+(it.floor||'-')+'층 | 준공 '+(it.buildYear||'-')+'년</div></div>';
+  });
+  document.getElementById('tradeList').innerHTML = html;
+  document.getElementById('tradeStatus').textContent = '조회: '+items.length+'건';
+}
+
+document.getElementById('filterYear').addEventListener('change', function(){
+  var name = document.getElementById('aptName').textContent;
+  if (name && name !== '단지명') fetchTrades(name);
+});
+</script>
+</body>
+</html>
