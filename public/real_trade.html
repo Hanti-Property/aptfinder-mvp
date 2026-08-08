@@ -76,7 +76,7 @@ kakao.maps.event.addListener(map,'click',function(e){
     var addr=result[0].address;
     var bldg=(result[0].road_address&&result[0].road_address.building_name)||'';
     selectedUmdNm=addr.region_3depth_name||'';
-    selectedJibun=addr.main_address_no||'';
+    selectedJibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!='0'?'-'+addr.sub_address_no:'');
     showAptInfo(bldg||addr.address_name, addr.address_name);
   });
 });
@@ -103,7 +103,7 @@ function selectPlace(lat,lng,name,address){
     if(status===kakao.maps.services.Status.OK){
       var addr=result[0].address;
       selectedUmdNm=addr.region_3depth_name||'';
-      selectedJibun=addr.main_address_no||'';
+      selectedJibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!='0'?'-'+addr.sub_address_no:'');
     }
   });
   showAptInfo(name,address);
@@ -146,7 +146,7 @@ function finishSearch(allItems,name){
   var filtered=[];
   if(selectedUmdNm && selectedJibun){
     filtered=allItems.filter(function(it){
-      var umd=selectedUmdNm.replace(/[0-9]/g,'').trim(); return (it.umdNm||'').trim()===umd && (it.jibun||'').trim().split('-')[0]===selectedJibun.trim().split('-')[0];
+      var umd=selectedUmdNm.replace(/[0-9]/g,'').trim(); return (it.umdNm||'').trim()===umd && (it.jibun||'').trim()===selectedJibun.trim();
     });
   }
   // 지번 매칭 실패 시 이름으로 폴백
