@@ -146,7 +146,7 @@ function finishSearch(allItems,name){
   var filtered=[];
   if(selectedUmdNm && selectedJibun){
     filtered=allItems.filter(function(it){
-      return (it.umdNm||'').trim()===selectedUmdNm.trim() && (it.jibun||'').trim()===selectedJibun.trim();
+      var umd=selectedUmdNm.replace(/[0-9]/g,'').trim(); return (it.umdNm||'').trim()===umd && (it.jibun||'').trim().split('-')[0]===selectedJibun.trim().split('-')[0];
     });
   }
   // 지번 매칭 실패 시 이름으로 폴백
