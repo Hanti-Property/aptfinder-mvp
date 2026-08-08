@@ -128,7 +128,7 @@ function doSearch(){
 }
 
 function finishSearch(allItems,name){
-  var kw=name.replace(/아파트|단지/g,'').trim();
+  var kw=name.replace(/아파트|단지|[0-9]+동/g,'').trim();
   var filtered=allItems.filter(function(it){return(it.aptNm||'').indexOf(kw)>=0;});
   filtered.sort(function(a,b){
     var da=(a.dealYear||'')+String(a.dealMonth||'').padStart(2,'0')+String(a.dealDay||'').padStart(2,'0');
