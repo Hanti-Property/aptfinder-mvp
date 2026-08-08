@@ -114,7 +114,7 @@ function doSearch(){
   for(var i=0;i<months;i++){(function(idx){
     var d=new Date(now.getFullYear(),now.getMonth()-idx,1);
     var ym=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0');
-    var url='https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade?serviceKey='+API_KEY+'&LAWD_CD='+LAWD_CD+'&DEAL_YMD='+ym+'&pageNo=1&numOfRows=1000';
+    var url='https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/?LAWD_CD='+LAWD_CD+'&DEAL_YMD='+ym+'&pageNo=1&numOfRows=1000';
     fetch(url).then(function(r){return r.text();}).then(function(xml){
       var doc=(new DOMParser()).parseFromString(xml,'text/xml');
       doc.querySelectorAll('item').forEach(function(el){
