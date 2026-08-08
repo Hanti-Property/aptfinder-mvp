@@ -58,8 +58,11 @@ header p{font-size:14px;opacity:0.7;margin-top:4px}
 </div>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
 <script>
-var API_KEY='Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
+var LAMBDA_URL='https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/';
 var LAWD_CD='11680';
+var selectedUmdNm='';
+var selectedJibun='';
+
 var map=new kakao.maps.Map(document.getElementById('map'),{center:new kakao.maps.LatLng(37.4946,127.0625),level:5});
 var geocoder=new kakao.maps.services.Geocoder();
 var ps=new kakao.maps.services.Places();
@@ -70,8 +73,11 @@ kakao.maps.event.addListener(map,'click',function(e){
   marker.setPosition(e.latLng);
   geocoder.coord2Address(e.latLng.getLng(),e.latLng.getLat(),function(result,status){
     if(status!==kakao.maps.services.Status.OK)return;
+    var addr=result[0].address;
     var bldg=(result[0].road_address&&result[0].road_address.building_name)||'';
-    showAptInfo(bldg||result[0].address.address_name, result[0].address.address_name);
+    selectedUmdNm=addr.region_3depth_name||'';
+    selectedJibun=addr.main_address_no||'';
+    showAptInfo(bldg||addr.address_name, addr.address_name);
   });
 });
 
@@ -92,6 +98,14 @@ function selectPlace(lat,lng,name,address){
   map.setCenter(new kakao.maps.LatLng(lat,lng));map.setLevel(3);
   marker.setPosition(new kakao.maps.LatLng(lat,lng));
   document.getElementById('searchResults').style.display='none';
+  // 주소에서 동명과 지번 추출
+  geocoder.coord2Address(lng,lat,function(result,status){
+    if(status===kakao.maps.services.Status.OK){
+      var addr=result[0].address;
+      selectedUmdNm=addr.region_3depth_name||'';
+      selectedJibun=addr.main_address_no||'';
+    }
+  });
   showAptInfo(name,address);
 }
 function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
@@ -114,7 +128,7 @@ function doSearch(){
   for(var i=0;i<months;i++){(function(idx){
     var d=new Date(now.getFullYear(),now.getMonth()-idx,1);
     var ym=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0');
-    var url='https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/?LAWD_CD='+LAWD_CD+'&DEAL_YMD='+ym+'&pageNo=1&numOfRows=1000';
+    var url=LAMBDA_URL+'?LAWD_CD='+LAWD_CD+'&DEAL_YMD='+ym+'&pageNo=1&numOfRows=1000';
     fetch(url).then(function(r){return r.text();}).then(function(xml){
       var doc=(new DOMParser()).parseFromString(xml,'text/xml');
       doc.querySelectorAll('item').forEach(function(el){
@@ -128,8 +142,18 @@ function doSearch(){
 }
 
 function finishSearch(allItems,name){
-  var kw=name.replace(/아파트|단지|[0-9]+동/g,'').trim();
-  var filtered=allItems.filter(function(it){return(it.aptNm||'').indexOf(kw)>=0;});
+  // 지번(동+번지) 기반 필터링 (가장 정확)
+  var filtered=[];
+  if(selectedUmdNm && selectedJibun){
+    filtered=allItems.filter(function(it){
+      return (it.umdNm||'').trim()===selectedUmdNm.trim() && (it.jibun||'').trim()===selectedJibun.trim();
+    });
+  }
+  // 지번 매칭 실패 시 이름으로 폴백
+  if(filtered.length===0){
+    var kw=name.replace(/아파트|단지|맨션|[0-9]+동|[0-9]+$/g,'').trim();
+    filtered=allItems.filter(function(it){return(it.aptNm||'').indexOf(kw)>=0;});
+  }
   filtered.sort(function(a,b){
     var da=(a.dealYear||'')+String(a.dealMonth||'').padStart(2,'0')+String(a.dealDay||'').padStart(2,'0');
     var db=(b.dealYear||'')+String(b.dealMonth||'').padStart(2,'0')+String(b.dealDay||'').padStart(2,'0');
