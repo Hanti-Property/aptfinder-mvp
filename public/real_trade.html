@@ -74,7 +74,7 @@ header p { font-size:14px; opacity:0.7; margin-top:4px; }
 </div>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
 <script>
-var API_KEY = 'Q5ESFB1wOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7tlkX3liqloF4A%3D%3D';
+var API_KEY = 'Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
 var LAWD_CD = '11680';
 var map = new kakao.maps.Map(document.getElementById('map'), {center:new kakao.maps.LatLng(37.4946,127.0625), level:5});
 var geocoder = new kakao.maps.services.Geocoder();
@@ -125,8 +125,8 @@ function fetchTrades(aptName) {
   var ym = document.getElementById('filterYear').value;
   document.getElementById('tradeSection').style.display = 'block';
   document.getElementById('tradeList').innerHTML = '<p style="color:#666;">조회 중...</p>';
-  var url = 'https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade?serviceKey='+API_KEY+'&LAWD_CD='+LAWD_CD+'&DEAL_YMD='+ym+'&pageNo=1&numOfRows=50&type=json';
-  fetch(url).then(function(r){return r.json();}).then(function(data){
+  var url = 'https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade?serviceKey='+API_KEY+'&LAWD_CD='+LAWD_CD+'&DEAL_YMD='+ym+'&pageNo=1&numOfRows=50';
+  fetch(url).then(function(r){return r.text();}).then(function(xml){ var parser=new DOMParser(); var doc=parser.parseFromString(xml,"text/xml"); var data={response:{body:{items:{}}}}; var itemEls=doc.querySelectorAll("item"); var items=[]; itemEls.forEach(function(el){ var obj={}; el.childNodes.forEach(function(n){if(n.nodeName!="#text")obj[n.nodeName]=n.textContent;}); items.push(obj); }); data.response.body.items.item=items;
     if (data.response && data.response.body && data.response.body.items) {
       var items = data.response.body.items.item || [];
       if (!Array.isArray(items)) items = [items];
