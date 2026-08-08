@@ -78,6 +78,7 @@ kakao.maps.event.addListener(map,'click',function(e){
     selectedUmdNm=addr.region_3depth_name||'';
     selectedJibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!='0'?'-'+addr.sub_address_no:'');
     showAptInfo(bldg||addr.address_name, addr.address_name);
+    geocoder.coord2RegionCode(e.latLng.getLng(),e.latLng.getLat(),function(rr,rs){if(rs===kakao.maps.services.Status.OK){for(var i=0;i<rr.length;i++){if(rr[i].region_type==="B"){LAWD_CD=rr[i].code.substring(0,5);break;}}}});
   });
 });
 
@@ -106,6 +107,7 @@ function selectPlace(lat,lng,name,address){
       selectedJibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!='0'?'-'+addr.sub_address_no:'');
     }
   });
+  geocoder.coord2RegionCode(lng,lat,function(rr,rs){if(rs===kakao.maps.services.Status.OK){for(var i=0;i<rr.length;i++){if(rr[i].region_type==="B"){LAWD_CD=rr[i].code.substring(0,5);break;}}}});
   showAptInfo(name,address);
 }
 function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
