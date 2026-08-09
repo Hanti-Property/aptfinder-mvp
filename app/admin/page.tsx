@@ -143,6 +143,8 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 gap-2">
           <a href="/admin/register" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 매물 등록</a>
           <a href="/admin/notes" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 노트 작성</a>
+          <a href="/admin/columns" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 칼럼 작성</a>
+          <a href="/admin/columns/list" className="bg-white border border-gray-300 rounded-lg p-3 text-center text-sm">칼럼 관리</a>
           <a href="/listings" className="bg-white border border-gray-300 rounded-lg p-3 text-center text-sm">매물 목록</a>
           <a href="/notes" className="bg-white border border-gray-300 rounded-lg p-3 text-center text-sm">노트 목록</a>
         </div>
@@ -179,6 +181,8 @@ export default function AdminDashboard() {
             <a href="/admin/inquiries" className="block p-3 text-xs hover:bg-gray-50">💬 상담 문의 관리</a>
             <a href="/admin/register" className="block p-3 text-xs hover:bg-gray-50">🏠 매물 등록</a>
             <a href="/admin/notes" className="block p-3 text-xs hover:bg-gray-50">📝 리서치 노트 작성</a>
+            <a href="/admin/columns" className="block p-3 text-xs hover:bg-gray-50">✍️ 전문가 칼럼 작성</a>
+            <a href="/admin/columns/list" className="block p-3 text-xs hover:bg-gray-50">📰 칼럼 목록 (수정/삭제)</a>
             <a href="/notes" className="block p-3 text-xs hover:bg-gray-50">📋 노트 목록 (수정/삭제)</a>
             <a href="/listings" className="block p-3 text-xs hover:bg-gray-50">📦 매물 목록 관리</a>
           </div>
