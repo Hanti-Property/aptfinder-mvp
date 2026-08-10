@@ -7,6 +7,7 @@ interface Stats {
   totalListings: number
   todayListings: number
   totalNotes: number
+  totalColumns: number
   totalAgencies: number
   totalComplexes: number
   totalInquiries: number
@@ -21,7 +22,7 @@ interface RecentItem {
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats>({ totalListings: 0, todayListings: 0, totalNotes: 0, totalAgencies: 0, totalComplexes: 0, totalInquiries: 0 })
+  const [stats, setStats] = useState<Stats>({ totalListings: 0, todayListings: 0, totalNotes: 0, totalColumns: 0, totalAgencies: 0, totalComplexes: 0, totalInquiries: 0 })
   const [recentItems, setRecentItems] = useState<RecentItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -30,19 +31,21 @@ export default function AdminDashboard() {
       const today = new Date().toISOString().split('T')[0]
 
       // 통계
-      const [listings, todayL, notes, agencies, complexes, inquiries] = await Promise.all([
+      const [listings, todayL, notes, agencies, complexes, inquiries, columns] = await Promise.all([
         supabase.from('listings').select('id', { count: 'exact', head: true }),
         supabase.from('listings').select('id', { count: 'exact', head: true }).gte('created_at', today),
         supabase.from('research_notes').select('id', { count: 'exact', head: true }),
         supabase.from('agencies').select('id', { count: 'exact', head: true }),
         supabase.from('complexes').select('id', { count: 'exact', head: true }),
         supabase.from('inquiries').select('id', { count: 'exact', head: true }),
+        supabase.from('expert_columns').select('id', { count: 'exact', head: true }),
       ])
 
       setStats({
         totalListings: listings.count || 0,
         todayListings: todayL.count || 0,
         totalNotes: notes.count || 0,
+        totalColumns: columns.count || 0,
         totalAgencies: agencies.count || 0,
         totalComplexes: complexes.count || 0,
         totalInquiries: inquiries.count || 0,
@@ -112,31 +115,31 @@ export default function AdminDashboard() {
       <div className="p-4 space-y-4">
         {/* 통계 카드 */}
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+          <a href="/listings" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
             <p className="text-2xl font-bold text-[#1B3A5C]">{stats.totalListings}</p>
             <p className="text-[10px] text-gray-500">총 매물</p>
             {stats.todayListings > 0 && <p className="text-[9px] text-green-600">+{stats.todayListings} 오늘</p>}
-          </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+          </a>
+          <a href="/notes" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
             <p className="text-2xl font-bold text-[#1B3A5C]">{stats.totalNotes}</p>
             <p className="text-[10px] text-gray-500">리서치 노트</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+          </a>
+          <a href="/admin/columns/list" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
+            <p className="text-2xl font-bold text-[#C49A3C]">{stats.totalColumns}</p>
+            <p className="text-[10px] text-gray-500">전문가 칼럼</p>
+          </a>
+          <a href="/admin/inquiries" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
             <p className="text-2xl font-bold text-[#1B3A5C]">{stats.totalInquiries}</p>
             <p className="text-[10px] text-gray-500">상담 문의</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+          </a>
+          <a href="/admin" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
             <p className="text-2xl font-bold text-orange-600">{stats.totalAgencies}</p>
             <p className="text-[10px] text-gray-500">입점 부동산</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+          </a>
+          <a href="/admin" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
             <p className="text-2xl font-bold text-blue-600">{stats.totalComplexes}</p>
             <p className="text-[10px] text-gray-500">등록 단지</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-gray-400">-</p>
-            <p className="text-[10px] text-gray-500">회원 수</p>
-          </div>
+          </a>
         </div>
 
         {/* 빠른 메뉴 */}
