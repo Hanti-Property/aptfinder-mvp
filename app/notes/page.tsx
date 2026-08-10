@@ -130,11 +130,7 @@ export default function NotesPage() {
           ))
         )}
 
-        <a href="/admin/notes"
-          className="block w-full p-3 bg-[#1B3A5C] text-white text-center rounded-lg font-semibold mt-4 text-base">
-          + 새 노트 작성
-        </a>
-        <a href="/" className="block text-center text-sm text-gray-500 underline mt-3">← 홈으로</a>
+        <a href="/" className="block text-center text-sm text-gray-500 underline mt-4">← 홈으로</a>
       </div>
     </div>
   )
