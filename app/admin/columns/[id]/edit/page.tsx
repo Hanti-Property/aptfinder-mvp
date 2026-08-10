@@ -156,10 +156,12 @@ export default function ColumnEditPage() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-sm text-gray-600 font-semibold">작성자</label>
-            <input type="text"
-              className="w-full p-2.5 border border-gray-300 rounded-lg mt-1"
+            <select className="w-full p-2.5 border border-gray-300 rounded-lg mt-1"
               value={form.author}
-              onChange={e => setForm({ ...form, author: e.target.value })} />
+              onChange={e => setForm({ ...form, author: e.target.value })}>
+              <option value="홍성욱">홍성욱</option>
+              <option value="aptFinder 리서치팀">aptFinder 리서치팀</option>
+            </select>
           </div>
           <div>
             <label className="text-sm text-gray-600 font-semibold">전문분야</label>
