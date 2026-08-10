@@ -18,7 +18,7 @@ interface RecentItem {
   label: string
   sub: string
   time: string
-  type: 'agency' | 'complex' | 'listing' | 'note' | 'inquiry'
+  type: 'agency' | 'complex' | 'listing' | 'note' | 'inquiry' | 'column'
 }
 
 export default function AdminDashboard() {
@@ -74,6 +74,11 @@ export default function AdminDashboard() {
         id: n.id, label: `📝 노트 발행: ${n.title}`, sub: n.category || '', time: n.created_at, type: 'note'
       }))
 
+      const { data: recentColumns } = await supabase.from('expert_columns').select('*').order('created_at', { ascending: false }).limit(3)
+      recentColumns?.forEach(c => recent.push({
+        id: c.id, label: `🎓 칼럼 발행: ${c.title}`, sub: c.series || '', time: c.created_at, type: 'column'
+      }))
+
       // 시간순 정렬
       recent.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
       setRecentItems(recent.slice(0, 15))
@@ -99,6 +104,7 @@ export default function AdminDashboard() {
       listing: 'bg-green-100 text-green-700',
       note: 'bg-purple-100 text-purple-700',
       inquiry: 'bg-red-100 text-red-700',
+      column: 'bg-yellow-100 text-yellow-700',
     }
     return badges[type] || 'bg-gray-100 text-gray-700'
   }
@@ -167,7 +173,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="text-right">
                     <span className={`text-[9px] px-1.5 py-0.5 rounded ${getTypeBadge(item.type)}`}>
-                      {item.type === 'agency' ? '부동산' : item.type === 'complex' ? '단지' : item.type === 'listing' ? '매물' : item.type === 'note' ? '노트' : '문의'}
+                      {item.type === 'agency' ? '부동산' : item.type === 'complex' ? '단지' : item.type === 'listing' ? '매물' : item.type === 'note' ? '노트' : item.type === 'column' ? '칼럼' : '문의'}
                     </span>
                     <p className="text-[10px] text-gray-400 mt-0.5">{formatTime(item.time)}</p>
                   </div>
