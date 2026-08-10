@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AptFinder - 건축물대장 조회</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, 'Malgun Gothic', sans-serif; background:#f5f5f5; }
+.container { max-width:960px; margin:0 auto; background:#fff; min-height:100vh; }
+header { background:#1B3A5C; color:#fff; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; }
+header h1 { font-size:17px; font-weight:600; }
+header .badge { background:rgba(255,255,255,0.2); padding:3px 8px; border-radius:12px; font-size:11px; }
+#map { width:100%; height:320px; }
+.guide { text-align:center; padding:10px; color:#666; font-size:13px; background:#fafafa; border-bottom:1px solid #eee; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <h1>건축물대장 조회</h1>
+  <span class="badge">지도 터치</span>
+</header>
+<p class="guide" id="guideText">🗺️ 지도에서 조회할 아파트를 클릭하세요</p>
+<div id="map"></div>
+
+<!-- 로딩 -->
+<div id="loading" style="display:none; text-align:center; padding:20px; color:#666;">
+  <div style="font-size:20px; margin-bottom:6px;">⏳</div>
+  <p style="font-size:13px;" id="loadingText">건축물대장 정보를 조회 중입니다...</p>
+</div>
+
+<!-- 에러 -->
+<div id="errorMsg" style="display:none; padding:10px 16px; background:#fff3f3; border-left:3px solid #e53935; margin:10px 16px; border-radius:4px;">
+  <p style="font-size:12px; color:#c62828;"></p>
+</div>
+
+<!-- ============================================================ -->
+<!-- [1단계] 총괄표제부 — 지도 터치 시 자동 표시 -->
+<!-- ============================================================ -->
+<div id="step1" style="display:none; padding:16px;">
+  <div class="step-header">
+    <span class="step-badge">1단계</span>
+    <span class="step-title">총괄표제부 (단지 개요)</span>
+  </div>
+  <div id="recapContent"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- [2단계] 동/호수 입력 -->
+<!-- ============================================================ -->
+<div id="step2" style="display:none; padding:16px; background:#f8fbff; border-top:1px solid #e8f0fa;">
+  <div class="step-header">
+    <span class="step-badge">2단계</span>
+    <span class="step-title">동·호수 선택</span>
+  </div>
+  <p style="font-size:12px; color:#666; margin:8px 0 12px;">표제부(동 정보)와 전유부(호 정보)를 조회합니다.</p>
+  <div style="display:flex; gap:10px; align-items:flex-end;">
+    <div style="flex:1;">
+      <label style="font-size:11px; color:#888; display:block; margin-bottom:4px;">동</label>
+      <input type="text" id="inputDong" placeholder="예) 101" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+    </div>
+    <div style="flex:1;">
+      <label style="font-size:11px; color:#888; display:block; margin-bottom:4px;">호수</label>
+      <input type="text" id="inputHo" placeholder="예) 1502" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+    </div>
+    <button onclick="searchDetail()" style="padding:10px 18px; background:#1B3A5C; color:#fff; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">조회</button>
+  </div>
+  <p style="font-size:10px; color:#aaa; margin-top:6px;">* 동 번호만 입력해도 표제부 조회 가능합니다</p>
+  <div id="step2Loading" style="display:none; text-align:center; padding:12px; color:#1B3A5C; margin-top:10px; background:#eef4fb; border-radius:6px;">
+    <span style="font-size:14px;">⏳</span> <span id="step2LoadingText" style="font-size:12px;">조회 중...</span>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- [3단계] 표제부 + 전유부 결과 -->
+<!-- ============================================================ -->
+<div id="step3" style="display:none; padding:16px;">
+  <div class="step-header">
+    <span class="step-badge">3단계</span>
+    <span class="step-title">상세 정보</span>
+  </div>
+  <div id="detailContent"></div>
+</div>
+
+<!-- 빠른 테스트 -->
+<div style="padding:16px; border-top:1px solid #eee; margin-top:8px;">
+  <h3 style="font-size:12px; color:#888; margin-bottom:8px;">빠른 테스트</h3>
+  <div style="display:flex; flex-wrap:wrap; gap:6px;">
+    <button class="quick-btn" onclick="quickSearch('11680','10600','316','0','은마아파트')">은마아파트</button>
+    <button class="quick-btn" onclick="quickSearch('11680','10600','511','0','미도아파트')">미도아파트</button>
+    <button class="quick-btn" onclick="quickSearch('11680','10600','1027','0','래미안대치팰리스')">래미안대치팰리스</button>
+    <button class="quick-btn" onclick="quickSearch('11680','10300','1284','0','개포자이프레지던스')">개포자이프레지던스</button>
+    <button class="quick-btn" onclick="quickSearch('11680','10600','1016','0','대치아이파크')">대치아이파크</button>
+  </div>
+</div>
+</div><!-- end container -->
+
+<style>
+.step-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.step-badge { background:#1B3A5C; color:#fff; font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; }
+.step-title { font-size:14px; font-weight:600; color:#1B3A5C; }
+.quick-btn { padding:6px 12px; border:1px solid #ddd; border-radius:16px; background:#fff; cursor:pointer; font-size:11px; color:#333; transition:all 0.2s; }
+.quick-btn:hover { background:#1B3A5C; color:#fff; border-color:#1B3A5C; }
+.summary-card { background:#f5f8fc; border-radius:8px; padding:14px; margin-bottom:10px; }
+.summary-card h4 { font-size:14px; color:#1B3A5C; margin-bottom:8px; }
+.summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.summary-item { font-size:12px; }
+.summary-item .label { color:#888; }
+.summary-item .value { color:#222; font-weight:600; }
+.dong-card { border:1px solid #e8e8e8; border-radius:8px; padding:12px; margin-bottom:10px; background:#fff; }
+.dong-card h5 { font-size:13px; color:#1B3A5C; margin-bottom:6px; }
+.dong-card p { font-size:11px; color:#555; margin:2px 0; }
+.data-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
+.data-table th { background:#f5f8fc; padding:7px 10px; text-align:left; color:#1B3A5C; font-weight:600; border-bottom:1px solid #e0e0e0; }
+.data-table td { padding:6px 10px; border-bottom:1px solid #f0f0f0; color:#333; }
+.data-table tr:hover td { background:#f9fbff; }
+.detail-section { margin-bottom:16px; }
+.detail-section-title { font-size:13px; font-weight:600; color:#333; margin-bottom:8px; padding-bottom:4px; border-bottom:1px solid #eee; }
+</style>
+
+<!-- 카카오 지도 SDK -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
+<script>
+// ============================================================
+// 설정
+// ============================================================
+var API_KEY = 'Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
+var BASE_URL = 'https://apis.data.go.kr/1613000/BldRgstHubService';
+var SIGUNGU_MAP = {
+  '강남구':'11680','서초구':'11650','송파구':'11710','강동구':'11740',
+  '마포구':'11440','용산구':'11170','성동구':'11200','광진구':'11215'
+};
+
+// 상태
+var selectedLocation = {};
+var allTitleData = [];   // 표제부 전체 (동별)
+var allExclData = [];    // 전유부 전체 (호별)
+
+// ============================================================
+// 카카오맵 초기화
+// ============================================================
+var mapContainer = document.getElementById('map');
+var map = new kakao.maps.Map(mapContainer, { center: new kakao.maps.LatLng(37.4946, 127.0625), level: 4 });
+var geocoder = new kakao.maps.services.Geocoder();
+var marker = new kakao.maps.Marker({ position: map.getCenter() });
+
+// ============================================================
+// 지도 클릭 → 1단계 자동 실행
+// ============================================================
+kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+  var latlng = mouseEvent.latLng;
+  marker.setPosition(latlng);
+  marker.setMap(map);
+
+  // Reverse Geocoding으로 주소 획득
+  geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function(result, status) {
+    if (status !== kakao.maps.services.Status.OK) return;
+    var addr = result[0];
+    var mainAddr = addr.address ? (addr.address.main_address_no || '') : '';
+    var subAddr = addr.address ? (addr.address.sub_address_no || '0') : '0';
+
+    // coord2RegionCode로 정확한 법정동코드 획득
+    geocoder.coord2RegionCode(latlng.getLng(), latlng.getLat(), function(regionResult, regionStatus) {
+      var sigunguCd = '', bjdongCd = '';
+      if (regionStatus === kakao.maps.services.Status.OK) {
+        var bjRegion = regionResult.find(function(r) { return r.region_type === 'B'; });
+        if (bjRegion && bjRegion.code) {
+          sigunguCd = bjRegion.code.substring(0, 5);
+          bjdongCd = bjRegion.code.substring(5, 10);
+        }
+      }
+      if (!sigunguCd && addr.address) {
+        sigunguCd = SIGUNGU_MAP[addr.address.region_2depth_name] || '';
+      }
+
+      selectedLocation = { sigunguCd: sigunguCd, bjdongCd: bjdongCd, bun: mainAddr, ji: subAddr || '0' };
+
+      if (sigunguCd && bjdongCd && mainAddr) {
+        runStep1();
+      } else {
+        showError('이 위치의 법정동 코드를 추출할 수 없습니다.');
+      }
+    });
+  });
+});
+
+// ============================================================
+// 빠른 테스트
+// ============================================================
+function quickSearch(sigungu, bjdong, bun, ji, name) {
+  selectedLocation = { sigunguCd: sigungu, bjdongCd: bjdong, bun: bun, ji: ji, name: name };
+  runStep1();
+}
+
+// ============================================================
+// [1단계] 총괄표제부 조회 및 표시
+// ============================================================
+async function runStep1() {
+  resetUI();
+  showLoading(true, '총괄표제부를 조회 중입니다...');
+
+  var loc = selectedLocation;
+  var bun = loc.bun.toString().padStart(4, '0');
+  var ji = (loc.ji || '0').toString().padStart(4, '0');
+
+  try {
+    // 총괄표제부 + 표제부 동시 호출 (표제부에서 거주동 카운트)
+    var [recapData, titleData] = await Promise.all([
+      fetchAPI('getBrRecapTitleInfo', loc.sigunguCd, loc.bjdongCd, bun, ji),
+      fetchAPI('getBrTitleInfo', loc.sigunguCd, loc.bjdongCd, bun, ji)
+    ]);
+    showLoading(false);
+
+    if (recapData.items.length === 0) {
+      showError('총괄표제부 데이터가 없습니다. 집합건물(아파트)이 아닌 경우 총괄표제부가 없을 수 있습니다.');
+      return;
+    }
+
+    // 거주동 카운트 (상가/편의시설 제외)
+    var residentialCount = titleData.items.filter(function(it) {
+      var purps = (it.etcPurps || '').trim();
+      return purps === '주거시설' || purps === '아파트' || purps === '공동주택';
+    }).length;
+
+    // 총괄표제부 렌더링
+    var item = recapData.items[0];
+    item._residentialCount = residentialCount; // 거주동 수 추가
+    var bldName = item.bldNm || loc.name || '건물명 없음';
+    document.getElementById('guideText').textContent = '📋 ' + bldName + ' — 총괄표제부 조회 완료';
+    document.getElementById('recapContent').innerHTML = renderRecap(item);
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step2').style.display = 'block';
+
+    // 동 입력 필드에 포커스
+    setTimeout(function() { document.getElementById('inputDong').focus(); }, 300);
+
+  } catch (err) {
+    showLoading(false);
+    showError('API 호출 오류: ' + err.message);
+  }
+}
+
+// ============================================================
+// [2단계→3단계] 동/호수 입력 후 표제부 + 전유부 조회
+// ============================================================
+async function searchDetail() {
+  var dong = document.getElementById('inputDong').value.trim();
+  var ho = document.getElementById('inputHo').value.trim();
+
+  if (!dong) {
+    alert('동 번호를 입력해주세요.');
+    document.getElementById('inputDong').focus();
+    return;
+  }
+
+  showStep2Loading(true, dong + '동 ' + (ho ? ho + '호' : '') + ' 정보를 조회 중...');
+  document.getElementById('step3').style.display = 'none';
+
+  var loc = selectedLocation;
+  var bun = loc.bun.toString().padStart(4, '0');
+  var ji = (loc.ji || '0').toString().padStart(4, '0');
+
+  try {
+    // 표제부 먼저 호출하여 정확한 dongNm 확인
+    var titleResult = await fetchAPI('getBrTitleInfo', loc.sigunguCd, loc.bjdongCd, bun, ji);
+    var titleData = titleResult.items;
+
+    // 동 필터링 — 입력값과 매칭 (숫자만 비교)
+    var dongClean = dong.replace('동','').replace(/^0+/,'');
+    var matchedTitle = titleData.filter(function(it) {
+      var dn = (it.dongNm || '').replace('동','').replace(/^0+/,'');
+      return dn === dongClean;
+    });
+
+    // 표제부에서 찾은 정확한 dongNm (API 파라미터용)
+    var exactDongNm = '';
+    if (matchedTitle.length > 0) {
+      exactDongNm = matchedTitle[0].dongNm || '';
+    }
+
+    // 전유부 호출 — 표제부에서 찾은 정확한 dongNm 사용
+    var exclResult;
+    if (exactDongNm) {
+      exclResult = await fetchExclusiveForUnit(loc.sigunguCd, loc.bjdongCd, bun, ji, exactDongNm, ho);
+    } else {
+      // 표제부에서 동을 못 찾으면 입력값 그대로 시도
+      exclResult = await fetchExclusiveForUnit(loc.sigunguCd, loc.bjdongCd, bun, ji, dong, ho);
+    }
+    var matchedExcl = exclResult.items;
+    showStep2Loading(false);
+
+    // 전유만 필터 (공용 제외)
+    var exclusiveOnly = matchedExcl.filter(function(it) {
+      return it.exposPubuseGbCd === '1' || it.exposPubuseGbCdNm === '전유';
+    });
+    var commonOnly = matchedExcl.filter(function(it) {
+      return it.exposPubuseGbCd === '2' || it.exposPubuseGbCdNm === '공용';
+    });
+
+    // 3단계 렌더링
+    var html = '';
+
+    // 표제부 (해당 동)
+    html += '<div class="detail-section">';
+    html += '<p class="detail-section-title">🏢 ' + dong + '동 표제부</p>';
+    if (matchedTitle.length > 0) {
+      matchedTitle.forEach(function(it) {
+        html += '<div class="dong-card">';
+        html += '<h5>' + (it.bldNm || it.dongNm || dong + '동') + '</h5>';
+        html += '<p><b>지상:</b> ' + (it.grndFlrCnt || '-') + '층 | <b>지하:</b> ' + (it.ugrndFlrCnt || '-') + '층</p>';
+        html += '<p><b>구조:</b> ' + (it.strctCdNm || '-') + ' | <b>용도:</b> ' + (it.mainPurpsCdNm || '-') + '</p>';
+        html += '<p><b>건축면적:</b> ' + formatNum(it.archArea) + '㎡ | <b>연면적:</b> ' + formatNum(it.totArea) + '㎡</p>';
+        html += '<p><b>사용승인일:</b> ' + formatDate(it.useAprDay) + ' | <b>승강기:</b> ' + (it.rideUseElvtCnt || '0') + '대</p>';
+        html += '</div>';
+      });
+    } else {
+      html += '<p style="font-size:12px; color:#999;">' + dong + '동에 해당하는 표제부를 찾지 못했습니다. (전체 ' + titleData.length + '건 중 검색)</p>';
+      // 동 목록 표시
+      var dongList = [...new Set(titleData.map(function(it) { return it.dongNm || ''; }).filter(Boolean))];
+      if (dongList.length > 0) {
+        html += '<p style="font-size:11px; color:#888; margin-top:4px;">등록된 동: ' + dongList.sort(function(a,b){return parseInt(a)-parseInt(b);}).join(', ') + '</p>';
+      }
+    }
+    html += '</div>';
+
+    // 전유부 (해당 동+호)
+    html += '<div class="detail-section">';
+    html += '<p class="detail-section-title">🏠 ' + dong + '동' + (ho ? ' ' + ho + '호' : '') + ' 전유부</p>';
+    if (exclusiveOnly.length > 0) {
+      html += '<table class="data-table"><thead><tr><th>동</th><th>호</th><th>층</th><th>전유면적(㎡)</th><th>용도</th></tr></thead><tbody>';
+      exclusiveOnly.forEach(function(it) {
+        var purpsNote = (it.etcPurps || '').indexOf('공유면적포함') >= 0 ? ' *' : '';
+        html += '<tr>';
+        html += '<td>' + (it.dongNm || '-') + '</td>';
+        html += '<td>' + (it.hoNm || '-') + '</td>';
+        html += '<td>' + (it.flrNo || '-') + '층</td>';
+        html += '<td><b>' + formatNum(it.area) + '</b>' + purpsNote + '</td>';
+        html += '<td>' + (it.mainPurpsCdNm || it.etcPurps || '-') + '</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      html += '<p style="font-size:10px; color:#999; margin-top:6px;">* 건축물대장 전유면적은 일부 공유면적이 포함된 값으로, 부동산 거래 시 전용면적(약 84㎡ 등)과 다를 수 있습니다.</p>';
+
+      // 공용면적도 표시
+      if (commonOnly.length > 0) {
+        html += '<details style="margin-top:10px;"><summary style="font-size:11px; color:#888; cursor:pointer;">공용면적 보기 (' + commonOnly.length + '건)</summary>';
+        html += '<table class="data-table" style="margin-top:6px;"><thead><tr><th>동</th><th>호</th><th>용도</th><th>면적(㎡)</th></tr></thead><tbody>';
+        commonOnly.forEach(function(it) {
+          html += '<tr><td>' + (it.dongNm || '-') + '</td><td>' + (it.hoNm || '-') + '</td><td>' + (it.etcPurps || it.mainPurpsCdNm || '-') + '</td><td>' + formatNum(it.area) + '</td></tr>';
+        });
+        html += '</tbody></table></details>';
+      }
+    } else {
+      html += '<p style="font-size:12px; color:#999;">해당 동/호의 전유부 데이터를 찾지 못했습니다.</p>';
+      if (exclResult.totalCount === 0) {
+        html += '<p style="font-size:11px; color:#888; margin-top:4px;">이 건물의 ' + dong + '동에는 전유부 데이터가 등록되어 있지 않습니다.</p>';
+      } else {
+        html += '<p style="font-size:11px; color:#888; margin-top:4px;">' + dong + '동 전체 ' + exclResult.totalCount + '건 중 검색했습니다. 호수를 정확히 확인해주세요.</p>';
+      }
+    }
+    html += '</div>';
+
+    document.getElementById('detailContent').innerHTML = html;
+    document.getElementById('step3').style.display = 'block';
+    document.getElementById('guideText').textContent = '✅ ' + dong + '동' + (ho ? ' ' + ho + '호' : '') + ' 상세 조회 완료';
+
+  } catch (err) {
+    showStep2Loading(false);
+    showError('상세 조회 오류: ' + err.message);
+  }
+}
+
+// ============================================================
+// 총괄표제부 렌더링
+// ============================================================
+function renderRecap(item) {
+  var html = '<div class="summary-card">';
+  html += '<h4>📋 ' + (item.bldNm || '건물명 없음') + '</h4>';
+  html += '<div class="summary-grid">';
+  html += summaryItem('대지면적', formatNum(item.platArea) + ' ㎡');
+  html += summaryItem('건축면적', formatNum(item.archArea) + ' ㎡');
+  html += summaryItem('연면적', formatNum(item.totArea) + ' ㎡');
+  html += summaryItem('용적률', formatNum(item.vlRat) + ' %');
+  html += summaryItem('건폐율', formatNum(item.bcRat) + ' %');
+  html += summaryItem('주용도', item.mainPurpsCdNm || '-');
+  html += summaryItem('세대수', formatNum(item.hhldCnt) + '세대');
+  html += summaryItem('동수', (item._residentialCount || item.mainBldCnt || '-') + '개동');
+  html += summaryItem('총주차', formatNum(item.totPkngCnt) + '대');
+  html += summaryItem('사용승인일', formatDate(item.useAprDay));
+  html += summaryItem('허가일', formatDate(item.pmsDay));
+  html += summaryItem('착공일', formatDate(item.stcnsDay));
+  html += '</div></div>';
+  return html;
+}
+
+// ============================================================
+// API 호출
+// ============================================================
+async function fetchAPI(endpoint, sigunguCd, bjdongCd, bun, ji, numOfRows, pageNo) {
+  numOfRows = numOfRows || 100;
+  pageNo = pageNo || 1;
+  var url = BASE_URL + '/' + endpoint +
+    '?serviceKey=' + API_KEY +
+    '&sigunguCd=' + sigunguCd +
+    '&bjdongCd=' + bjdongCd +
+    '&bun=' + bun + '&ji=' + ji +
+    '&numOfRows=' + numOfRows + '&pageNo=' + pageNo + '&_type=json';
+
+  var response = await fetch(url);
+  var data = await response.json();
+  var items = [];
+  var totalCount = 0;
+  if (data.response && data.response.body) {
+    totalCount = parseInt(data.response.body.totalCount) || 0;
+    if (data.response.body.items) {
+      items = data.response.body.items.item || [];
+    }
+  }
+  if (!items) items = [];
+  if (!Array.isArray(items)) items = [items];
+  return { items: items, totalCount: totalCount };
+}
+
+// 전유부: dongNm 파라미터로 해당 동만 필터하여 조회
+async function fetchExclusiveForUnit(sigunguCd, bjdongCd, bun, ji, dong, ho) {
+  var maxPages = 16;
+  var allItems = [];
+  var pageNo = 1;
+  var totalCount = 0;
+  // dong을 그대로 사용 (표제부에서 가져온 정확한 dongNm: "103동" 또는 "22")
+  var dongParam = dong;
+
+  while (pageNo <= maxPages) {
+    var url = BASE_URL + '/getBrExposPubuseAreaInfo' +
+      '?serviceKey=' + API_KEY +
+      '&sigunguCd=' + sigunguCd +
+      '&bjdongCd=' + bjdongCd +
+      '&bun=' + bun + '&ji=' + ji +
+      '&dongNm=' + encodeURIComponent(dongParam) +
+      '&numOfRows=100&pageNo=' + pageNo + '&_type=json';
+
+    var response = await fetch(url);
+    var data = await response.json();
+    totalCount = parseInt(data.response.body.totalCount) || 0;
+    var items = [];
+    if (data.response && data.response.body && data.response.body.items) {
+      items = data.response.body.items.item || [];
+    }
+    if (!items) items = [];
+    if (!Array.isArray(items)) items = [items];
+    if (items.length === 0) break;
+
+    allItems = allItems.concat(items);
+
+    if (pageNo * 100 >= totalCount) break;
+    pageNo++;
+  }
+
+  // 호수 필터 — 숫자만 추출하여 비교
+  var matched = allItems;
+  if (ho) {
+    var hoNum = ho.replace(/[^0-9]/g, '');
+    matched = allItems.filter(function(it) {
+      var hn = (it.hoNm || '').replace(/[^0-9]/g, '');
+      return hn === hoNum;
+    });
+  }
+
+  return { items: matched, totalCount: totalCount, pagesSearched: pageNo };
+}
+
+// ============================================================
+// 유틸리티
+// ============================================================
+function summaryItem(label, value) {
+  return '<div class="summary-item"><span class="label">' + label + '</span><br><span class="value">' + (value || '-') + '</span></div>';
+}
+function formatNum(val) {
+  if (!val || val === '0' || val === 0) return '-';
+  var num = parseFloat(val);
+  if (isNaN(num)) return val;
+  return num.toLocaleString('ko-KR', { maximumFractionDigits: 2 });
+}
+function formatDate(val) {
+  if (!val || val === 'nan' || val.toString().trim() === '') return '-';
+  var s = val.toString();
+  if (s.length === 8) return s.substring(0,4) + '.' + s.substring(4,6) + '.' + s.substring(6,8);
+  return s;
+}
+function showLoading(show, text) {
+  document.getElementById('loading').style.display = show ? 'block' : 'none';
+  if (text) document.getElementById('loadingText').textContent = text;
+}
+function showStep2Loading(show, text) {
+  document.getElementById('step2Loading').style.display = show ? 'block' : 'none';
+  if (text) document.getElementById('step2LoadingText').textContent = text;
+}
+function showError(msg) {
+  var el = document.getElementById('errorMsg');
+  el.style.display = 'block';
+  el.querySelector('p').textContent = msg;
+}
+function hideError() {
+  document.getElementById('errorMsg').style.display = 'none';
+}
+function resetUI() {
+  hideError();
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'none';
+  document.getElementById('inputDong').value = '';
+  document.getElementById('inputHo').value = '';
+}
+
+// Enter 키로 조회
+document.getElementById('inputDong').addEventListener('keypress', function(e) { if (e.key === 'Enter') { document.getElementById('inputHo').focus(); } });
+document.getElementById('inputHo').addEventListener('keypress', function(e) { if (e.key === 'Enter') { searchDetail(); } });
+</script>
+</body>
+</html>
