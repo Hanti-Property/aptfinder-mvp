@@ -155,7 +155,6 @@ function doSearch(){
   document.getElementById('tradeSection').style.display='block';
   document.getElementById('tradeList').innerHTML='<p style="color:#666;">조회 중... ('+months+'개월)</p>';
   document.getElementById('summaryBox').style.display='none';
-  document.getElementById('tabRow').style.display='none';
   var allItems=[],done=0,now=new Date();
   for(var i=0;i<months;i++){(function(idx){
     var d=new Date(now.getFullYear(),now.getMonth()-idx,1);
