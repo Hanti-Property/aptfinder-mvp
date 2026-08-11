@@ -72,11 +72,14 @@ header p{font-size:14px;opacity:0.7;margin-top:4px}
 <div class="section" id="tradeSection" style="display:none;">
 <h3>전월세 실거래 내역</h3>
 <div id="summaryBox" class="summary-box" style="display:none;"></div>
-<div style="margin-bottom:12px;">
+<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
 <select id="viewType" aria-label="전세/월세 보기" onchange="onViewTypeChange()" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-weight:600;">
 <option value="all">전월세 (전체)</option>
 <option value="jeonse">전세</option>
 <option value="wolse">월세</option>
+</select>
+<select id="viewArea" aria-label="전용면적 보기" onchange="onViewTypeChange()" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-weight:600;">
+<option value="all">전용면적 (전체)</option>
 </select>
 </div>
 <div id="tradeList"></div>
@@ -193,22 +196,39 @@ function finishSearch(allItems,name){
     return db.localeCompare(da);
   });
   allFilteredItems=filtered;
+  // 전용면적 드롭다운 채우기
+  var areaSet={};
+  filtered.forEach(function(it){
+    var ar=parseFloat((it.excluUseAr||'0').trim());
+    if(ar>0) areaSet[ar]=true;
+  });
+  var areas=Object.keys(areaSet).map(Number).sort(function(a,b){return a-b;});
+  var areaSelect=document.getElementById('viewArea');
+  areaSelect.innerHTML='<option value="all">전용면적 (전체)</option>';
+  areas.forEach(function(ar){
+    areaSelect.innerHTML+='<option value="'+ar+'">'+ar+'㎡</option>';
+  });
   // 드롭다운 필터와 연동
   var initView=document.getElementById('filterType').value;
   document.getElementById('viewType').value=initView;
   renderSummary(filtered);
-  renderFilteredList(initView);
+  renderFilteredList();
 }
 
 function onViewTypeChange(){
-  var viewType=document.getElementById('viewType').value;
-  renderFilteredList(viewType);
+  renderFilteredList();
 }
 
-function renderFilteredList(viewType){
+function renderFilteredList(){
+  var viewType=document.getElementById('viewType').value;
+  var viewArea=document.getElementById('viewArea').value;
   var items=allFilteredItems;
-  if(viewType==='jeonse')items=allFilteredItems.filter(function(it){return isJeonse(it);});
-  else if(viewType==='wolse')items=allFilteredItems.filter(function(it){return !isJeonse(it);});
+  if(viewType==='jeonse')items=items.filter(function(it){return isJeonse(it);});
+  else if(viewType==='wolse')items=items.filter(function(it){return !isJeonse(it);});
+  if(viewArea!=='all'){
+    var targetArea=parseFloat(viewArea);
+    items=items.filter(function(it){return parseFloat((it.excluUseAr||'0').trim())===targetArea;});
+  }
   renderTrades(items);
 }
 
