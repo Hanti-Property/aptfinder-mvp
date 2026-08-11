@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AptFinder - 전월세 실거래가 조회</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#f5f5f5;font-size:15px}
+.container{max-width:960px;margin:0 auto;background:#fff;min-height:100vh;padding-bottom:20px}
+header{background:#1B3A5C;color:#fff;padding:18px 32px;text-align:center}
+header h1{font-size:28px;font-weight:700}
+header p{font-size:14px;opacity:0.7;margin-top:4px}
+.search-area{padding:16px;border-bottom:1px solid #eee}
+.search-title{font-size:18px;color:#1B3A5C;font-weight:700;text-align:center;margin-bottom:10px}
+.search-row{display:flex;gap:8px}
+.search-row input{flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px}
+.search-row button{padding:8px 16px;background:#1B3A5C;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+#map{width:100%;height:400px}
+.section{padding:16px;border-bottom:1px solid #f0f0f0}
+.section h3{font-size:18px;color:#1B3A5C;margin-bottom:10px;font-weight:600}
+.filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.filter-row select,.filter-row button{padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px}
+.filter-row button{background:#2E7D32;color:#fff;border:none;font-weight:600;cursor:pointer}
+.trade-card{border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:8px}
+.trade-card .price{font-size:18px;font-weight:700;color:#1565C0}
+.trade-card .price .monthly{color:#e53935;font-size:16px;margin-left:4px}
+.trade-card .info{font-size:12px;color:#666;margin-top:4px}
+.trade-card .contract-info{font-size:11px;color:#888;margin-top:3px}
+.trade-card .badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-right:4px}
+.badge-jeonse{background:#E3F2FD;color:#1565C0}
+.badge-wolse{background:#FFEBEE;color:#C62828}
+.badge-renewal{background:#FFF3E0;color:#E65100}
+.badge-new{background:#E8F5E9;color:#2E7D32}
+.summary-box{background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:12px;margin-bottom:12px}
+.summary-box .row{display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px}
+.summary-box .row:last-child{margin-bottom:0}
+.summary-box .label{color:#666}
+.summary-box .value{font-weight:600;color:#333}
+.notice{padding:12px 16px;background:#fff9c4;margin:12px;border-radius:6px;font-size:11px;color:#666;line-height:1.5}
+.tab-row{display:flex;border-bottom:2px solid #eee;margin-bottom:0}
+.tab-row button{flex:1;padding:10px;border:none;background:transparent;font-size:14px;font-weight:600;color:#999;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab-row button.active{color:#1B3A5C;border-bottom-color:#1B3A5C}
+</style>
+</head>
+<body>
+<div class="container">
+<header><h1>전월세 실거래가 조회</h1><p>aptfinder.net | 국토교통부 전월세 실거래 공개 자료</p></header>
+<div class="search-area">
+<p class="search-title">지도 터치 또는 검색</p>
+<div class="search-row">
+<input type="text" id="searchInput" placeholder="아파트명 또는 주소 입력 (예: 은마)" aria-label="아파트명 또는 주소 검색"/>
+<button onclick="searchAddress()">검색</button>
+</div>
+<div id="searchResults" style="margin-top:8px;display:none;"></div>
+</div>
+<div id="map"></div>
+<div class="section" id="aptSection" style="display:none;">
+<h3 id="aptName">단지명</h3>
+<div id="aptAddress" style="font-size:13px;color:#666;"></div>
+<div class="filter-row">
+<select id="filterPeriod" aria-label="조회 기간">
+<option value="6">최근 6개월</option>
+<option value="12">최근 1년</option>
+<option value="24" selected>최근 2년</option>
+</select>
+<select id="filterType" aria-label="전월세 구분">
+<option value="all">전체</option>
+<option value="jeonse">전세</option>
+<option value="wolse">월세</option>
+</select>
+<button onclick="doSearch()">조회</button>
+</div>
+</div>
+<div class="section" id="tradeSection" style="display:none;">
+<h3>전월세 실거래 내역</h3>
+<div id="summaryBox" class="summary-box" style="display:none;"></div>
+<div class="tab-row" id="tabRow" style="display:none;">
+<button class="active" onclick="switchTab('all')">전체</button>
+<button onclick="switchTab('jeonse')">전세</button>
+<button onclick="switchTab('wolse')">월세</button>
+</div>
+<div id="tradeList"></div>
+<p id="tradeStatus" style="font-size:12px;color:#999;margin-top:8px;"></p>
+</div>
+<div class="notice">* 국토교통부 전월세 실거래가 공개시스템 기반. 신고 후 취소 건 포함 가능.<br>* 거래일 = 계약일 기준. 보증금/월세 단위: 만원.<br>* 월세 0원 = 전세 거래.</div>
+</div>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
+<script>
+var LAMBDA_URL='https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/';
+var LAWD_CD='11680';
+var selectedUmdNm='';
+var selectedJibun='';
+var allFilteredItems=[];
+var currentTab='all';
+
+var map=new kakao.maps.Map(document.getElementById('map'),{center:new kakao.maps.LatLng(37.4946,127.0625),level:5});
+var geocoder=new kakao.maps.services.Geocoder();
+var ps=new kakao.maps.services.Places();
+var marker=new kakao.maps.Marker({position:map.getCenter()});
+marker.setMap(map);
+
+kakao.maps.event.addListener(map,'click',function(e){
+  marker.setPosition(e.latLng);
+  geocoder.coord2Address(e.latLng.getLng(),e.latLng.getLat(),function(result,status){
+    if(status!==kakao.maps.services.Status.OK)return;
+    var addr=result[0].address;
+    var bldg=(result[0].road_address&&result[0].road_address.building_name)||'';
+    selectedUmdNm=addr.region_3depth_name||'';
+    selectedJibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!='0'?'-'+addr.sub_address_no:'');
+    showAptInfo(bldg||addr.address_name, addr.address_name);
+    geocoder.coord2RegionCode(e.latLng.getLng(),e.latLng.getLat(),function(rr,rs){if(rs===kakao.maps.services.Status.OK){for(var i=0;i<rr.length;i++){if(rr[i].region_type==="B"){LAWD_CD=rr[i].code.substring(0,5);break;}}}});
+  });
+});
+
+function searchAddress(){
+  var kw=document.getElementById('searchInput').value.trim();
+  if(!kw)return;
+  ps.keywordSearch(kw,function(data,status){
+    if(status!==kakao.maps.services.Status.OK){alert('검색 결과 없음');return;}
+    var html='<div style="max-height:150px;overflow-y:auto;">';
+    data.slice(0,8).forEach(function(p){
+      html+='<div onclick="selectPlace('+p.y+','+p.x+',\''+esc(p.place_name)+'\',\''+esc(p.address_name)+'\')" style="padding:8px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:12px;"><b>'+p.place_name+'</b><br><span style="color:#666;">'+p.address_name+'</span></div>';
+    });
+    document.getElementById('searchResults').innerHTML=html+'</div>';
+    document.getElementById('searchResults').style.display='block';
+  });
+}
+function selectPlace(lat,lng,name,address){
+  map.setCenter(new kakao.maps.LatLng(lat,lng));map.setLevel(3);
+  marker.setPosition(new kakao.maps.LatLng(lat,lng));
+  document.getElementById('searchResults').style.display='none';
+  geocoder.coord2Address(lng,lat,function(result,status){
+    if(status===kakao.maps.services.Status.OK){
+      var addr=result[0].address;
+      selectedUmdNm=addr.region_3depth_name||'';
+      selectedJibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!='0'?'-'+addr.sub_address_no:'');
+    }
+  });
+  geocoder.coord2RegionCode(lng,lat,function(rr,rs){if(rs===kakao.maps.services.Status.OK){for(var i=0;i<rr.length;i++){if(rr[i].region_type==="B"){LAWD_CD=rr[i].code.substring(0,5);break;}}}});
+  showAptInfo(name,address);
+}
+function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+document.getElementById('searchInput').addEventListener('keypress',function(e){if(e.key==='Enter')searchAddress();});
+
+function showAptInfo(name,address){
+  document.getElementById('aptName').textContent=name;
+  document.getElementById('aptAddress').textContent=address;
+  document.getElementById('aptSection').style.display='block';
+  document.getElementById('tradeSection').style.display='none';
+}
+
+function doSearch(){
+  var name=document.getElementById('aptName').textContent;
+  if(!name||name==='단지명'){alert('아파트를 먼저 선택하세요');return;}
+  var months=Number(document.getElementById('filterPeriod').value);
+  document.getElementById('tradeSection').style.display='block';
+  document.getElementById('tradeList').innerHTML='<p style="color:#666;">조회 중... ('+months+'개월)</p>';
+  document.getElementById('summaryBox').style.display='none';
+  document.getElementById('tabRow').style.display='none';
+  var allItems=[],done=0,now=new Date();
+  for(var i=0;i<months;i++){(function(idx){
+    var d=new Date(now.getFullYear(),now.getMonth()-idx,1);
+    var ym=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0');
+    var url=LAMBDA_URL+'?type=rent&LAWD_CD='+LAWD_CD+'&DEAL_YMD='+ym+'&pageNo=1&numOfRows=1000';
+    fetch(url).then(function(r){return r.text();}).then(function(xml){
+      var doc=(new DOMParser()).parseFromString(xml,'text/xml');
+      doc.querySelectorAll('item').forEach(function(el){
+        var o={};el.childNodes.forEach(function(n){if(n.nodeType===1)o[n.nodeName]=n.textContent;});
+        allItems.push(o);
+      });
+      done++;
+      if(done>=months)finishSearch(allItems,name);
+    }).catch(function(){done++;if(done>=months)finishSearch(allItems,name);});
+  })(i);}
+}
+
+function finishSearch(allItems,name){
+  // 지번(동+번지) 기반 필터링
+  var filtered=[];
+  if(selectedUmdNm && selectedJibun){
+    filtered=allItems.filter(function(it){
+      var umd=selectedUmdNm.replace(/[0-9]/g,'').trim();
+      return (it.umdNm||'').trim()===umd && (it.jibun||'').trim()===selectedJibun.trim();
+    });
+  }
+  // 지번 매칭 실패 시 이름으로 폴백
+  if(filtered.length===0){
+    var kw=name.replace(/아파트|단지|맨션|[0-9]+동|[0-9]+$|서울|강남구|서초구|송파구/g,"").trim();
+    kw=kw.replace(/^(대치동|도곡동|개포동|삼성동|압구정동|청담동|역삼동|논현동|일원동|수서동|서초동|반포동|잠원동|방배동|양재동)/,"").trim();
+    if(kw.length>=2){filtered=allItems.filter(function(it){var a=(it.aptNm||"").trim();return a.indexOf(kw)>=0||kw.indexOf(a)>=0;});}
+  }
+  filtered.sort(function(a,b){
+    var da=(a.dealYear||'')+String(a.dealMonth||'').padStart(2,'0')+String(a.dealDay||'').padStart(2,'0');
+    var db=(b.dealYear||'')+String(b.dealMonth||'').padStart(2,'0')+String(b.dealDay||'').padStart(2,'0');
+    return db.localeCompare(da);
+  });
+  allFilteredItems=filtered;
+  currentTab='all';
+  // 탭 초기화
+  document.querySelectorAll('#tabRow button').forEach(function(btn){btn.classList.remove('active');});
+  document.querySelector('#tabRow button:first-child').classList.add('active');
+  document.getElementById('tabRow').style.display='flex';
+  renderSummary(filtered);
+  renderTrades(filtered);
+}
+
+function switchTab(type){
+  currentTab=type;
+  document.querySelectorAll('#tabRow button').forEach(function(btn){btn.classList.remove('active');});
+  var btns=document.querySelectorAll('#tabRow button');
+  if(type==='all')btns[0].classList.add('active');
+  else if(type==='jeonse')btns[1].classList.add('active');
+  else btns[2].classList.add('active');
+
+  var items=allFilteredItems;
+  if(type==='jeonse')items=allFilteredItems.filter(function(it){return isJeonse(it);});
+  else if(type==='wolse')items=allFilteredItems.filter(function(it){return !isJeonse(it);});
+  renderTrades(items);
+}
+
+function isJeonse(it){
+  var monthly=Number((it.monthlyRent||it.monthlyRentAmount||'0').trim().replace(/,/g,''));
+  return monthly===0;
+}
+
+function renderSummary(items){
+  if(!items.length){document.getElementById('summaryBox').style.display='none';return;}
+  var jeonseItems=items.filter(function(it){return isJeonse(it);});
+  var wolseItems=items.filter(function(it){return !isJeonse(it);});
+
+  var jeonseAvg=0,wolseAvgDeposit=0,wolseAvgRent=0;
+  if(jeonseItems.length){
+    var sum=0;
+    jeonseItems.forEach(function(it){sum+=Number((it.deposit||'0').trim().replace(/,/g,''));});
+    jeonseAvg=Math.round(sum/jeonseItems.length);
+  }
+  if(wolseItems.length){
+    var sumD=0,sumR=0;
+    wolseItems.forEach(function(it){
+      sumD+=Number((it.deposit||'0').trim().replace(/,/g,''));
+      sumR+=Number((it.monthlyRent||it.monthlyRentAmount||'0').trim().replace(/,/g,''));
+    });
+    wolseAvgDeposit=Math.round(sumD/wolseItems.length);
+    wolseAvgRent=Math.round(sumR/wolseItems.length);
+  }
+
+  var html='<div class="row"><span class="label">전체 거래</span><span class="value">'+items.length+'건 (전세 '+jeonseItems.length+'건 / 월세 '+wolseItems.length+'건)</span></div>';
+  if(jeonseItems.length) html+='<div class="row"><span class="label">전세 평균 보증금</span><span class="value">'+formatPrice(jeonseAvg)+'</span></div>';
+  if(wolseItems.length) html+='<div class="row"><span class="label">월세 평균</span><span class="value">보증금 '+formatPrice(wolseAvgDeposit)+' / 월 '+wolseAvgRent.toLocaleString()+'만</span></div>';
+  document.getElementById('summaryBox').innerHTML=html;
+  document.getElementById('summaryBox').style.display='block';
+}
+
+function formatPrice(p){
+  if(p>=10000)return Math.floor(p/10000)+'억'+(p%10000?' '+(p%10000).toLocaleString()+'만':'');
+  return p.toLocaleString()+'만';
+}
+
+function renderTrades(items){
+  if(!items.length){document.getElementById('tradeList').innerHTML='<p style="color:#999;">거래 내역 없음</p>';document.getElementById('tradeStatus').textContent='';return;}
+  var filterType=document.getElementById('filterType').value;
+  if(filterType==='jeonse')items=items.filter(function(it){return isJeonse(it);});
+  else if(filterType==='wolse')items=items.filter(function(it){return !isJeonse(it);});
+
+  var html='';
+  items.forEach(function(it){
+    var dep=Number((it.deposit||'0').trim().replace(/,/g,''));
+    var monthly=Number((it.monthlyRent||it.monthlyRentAmount||'0').trim().replace(/,/g,''));
+    var jeonse=monthly===0;
+    var date=(it.dealYear||'')+'.'+String(it.dealMonth||'').padStart(2,'0')+'.'+String(it.dealDay||'').padStart(2,'0');
+
+    // 가격 표시
+    var priceHtml='';
+    if(jeonse){
+      priceHtml='<span class="badge badge-jeonse">전세</span><span class="price">'+formatPrice(dep)+'</span>';
+    } else {
+      priceHtml='<span class="badge badge-wolse">월세</span><span class="price">'+formatPrice(dep)+'<span class="monthly"> / 월 '+monthly.toLocaleString()+'만</span></span>';
+    }
+
+    // 계약유형 배지
+    var contractBadge='';
+    var ct=(it.contractType||it.cdealType||'').trim();
+    if(ct==='갱신'||ct==='갱신계약') contractBadge='<span class="badge badge-renewal">갱신</span>';
+    else if(ct==='신규'||ct==='신규계약') contractBadge='<span class="badge badge-new">신규</span>';
+
+    // 종전 계약 정보
+    var prevInfo='';
+    var preDep=Number((it.preDeposit||it.previousDeposit||'0').trim().replace(/,/g,''));
+    var preMonthly=Number((it.preMonthlyRent||it.previousMonthlyRent||'0').trim().replace(/,/g,''));
+    if(preDep>0){
+      if(preMonthly>0) prevInfo='종전: 보증금 '+formatPrice(preDep)+' / 월 '+preMonthly.toLocaleString()+'만';
+      else prevInfo='종전: '+formatPrice(preDep);
+    }
+
+    html+='<div class="trade-card">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;">'+priceHtml+'<span style="font-size:11px;color:#999;">'+date+'</span></div>';
+    html+='<div class="info">'+contractBadge+(it.aptNm||'')+' | 전용 '+(it.excluUseAr||'-')+'㎡ | '+(it.floor||'-')+'층 | '+(it.umdNm||'')+'</div>';
+    if(prevInfo) html+='<div class="contract-info">'+prevInfo+'</div>';
+    var term=(it.contractTerm||it.termOfContract||'').trim();
+    if(term) html+='<div class="contract-info">계약기간: '+term+'</div>';
+    html+='</div>';
+  });
+  document.getElementById('tradeList').innerHTML=html;
+  document.getElementById('tradeStatus').textContent='조회: '+items.length+'건 (최신순)';
+}
+</script>
+</body>
+</html>
