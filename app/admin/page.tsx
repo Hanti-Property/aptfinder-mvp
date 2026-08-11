@@ -190,6 +190,11 @@ export default function AdminDashboard() {
               <p className="text-xs font-semibold text-teal-800">건축물대장 API</p>
               <p className="text-[10px] text-teal-600">직접 조회</p>
             </a>
+            <a href="/rent_trade.html" target="_blank" className="bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+              <p className="text-lg">🏘️</p>
+              <p className="text-xs font-semibold text-indigo-800">전월세 실거래가</p>
+              <p className="text-[10px] text-indigo-600">지도 기반 조회</p>
+            </a>
           </div>
         </div>
 
