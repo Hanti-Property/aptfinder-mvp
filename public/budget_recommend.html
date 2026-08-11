@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 예산에 맞춤 아파트 추천 | AptFinder</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f7fa;color:#1a1a2e;line-height:1.6}
+.container{max-width:900px;margin:0 auto;padding:20px}
+header{text-align:center;padding:40px 0 30px}
+header h1{font-size:28px;font-weight:700;color:#1a1a2e;margin-bottom:8px}
+header p{font-size:15px;color:#666}
+.badge{display:inline-block;background:#e8f4fd;color:#0066cc;font-size:12px;font-weight:600;padding:4px 10px;border-radius:12px;margin-bottom:12px}
+.card{background:#fff;border-radius:16px;padding:30px;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card h2{font-size:20px;margin-bottom:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-group{display:flex;flex-direction:column;gap:8px}
+.form-group.full-width{grid-column:1/-1}
+.form-group label{font-size:14px;font-weight:600;color:#333}
+.required{color:#e74c3c;font-size:11px;font-weight:400}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<div class="badge">AptFinder 분석 모듈</div>
+<h1>💰 내 예산에 맞춤 아파트 추천</h1>
+<p>강남3구(강남·서초·송파) 아파트를 예산과 조건에 맞춰 분석합니다</p>
+</header>
+<section id="input-section" class="card">
+<h2>📋 조건 입력</h2>
+<div class="form-grid">
+<div class="form-group full-width">
+<label>총 예산 (억 원) <span class="required">*필수</span></label>
+<div class="budget-input">
+<input type="range" id="budget-slider" min="5" max="80" value="30" step="1">
+<div class="budget-display"><input type="number" id="budget-value" value="30" min="5" max="80"> 억 원</div>
+</div>
+<div class="budget-range-label"><span>5억</span><span>80억</span></div>
+</div>
+<div class="form-group">
+<label>거래 유형 <span class="required">*필수</span></label>
+<div class="toggle-group">
+<button class="toggle-btn active" data-value="매매" onclick="setTx(this)">매매</button>
+<button class="toggle-btn" data-value="전세" onclick="setTx(this)">전세</button>
+</div>
+</div>
+<div class="form-group">
+<label>희망 지역</label>
+<div class="checkbox-group" id="district-checks">
+<label class="checkbox"><input type="checkbox" value="강남구" checked> 강남구</label>
+<label class="checkbox"><input type="checkbox" value="서초구" checked> 서초구</label>
+<label class="checkbox"><input type="checkbox" value="송파구" checked> 송파구</label>
+</div>
+</div>
+<div class="form-group">
+<label>전용면적</label>
+<select id="area-select">
+<option value="all">전체</option>
+<option value="small">59㎡ 이하</option>
+<option value="medium">59~84㎡</option>
+<option value="large">84~115㎡</option>
+<option value="xlarge">115㎡ 이상</option>
+</select>
+</div>
+<div class="form-group">
+<label>준공년도</label>
+<select id="built-select">
+<option value="0">무관</option>
+<option value="5">5년 이내 (신축)</option>
+<option value="10">10년 이내</option>
+<option value="20">20년 이내</option>
+</select>
+</div>
+<div class="form-group">
+<label>단지 유형</label>
+<div class="checkbox-group" id="type-checks">
+<label class="checkbox"><input type="checkbox" value="일반" checked> 일반</label>
+<label class="checkbox"><input type="checkbox" value="재건축" checked> 재건축</label>
+</div>
+</div>
+<div class="form-group">
+<label>추천 우선순위</label>
+<select id="priority-select">
+<option value="투자가치">투자가치 우선</option>
+<option value="신축">신축·대단지 우선</option>
+<option value="재건축">재건축 잠재력 우선</option>
+<option value="가성비">가성비 (전세가율) 우선</option>
+</select>
+</div>
+</div>
+<button id="recommend-btn" onclick="runRecommendation()">🔍 맞춤 아파트 추천받기</button>
+</section>
+
+<section id="result-section" style="display:none">
+<div class="result-header"><h2>🏆 추천 결과</h2><p id="result-summary"></p></div>
+<div class="comparison-table" id="comparison-table"></div>
+<div id="recommendation-cards"></div>
+<div class="disclaimer"><p>⚠️ 본 추천은 과거 실거래 데이터 및 공공정보 기반 참고자료이며, 투자 권유가 아닙니다. 실제 투자 판단은 전문가 상담 후 본인 책임하에 결정하시기 바랍니다. 가격 데이터 출처: 국토부 실거래가 공개시스템(시뮬레이션 기준).</p></div>
+<div class="cta-section"><p>추천 단지에 대해 더 깊은 분석이 필요하신가요?</p>
+<button class="cta-btn" onclick="alert('상담 신청 기능은 실서비스에서 제공됩니다.')">📞 전문가 상담 신청</button></div>
+</section>
+</div>
+<style>
+.budget-input{display:flex;align-items:center;gap:16px}
+.budget-input input[type="range"]{flex:1;height:6px;-webkit-appearance:none;background:#e0e7ef;border-radius:3px;outline:none}
+.budget-input input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#0066cc;cursor:pointer;box-shadow:0 2px 6px rgba(0,102,204,.3)}
+.budget-display{display:flex;align-items:center;gap:6px;font-size:18px;font-weight:700;color:#0066cc;white-space:nowrap}
+.budget-display input{width:60px;text-align:center;border:2px solid #0066cc;border-radius:8px;font-size:18px;font-weight:700;color:#0066cc;padding:4px}
+.budget-range-label{display:flex;justify-content:space-between;font-size:12px;color:#999;margin-top:-4px}
+.toggle-group{display:flex;gap:8px}
+.toggle-btn{padding:8px 20px;border:2px solid #e0e7ef;border-radius:8px;background:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.toggle-btn.active{background:#0066cc;color:#fff;border-color:#0066cc}
+.checkbox-group{display:flex;gap:12px;flex-wrap:wrap}
+.checkbox{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.checkbox input{width:16px;height:16px;accent-color:#0066cc}
+select{padding:10px 12px;border:2px solid #e0e7ef;border-radius:8px;font-size:14px;background:#fff;cursor:pointer}
+select:focus{border-color:#0066cc;outline:none}
+#recommend-btn{width:100%;margin-top:24px;padding:16px;background:linear-gradient(135deg,#0066cc,#0052a3);color:#fff;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;transition:transform .1s,box-shadow .2s;box-shadow:0 4px 14px rgba(0,102,204,.3)}
+#recommend-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,102,204,.4)}
+.result-header{margin-bottom:20px}
+.result-header h2{font-size:22px;margin-bottom:6px}
+.result-header p{font-size:14px;color:#666}
+.comparison-table{background:#fff;border-radius:12px;overflow-x:auto;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.comparison-table table{width:100%;border-collapse:collapse;font-size:13px}
+.comparison-table th{background:#f0f4f8;padding:12px 10px;text-align:left;font-weight:600;color:#555;white-space:nowrap}
+.comparison-table td{padding:12px 10px;border-top:1px solid #f0f0f0;white-space:nowrap}
+.comparison-table tr:hover{background:#f8fbff}
+.rank-badge{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;font-size:12px;font-weight:700;color:#fff}
+.rank-1{background:#f4b400}.rank-2{background:#9e9e9e}.rank-3{background:#cd7f32}.rank-other{background:#bbb}
+.score-bar{display:inline-block;height:6px;border-radius:3px;background:#0066cc;margin-right:6px;vertical-align:middle}
+.rec-card{background:#fff;border-radius:14px;padding:24px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);border-left:4px solid #0066cc;transition:transform .15s}
+.rec-card:hover{transform:translateX(4px)}
+.rec-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.rec-card-title{font-size:18px;font-weight:700}
+.rec-card-score{font-size:24px;font-weight:800;color:#0066cc}
+.rec-card-location{font-size:13px;color:#888;margin-top:2px}
+.rec-card-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0;padding:14px 0;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0}
+.stat-item{display:flex;flex-direction:column;gap:2px}
+.stat-label{font-size:11px;color:#999}
+.stat-value{font-size:14px;font-weight:600}
+.stat-value.up{color:#e74c3c}
+.rec-card-highlight{background:#f8fbff;border-radius:8px;padding:12px 14px;margin-top:12px}
+.rec-card-highlight p{font-size:13px;color:#444}
+.rec-card-highlight .label{font-size:12px;font-weight:700;color:#0066cc;margin-bottom:4px}
+.rec-card-tags{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.tag{font-size:11px;padding:3px 8px;border-radius:4px;font-weight:600}
+.tag-recon{background:#fff3e0;color:#e65100}
+.tag-new{background:#e3f2fd;color:#1565c0}
+.tag-big{background:#f3e5f5;color:#7b1fa2}
+.tag-value{background:#fce4ec;color:#c62828}
+.disclaimer{background:#fffde7;border:1px solid #fff9c4;border-radius:10px;padding:14px 18px;margin:24px 0}
+.disclaimer p{font-size:12px;color:#666}
+.cta-section{text-align:center;padding:30px 0}
+.cta-section p{font-size:15px;color:#555;margin-bottom:14px}
+.cta-btn{padding:14px 32px;background:#16a34a;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.3)}
+.cta-btn:hover{background:#15803d}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr}.container{padding:12px}header h1{font-size:22px}.rec-card-stats{grid-template-columns:1fr 1fr}}
+</style>
+<script>
+// ============================================================
+// 강남3구 단지 데이터 (100+)
+// 필드: name, district, dong, units(세대수), built(준공), type(일반/재건축),
+//       area(대표 전용면적㎡), price(매매 시세, 100단위=1억), price3y(3년전),
+//       jeonse(전세 시세), recon(재건축단계), highlight(추천포인트)
+// 참고: 가격은 국토부 실거래가 시뮬레이션 기준 (프로토타입용)
+// 방수/욕실수: 건축물대장 API 연동 전까지 미표시 (7.0-1 원칙)
+// ============================================================
+const D = [
+// ─── 강남구 대치동 ───
+{name:"은마아파트",district:"강남구",dong:"대치동",units:4424,built:1979,type:"재건축",area:76,price:2850,price3y:2410,jeonse:1200,recon:"사업시행인가",highlight:"강남 대표 재건축. 사업시행인가 통과, 사업 속도 가시성 높음."},
+{name:"미도아파트",district:"강남구",dong:"대치동",units:2436,built:1983,type:"재건축",area:79,price:2650,price3y:2200,jeonse:1050,recon:"추진위승인",highlight:"은마 인접 재건축 대어. 대치동 학군+재건축 이중 프리미엄."},
+{name:"래미안대치팰리스",district:"강남구",dong:"대치동",units:1608,built:2015,type:"일반",area:84,price:3200,price3y:2780,jeonse:1450,recon:null,highlight:"대치동 신축 대장주. 학원가 접근 최상, 시세 선도."},
+{name:"대치아이파크",district:"강남구",dong:"대치동",units:1608,built:2008,type:"일반",area:84,price:2700,price3y:2350,jeonse:1200,recon:null,highlight:"대치동 중심 입지. 학원가 도보권, 가격 대비 면적 우수."},
+{name:"선경1차아파트",district:"강남구",dong:"대치동",units:990,built:1983,type:"재건축",area:79,price:2500,price3y:2050,jeonse:950,recon:"추진위",highlight:"대치동 재건축 유망주. 은마 인접, 동일 생활권 수혜."},
+{name:"선경2차아파트",district:"강남구",dong:"대치동",units:510,built:1983,type:"재건축",area:66,price:2100,price3y:1700,jeonse:820,recon:"추진위",highlight:"소규모 재건축. 대치 학원가 도보 3분, 진입가 합리적."},
+{name:"한보미도맨션1차",district:"강남구",dong:"대치동",units:480,built:1983,type:"재건축",area:72,price:2200,price3y:1800,jeonse:850,recon:"추진위",highlight:"미도 인접 재건축. 통합 재건축 시 시너지 기대."},
+{name:"대치주공아파트",district:"강남구",dong:"대치동",units:1386,built:1980,type:"재건축",area:66,price:2300,price3y:1900,jeonse:870,recon:"추진",highlight:"1,386세대 대규모 재건축 가능 부지. 대치동 핵심 입지."},
+{name:"대치삼성래미안",district:"강남구",dong:"대치동",units:588,built:2003,type:"일반",area:84,price:2350,price3y:2000,jeonse:1050,recon:null,highlight:"학원가 최근접. 소규모 단지지만 입지 프리미엄."},
+{name:"래미안대치하이스턴",district:"강남구",dong:"대치동",units:340,built:2015,type:"일반",area:59,price:2000,price3y:1650,jeonse:950,recon:null,highlight:"2015년 준공 신축급. 59㎡ 컴팩트 설계, 실거주 적합."},
+{name:"대치SK뷰",district:"강남구",dong:"대치동",units:320,built:2005,type:"일반",area:84,price:2150,price3y:1800,jeonse:950,recon:null,highlight:"선릉로 접근성. 수인분당선 한티역 도보권."},
+{name:"대치쌍용1차",district:"강남구",dong:"대치동",units:564,built:1993,type:"일반",area:84,price:2100,price3y:1750,jeonse:900,recon:null,highlight:"은마 인접 생활권. 준공 30년 초과, 향후 재건축 가능성."},
+{name:"대치현대아파트",district:"강남구",dong:"대치동",units:464,built:1980,type:"재건축",area:72,price:2150,price3y:1750,jeonse:820,recon:"추진",highlight:"역삼로변 재건축 추진. 대치동 내 합리적 진입가."},
+{name:"개포우성1차",district:"강남구",dong:"대치동",units:600,built:1983,type:"재건축",area:72,price:2200,price3y:1800,jeonse:830,recon:"추진위예정",highlight:"대치·개포 경계 재건축. 양재천 접근+학군 겸비."},
+{name:"대치럭키아파트",district:"강남구",dong:"대치동",units:320,built:1983,type:"재건축",area:66,price:1900,price3y:1550,jeonse:750,recon:"추진",highlight:"대치동 내 저평가 재건축. 소규모 통합 개발 기대."},
+// ─── 강남구 도곡·역삼동 ───
+{name:"도곡렉슬",district:"강남구",dong:"도곡동",units:3002,built:2006,type:"일반",area:84,price:2450,price3y:2050,jeonse:1100,recon:null,highlight:"3,002세대 대단지. 한티역 도보 3분, 생활 인프라 최상."},
+{name:"타워팰리스1차",district:"강남구",dong:"도곡동",units:892,built:2002,type:"일반",area:131,price:4500,price3y:3800,jeonse:2000,recon:null,highlight:"초고층 랜드마크. 대형 평형 프리미엄 주거."},
+{name:"타워팰리스2차",district:"강남구",dong:"도곡동",units:816,built:2003,type:"일반",area:131,price:4200,price3y:3500,jeonse:1900,recon:null,highlight:"도곡동 초고층. 남산·한강 조망 프리미엄."},
+{name:"타워팰리스3차",district:"강남구",dong:"도곡동",units:786,built:2004,type:"일반",area:131,price:4000,price3y:3400,jeonse:1800,recon:null,highlight:"3차 완결. 도곡동 랜드마크 클러스터."},
+{name:"도곡동아아파트",district:"강남구",dong:"도곡동",units:1032,built:1986,type:"재건축",area:79,price:2100,price3y:1700,jeonse:830,recon:"추진",highlight:"도곡동 대규모 재건축 추진. 매봉역 접근성 양호."},
+{name:"도곡한신아파트",district:"강남구",dong:"도곡동",units:900,built:1985,type:"재건축",area:72,price:1950,price3y:1600,jeonse:780,recon:"추진",highlight:"논현로변 재건축. 도곡동 내 합리적 가격대."},
+{name:"도곡쌍용아파트",district:"강남구",dong:"도곡동",units:600,built:1987,type:"일반",area:84,price:1800,price3y:1500,jeonse:850,recon:null,highlight:"매봉역 도보권. 도곡동 내 실거주 가성비."},
+{name:"역삼래미안",district:"강남구",dong:"역삼동",units:1050,built:2005,type:"일반",area:84,price:2200,price3y:1850,jeonse:1000,recon:null,highlight:"역삼역 초역세권. 강남업무지구 접근 최상."},
+{name:"역삼아이파크",district:"강남구",dong:"역삼동",units:330,built:2004,type:"일반",area:84,price:1950,price3y:1600,jeonse:900,recon:null,highlight:"역삼동 주거지역. 강남역 생활권, 직주근접."},
+{name:"역삼푸르지오",district:"강남구",dong:"역삼동",units:250,built:2007,type:"일반",area:84,price:1900,price3y:1550,jeonse:880,recon:null,highlight:"테헤란로 인접 주거. 업무+주거 복합 수요."},
+// ─── 강남구 개포동 ───
+{name:"개포자이프레지던스",district:"강남구",dong:"개포동",units:3375,built:2023,type:"일반",area:84,price:3100,price3y:2600,jeonse:1500,recon:null,highlight:"2023 신축 3,375세대. 개포주공4단지 재건축 완료."},
+{name:"디에이치아너힐즈",district:"강남구",dong:"개포동",units:1320,built:2020,type:"일반",area:84,price:2900,price3y:2400,jeonse:1350,recon:null,highlight:"개포동 프리미엄 신축. 양재천 조망, 쾌적한 주거."},
+{name:"개포래미안포레스트",district:"강남구",dong:"개포동",units:2296,built:2021,type:"일반",area:84,price:2800,price3y:2300,jeonse:1300,recon:null,highlight:"2,296세대 대단지 신축. 양재천 라이프스타일."},
+{name:"래미안블레스티지",district:"강남구",dong:"개포동",units:1957,built:2021,type:"일반",area:84,price:2750,price3y:2250,jeonse:1280,recon:null,highlight:"개포주공3단지 재건축 완료. 대단지+신축."},
+{name:"디에이치퍼스티어아이파크",district:"강남구",dong:"개포동",units:6702,built:2024,type:"일반",area:84,price:3000,price3y:2500,jeonse:1400,recon:null,highlight:"6,702세대 메가단지. 2024년 준공, 강남 최대 규모."},
+{name:"개포주공5단지",district:"강남구",dong:"개포동",units:1800,built:1983,type:"재건축",area:66,price:2400,price3y:1950,jeonse:900,recon:"추진",highlight:"대규모 재건축 추진 단지. 개포동 미래가치 투자처."},
+{name:"개포주공9단지",district:"강남구",dong:"개포동",units:1600,built:1982,type:"재건축",area:66,price:2300,price3y:1850,jeonse:870,recon:"추진",highlight:"1,600세대 재건축 추진. 개포동 내 진입가 합리적."},
+{name:"개포주공6단지",district:"강남구",dong:"개포동",units:560,built:1983,type:"재건축",area:52,price:1800,price3y:1450,jeonse:700,recon:"추진",highlight:"소형 평형 재건축. 소액 투자 진입점."},
+// ─── 강남구 압구정·청담 ───
+{name:"압구정현대1차",district:"강남구",dong:"압구정동",units:1100,built:1976,type:"재건축",area:109,price:5500,price3y:4500,jeonse:1800,recon:"정비구역지정",highlight:"압구정 재건축 핵심. 한강 조망+재건축 프리미엄 극대화."},
+{name:"압구정현대2차",district:"강남구",dong:"압구정동",units:600,built:1977,type:"재건축",area:96,price:4800,price3y:3900,jeonse:1500,recon:"정비구역지정",highlight:"압구정 한강변. 재건축 후 최고가 예상 지역."},
+{name:"압구정현대7차",district:"강남구",dong:"압구정동",units:798,built:1981,type:"재건축",area:96,price:4600,price3y:3800,jeonse:1450,recon:"정비구역지정",highlight:"한강변 재건축. 입지+브랜드 가치 최상위."},
+{name:"신현대9차",district:"강남구",dong:"압구정동",units:1008,built:1982,type:"재건축",area:84,price:4200,price3y:3500,jeonse:1350,recon:"정비구역지정",highlight:"1,000세대 규모 재건축. 압구정로변 핵심 입지."},
+{name:"신현대11차",district:"강남구",dong:"압구정동",units:1122,built:1983,type:"재건축",area:84,price:4000,price3y:3300,jeonse:1300,recon:"정비구역지정",highlight:"압구정 최대 규모 단지. 재건축 사업성 우수."},
+{name:"한양아파트(압구정)",district:"강남구",dong:"압구정동",units:2310,built:1978,type:"재건축",area:96,price:4500,price3y:3700,jeonse:1400,recon:"추진",highlight:"2,310세대 대단지 재건축. 압구정 한강 생활권."},
+{name:"미성1차(압구정)",district:"강남구",dong:"압구정동",units:660,built:1978,type:"재건축",area:72,price:3800,price3y:3100,jeonse:1200,recon:"추진",highlight:"압구정 소형 재건축. 한강 접근+도산공원 생활권."},
+{name:"청담르엘",district:"강남구",dong:"청담동",units:1261,built:2024,type:"일반",area:84,price:4200,price3y:3500,jeonse:2000,recon:null,highlight:"2024 청담 신축. 한강조망+초고가 주거 클러스터."},
+{name:"청담래미안로이뷰",district:"강남구",dong:"청담동",units:352,built:2015,type:"일반",area:84,price:3500,price3y:2900,jeonse:1600,recon:null,highlight:"청담 프리미엄 주거. 도산대로 접근 양호."},
+// ─── 강남구 삼성·기타 ───
+{name:"래미안라클래시",district:"강남구",dong:"삼성동",units:1300,built:2024,type:"일반",area:84,price:3400,price3y:2800,jeonse:1600,recon:null,highlight:"2024 삼성동 신축 대장. 봉은사역 도보, 프리미엄 입지."},
+{name:"아이파크삼성",district:"강남구",dong:"삼성동",units:534,built:2004,type:"일반",area:84,price:2500,price3y:2100,jeonse:1100,recon:null,highlight:"삼성역 도보권. 코엑스·현대백화점 생활권."},
+{name:"힐스테이트삼성",district:"강남구",dong:"삼성동",units:312,built:2005,type:"일반",area:84,price:2300,price3y:1900,jeonse:1050,recon:null,highlight:"삼성동 주거지역. GBC 개발 수혜 기대."},
+{name:"일원삼성래미안",district:"강남구",dong:"일원동",units:990,built:2001,type:"일반",area:84,price:1700,price3y:1400,jeonse:800,recon:null,highlight:"수서역 SRT 접근. 강남 내 합리적 가격대."},
+{name:"까치마을신동아",district:"강남구",dong:"일원동",units:980,built:1993,type:"일반",area:84,price:1500,price3y:1250,jeonse:720,recon:null,highlight:"일원동 대단지. 강남 내 15억대 진입 가능."},
+{name:"수서삼성래미안",district:"강남구",dong:"수서동",units:480,built:2003,type:"일반",area:84,price:1550,price3y:1280,jeonse:750,recon:null,highlight:"수서역 초역세권. SRT+3호선 더블 접근."},
+// ─── 서초구 반포동 ───
+{name:"아크로리버파크",district:"서초구",dong:"반포동",units:1612,built:2016,type:"일반",area:84,price:4800,price3y:4000,jeonse:2200,recon:null,highlight:"반포 대장주. 한강조망+신반포역 초역세권."},
+{name:"래미안원베일리",district:"서초구",dong:"반포동",units:2990,built:2023,type:"일반",area:84,price:4500,price3y:3700,jeonse:2100,recon:null,highlight:"2023 반포 신축 대장. 2,990세대+한강조망."},
+{name:"반포래미안아이파크",district:"서초구",dong:"반포동",units:2091,built:2025,type:"일반",area:84,price:4600,price3y:3800,jeonse:2200,recon:null,highlight:"2025 최신축. 반포주공1단지 재건축, 한강 최전선."},
+{name:"반포자이",district:"서초구",dong:"반포동",units:3410,built:2009,type:"일반",area:84,price:3800,price3y:3200,jeonse:1700,recon:null,highlight:"반포 3,410세대 대단지. 고속터미널역, 생활편의 최상."},
+{name:"래미안퍼스티지",district:"서초구",dong:"반포동",units:2444,built:2009,type:"일반",area:84,price:3600,price3y:3000,jeonse:1600,recon:null,highlight:"신반포역 대단지. 한강 근접+서초 학군."},
+{name:"반포힐스테이트",district:"서초구",dong:"반포동",units:760,built:2012,type:"일반",area:84,price:3400,price3y:2850,jeonse:1550,recon:null,highlight:"한강변 프리미엄. 센트럴파크 생활권."},
+{name:"반포주공1단지(3주구)",district:"서초구",dong:"반포동",units:2180,built:1973,type:"재건축",area:82,price:4200,price3y:3400,jeonse:1500,recon:"관리처분인가",highlight:"반포 재건축 최상위. 관리처분 단계, 한강 조망 확정."},
+{name:"신반포자이",district:"서초구",dong:"반포동",units:607,built:2018,type:"일반",area:84,price:3500,price3y:2900,jeonse:1650,recon:null,highlight:"신반포역 도보 1분. 소규모 프리미엄 신축."},
+{name:"반포센트레빌아스테리움",district:"서초구",dong:"반포동",units:757,built:2020,type:"일반",area:84,price:3300,price3y:2700,jeonse:1550,recon:null,highlight:"2020 준공. 반포대로변 접근성 양호."},
+{name:"래미안반포팰리스",district:"서초구",dong:"반포동",units:292,built:2010,type:"일반",area:84,price:3000,price3y:2500,jeonse:1400,recon:null,highlight:"신반포역 인접. 소규모지만 반포 생활권 완벽 향유."},
+// ─── 서초구 잠원·서초·방배 ───
+{name:"잠원래미안",district:"서초구",dong:"잠원동",units:620,built:2008,type:"일반",area:84,price:2800,price3y:2350,jeonse:1300,recon:null,highlight:"잠원역 초역세권. 신사동 가로수길 생활권."},
+{name:"신반포한신리버파크",district:"서초구",dong:"잠원동",units:508,built:1979,type:"재건축",area:84,price:3200,price3y:2600,jeonse:1200,recon:"추진위",highlight:"잠원동 한강변 재건축. 한강 조망 확정 부지."},
+{name:"서초래미안리더스원",district:"서초구",dong:"서초동",units:1317,built:2024,type:"일반",area:84,price:3200,price3y:2650,jeonse:1500,recon:null,highlight:"2024 서초동 신축. 교대역 역세권, 법조타운 인접."},
+{name:"래미안서초에스티지S",district:"서초구",dong:"서초동",units:830,built:2024,type:"일반",area:59,price:2400,price3y:1950,jeonse:1200,recon:null,highlight:"서초역 도보 3분. 59㎡ 신축, 실거주+투자 겸용."},
+{name:"서초그랑자이",district:"서초구",dong:"서초동",units:680,built:2021,type:"일반",area:84,price:2900,price3y:2400,jeonse:1350,recon:null,highlight:"남부터미널역 인접. 서초동 신축 프리미엄."},
+{name:"서초우성1차",district:"서초구",dong:"서초동",units:900,built:1984,type:"재건축",area:79,price:2300,price3y:1900,jeonse:900,recon:"추진",highlight:"서초역 인접 재건축. 교통+학군+재건축 3중 수혜."},
+{name:"래미안에스티움(서초)",district:"서초구",dong:"서초동",units:654,built:2018,type:"일반",area:59,price:2100,price3y:1750,jeonse:1050,recon:null,highlight:"교대역 도보. 전세가율 높아 갭투자 유리."},
+{name:"방배그랑자이",district:"서초구",dong:"방배동",units:1320,built:2024,type:"일반",area:84,price:2750,price3y:2200,jeonse:1300,recon:null,highlight:"2024 방배동 신축. 사당+이수 더블 역세권."},
+{name:"방배삼익아파트",district:"서초구",dong:"방배동",units:1100,built:1981,type:"재건축",area:72,price:2200,price3y:1800,jeonse:850,recon:"추진위",highlight:"방배동 대규모 재건축. 내방역 역세권, 미래가치."},
+{name:"방배아트자이",district:"서초구",dong:"방배동",units:540,built:2019,type:"일반",area:84,price:2400,price3y:2000,jeonse:1150,recon:null,highlight:"방배역 도보. 서리풀공원 접근, 쾌적 주거."},
+{name:"서초푸르지오써밋",district:"서초구",dong:"서초동",units:386,built:2020,type:"일반",area:84,price:2700,price3y:2200,jeonse:1250,recon:null,highlight:"서초역 인접 신축. 법조타운 직주근접 수요."},
+// ─── 송파구 잠실 ───
+{name:"잠실엘스",district:"송파구",dong:"잠실동",units:5678,built:2008,type:"일반",area:84,price:2700,price3y:2300,jeonse:1200,recon:null,highlight:"5,678세대 메가단지. 잠실 생활 인프라 완벽, 안정적 시세."},
+{name:"리센츠",district:"송파구",dong:"잠실동",units:3564,built:2008,type:"일반",area:84,price:2650,price3y:2250,jeonse:1180,recon:null,highlight:"석촌호수+롯데월드타워 생활권. 3,564세대 대단지."},
+{name:"트리지움",district:"송파구",dong:"잠실동",units:3696,built:2008,type:"일반",area:84,price:2600,price3y:2200,jeonse:1150,recon:null,highlight:"잠실주공3단지 재건축 완료. 송파대로 접근성."},
+{name:"레이크팰리스",district:"송파구",dong:"잠실동",units:2678,built:2008,type:"일반",area:84,price:2550,price3y:2150,jeonse:1120,recon:null,highlight:"석촌호수 조망. 호수공원 도보 1분 쾌적 주거."},
+{name:"파크리오",district:"송파구",dong:"잠실동",units:6864,built:2008,type:"일반",area:84,price:2650,price3y:2200,jeonse:1180,recon:null,highlight:"6,864세대 메가단지. 종합운동장역 초역세권."},
+{name:"잠실래미안아이파크",district:"송파구",dong:"잠실동",units:5765,built:2024,type:"일반",area:84,price:3000,price3y:2450,jeonse:1450,recon:null,highlight:"2024 잠실 최신축. 5,765세대+프리미엄 커뮤니티."},
+{name:"잠실주공5단지",district:"송파구",dong:"잠실동",units:3930,built:1978,type:"재건축",area:76,price:2800,price3y:2300,jeonse:1000,recon:"관리처분인가",highlight:"잠실 재건축 대장. 관리처분 단계, 입주 후 시세 급등 기대."},
+{name:"잠실롯데캐슬골드",district:"송파구",dong:"신천동",units:682,built:2008,type:"일반",area:84,price:2400,price3y:2000,jeonse:1080,recon:null,highlight:"잠실새내역 초역세권. 롯데월드몰 도보."},
+// ─── 송파구 송파·가락·문정·방이 ───
+{name:"헬리오시티",district:"송파구",dong:"송파동",units:9510,built:2018,type:"일반",area:84,price:2500,price3y:2100,jeonse:1100,recon:null,highlight:"국내 최대 9,510세대. 생활 자족 도시, 가성비 최강."},
+{name:"올림픽선수기자촌",district:"송파구",dong:"방이동",units:5540,built:1988,type:"재건축",area:84,price:2300,price3y:1900,jeonse:950,recon:"추진위",highlight:"올림픽공원 앞 5,540세대. 대규모 재건축 기대."},
+{name:"가락쌍용1차",district:"송파구",dong:"가락동",units:1100,built:1984,type:"재건축",area:72,price:1900,price3y:1550,jeonse:780,recon:"추진",highlight:"가락시장역 역세권 재건축. 강남3구 내 합리적 진입가."},
+{name:"문정래미안",district:"송파구",dong:"문정동",units:950,built:2006,type:"일반",area:84,price:1800,price3y:1500,jeonse:900,recon:null,highlight:"문정법조타운 인접. 8호선 역세권, 강남3구 최저 진입가."},
+{name:"가락금호어울림",district:"송파구",dong:"가락동",units:420,built:2005,type:"일반",area:84,price:1650,price3y:1350,jeonse:800,recon:null,highlight:"가락시장역 도보 3분. 강남3구 진입 최저가."},
+{name:"잠실한신",district:"송파구",dong:"잠실동",units:550,built:1979,type:"재건축",area:66,price:2200,price3y:1800,jeonse:850,recon:"추진",highlight:"잠실역 인접 재건축. 소규모이나 입지 프리미엄 확실."},
+{name:"장미아파트(잠실)",district:"송파구",dong:"신천동",units:1500,built:1979,type:"재건축",area:79,price:2500,price3y:2050,jeonse:950,recon:"추진위",highlight:"잠실새내역 재건축. 1,500세대 규모 사업성 양호."},
+{name:"가락현대아파트",district:"송파구",dong:"가락동",units:760,built:1986,type:"재건축",area:66,price:1750,price3y:1400,jeonse:700,recon:"추진",highlight:"가락동 재건축. 3호선+8호선 접근, 저가 진입."},
+{name:"송파래미안",district:"송파구",dong:"송파동",units:620,built:2007,type:"일반",area:84,price:1850,price3y:1530,jeonse:870,recon:null,highlight:"송파역 도보. 헬리오시티 인접 생활권 공유."},
+{name:"문정래미안2차",district:"송파구",dong:"문정동",units:420,built:2008,type:"일반",area:84,price:1750,price3y:1450,jeonse:850,recon:null,highlight:"문정역 도보 3분. 법조타운 직주근접, 가성비."},
+{name:"가락삼성래미안",district:"송파구",dong:"가락동",units:380,built:2003,type:"일반",area:84,price:1700,price3y:1400,jeonse:820,recon:null,highlight:"가락시장역 접근. 저가대 강남3구 실거주 적합."},
+{name:"잠실아이파크",district:"송파구",dong:"신천동",units:500,built:2008,type:"일반",area:84,price:2350,price3y:1950,jeonse:1050,recon:null,highlight:"잠실새내역 인접. 롯데월드 생활권, 안정적 시세."},
+{name:"송파파크데일",district:"송파구",dong:"송파동",units:800,built:2007,type:"일반",area:84,price:1900,price3y:1570,jeonse:900,recon:null,highlight:"8호선 역세권. 헬리오시티와 함께 송파 핵심 생활권."},
+{name:"잠실우성1차",district:"송파구",dong:"잠실동",units:480,built:1980,type:"재건축",area:72,price:2100,price3y:1700,jeonse:800,recon:"추진",highlight:"잠실역 인접 재건축 추진. 잠실 생활권 핵심."},
+];
+
+// ============================================================
+const currentYear = 2026;
+let txType = "매매";
+
+const slider = document.getElementById('budget-slider');
+const budgetInput = document.getElementById('budget-value');
+slider.addEventListener('input', () => { budgetInput.value = slider.value; });
+budgetInput.addEventListener('input', () => { slider.value = budgetInput.value; });
+
+function setTx(el) {
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  txType = el.dataset.value;
+}
+
+function runRecommendation() {
+  const budget = parseInt(budgetInput.value) * 100; // 100단위=1억
+  const districts = [...document.querySelectorAll('#district-checks input:checked')].map(c=>c.value);
+  const areaKey = document.getElementById('area-select').value;
+  const builtWithin = parseInt(document.getElementById('built-select').value);
+  const types = [...document.querySelectorAll('#type-checks input:checked')].map(c=>c.value);
+  const priority = document.getElementById('priority-select').value;
+
+  const areaRanges = {all:[0,999],small:[0,59],medium:[59,84],large:[84,115],xlarge:[115,999]};
+  const [aMin,aMax] = areaRanges[areaKey];
+  const minBuilt = builtWithin > 0 ? currentYear - builtWithin : 0;
+
+  // 1) 하드 필터
+  let list = D.filter(c => {
+    if (!districts.includes(c.district)) return false;
+    if (!types.includes(c.type)) return false;
+    const p = txType==="매매" ? c.price : c.jeonse;
+    if (p > budget * 1.05 || p < budget * 0.4) return false;
+    if (c.area < aMin || c.area > aMax) return false;
+    if (c.built < minBuilt) return false;
+    return true;
+  });
+
+  // 2) 점수화
+  list = list.map(c => {
+    const p = txType==="매매" ? c.price : c.jeonse;
+    // 가격 적합도 (30점) — 예산에 딱 맞을수록 고점
+    const priceFit = Math.max(0, 30 * (1 - Math.abs(budget - p) / budget));
+    // 투자가치 (30점) — 3년 상승률 + 재건축 가점
+    const growth = ((c.price - c.price3y) / c.price3y) * 100;
+    let invest = Math.min(25, growth * 1.0);
+    if (c.type==="재건축") invest += 3;
+    if (c.recon==="사업시행인가"||c.recon==="관리처분인가") invest += 2;
+    invest = Math.min(30, invest);
+    // 인프라 (20점) — 세대수 + 신축
+    let infra = 0;
+    if (c.units>=5000) infra+=10; else if(c.units>=3000) infra+=8; else if(c.units>=1500) infra+=5; else if(c.units>=800) infra+=3; else infra+=1;
+    const age = currentYear - c.built;
+    if(age<=3) infra+=10; else if(age<=7) infra+=7; else if(age<=15) infra+=4; else infra+=1;
+    infra = Math.min(20, infra);
+    // 거래안정성 (20점) — 전세가율 + 세대수
+    const jr = c.jeonse / c.price;
+    let stab = jr > 0.5 ? 14 : jr > 0.42 ? 11 : 8;
+    if (c.units>=2000) stab+=4; else if(c.units>=1000) stab+=2;
+    stab = Math.min(20, stab);
+
+    let total = priceFit + invest + infra + stab;
+    return {...c, priceFit, invest, infra, stab, total, growth};
+  });
+
+  // 3) 우선순위 → 배점 재분배 (합계 100점 고정)
+  let weights;
+  switch(priority) {
+    case "투자가치": weights = {pf:20, inv:45, inf:15, st:20}; break;
+    case "신축":     weights = {pf:20, inv:15, inf:45, st:20}; break;
+    case "재건축":   weights = {pf:20, inv:40, inf:10, st:30}; break;
+    case "가성비":   weights = {pf:25, inv:15, inf:15, st:45}; break;
+    default:         weights = {pf:30, inv:30, inf:20, st:20};
+  }
+  list = list.map(c => {
+    // 각 지표를 0~1로 정규화 후 가중치 적용
+    const normPf = c.priceFit / 30;
+    const normInv = c.invest / 30;
+    const normInf = c.infra / 20;
+    const normSt = c.stab / 20;
+    let s = normPf * weights.pf + normInv * weights.inv + normInf * weights.inf + normSt * weights.st;
+    // 재건축 우선 시 재건축 단지에 추가 부스트
+    if (priority==="재건축" && c.type==="재건축") s += 10;
+    return {...c, score: Math.min(99, Math.round(s))};
+  });
+
+  // 4) 랭킹
+  list.sort((a,b) => b.score - a.score);
+  const top = list.slice(0, 10);
+  render(top, budget, list.length);
+}
+
+function render(results, budget, total) {
+  const sec = document.getElementById('result-section');
+  sec.style.display = 'block';
+  if (!results.length) {
+    document.getElementById('result-summary').textContent = '조건에 맞는 단지가 없습니다. 예산이나 조건을 조정해보세요.';
+    document.getElementById('comparison-table').innerHTML = '';
+    document.getElementById('recommendation-cards').innerHTML = '';
+    sec.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  document.getElementById('result-summary').textContent =
+    `예산 ${(budget/100)}억 기준, ${total}개 단지 매칭 → 상위 ${results.length}개 추천`;
+
+  // 비교표
+  let t = `<table><thead><tr><th>순위</th><th>단지명</th><th>지역</th><th>면적</th><th>${txType}가</th><th>3년 변동</th><th>세대수</th><th>점수</th></tr></thead><tbody>`;
+  results.forEach((r,i) => {
+    const rc = i<3 ? `rank-${i+1}` : 'rank-other';
+    const pr = txType==="매매" ? r.price : r.jeonse;
+    t += `<tr><td><span class="rank-badge ${rc}">${i+1}</span></td>
+      <td><strong>${r.name}</strong></td><td>${r.dong}</td><td>${r.area}㎡</td>
+      <td>${(pr/100).toFixed(1)}억</td>
+      <td style="color:${r.growth>=0?'#e74c3c':'#2980b9'}">${r.growth>=0?'+':''}${r.growth.toFixed(1)}%</td>
+      <td>${r.units.toLocaleString()}</td>
+      <td><span class="score-bar" style="width:${r.score*0.6}px"></span>${r.score}</td></tr>`;
+  });
+  t += '</tbody></table>';
+  document.getElementById('comparison-table').innerHTML = t;
+
+  // 카드
+  let cards = '';
+  results.forEach((r,i) => {
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}위`;
+    const pr = txType==="매매" ? r.price : r.jeonse;
+    const jr = (r.jeonse/r.price*100).toFixed(0);
+    let tags = '';
+    if (r.type==="재건축") tags += `<span class="tag tag-recon">🏗️ ${r.recon||'재건축'}</span>`;
+    if ((currentYear-r.built)<=5) tags += `<span class="tag tag-new">✨ ${r.built}년 신축</span>`;
+    if (r.units>=3000) tags += `<span class="tag tag-big">🏘️ ${r.units.toLocaleString()}세대</span>`;
+    if (r.jeonse/r.price > 0.48) tags += `<span class="tag tag-value">💎 전세가율 ${jr}%</span>`;
+
+    cards += `<div class="rec-card">
+      <div class="rec-card-header">
+        <div><div class="rec-card-title">${medal} ${r.name}</div>
+        <div class="rec-card-location">${r.district} ${r.dong} | ${r.built}년 준공 | ${r.units.toLocaleString()}세대</div></div>
+        <div class="rec-card-score">${r.score}<span style="font-size:13px;color:#888">/100</span></div>
+      </div>
+      <div class="rec-card-tags">${tags}</div>
+      <div class="rec-card-stats">
+        <div class="stat-item"><span class="stat-label">💰 ${txType}가</span><span class="stat-value">${(pr/100).toFixed(1)}억</span></div>
+        <div class="stat-item"><span class="stat-label">📐 전용면적</span><span class="stat-value">${r.area}㎡</span></div>
+        <div class="stat-item"><span class="stat-label">📈 3년 변동</span><span class="stat-value up">${r.growth>=0?'+':''}${r.growth.toFixed(1)}%</span></div>
+        <div class="stat-item"><span class="stat-label">🏠 전세가율</span><span class="stat-value">${jr}%</span></div>
+        ${r.recon?`<div class="stat-item"><span class="stat-label">🏗️ 재건축</span><span class="stat-value">${r.recon}</span></div>`:''}
+      </div>
+      <div class="rec-card-highlight"><div class="label">📌 추천 포인트</div><p>${r.highlight}</p></div>
+    </div>`;
+  });
+  document.getElementById('recommendation-cards').innerHTML = cards;
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
