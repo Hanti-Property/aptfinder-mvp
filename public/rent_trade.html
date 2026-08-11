@@ -245,9 +245,52 @@ function renderSummary(items){
     wolseAvgRent=Math.round(sumR/wolseItems.length);
   }
 
+  // 전체 요약
   var html='<div class="row"><span class="label">전체 거래</span><span class="value">'+items.length+'건 (전세 '+jeonseItems.length+'건 / 월세 '+wolseItems.length+'건)</span></div>';
-  if(jeonseItems.length) html+='<div class="row"><span class="label">전세 평균 보증금</span><span class="value">'+formatPrice(jeonseAvg)+'</span></div>';
-  if(wolseItems.length) html+='<div class="row"><span class="label">월세 평균</span><span class="value">보증금 '+formatPrice(wolseAvgDeposit)+' / 월 '+wolseAvgRent.toLocaleString()+'만</span></div>';
+
+  // 전세 계약 조건 정보
+  if(jeonseItems.length){
+    html+='<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e9ecef;">';
+    html+='<div style="font-size:13px;font-weight:700;color:#1565C0;margin-bottom:6px;">전세</div>';
+    html+='<div class="row"><span class="label">평균 보증금</span><span class="value">'+formatPrice(jeonseAvg)+'</span></div>';
+    // 전세 신규/갱신 비율
+    var jNew=0,jRenew=0;
+    jeonseItems.forEach(function(it){
+      var ct=(it.contractType||'').trim();
+      if(ct==='갱신'||ct==='갱신계약')jRenew++;
+      else if(ct==='신규'||ct==='신규계약')jNew++;
+    });
+    if(jNew||jRenew) html+='<div class="row"><span class="label">계약유형</span><span class="value">신규 '+jNew+'건 / 갱신 '+jRenew+'건</span></div>';
+    // 전세 보증금 범위
+    var jDeposits=jeonseItems.map(function(it){return Number((it.deposit||'0').trim().replace(/,/g,''));});
+    var jMin=Math.min.apply(null,jDeposits),jMax=Math.max.apply(null,jDeposits);
+    html+='<div class="row"><span class="label">보증금 범위</span><span class="value">'+formatPrice(jMin)+' ~ '+formatPrice(jMax)+'</span></div>';
+    html+='</div>';
+  }
+
+  // 월세 계약 조건 정보
+  if(wolseItems.length){
+    html+='<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e9ecef;">';
+    html+='<div style="font-size:13px;font-weight:700;color:#C62828;margin-bottom:6px;">월세</div>';
+    html+='<div class="row"><span class="label">평균 보증금 / 월세</span><span class="value">'+formatPrice(wolseAvgDeposit)+' / 월 '+wolseAvgRent.toLocaleString()+'만</span></div>';
+    // 월세 신규/갱신 비율
+    var wNew=0,wRenew=0;
+    wolseItems.forEach(function(it){
+      var ct=(it.contractType||'').trim();
+      if(ct==='갱신'||ct==='갱신계약')wRenew++;
+      else if(ct==='신규'||ct==='신규계약')wNew++;
+    });
+    if(wNew||wRenew) html+='<div class="row"><span class="label">계약유형</span><span class="value">신규 '+wNew+'건 / 갱신 '+wRenew+'건</span></div>';
+    // 월세 보증금/월세 범위
+    var wDeposits=wolseItems.map(function(it){return Number((it.deposit||'0').trim().replace(/,/g,''));});
+    var wRents=wolseItems.map(function(it){return Number((it.monthlyRent||it.monthlyRentAmount||'0').trim().replace(/,/g,''));});
+    var wMinD=Math.min.apply(null,wDeposits),wMaxD=Math.max.apply(null,wDeposits);
+    var wMinR=Math.min.apply(null,wRents),wMaxR=Math.max.apply(null,wRents);
+    html+='<div class="row"><span class="label">보증금 범위</span><span class="value">'+formatPrice(wMinD)+' ~ '+formatPrice(wMaxD)+'</span></div>';
+    html+='<div class="row"><span class="label">월세 범위</span><span class="value">'+wMinR.toLocaleString()+'만 ~ '+wMaxR.toLocaleString()+'만</span></div>';
+    html+='</div>';
+  }
+
   document.getElementById('summaryBox').innerHTML=html;
   document.getElementById('summaryBox').style.display='block';
 }
