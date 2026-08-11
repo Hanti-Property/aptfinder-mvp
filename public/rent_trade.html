@@ -188,7 +188,17 @@ function finishSearch(allItems,name){
   if(filtered.length===0){
     var kw=name.replace(/아파트|단지|맨션|[0-9]+동|[0-9]+$|서울|강남구|서초구|송파구/g,"").trim();
     kw=kw.replace(/^(대치동|도곡동|개포동|삼성동|압구정동|청담동|역삼동|논현동|일원동|수서동|서초동|반포동|잠원동|방배동|양재동)/,"").trim();
-    if(kw.length>=2){filtered=allItems.filter(function(it){var a=(it.aptNm||"").trim();return a.indexOf(kw)>=0||kw.indexOf(a)>=0;});}
+    if(kw.length>=2){
+      var umdFilter=selectedUmdNm?selectedUmdNm.replace(/[0-9]/g,'').trim():'';
+      filtered=allItems.filter(function(it){
+        var a=(it.aptNm||"").trim();
+        var nameMatch=a.indexOf(kw)>=0||kw.indexOf(a)>=0;
+        if(!nameMatch)return false;
+        // 동명이 있으면 동명도 일치해야 함
+        if(umdFilter){return (it.umdNm||'').trim()===umdFilter;}
+        return true;
+      });
+    }
   }
   filtered.sort(function(a,b){
     var da=(a.dealYear||'')+String(a.dealMonth||'').padStart(2,'0')+String(a.dealDay||'').padStart(2,'0');
