@@ -196,13 +196,22 @@ function finishSearch(allItems,name){
     return db.localeCompare(da);
   });
   allFilteredItems=filtered;
-  currentTab='all';
+  // 드롭다운 필터와 탭 연동
+  var initTab=document.getElementById('filterType').value;
+  currentTab=initTab;
   // 탭 초기화
   document.querySelectorAll('#tabRow button').forEach(function(btn){btn.classList.remove('active');});
-  document.querySelector('#tabRow button:first-child').classList.add('active');
+  var btns=document.querySelectorAll('#tabRow button');
+  if(initTab==='jeonse')btns[1].classList.add('active');
+  else if(initTab==='wolse')btns[2].classList.add('active');
+  else btns[0].classList.add('active');
   document.getElementById('tabRow').style.display='flex';
   renderSummary(filtered);
-  renderTrades(filtered);
+  // 탭에 따라 필터링된 목록 표시
+  var displayItems=filtered;
+  if(initTab==='jeonse')displayItems=filtered.filter(function(it){return isJeonse(it);});
+  else if(initTab==='wolse')displayItems=filtered.filter(function(it){return !isJeonse(it);});
+  renderTrades(displayItems);
 }
 
 function switchTab(type){
@@ -302,9 +311,6 @@ function formatPrice(p){
 
 function renderTrades(items){
   if(!items.length){document.getElementById('tradeList').innerHTML='<p style="color:#999;">거래 내역 없음</p>';document.getElementById('tradeStatus').textContent='';return;}
-  var filterType=document.getElementById('filterType').value;
-  if(filterType==='jeonse')items=items.filter(function(it){return isJeonse(it);});
-  else if(filterType==='wolse')items=items.filter(function(it){return !isJeonse(it);});
 
   var html='';
   items.forEach(function(it){
