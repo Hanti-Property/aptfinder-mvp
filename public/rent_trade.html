@@ -38,9 +38,6 @@ header p{font-size:14px;opacity:0.7;margin-top:4px}
 .summary-box .label{color:#666}
 .summary-box .value{font-weight:600;color:#333}
 .notice{padding:12px 16px;background:#fff9c4;margin:12px;border-radius:6px;font-size:11px;color:#666;line-height:1.5}
-.tab-row{display:flex;border-bottom:2px solid #eee;margin-bottom:0}
-.tab-row button{flex:1;padding:10px;border:none;background:transparent;font-size:14px;font-weight:600;color:#999;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
-.tab-row button.active{color:#1B3A5C;border-bottom-color:#1B3A5C}
 </style>
 </head>
 <body>
@@ -75,10 +72,12 @@ header p{font-size:14px;opacity:0.7;margin-top:4px}
 <div class="section" id="tradeSection" style="display:none;">
 <h3>전월세 실거래 내역</h3>
 <div id="summaryBox" class="summary-box" style="display:none;"></div>
-<div class="tab-row" id="tabRow" style="display:none;">
-<button class="active" onclick="switchTab('all')">전체</button>
-<button onclick="switchTab('jeonse')">전세</button>
-<button onclick="switchTab('wolse')">월세</button>
+<div style="margin-bottom:12px;">
+<select id="viewType" aria-label="전세/월세 보기" onchange="onViewTypeChange()" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-weight:600;">
+<option value="all">전월세 (전체)</option>
+<option value="jeonse">전세</option>
+<option value="wolse">월세</option>
+</select>
 </div>
 <div id="tradeList"></div>
 <p id="tradeStatus" style="font-size:12px;color:#999;margin-top:8px;"></p>
@@ -92,7 +91,6 @@ var LAWD_CD='11680';
 var selectedUmdNm='';
 var selectedJibun='';
 var allFilteredItems=[];
-var currentTab='all';
 
 var map=new kakao.maps.Map(document.getElementById('map'),{center:new kakao.maps.LatLng(37.4946,127.0625),level:5});
 var geocoder=new kakao.maps.services.Geocoder();
@@ -196,35 +194,22 @@ function finishSearch(allItems,name){
     return db.localeCompare(da);
   });
   allFilteredItems=filtered;
-  // 드롭다운 필터와 탭 연동
-  var initTab=document.getElementById('filterType').value;
-  currentTab=initTab;
-  // 탭 초기화
-  document.querySelectorAll('#tabRow button').forEach(function(btn){btn.classList.remove('active');});
-  var btns=document.querySelectorAll('#tabRow button');
-  if(initTab==='jeonse')btns[1].classList.add('active');
-  else if(initTab==='wolse')btns[2].classList.add('active');
-  else btns[0].classList.add('active');
-  document.getElementById('tabRow').style.display='flex';
+  // 드롭다운 필터와 연동
+  var initView=document.getElementById('filterType').value;
+  document.getElementById('viewType').value=initView;
   renderSummary(filtered);
-  // 탭에 따라 필터링된 목록 표시
-  var displayItems=filtered;
-  if(initTab==='jeonse')displayItems=filtered.filter(function(it){return isJeonse(it);});
-  else if(initTab==='wolse')displayItems=filtered.filter(function(it){return !isJeonse(it);});
-  renderTrades(displayItems);
+  renderFilteredList(initView);
 }
 
-function switchTab(type){
-  currentTab=type;
-  document.querySelectorAll('#tabRow button').forEach(function(btn){btn.classList.remove('active');});
-  var btns=document.querySelectorAll('#tabRow button');
-  if(type==='all')btns[0].classList.add('active');
-  else if(type==='jeonse')btns[1].classList.add('active');
-  else btns[2].classList.add('active');
+function onViewTypeChange(){
+  var viewType=document.getElementById('viewType').value;
+  renderFilteredList(viewType);
+}
 
+function renderFilteredList(viewType){
   var items=allFilteredItems;
-  if(type==='jeonse')items=allFilteredItems.filter(function(it){return isJeonse(it);});
-  else if(type==='wolse')items=allFilteredItems.filter(function(it){return !isJeonse(it);});
+  if(viewType==='jeonse')items=allFilteredItems.filter(function(it){return isJeonse(it);});
+  else if(viewType==='wolse')items=allFilteredItems.filter(function(it){return !isJeonse(it);});
   renderTrades(items);
 }
 
