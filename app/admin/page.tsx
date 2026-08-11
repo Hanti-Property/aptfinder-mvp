@@ -156,6 +156,43 @@ export default function AdminDashboard() {
           </a>
         </div>
 
+        {/* 서비스 모듈 (개발 도구) */}
+        <div>
+          <h2 className="text-sm font-semibold mb-2">🧩 서비스 모듈</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <a href="/real_trade.html" target="_blank" className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+              <p className="text-lg">🗺️</p>
+              <p className="text-xs font-semibold text-blue-800">실거래가 조회</p>
+              <p className="text-[10px] text-blue-600">지도 기반</p>
+            </a>
+            <a href="/tax_calc.html" target="_blank" className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+              <p className="text-lg">🧮</p>
+              <p className="text-xs font-semibold text-green-800">보유세 계산기</p>
+              <p className="text-[10px] text-green-600">공시가격 연동</p>
+            </a>
+            <a href="/building_register_map.html" target="_blank" className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+              <p className="text-lg">🏗️</p>
+              <p className="text-xs font-semibold text-purple-800">건축물대장</p>
+              <p className="text-[10px] text-purple-600">지도 기반 조회</p>
+            </a>
+            <a href="/tax_map.html" target="_blank" className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+              <p className="text-lg">📍</p>
+              <p className="text-xs font-semibold text-amber-800">보유세 (지도)</p>
+              <p className="text-[10px] text-amber-600">지도 기반 계산</p>
+            </a>
+            <a href="/kakao_map_register.html" target="_blank" className="bg-gradient-to-br from-rose-50 to-rose-100 border border-rose-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+              <p className="text-lg">📌</p>
+              <p className="text-xs font-semibold text-rose-800">매물 등록 (지도)</p>
+              <p className="text-[10px] text-rose-600">카카오맵 연동</p>
+            </a>
+            <a href="/building_register_api.html" target="_blank" className="bg-gradient-to-br from-teal-50 to-teal-100 border border-teal-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+              <p className="text-lg">📄</p>
+              <p className="text-xs font-semibold text-teal-800">건축물대장 API</p>
+              <p className="text-[10px] text-teal-600">직접 조회</p>
+            </a>
+          </div>
+        </div>
+
         {/* 빠른 메뉴 */}
         <div className="grid grid-cols-2 gap-2">
           <a href="/admin/register" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 매물 등록</a>
