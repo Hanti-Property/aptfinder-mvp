@@ -1,12 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [redirect, setRedirect] = useState('/admin')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const r = params.get('redirect')
+    if (r && r.startsWith('/admin')) setRedirect(r)
+  }, [])
 
   async function handleLogin() {
     setLoading(true)
@@ -15,7 +22,7 @@ export default function LoginPage() {
     if (error) {
       alert('로그인 실패: ' + error.message)
     } else {
-      window.location.href = '/admin/register'
+      window.location.href = redirect
     }
   }
 
