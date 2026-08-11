@@ -113,9 +113,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 max-w-2xl mx-auto">
-      <header className="bg-[#1B3A5C] text-white p-4">
-        <h1 className="text-lg font-semibold">📊 관리자 대시보드</h1>
-        <p className="text-xs opacity-80 mt-1">AptFinder 운영 현황</p>
+      <header className="bg-[#1B3A5C] text-white p-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">📊 관리자 대시보드</h1>
+          <p className="text-xs opacity-80 mt-1">AptFinder 운영 현황</p>
+        </div>
+        <button
+          onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
+          className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded"
+        >
+          로그아웃
+        </button>
       </header>
 
       <div className="p-4 space-y-4">
