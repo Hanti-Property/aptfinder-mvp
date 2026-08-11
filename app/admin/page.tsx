@@ -195,9 +195,10 @@ export default function AdminDashboard() {
 
         {/* 빠른 메뉴 */}
         <div className="grid grid-cols-2 gap-2">
-          <a href="/admin/register" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 매물 등록</a>
+          <a href="/admin/inquiries" className="bg-[#C49A3C] text-white rounded-lg p-3 text-center text-sm font-semibold">📋 상담 신청 목록</a>
           <a href="/admin/notes" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 노트 작성</a>
           <a href="/admin/columns" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 칼럼 작성</a>
+          <a href="/admin/register" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 매물 등록</a>
           <a href="/admin/columns/list" className="bg-white border border-gray-300 rounded-lg p-3 text-center text-sm">칼럼 관리</a>
           <a href="/listings" className="bg-white border border-gray-300 rounded-lg p-3 text-center text-sm">매물 목록</a>
           <a href="/notes" className="bg-white border border-gray-300 rounded-lg p-3 text-center text-sm">노트 목록</a>
