@@ -25,15 +25,15 @@ header p{font-size:14px;opacity:0.7;margin-top:4px}
 .trade-card{border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:8px}
 .trade-card .price{font-size:18px;font-weight:700;color:#1565C0}
 .trade-card .price .monthly{color:#e53935;font-size:16px;margin-left:4px}
-.trade-card .info{font-size:12px;color:#666;margin-top:4px}
-.trade-card .contract-info{font-size:11px;color:#888;margin-top:3px}
-.trade-card .badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-right:4px}
+.trade-card .info{font-size:14px;color:#666;margin-top:4px}
+.trade-card .contract-info{font-size:13px;color:#888;margin-top:3px}
+.trade-card .badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:12px;font-weight:600;margin-right:4px}
 .badge-jeonse{background:#E3F2FD;color:#1565C0}
 .badge-wolse{background:#FFEBEE;color:#C62828}
 .badge-renewal{background:#FFF3E0;color:#E65100}
 .badge-new{background:#E8F5E9;color:#2E7D32}
 .summary-box{background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:12px;margin-bottom:12px}
-.summary-box .row{display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px}
+.summary-box .row{display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px}
 .summary-box .row:last-child{margin-bottom:0}
 .summary-box .label{color:#666}
 .summary-box .value{font-weight:600;color:#333}
@@ -264,7 +264,7 @@ function renderSummary(items){
   // 전세 계약 조건 정보
   if(jeonseItems.length){
     html+='<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e9ecef;">';
-    html+='<div style="font-size:13px;font-weight:700;color:#1565C0;margin-bottom:6px;">전세</div>';
+    html+='<div style="font-size:14px;font-weight:700;color:#1565C0;margin-bottom:6px;">전세</div>';
     html+='<div class="row"><span class="label">평균 보증금</span><span class="value">'+formatPrice(jeonseAvg)+'</span></div>';
     // 전세 신규/갱신 비율
     var jNew=0,jRenew=0;
@@ -284,7 +284,7 @@ function renderSummary(items){
   // 월세 계약 조건 정보
   if(wolseItems.length){
     html+='<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e9ecef;">';
-    html+='<div style="font-size:13px;font-weight:700;color:#C62828;margin-bottom:6px;">월세</div>';
+    html+='<div style="font-size:14px;font-weight:700;color:#C62828;margin-bottom:6px;">월세</div>';
     html+='<div class="row"><span class="label">평균 보증금 / 월세</span><span class="value">'+formatPrice(wolseAvgDeposit)+' / 월 '+wolseAvgRent.toLocaleString()+'만</span></div>';
     // 월세 신규/갱신 비율
     var wNew=0,wRenew=0;
@@ -347,7 +347,7 @@ function renderTrades(items){
     }
 
     html+='<div class="trade-card">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;">'+priceHtml+'<span style="font-size:11px;color:#999;">'+date+'</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;">'+priceHtml+'<span style="font-size:13px;color:#999;">'+date+'</span></div>';
     html+='<div class="info">'+contractBadge+(it.aptNm||'')+' | 전용 '+(it.excluUseAr||'-')+'㎡ | '+(it.floor||'-')+'층 | '+(it.umdNm||'')+'</div>';
     if(prevInfo) html+='<div class="contract-info">'+prevInfo+'</div>';
     var term=(it.contractTerm||it.termOfContract||'').trim();
