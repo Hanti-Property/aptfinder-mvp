@@ -196,8 +196,6 @@ async function loadDashboard(name,address){
     }
   }
 
-  const sales=filterByComplex(saleItems,name);
-  const rents=filterByComplex(rentItems,name);
   sales.sort((a,b)=>makeDate(b)-makeDate(a));
   rents.sort((a,b)=>makeDate(b)-makeDate(a));
 
