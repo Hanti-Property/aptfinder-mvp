@@ -219,13 +219,17 @@ async function fetchBuilding(){
   const ji=(parts[1]||'0').padStart(4,'0');
   const bjdong=selectedBjdongCd||'10600';
   // 총괄표제부 (getBrRecapTitleInfo) — 단지 전체 세대수/용적률/대지면적 포함
-  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_API_KEY}&sigunguCd=${LAWD_CD}&bjdongCd=${bjdong}&bun=${bun}&ji=${ji}&numOfRows=10&pageNo=1&_type=json`;
+  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_API_KEY}&sigunguCd=${LAWD_CD}&bjdongCd=${bjdong}&bun=${bun}&ji=${ji}&numOfRows=100&pageNo=1&_type=json`;
+  console.log('[건축물대장] URL:', url);
+  console.log('[건축물대장] params:', {LAWD_CD, bjdong, bun, ji, selectedBjdongCd});
   try{
-    const r=await fetch(url);const data=await r.json();
+    const r=await fetch(url);
+    const data=await r.json();
+    console.log('[건축물대장] 응답:', data);
     const items=data.response?.body?.items?.item;
     if(!items)return null;
     return Array.isArray(items)?items[0]:items;
-  }catch(e){console.error('건축물대장 조회 실패:',e);return null;}
+  }catch(e){console.error('[건축물대장] 오류:',e);return null;}
 }
 
 // ============================================================
