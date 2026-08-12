@@ -162,7 +162,8 @@ async function loadDashboard(name,address){
   document.getElementById('tradeBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:#666">조회 중...</td></tr>';
 
   // 병렬 호출: 매매실거래 + 전월세실거래 + 건축물대장(총괄+표제부) + 토지특성
-  const [saleItems, rentItems, bldgData, titleItems, landData] = await Promise.all([
+  // 초기 6개월 조회, 데이터 부족 시 확장
+  let [saleItems, rentItems, bldgData, titleItems, landData] = await Promise.all([
     fetchTrades('sale',6),
     fetchTrades('rent',6),
     fetchBuilding(),
@@ -170,25 +171,56 @@ async function loadDashboard(name,address){
     fetchLandInfo()
   ]);
 
+  let sales=filterByComplex(saleItems,name);
+  let rents=filterByComplex(rentItems,name);
+  let dataPeriodMonths=6;
+
+  // 매매 데이터 부족 시 확장: 6→12→24개월
+  if(sales.length===0){
+    const extra=await fetchTrades('sale',12);
+    sales=filterByComplex(extra,name);
+    dataPeriodMonths=12;
+  }
+  if(sales.length===0){
+    const extra=await fetchTrades('sale',24);
+    sales=filterByComplex(extra,name);
+    dataPeriodMonths=24;
+  }
+  // 전월세 데이터 부족 시 확장
+  if(rents.length===0){
+    const extra=await fetchTrades('rent',12);
+    rents=filterByComplex(extra,name);
+    if(rents.length===0){
+      const extra2=await fetchTrades('rent',24);
+      rents=filterByComplex(extra2,name);
+    }
+  }
+
   const sales=filterByComplex(saleItems,name);
   const rents=filterByComplex(rentItems,name);
   sales.sort((a,b)=>makeDate(b)-makeDate(a));
   rents.sort((a,b)=>makeDate(b)-makeDate(a));
 
-  // 3개월/6개월 규칙
-  const now=new Date(),m3=new Date(now.getFullYear(),now.getMonth()-3,now.getDate());
+  // 3개월/6개월 우선 규칙 + 확장 표시
+  const now=new Date(),m3=new Date(now.getFullYear(),now.getMonth()-3,now.getDate()),m6=new Date(now.getFullYear(),now.getMonth()-6,now.getDate());
   const sales3m=sales.filter(t=>makeDate(t)>=m3);
+  const sales6m=sales.filter(t=>makeDate(t)>=m6);
+  const useSales=sales3m.length>0?sales3m:sales6m.length>0?sales6m:sales;
+  const salePeriod=sales3m.length>0?'3개월':sales6m.length>0?'6개월':`${dataPeriodMonths}개월 (⚠️ 오래된 데이터)`;
+
   const rents3m=rents.filter(t=>makeDate(t)>=m3);
-  const useSales=sales3m.length>0?sales3m:sales;
-  const useRents=rents3m.length>0?rents3m:rents;
-  const salePeriod=sales3m.length>0?'3개월':'6개월(확장)';
+  const rents6m=rents.filter(t=>makeDate(t)>=m6);
+  const useRents=rents3m.length>0?rents3m:rents6m.length>0?rents6m:rents;
+
+  // 6개월 이상 지난 데이터인지 판별
+  const isStaleData=dataPeriodMonths>6||(sales.length>0&&makeDate(sales[0])<m6);
 
   // 표제부로 총괄표제부 보완
   const mergedBldg = mergeBuildingData(bldgData, titleItems);
 
   // 표시
   displayBuilding(mergedBldg, landData);
-  displayPrice(useSales,useRents,salePeriod);
+  displayPrice(useSales,useRents,salePeriod,isStaleData);
   calculateAllIndices(useSales,useRents,sales,mergedBldg,landData);
   displayTradeTable(sales.slice(0,8),rents.slice(0,7));
   document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
@@ -413,7 +445,7 @@ function displayBuilding(bld, land){
 // ============================================================
 // DISPLAY: 가격
 // ============================================================
-function displayPrice(sales,rents,periodLabel){
+function displayPrice(sales,rents,periodLabel,isStale){
   if(sales.length>0){
     const s=sales[0];
     const p=parseInt((s.dealAmount||'0').replace(/,/g,''));
@@ -460,6 +492,10 @@ function displayPrice(sales,rents,periodLabel){
     document.getElementById('v-wolse').textContent='거래없음';
   }
   document.getElementById('v-period').textContent=periodLabel;
+  // 6개월 이상 지난 데이터 경고
+  if(isStale){
+    document.getElementById('v-period').innerHTML=periodLabel+'<br><span style="color:#ff6b6b;font-size:10px">⚠️ 6개월 이상 지난 정보입니다</span>';
+  }
 }
 
 // ============================================================
