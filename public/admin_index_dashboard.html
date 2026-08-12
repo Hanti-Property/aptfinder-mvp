@@ -384,6 +384,16 @@ function displayBuilding(bld, land){
   const age=builtYear?(2026-builtYear):null;
   const units=bld?(bld.hhldCnt||bld.hoCnt||'—'):'—';
   const far=bld&&bld.vlRat&&parseFloat(bld.vlRat)>0?parseFloat(bld.vlRat).toFixed(1)+'%':'—';
+  // 용적률 역산: 건축물대장에 없으면 용적률산정연면적÷대지면적으로 산출
+  let farDisplay=far;
+  if(far==='—'){
+    const vlEstm=bld?parseFloat(bld.vlRatEstmTotArea||bld.totArea||0):0;
+    const landArea=land?parseFloat(land.lndpclAr||0):0;
+    if(vlEstm>0&&landArea>0){
+      const calc=(vlEstm/landArea*100).toFixed(1);
+      farDisplay=calc+'% (역산)';
+    }
+  }
   // 대지면적: 건축물대장 우선, 없으면 토지특성 API
   let plat='—';
   if(bld&&bld.platArea&&parseFloat(bld.platArea)>0){
@@ -395,7 +405,7 @@ function displayBuilding(bld, land){
   document.getElementById('v-built').textContent=builtYear?builtYear+'년':'—';
   document.getElementById('v-age').textContent=age?age+'년':'—';
   document.getElementById('v-units').textContent=typeof units==='number'||!isNaN(units)?Number(units).toLocaleString()+'세대':units;
-  document.getElementById('v-far').textContent=far;
+  document.getElementById('v-far').textContent=farDisplay;
   document.getElementById('v-plat').textContent=plat;
   document.getElementById('v-park').textContent=!isNaN(parkTotal)&&parkTotal!=='—'?Number(parkTotal).toLocaleString()+'대':parkTotal;
 }
