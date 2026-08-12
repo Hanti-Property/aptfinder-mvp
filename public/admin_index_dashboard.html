@@ -161,11 +161,12 @@ async function loadDashboard(name,address){
   document.getElementById('indexGrid').innerHTML='';
   document.getElementById('tradeBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:#666">조회 중...</td></tr>';
 
-  // 병렬 호출: 매매실거래 + 전월세실거래 + 건축물대장 + 토지특성
-  const [saleItems, rentItems, bldgData, landData] = await Promise.all([
+  // 병렬 호출: 매매실거래 + 전월세실거래 + 건축물대장(총괄+표제부) + 토지특성
+  const [saleItems, rentItems, bldgData, titleItems, landData] = await Promise.all([
     fetchTrades('sale',6),
     fetchTrades('rent',6),
     fetchBuilding(),
+    fetchBuildingTitle(),
     fetchLandInfo()
   ]);
 
@@ -182,10 +183,13 @@ async function loadDashboard(name,address){
   const useRents=rents3m.length>0?rents3m:rents;
   const salePeriod=sales3m.length>0?'3개월':'6개월(확장)';
 
+  // 표제부로 총괄표제부 보완
+  const mergedBldg = mergeBuildingData(bldgData, titleItems);
+
   // 표시
-  displayBuilding(bldgData, landData);
+  displayBuilding(mergedBldg, landData);
   displayPrice(useSales,useRents,salePeriod);
-  calculateAllIndices(useSales,useRents,sales,bldgData,landData);
+  calculateAllIndices(useSales,useRents,sales,mergedBldg,landData);
   displayTradeTable(sales.slice(0,8),rents.slice(0,7));
   document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
 }
@@ -231,6 +235,95 @@ async function fetchBuilding(){
     if(!items)return null;
     return Array.isArray(items)?items[0]:items;
   }catch(e){console.error('[건축물대장] 오류:',e);return null;}
+}
+
+// ============================================================
+// FETCH: 건축물대장 표제부 (동별 상세 — 보완용)
+// ============================================================
+async function fetchBuildingTitle(){
+  const parts=selectedJibun.split('-');
+  const bun=(parts[0]||'0').padStart(4,'0');
+  const ji=(parts[1]||'0').padStart(4,'0');
+  const bjdong=selectedBjdongCd||'10600';
+  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?serviceKey=${BLD_API_KEY}&sigunguCd=${LAWD_CD}&bjdongCd=${bjdong}&bun=${bun}&ji=${ji}&numOfRows=100&pageNo=1&_type=json`;
+  try{
+    const r=await fetch(url);const data=await r.json();
+    const items=data.response?.body?.items?.item;
+    if(!items)return [];
+    return Array.isArray(items)?items:[items];
+  }catch(e){console.error('[표제부] 오류:',e);return [];}
+}
+
+// ============================================================
+// 총괄표제부 + 표제부 병합 (누락 필드 보완)
+// ============================================================
+function mergeBuildingData(recap, titleItems){
+  const merged = recap ? {...recap} : {};
+  if(!titleItems||titleItems.length===0) return merged;
+
+  // 주거시설 동만 필터
+  const residential = titleItems.filter(t=>{
+    const p=(t.etcPurps||'').trim();
+    return p==='주거시설'||p==='아파트'||p==='공동주택'||(t.mainPurpsCdNm||'')==='공동주택';
+  });
+  const targets = residential.length>0 ? residential : titleItems;
+
+  // 준공년도: 총괄에 없으면 표제부에서 가장 이른 useAprDay
+  if(!merged.useAprDay||merged.useAprDay.trim()===''){
+    const dates=targets.map(t=>t.useAprDay).filter(d=>d&&d.trim()!==''&&d.trim()!=='-');
+    if(dates.length>0){
+      dates.sort();
+      merged.useAprDay=dates[0]; // 가장 이른 날짜 (최초 준공)
+      merged._useAprDaySource='표제부';
+    }
+  }
+
+  // 세대수: 총괄에 없거나 0이면 동별 합산
+  if(!merged.hhldCnt||parseInt(merged.hhldCnt)===0){
+    const total=targets.reduce((sum,t)=>sum+parseInt(t.hhldCnt||0),0);
+    if(total>0){merged.hhldCnt=total;merged._hhldCntSource='표제부합산';}
+  }
+
+  // 용적률: 총괄에 없으면 표제부에서 첫 유효값
+  if(!merged.vlRat||parseFloat(merged.vlRat)===0){
+    const valid=targets.find(t=>t.vlRat&&parseFloat(t.vlRat)>0);
+    if(valid){merged.vlRat=valid.vlRat;merged._vlRatSource='표제부';}
+  }
+
+  // 연면적: 총괄에 없으면 동별 합산
+  if(!merged.totArea||parseFloat(merged.totArea)===0){
+    const total=targets.reduce((sum,t)=>sum+parseFloat(t.totArea||0),0);
+    if(total>0){merged.totArea=total;merged._totAreaSource='표제부합산';}
+  }
+
+  // 용적률산정연면적: 합산
+  if(!merged.vlRatEstmTotArea||parseFloat(merged.vlRatEstmTotArea)===0){
+    const total=targets.reduce((sum,t)=>sum+parseFloat(t.vlRatEstmTotArea||0),0);
+    if(total>0) merged.vlRatEstmTotArea=total;
+  }
+
+  // 주차: 총괄에 없으면 동별 합산
+  if(!merged.totPkngCnt||parseInt(merged.totPkngCnt)===0){
+    const total=targets.reduce((sum,t)=>{
+      return sum+parseInt(t.indrMechUtcnt||0)+parseInt(t.oudrMechUtcnt||0)+parseInt(t.indrAutoUtcnt||0)+parseInt(t.oudrAutoUtcnt||0);
+    },0);
+    if(total>0){merged.totPkngCnt=total;merged._parkSource='표제부합산';}
+  }
+
+  // 동수
+  if(!merged.dongCnt||parseInt(merged.dongCnt)===0){
+    merged.dongCnt=targets.length;
+  }
+
+  // 최대 층수 / 평균 층수
+  const floors=targets.map(t=>parseInt(t.grndFlrCnt||0)).filter(f=>f>0);
+  if(floors.length>0){
+    merged._maxFloor=Math.max(...floors);
+    merged._avgFloor=Math.round(floors.reduce((a,b)=>a+b,0)/floors.length);
+  }
+
+  console.log('[병합결과]', merged);
+  return merged;
 }
 
 // ============================================================
