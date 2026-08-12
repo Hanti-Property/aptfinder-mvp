@@ -195,6 +195,11 @@ export default function AdminDashboard() {
               <p className="text-xs font-semibold text-indigo-800">전월세 실거래가</p>
               <p className="text-[10px] text-indigo-600">지도 기반 조회</p>
             </a>
+            <a href="/admin_index_dashboard.html" target="_blank" className="bg-gradient-to-br from-cyan-50 to-cyan-100 border border-cyan-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+              <p className="text-lg">📊</p>
+              <p className="text-xs font-semibold text-cyan-800">단지 인덱스</p>
+              <p className="text-[10px] text-cyan-600">9개 평가지수</p>
+            </a>
           </div>
         </div>
 
