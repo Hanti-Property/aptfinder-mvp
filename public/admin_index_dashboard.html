@@ -426,8 +426,8 @@ function displayPrice(sales,rents,periodLabel){
   }
   if(rents.length>0){
     const r=rents[0];
-    const dep=parseInt((r.deposit||r.보증금||'0').replace(/,/g,''));
-    const monthly=parseInt((r.monthlyRent||r.월세금액||'0').replace(/,/g,''));
+    const dep=parseInt((r.deposit||r.보증금||'0').toString().trim().replace(/,/g,''))||0;
+    const monthly=parseInt((r.monthlyRent||r.월세금액||'0').toString().trim().replace(/,/g,''))||0;
     const label=monthly>0?`${fmtPrice(dep)}/${monthly}만`:fmtPrice(dep);
     document.getElementById('v-jeonse').textContent=label;
     document.getElementById('v-jeonse-sub').textContent=`${r.dealYear}.${String(r.dealMonth).padStart(2,'0')} | ${r.excluUseAr||r.exclusiveArea||'?'}㎡`;
@@ -509,7 +509,7 @@ function calculateAllIndices(sales,rents,allSales,bld,land){
   }
 
   // ═══ INDEX #2: JGI ═══
-  const jeonseRents=rents.filter(t=>parseInt((t.monthlyRent||t.월세금액||'0').replace(/,/g,''))===0);
+  const jeonseRents=rents.filter(t=>{const m=parseInt((t.monthlyRent||t.월세금액||'0').toString().trim().replace(/,/g,''))||0;return m===0;});
   if(jeonseRents.length>0&&avgPrice>0){
     const jeonseAvg=jeonseRents.map(t=>parseInt((t.deposit||t.보증금||'0').replace(/,/g,''))).reduce((a,b)=>a+b,0)/jeonseRents.length;
     const jgi=jeonseAvg/avgPrice*100;
@@ -535,7 +535,7 @@ function calculateAllIndices(sales,rents,allSales,bld,land){
   }
 
   // ═══ INDEX #4: YSI ═══
-  const wolseRents=rents.filter(t=>parseInt((t.monthlyRent||t.월세금액||'0').replace(/,/g,''))>0);
+  const wolseRents=rents.filter(t=>{const m=parseInt((t.monthlyRent||t.월세금액||'0').toString().trim().replace(/,/g,''))||0;return m>0;});
   if(wolseRents.length>0&&avgPrice>0){
     const avgMonthly=wolseRents.map(t=>parseInt((t.monthlyRent||t.월세금액||'0').replace(/,/g,''))).reduce((a,b)=>a+b,0)/wolseRents.length;
     const ysi=avgMonthly*12/avgPrice*100;
