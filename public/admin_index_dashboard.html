@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AptFinder Admin - 단지 인덱스 대시보드</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#1a1a2e;color:#e0e0e0;font-size:14px}
+.container{max-width:1100px;margin:0 auto;min-height:100vh}
+header{background:#0f0f23;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a4a}
+header h1{font-size:20px;color:#fff;font-weight:700}
+header .badge{background:#e74c3c;color:#fff;font-size:11px;padding:3px 8px;border-radius:4px;font-weight:600}
+.top-bar{padding:12px 24px;background:#12122b;display:flex;gap:10px;align-items:center;border-bottom:1px solid #2a2a4a}
+.top-bar input{flex:1;padding:10px 14px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:8px;color:#fff;font-size:14px}
+.top-bar input::placeholder{color:#666}
+.top-bar button{padding:10px 18px;background:#0066cc;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+#map{width:100%;height:360px;border-bottom:1px solid #2a2a4a}
+.dashboard{display:none;padding:20px 24px}
+.dash-header{margin-bottom:16px}
+.dash-header h2{font-size:22px;color:#fff;margin-bottom:4px}
+.dash-header p{font-size:13px;color:#888}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.info-card{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:14px}
+.info-card .label{font-size:11px;color:#888;margin-bottom:4px}
+.info-card .value{font-size:16px;font-weight:700;color:#fff}
+.info-card .sub{font-size:11px;color:#666;margin-top:2px}
+.section-title{font-size:16px;font-weight:700;color:#fff;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid #2a2a4a}
+.index-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.index-card{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;position:relative}
+.index-card .grade{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px}
+.grade-a{background:#1b5e20;color:#a5d6a7}
+.grade-b{background:#1a237e;color:#9fa8da}
+.grade-c{background:#4e342e;color:#bcaaa4}
+.index-card .idx-name{font-size:12px;color:#888;margin-bottom:6px}
+.index-card .idx-value{font-size:28px;font-weight:800;color:#fff}
+.index-card .idx-score{font-size:13px;margin-top:4px}
+.idx-bar{height:4px;background:#2a2a4a;border-radius:2px;margin-top:6px;overflow:hidden}
+.idx-bar-fill{height:100%;border-radius:2px;transition:width .5s}
+.index-card .idx-desc{font-size:11px;color:#777;margin-top:8px;line-height:1.4}
+.trade-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.trade-table th{background:#12122b;padding:10px 8px;font-size:11px;color:#888;text-align:left;font-weight:600}
+.trade-table td{padding:10px 8px;border-bottom:1px solid #1e1e3f;font-size:13px}
+.trade-table .price{color:#ff6b6b;font-weight:700}
+.disclaimer{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:8px;padding:12px 16px;margin-top:20px}
+.disclaimer p{font-size:11px;color:#666;line-height:1.5}
+.loading{text-align:center;padding:30px;color:#666}
+@media(max-width:768px){.grid-3{grid-template-columns:1fr 1fr}.index-grid{grid-template-columns:1fr}.container{padding-bottom:20px}}
+@media(max-width:480px){.grid-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>📊 단지 인덱스 대시보드</h1>
+<span class="badge">ADMIN ONLY</span>
+</header>
+<div class="top-bar">
+<input type="text" id="searchInput" placeholder="아파트명 또는 주소 검색 (예: 은마아파트)" />
+<button onclick="searchAddress()">검색</button>
+</div>
+<div id="map"></div>
+<div class="dashboard" id="dashboard">
+<div class="dash-header">
+<h2 id="complexName">—</h2>
+<p id="complexAddr">지도에서 단지를 선택하세요</p>
+</div>
+
+<!-- 건축물 기본 정보 -->
+<div class="section-title">🏢 건축물 기본 정보</div>
+<div class="grid-3" id="buildingInfo">
+<div class="info-card"><div class="label">준공년도</div><div class="value" id="v-built">—</div></div>
+<div class="info-card"><div class="label">총 세대수</div><div class="value" id="v-units">—</div></div>
+<div class="info-card"><div class="label">건축연수</div><div class="value" id="v-age">—</div></div>
+<div class="info-card"><div class="label">용적률</div><div class="value" id="v-far">—</div><div class="sub">건축물대장 기준</div></div>
+<div class="info-card"><div class="label">주차대수</div><div class="value" id="v-park">—</div></div>
+<div class="info-card"><div class="label">단지유형</div><div class="value" id="v-type">—</div></div>
+</div>
+
+<!-- 실거래가 요약 -->
+<div class="section-title">💰 실거래가 (최근 6개월)</div>
+<div class="grid-3" id="priceInfo">
+<div class="info-card"><div class="label">최근 매매가</div><div class="value price" id="v-price">—</div><div class="sub" id="v-price-date">—</div></div>
+<div class="info-card"><div class="label">평당가</div><div class="value" id="v-ppy">—</div><div class="sub">만원/평</div></div>
+<div class="info-card"><div class="label">거래건수 (3개월)</div><div class="value" id="v-count">—</div></div>
+<div class="info-card"><div class="label">최근 전세가</div><div class="value" id="v-jeonse">—</div><div class="sub" id="v-jeonse-date">—</div></div>
+<div class="info-card"><div class="label">전세가율</div><div class="value" id="v-jgr">—</div></div>
+<div class="info-card"><div class="label">데이터 구간</div><div class="value" id="v-period">—</div><div class="sub">3개월 우선 / 6개월 확장</div></div>
+</div>
+
+<!-- 평가지수 -->
+<div class="section-title">📈 평가지수 (Valuation Index)</div>
+<div class="index-grid" id="indexGrid">
+<!-- JS에서 동적 생성 -->
+</div>
+
+<!-- 최근 거래 내역 -->
+<div class="section-title">📋 최근 거래 내역</div>
+<table class="trade-table" id="tradeTable">
+<thead><tr><th>거래일</th><th>면적(㎡)</th><th>층</th><th>매매가</th><th>평당가</th></tr></thead>
+<tbody id="tradeBody"><tr><td colspan="5" style="text-align:center;color:#666">단지를 선택하세요</td></tr></tbody>
+</table>
+
+<div class="disclaimer">
+<p>ℹ️ <strong>가격 정보 안내:</strong> 표시된 가격은 국토부 실거래가 신고 데이터(과거 거래 기록)이며, 현재 매도·매수 가능 가격과 다를 수 있습니다. 부동산은 실시간 거래가 아니므로 가장 최근 데이터라도 1~2개월의 시차가 있습니다. 정확한 시세는 현장 확인을 통해 판단하세요.</p>
+<p style="margin-top:6px">📐 <strong>지수 산출 기준:</strong> aptfinder_valuation_index_definition.md v1.0 | 거래정보 유효기간: 3개월 우선, 6개월 확장, 6개월 초과 무효</p>
+</div>
+</div><!-- /dashboard -->
+</div><!-- /container -->
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const LAMBDA_TRADE = 'https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/';
+let LAWD_CD = '11680'; // 강남구 기본
+let selectedUmdNm = '';
+let selectedJibun = '';
+let selectedName = '';
+
+// ============================================================
+// MAP INIT
+// ============================================================
+const map = new kakao.maps.Map(document.getElementById('map'), {
+  center: new kakao.maps.LatLng(37.4946, 127.0625), level: 5
+});
+const geocoder = new kakao.maps.services.Geocoder();
+const ps = new kakao.maps.services.Places();
+const marker = new kakao.maps.Marker({ position: map.getCenter() });
+marker.setMap(map);
+
+kakao.maps.event.addListener(map, 'click', function(e) {
+  marker.setPosition(e.latLng);
+  geocoder.coord2Address(e.latLng.getLng(), e.latLng.getLat(), function(result, status) {
+    if (status !== kakao.maps.services.Status.OK) return;
+    const addr = result[0].address;
+    const bldg = (result[0].road_address && result[0].road_address.building_name) || '';
+    selectedUmdNm = addr.region_3depth_name || '';
+    selectedJibun = (addr.main_address_no || '') + (addr.sub_address_no && addr.sub_address_no !== '0' ? '-' + addr.sub_address_no : '');
+    selectedName = bldg || addr.address_name;
+    geocoder.coord2RegionCode(e.latLng.getLng(), e.latLng.getLat(), function(rr, rs) {
+      if (rs === kakao.maps.services.Status.OK) {
+        for (let i = 0; i < rr.length; i++) {
+          if (rr[i].region_type === "B") { LAWD_CD = rr[i].code.substring(0, 5); break; }
+        }
+      }
+      loadDashboard(selectedName, addr.address_name);
+    });
+  });
+});
+
+// ============================================================
+// SEARCH
+// ============================================================
+function searchAddress() {
+  const kw = document.getElementById('searchInput').value.trim();
+  if (!kw) return;
+  ps.keywordSearch(kw, function(data, status) {
+    if (status !== kakao.maps.services.Status.OK) { alert('검색 결과 없음'); return; }
+    const p = data[0];
+    map.setCenter(new kakao.maps.LatLng(p.y, p.x));
+    map.setLevel(3);
+    marker.setPosition(new kakao.maps.LatLng(p.y, p.x));
+    geocoder.coord2Address(p.x, p.y, function(result, status) {
+      if (status === kakao.maps.services.Status.OK) {
+        const addr = result[0].address;
+        selectedUmdNm = addr.region_3depth_name || '';
+        selectedJibun = (addr.main_address_no || '') + (addr.sub_address_no && addr.sub_address_no !== '0' ? '-' + addr.sub_address_no : '');
+      }
+    });
+    geocoder.coord2RegionCode(p.x, p.y, function(rr, rs) {
+      if (rs === kakao.maps.services.Status.OK) {
+        for (let i = 0; i < rr.length; i++) {
+          if (rr[i].region_type === "B") { LAWD_CD = rr[i].code.substring(0, 5); break; }
+        }
+      }
+      selectedName = p.place_name;
+      loadDashboard(p.place_name, p.address_name);
+    });
+  });
+}
+document.getElementById('searchInput').addEventListener('keypress', e => { if (e.key === 'Enter') searchAddress(); });
+
+// ============================================================
+// LOAD DASHBOARD
+// ============================================================
+function loadDashboard(name, address) {
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('complexName').textContent = name;
+  document.getElementById('complexAddr').textContent = address;
+  // 초기화
+  document.getElementById('tradeBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666">조회 중...</td></tr>';
+  document.getElementById('indexGrid').innerHTML = '<div class="loading">실거래 데이터 수집 중...</div>';
+  
+  // 6개월치 실거래 데이터 수집
+  fetchTrades(6).then(allItems => {
+    const filtered = filterByComplex(allItems, name);
+    if (filtered.length === 0) {
+      document.getElementById('tradeBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888">해당 단지 거래 내역 없음 (최근 6개월)</td></tr>';
+      document.getElementById('indexGrid').innerHTML = '<div class="loading">거래 데이터 부족 — 지수 산출 불가</div>';
+      clearInfoCards();
+      return;
+    }
+    // 날짜 정렬 (최신순)
+    filtered.sort((a, b) => makeDate(b) - makeDate(a));
+    
+    // 3개월/6개월 분리
+    const now = new Date();
+    const m3ago = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+    const trades3m = filtered.filter(t => makeDate(t) >= m3ago);
+    const useTrades = trades3m.length > 0 ? trades3m : filtered;
+    const periodLabel = trades3m.length > 0 ? '3개월' : '6개월 (확장)';
+    
+    // 건축물 정보 (실거래 데이터에서 추출 가능한 것)
+    const built = filtered[0].buildYear ? parseInt(filtered[0].buildYear) : null;
+    displayBuildingInfo(built, name);
+    
+    // 가격 정보
+    displayPriceInfo(useTrades, filtered, periodLabel);
+    
+    // 인덱스 산출
+    calculateIndices(useTrades, filtered, periodLabel);
+    
+    // 거래 내역 테이블
+    displayTradeTable(filtered.slice(0, 15));
+  });
+}
+
+// ============================================================
+// FETCH TRADES (국토부 API)
+// ============================================================
+async function fetchTrades(months) {
+  const now = new Date();
+  const promises = [];
+  for (let i = 0; i < months; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const ym = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0');
+    promises.push(
+      fetch(`${LAMBDA_TRADE}?LAWD_CD=${LAWD_CD}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`)
+        .then(r => r.text())
+        .then(xml => {
+          const doc = new DOMParser().parseFromString(xml, 'text/xml');
+          const items = [];
+          doc.querySelectorAll('item').forEach(el => {
+            const o = {};
+            el.childNodes.forEach(n => { if (n.nodeType === 1) o[n.nodeName] = n.textContent.trim(); });
+            items.push(o);
+          });
+          return items;
+        })
+        .catch(() => [])
+    );
+  }
+  const results = await Promise.all(promises);
+  return results.flat();
+}
+
+// ============================================================
+// FILTER BY COMPLEX (지번 우선, 이름 폴백)
+// ============================================================
+function filterByComplex(allItems, name) {
+  let filtered = [];
+  if (selectedUmdNm && selectedJibun) {
+    const umd = selectedUmdNm.replace(/[0-9]/g, '').trim();
+    filtered = allItems.filter(it =>
+      (it.umdNm || '').trim() === umd && (it.jibun || '').trim() === selectedJibun.trim()
+    );
+  }
+  if (filtered.length === 0) {
+    let kw = name.replace(/아파트|단지|맨션|[0-9]+동|[0-9]+$|서울|강남구|서초구|송파구/g, '').trim();
+    kw = kw.replace(/^(대치동|도곡동|개포동|삼성동|압구정동|청담동|역삼동|논현동|일원동|수서동|서초동|반포동|잠원동|방배동|양재동|잠실동|송파동|가락동|문정동|방이동|신천동)/, '').trim();
+    if (kw.length >= 2) {
+      filtered = allItems.filter(it => {
+        const a = (it.aptNm || '').trim();
+        return a.indexOf(kw) >= 0 || kw.indexOf(a) >= 0;
+      });
+    }
+  }
+  return filtered;
+}
+
+function makeDate(t) {
+  return new Date(parseInt(t.dealYear), parseInt(t.dealMonth) - 1, parseInt(t.dealDay || 1));
+}
+
+// ============================================================
+// DISPLAY FUNCTIONS
+// ============================================================
+function clearInfoCards() {
+  ['v-built','v-units','v-age','v-far','v-park','v-type','v-price','v-price-date','v-ppy','v-count','v-jeonse','v-jeonse-date','v-jgr','v-period'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '—';
+  });
+}
+
+function displayBuildingInfo(built, name) {
+  const age = built ? (2026 - built) : null;
+  document.getElementById('v-built').textContent = built ? built + '년' : '—';
+  document.getElementById('v-age').textContent = age ? age + '년' : '—';
+  document.getElementById('v-units').textContent = '—'; // 건축물대장 연동 후
+  document.getElementById('v-far').textContent = '—'; // 건축물대장 연동 후
+  document.getElementById('v-park').textContent = '—'; // 건축물대장 연동 후
+  document.getElementById('v-type').textContent = '—'; // 자체DB 연동 후
+}
+
+function displayPriceInfo(useTrades, allTrades, periodLabel) {
+  if (useTrades.length === 0) return;
+  
+  const latest = useTrades[0];
+  const price = parseInt((latest.dealAmount || '0').replace(/,/g, ''));
+  const area = parseFloat(latest.excluUseAr || latest.exclusiveArea || 0);
+  const py = area / 3.3058;
+  const ppy = py > 0 ? Math.round(price / py) : 0;
+  
+  document.getElementById('v-price').textContent = formatPrice(price);
+  document.getElementById('v-price-date').textContent = `${latest.dealYear}.${String(latest.dealMonth).padStart(2,'0')}.${String(latest.dealDay||'').padStart(2,'0')} | ${area}㎡`;
+  document.getElementById('v-ppy').textContent = ppy > 0 ? ppy.toLocaleString() : '—';
+  document.getElementById('v-count').textContent = useTrades.length + '건';
+  document.getElementById('v-period').textContent = periodLabel;
+  
+  // 전세가율은 매매 전용 Lambda만 있으므로 현재 표시 불가
+  document.getElementById('v-jeonse').textContent = '전월세 API 연동 후';
+  document.getElementById('v-jeonse-date').textContent = '';
+  document.getElementById('v-jgr').textContent = '—';
+}
+
+function formatPrice(manwon) {
+  if (manwon >= 10000) return (manwon / 10000).toFixed(1) + '억';
+  return manwon.toLocaleString() + '만';
+}
+
+function displayTradeTable(trades) {
+  let html = '';
+  trades.forEach(t => {
+    const price = parseInt((t.dealAmount || '0').replace(/,/g, ''));
+    const area = parseFloat(t.excluUseAr || t.exclusiveArea || 0);
+    const py = area / 3.3058;
+    const ppy = py > 0 ? Math.round(price / py) : 0;
+    const date = `${t.dealYear}.${String(t.dealMonth).padStart(2,'0')}.${String(t.dealDay||'').padStart(2,'0')}`;
+    html += `<tr>
+      <td>${date}</td>
+      <td>${area}㎡ (${py.toFixed(1)}평)</td>
+      <td>${t.floor || '—'}층</td>
+      <td class="price">${formatPrice(price)}</td>
+      <td>${ppy > 0 ? ppy.toLocaleString() + '만/평' : '—'}</td>
+    </tr>`;
+  });
+  document.getElementById('tradeBody').innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:#666">거래 내역 없음</td></tr>';
+}
+
+// ============================================================
+// INDEX CALCULATION (정의서 기반)
+// ============================================================
+function calculateIndices(useTrades, allTrades, periodLabel) {
+  if (useTrades.length === 0) {
+    document.getElementById('indexGrid').innerHTML = '<div class="loading">거래 데이터 부족 — 지수 산출 불가</div>';
+    return;
+  }
+  
+  // 기본 산출값
+  const prices = useTrades.map(t => parseInt((t.dealAmount||'0').replace(/,/g,'')));
+  const areas = useTrades.map(t => parseFloat(t.excluUseAr || t.exclusiveArea || 0));
+  const avgPrice = prices.reduce((a,b) => a+b, 0) / prices.length;
+  const avgArea = areas.reduce((a,b) => a+b, 0) / areas.length;
+  const avgPy = avgArea / 3.3058;
+  const ppy = avgPy > 0 ? Math.round(avgPrice / avgPy) : 0; // 평당가
+  
+  // 동(dong) 평균 평당가 산출 (전체 6개월 데이터에서)
+  const dongTrades = allTrades.filter(t => {
+    const a = parseFloat(t.excluUseAr || t.exclusiveArea || 0);
+    return a > 0;
+  });
+  let dongAvgPpy = 0;
+  if (dongTrades.length > 0) {
+    const dongPpys = dongTrades.map(t => {
+      const p = parseInt((t.dealAmount||'0').replace(/,/g,''));
+      const a = parseFloat(t.excluUseAr || t.exclusiveArea || 0) / 3.3058;
+      return a > 0 ? p / a : 0;
+    }).filter(v => v > 0);
+    dongAvgPpy = dongPpys.reduce((a,b) => a+b, 0) / dongPpys.length;
+  }
+  
+  // --- UPI (저평가지수) ---
+  const upi = (dongAvgPpy > 0 && ppy > 0) ? dongAvgPpy / ppy : null;
+  const upiScore = upi ? Math.min(100, Math.max(0, (upi - 0.6) / (1.5 - 0.6) * 100)) : null;
+  
+  // --- MLI (거래유동성) ---
+  // 세대수 모르므로 3개월 거래건수만 표시 (세대수 연동 후 정식 산출)
+  const now = new Date();
+  const m3ago = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+  const count3m = allTrades.filter(t => makeDate(t) >= m3ago).length;
+  // 임시: 세대수 1000으로 가정 (건축물대장 연동 후 교체)
+  const mli = count3m / 1000 * 1000; // 건/천세대 (세대수 미상시 raw 건수만)
+  const mliScore = Math.min(100, Math.max(0, mli / 8 * 100));
+  
+  // --- API (연식프리미엄) ---
+  const built = parseInt(useTrades[0].buildYear || 0);
+  const age = built > 0 ? 2026 - built : null;
+  const api = (ppy > 0 && age > 0) ? Math.round(ppy / age) : null;
+  
+  // --- PSI (주차충분도) — 건축물대장 연동 전 산출 불가 ---
+  // --- DSI (밀도지수) — 건축물대장 연동 전 산출 불가 ---
+  // --- JGI (전세지지력) — 전월세 API 연동 전 산출 불가 ---
+  // --- LSI (대지지분) — 건축물대장 연동 전 산출 불가 ---
+  
+  // 렌더링
+  let html = '';
+  
+  // UPI
+  if (upi !== null) {
+    const color = upi >= 1.2 ? '#4caf50' : upi >= 0.9 ? '#ff9800' : '#f44336';
+    html += renderIndexCard('UPI', '저평가지수', 'A', upi.toFixed(2), upiScore,
+      upi >= 1.2 ? '동 평균 대비 저평가' : upi >= 0.9 ? '적정 수준' : '동 평균 대비 고평가',
+      color, `동 평균 평당가 ${Math.round(dongAvgPpy).toLocaleString()}만 ÷ 단지 평당가 ${ppy.toLocaleString()}만`);
+  }
+  
+  // MLI
+  html += renderIndexCard('MLI', '거래유동성', 'A', count3m + '건/3개월', mliScore,
+    count3m >= 5 ? '거래 활발' : count3m >= 2 ? '보통' : '거래 침체',
+    count3m >= 5 ? '#4caf50' : count3m >= 2 ? '#ff9800' : '#f44336',
+    '최근 3개월 매매 거래건수 (세대수 연동 후 MLI 정식 산출)');
+  
+  // API (연식프리미엄)
+  if (api !== null) {
+    html += renderIndexCard('API', '연식프리미엄', 'B', api.toLocaleString() + '만/년', null,
+      `평당가 ${ppy.toLocaleString()}만 ÷ 건축연수 ${age}년`,
+      '#64b5f6',
+      '높을수록 입지·브랜드 프리미엄 존재 (동일 구 내 상대 비교 필요)');
+  }
+  
+  // JGI (미연동)
+  html += renderIndexCard('JGI', '전세지지력', 'A', '—', null,
+    '전월세 실거래 API 연동 후 산출', '#666',
+    '전세가 ÷ 매매가 × 100. 높을수록 실수요 강함');
+  
+  // DSI (미연동)
+  html += renderIndexCard('DSI', '밀도지수(개발여력)', 'A', '—', null,
+    '건축물대장 API 연동 후 산출', '#666',
+    '단지 용적률 ÷ 지역 평균. 낮을수록 재건축 사업성 높음');
+  
+  // RPI (미연동)
+  html += renderIndexCard('RPI', '재건축잠재력', 'B', '—', null,
+    '건축물대장 API 연동 후 산출', '#666',
+    '연식 + 용적률여력 + 대지지분 + 규모 종합');
+  
+  document.getElementById('indexGrid').innerHTML = html;
+}
+
+function renderIndexCard(abbr, name, grade, value, score, desc, color, formula) {
+  const gradeClass = grade === 'A' ? 'grade-a' : grade === 'B' ? 'grade-b' : 'grade-c';
+  const scoreHtml = score !== null ? `
+    <div class="idx-score" style="color:${color}">점수: ${Math.round(score)}/100</div>
+    <div class="idx-bar"><div class="idx-bar-fill" style="width:${score}%;background:${color}"></div></div>` : '';
+  return `<div class="index-card">
+    <span class="grade ${gradeClass}">${grade}</span>
+    <div class="idx-name">${abbr} · ${name}</div>
+    <div class="idx-value" style="color:${color}">${value}</div>
+    ${scoreHtml}
+    <div class="idx-desc">${desc}</div>
+    <div class="idx-desc" style="margin-top:4px;font-style:italic">${formula}</div>
+  </div>`;
+}
+</script>
+</body>
+</html>
