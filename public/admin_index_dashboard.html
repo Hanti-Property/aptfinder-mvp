@@ -237,6 +237,7 @@ async function fetchBuilding(){
 // FETCH: 토지특성 (V-World API) — 대지면적, 지목, 공시지가
 // ============================================================
 const LAND_API_KEY='F287CABE-E562-3B60-BF55-7A93F964C866';
+const LAND_LAMBDA_URL='https://3b77wfcneqfnywtzw3z333kw6a0gtrzt.lambda-url.ap-northeast-2.on.aws/';
 async function fetchLandInfo(){
   const parts=selectedJibun.split('-');
   const bun=(parts[0]||'0').padStart(4,'0');
@@ -244,7 +245,7 @@ async function fetchLandInfo(){
   const bjdong=selectedBjdongCd||'10600';
   // PNU = 시군구(5) + 법정동(5) + 산여부(1=대지) + 본번(4) + 부번(4)
   const pnu = LAWD_CD + bjdong + '1' + bun + ji;
-  const url=`https://api.vworld.kr/ned/data/getLandCharacteristics?key=${LAND_API_KEY}&pnu=${pnu}&numOfRows=10&pageNo=1&format=json&domain=aptfinder.net`;
+  const url=`${LAND_LAMBDA_URL}?pnu=${pnu}`;
   console.log('[토지특성] URL:', url);
   try{
     const r=await fetch(url);
