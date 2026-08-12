@@ -211,21 +211,21 @@ async function fetchTrades(type,months){
 }
 
 // ============================================================
-// FETCH: 건축물대장
+// FETCH: 건축물대장 (총괄표제부 — 단지 전체 정보)
 // ============================================================
 async function fetchBuilding(){
-  // 지번에서 본번/부번 분리
   const parts=selectedJibun.split('-');
   const bun=(parts[0]||'0').padStart(4,'0');
   const ji=(parts[1]||'0').padStart(4,'0');
-  const bjdong=selectedBjdongCd||'10300';
-  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?serviceKey=${BLD_API_KEY}&sigunguCd=${LAWD_CD}&bjdongCd=${bjdong}&bun=${bun}&ji=${ji}&numOfRows=10&pageNo=1&type=json`;
+  const bjdong=selectedBjdongCd||'10600';
+  // 총괄표제부 (getBrRecapTitleInfo) — 단지 전체 세대수/용적률/대지면적 포함
+  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_API_KEY}&sigunguCd=${LAWD_CD}&bjdongCd=${bjdong}&bun=${bun}&ji=${ji}&numOfRows=10&pageNo=1&type=json`;
   try{
     const r=await fetch(url);const data=await r.json();
     const items=data.response?.body?.items?.item;
     if(!items)return null;
     return Array.isArray(items)?items[0]:items;
-  }catch(e){return null;}
+  }catch(e){console.error('건축물대장 조회 실패:',e);return null;}
 }
 
 // ============================================================
@@ -255,19 +255,20 @@ function displayBuilding(bld){
     ['v-built','v-units','v-age','v-far','v-plat','v-park'].forEach(id=>document.getElementById(id).textContent='조회불가');
     return;
   }
-  const useApr=bld.useAprDay||'';
+  const useApr=bld.useAprDay||bld.pmsDay||'';
   const builtYear=useApr?parseInt(useApr.substring(0,4)):null;
   const age=builtYear?(2026-builtYear):null;
-  const units=bld.hhldCnt||bld.hoCnt||'—';
+  const units=bld.hhldCnt||bld.hoCnt||bld.totPkngCnt||'—';
   const far=bld.vlRat?parseFloat(bld.vlRat).toFixed(1)+'%':'—';
   const plat=bld.platArea?parseFloat(bld.platArea).toFixed(0)+'㎡':'—';
-  const parkTotal=(parseInt(bld.indrMechUtcnt||0)+parseInt(bld.oudrMechUtcnt||0)+parseInt(bld.indrAutoUtcnt||0)+parseInt(bld.oudrAutoUtcnt||0))||'—';
+  // 주차: 총괄표제부에서는 totPkngCnt (총 주차대수) 필드 사용
+  const parkTotal=bld.totPkngCnt||bld.indrMechUtcnt||'—';
   document.getElementById('v-built').textContent=builtYear?builtYear+'년':'—';
   document.getElementById('v-age').textContent=age?age+'년':'—';
-  document.getElementById('v-units').textContent=units;
+  document.getElementById('v-units').textContent=typeof units==='number'||!isNaN(units)?Number(units).toLocaleString()+'세대':units;
   document.getElementById('v-far').textContent=far;
   document.getElementById('v-plat').textContent=plat;
-  document.getElementById('v-park').textContent=parkTotal!=='—'?parkTotal+'대':'—';
+  document.getElementById('v-park').textContent=!isNaN(parkTotal)?Number(parkTotal).toLocaleString()+'대':parkTotal;
 }
 
 // ============================================================
@@ -349,12 +350,12 @@ function calculateAllIndices(sales,rents,allSales,bld){
   const dongAvgPpy=allPpys.length?allPpys.reduce((a,b)=>a+b,0)/allPpys.length:0;
 
   // 건축물대장 파싱
-  const builtYear=bld&&bld.useAprDay?parseInt(bld.useAprDay.substring(0,4)):null;
+  const builtYear=bld&&(bld.useAprDay||bld.pmsDay)?parseInt((bld.useAprDay||bld.pmsDay).substring(0,4)):null;
   const age=builtYear?(2026-builtYear):null;
   const units=bld?(parseInt(bld.hhldCnt)||parseInt(bld.hoCnt)||0):0;
   const vlRat=bld?parseFloat(bld.vlRat||0):0;
   const platArea=bld?parseFloat(bld.platArea||0):0;
-  const parkTotal=bld?(parseInt(bld.indrMechUtcnt||0)+parseInt(bld.oudrMechUtcnt||0)+parseInt(bld.indrAutoUtcnt||0)+parseInt(bld.oudrAutoUtcnt||0)):0;
+  const parkTotal=bld?parseInt(bld.totPkngCnt||0):0;
 
   // ═══ INDEX #1: UPI ═══
   if(ppy>0&&dongAvgPpy>0){
