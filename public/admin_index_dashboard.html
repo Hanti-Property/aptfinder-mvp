@@ -577,9 +577,10 @@ function calculateAllIndices(sales,rents,allSales,bld,land){
   } else { html+=idxCard('LSI','대지지분','B','—',null,'#555','대지면적/세대수 부족','건축물대장 연동 필요'); }
 
   // ═══ INDEX #9: RPI ═══
-  if(age&&vlRat>0&&platArea>0&&units>0){
+  if(age&&(effectiveVlRat>0||platArea>0)&&platArea>0&&units>0){
     const ageScore=Math.min(100,Math.max(0,(age-20)*2.5));
-    const dsiScore=Math.min(100,Math.max(0,(1.2-vlRat/250)/(1.2-0.5)*100));
+    const dsiVal=effectiveVlRat>0?effectiveVlRat/250:1.0;
+    const dsiScore=Math.min(100,Math.max(0,(1.2-dsiVal)/(1.2-0.5)*100));
     const landPerUnit=platArea/units;
     const lsiVal=landPerUnit/(avgArea||60);
     const lsiScore=Math.min(100,Math.max(0,(lsiVal-0.2)/(1.5-0.2)*100));
