@@ -465,12 +465,20 @@ function displayPrice(sales,rents,periodLabel,isStale){
     const a=j.excluUseAr||j.exclusiveArea||'?';
     document.getElementById('v-jeonse').textContent=fmtPrice(dep);
     document.getElementById('v-jeonse-sub').textContent=`${j.dealYear}.${String(j.dealMonth).padStart(2,'0')} | ${a}㎡ (순수전세)`;
-    // 전세가율: 순수 전세 ÷ 매매 평균
+    // 전세가율: 동일 면적대 매매가와 비교 (±10㎡ 허용)
     if(sales.length>0){
-      const saleAvg=sales.map(t=>parseInt((t.dealAmount||'0').replace(/,/g,''))).reduce((a,b)=>a+b,0)/sales.length;
+      const jeonseArea=parseFloat(a)||0;
+      const sameSizeSales=sales.filter(t=>{
+        const sa=parseFloat(t.excluUseAr||t.exclusiveArea||0);
+        return sa>0 && Math.abs(sa-jeonseArea)<=10;
+      });
+      const compareSales=sameSizeSales.length>0?sameSizeSales:sales;
+      const saleAvg=compareSales.map(t=>parseInt((t.dealAmount||'0').replace(/,/g,''))).reduce((a,b)=>a+b,0)/compareSales.length;
       if(saleAvg>0){
         const jgi=(dep/saleAvg*100).toFixed(1);
+        const sizeNote=sameSizeSales.length>0?`동일면적(${jeonseArea}㎡) 기준`:'전체면적 평균 기준';
         document.getElementById('v-jgr').textContent=jgi+'%';
+        document.getElementById('v-jgr').title=sizeNote;
       }
     }
   } else {
@@ -562,13 +570,37 @@ function calculateAllIndices(sales,rents,allSales,bld,land){
 
   // ═══ INDEX #2: JGI ═══
   const jeonseRents=rents.filter(t=>{const m=parseInt((t.monthlyRent||t.월세금액||'0').toString().trim().replace(/,/g,''))||0;return m===0;});
-  if(jeonseRents.length>0&&avgPrice>0){
-    const jeonseAvg=jeonseRents.map(t=>parseInt((t.deposit||t.보증금||'0').replace(/,/g,''))).reduce((a,b)=>a+b,0)/jeonseRents.length;
-    const jgi=jeonseAvg/avgPrice*100;
+  if(jeonseRents.length>0&&sales.length>0){
+    // 면적대별 매칭: 전세 거래의 면적과 동일 면적(±10㎡) 매매만 비교
+    let jgiSum=0, jgiCount=0;
+    jeonseRents.forEach(jr=>{
+      const jArea=parseFloat(jr.excluUseAr||jr.exclusiveArea||0);
+      const jDep=parseInt((jr.deposit||jr.보증금||'0').toString().trim().replace(/,/g,''))||0;
+      if(jArea<=0||jDep<=0)return;
+      const sameSizeSales=sales.filter(s=>{
+        const sArea=parseFloat(s.excluUseAr||s.exclusiveArea||0);
+        return sArea>0&&Math.abs(sArea-jArea)<=10;
+      });
+      if(sameSizeSales.length>0){
+        const saleAvg=sameSizeSales.map(s=>parseInt((s.dealAmount||'0').replace(/,/g,''))).reduce((a,b)=>a+b,0)/sameSizeSales.length;
+        if(saleAvg>0){jgiSum+=jDep/saleAvg;jgiCount++;}
+      }
+    });
+    // 동일면적 매칭 실패 시 전체 평균으로 폴백
+    let jgi;
+    let jgiNote;
+    if(jgiCount>0){
+      jgi=jgiSum/jgiCount*100;
+      jgiNote='동일면적 매매 대비';
+    } else {
+      const jeonseAvg=jeonseRents.map(t=>parseInt((t.deposit||t.보증금||'0').toString().trim().replace(/,/g,''))||0).reduce((a,b)=>a+b,0)/jeonseRents.length;
+      jgi=jeonseAvg/avgPrice*100;
+      jgiNote='전체면적 평균 대비 (면적 매칭 불가)';
+    }
     const score=Math.min(100,Math.max(0,(jgi-30)/(70-30)*100));
     const color=jgi>=60?'#4caf50':jgi>=45?'#ff9800':'#f44336';
     const desc=jgi>=60?'실수요 매우 강함':jgi>=45?'적정 수준':'투자 갭 큼';
-    html+=idxCard('JGI','전세지지력','A',jgi.toFixed(1)+'%',score,color,desc,`전세 평균 ${fmtPrice(Math.round(jeonseAvg))} ÷ 매매 평균 ${fmtPrice(Math.round(avgPrice))}`);
+    html+=idxCard('JGI','전세지지력','A',jgi.toFixed(1)+'%',score,color,desc,jgiNote);
     statusParts.push('JGI✓');
   } else { html+=idxCard('JGI','전세지지력','A','—',null,'#555','전세 거래 데이터 부족','최근 6개월 내 전세 거래 필요'); }
 
