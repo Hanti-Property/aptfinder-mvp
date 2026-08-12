@@ -74,8 +74,8 @@ header .badge{background:#e74c3c;color:#fff;font-size:11px;padding:3px 8px;borde
 <div class="info-card"><div class="label">평당가</div><div class="value" id="v-ppy">—</div><div class="sub">만원/평</div></div>
 <div class="info-card"><div class="label">매매 거래건수</div><div class="value" id="v-count">—</div><div class="sub" id="v-period">—</div></div>
 <div class="info-card"><div class="label">최근 전세가</div><div class="value" id="v-jeonse" style="color:#64b5f6">—</div><div class="sub" id="v-jeonse-sub">—</div></div>
-<div class="info-card"><div class="label">전세가율 (JGI)</div><div class="value" id="v-jgr">—</div></div>
-<div class="info-card"><div class="label">데이터 구간</div><div class="value" id="v-data-period">—</div></div>
+<div class="info-card"><div class="label">최근 월세</div><div class="value" id="v-wolse" style="color:#ff9800">—</div><div class="sub" id="v-wolse-sub">—</div></div>
+<div class="info-card"><div class="label">전세가율 (JGI)</div><div class="value" id="v-jgr">—</div><div class="sub">순수전세 기준</div></div>
 </div>
 <div class="section-title">📈 평가지수 (Valuation Index)</div>
 <p class="status-msg" id="indexStatus">산출 중...</p>
@@ -424,24 +424,42 @@ function displayPrice(sales,rents,periodLabel){
     document.getElementById('v-ppy').textContent=py>0?Math.round(p/py).toLocaleString():'—';
     document.getElementById('v-count').textContent=sales.length+'건';
   }
-  if(rents.length>0){
-    const r=rents[0];
-    const dep=parseInt((r.deposit||r.보증금||'0').toString().trim().replace(/,/g,''))||0;
-    const monthly=parseInt((r.monthlyRent||r.월세금액||'0').toString().trim().replace(/,/g,''))||0;
-    const label=monthly>0?`${fmtPrice(dep)}/${monthly}만`:fmtPrice(dep);
-    document.getElementById('v-jeonse').textContent=label;
-    document.getElementById('v-jeonse-sub').textContent=`${r.dealYear}.${String(r.dealMonth).padStart(2,'0')} | ${r.excluUseAr||r.exclusiveArea||'?'}㎡`;
-    // JGI 계산
+  // 전세/월세 분리
+  const jeonseList=rents.filter(t=>{const m=parseInt((t.monthlyRent||t.월세금액||'0').toString().trim().replace(/,/g,''))||0;return m===0;});
+  const wolseList=rents.filter(t=>{const m=parseInt((t.monthlyRent||t.월세금액||'0').toString().trim().replace(/,/g,''))||0;return m>0;});
+
+  // 최근 전세가
+  if(jeonseList.length>0){
+    const j=jeonseList[0];
+    const dep=parseInt((j.deposit||'0').toString().trim().replace(/,/g,''))||0;
+    const a=j.excluUseAr||j.exclusiveArea||'?';
+    document.getElementById('v-jeonse').textContent=fmtPrice(dep);
+    document.getElementById('v-jeonse-sub').textContent=`${j.dealYear}.${String(j.dealMonth).padStart(2,'0')} | ${a}㎡ (순수전세)`;
+    // 전세가율: 순수 전세 ÷ 매매 평균
     if(sales.length>0){
-      const salePrice=parseInt((sales[0].dealAmount||'0').replace(/,/g,''));
-      if(salePrice>0&&dep>0&&monthly===0){
-        const jgi=(dep/salePrice*100).toFixed(1);
+      const saleAvg=sales.map(t=>parseInt((t.dealAmount||'0').replace(/,/g,''))).reduce((a,b)=>a+b,0)/sales.length;
+      if(saleAvg>0){
+        const jgi=(dep/saleAvg*100).toFixed(1);
         document.getElementById('v-jgr').textContent=jgi+'%';
       }
     }
+  } else {
+    document.getElementById('v-jeonse').textContent='거래없음';
+    document.getElementById('v-jeonse-sub').textContent='최근 6개월 순수전세 없음';
+  }
+
+  // 최근 월세
+  if(wolseList.length>0){
+    const w=wolseList[0];
+    const dep=parseInt((w.deposit||'0').toString().trim().replace(/,/g,''))||0;
+    const mon=parseInt((w.monthlyRent||w.월세금액||'0').toString().trim().replace(/,/g,''))||0;
+    const a=w.excluUseAr||w.exclusiveArea||'?';
+    document.getElementById('v-wolse').textContent=`${fmtPrice(dep)}/${mon}만`;
+    document.getElementById('v-wolse-sub').textContent=`${w.dealYear}.${String(w.dealMonth).padStart(2,'0')} | ${a}㎡`;
+  } else {
+    document.getElementById('v-wolse').textContent='거래없음';
   }
   document.getElementById('v-period').textContent=periodLabel;
-  document.getElementById('v-data-period').textContent=periodLabel;
 }
 
 // ============================================================
