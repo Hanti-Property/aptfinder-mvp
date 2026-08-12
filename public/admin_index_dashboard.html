@@ -71,7 +71,7 @@ header .badge{background:#e74c3c;color:#fff;font-size:11px;padding:3px 8px;borde
 <div class="section-title">💰 실거래가</div>
 <div class="grid-3" id="priceInfo">
 <div class="info-card"><div class="label">최근 매매가</div><div class="value price" id="v-price">—</div><div class="sub" id="v-price-sub">—</div></div>
-<div class="info-card"><div class="label">평당가</div><div class="value" id="v-ppy">—</div><div class="sub">만원/평</div></div>
+<div class="info-card"><div class="label">평당가 (공급면적)</div><div class="value" id="v-ppy">—</div><div class="sub">만원/평 (추정 전용률 74%)</div></div>
 <div class="info-card"><div class="label">매매 거래건수</div><div class="value" id="v-count">—</div><div class="sub" id="v-period">—</div></div>
 <div class="info-card"><div class="label">최근 전세가</div><div class="value" id="v-jeonse" style="color:#64b5f6">—</div><div class="sub" id="v-jeonse-sub">—</div></div>
 <div class="info-card"><div class="label">최근 월세</div><div class="value" id="v-wolse" style="color:#ff9800">—</div><div class="sub" id="v-wolse-sub">—</div></div>
@@ -81,7 +81,7 @@ header .badge{background:#e74c3c;color:#fff;font-size:11px;padding:3px 8px;borde
 <p class="status-msg" id="indexStatus">산출 중...</p>
 <div class="index-grid" id="indexGrid"></div>
 <div class="section-title">📋 최근 거래 내역</div>
-<table class="trade-table"><thead><tr><th>거래일</th><th>유형</th><th>면적</th><th>층</th><th>가격</th><th>평당가</th></tr></thead>
+<table class="trade-table"><thead><tr><th>거래일</th><th>유형</th><th>면적</th><th>층</th><th>가격</th><th>평당가(공급)</th></tr></thead>
 <tbody id="tradeBody"><tr><td colspan="6" style="text-align:center;color:#666">단지를 선택하세요</td></tr></tbody></table>
 <div class="disclaimer">
 <p>ℹ️ 표시된 가격은 국토부 실거래가 신고 데이터(과거 거래)이며, 현재 시세와 다를 수 있습니다. 부동산은 실시간 거래가 아니므로 1~2개월 시차가 존재합니다.</p>
@@ -94,6 +94,9 @@ header .badge{background:#e74c3c;color:#fff;font-size:11px;padding:3px 8px;borde
 <script>
 const LAMBDA_URL='https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/';
 const BLD_API_KEY='Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
+// 평당가 환산: 전용면적 → 추정 공급면적(전용률 0.74) → 평(÷3.3058)
+const JYONYUL = 0.74; // 강남3구 아파트 평균 전용률
+function toPy(excluArea) { return (excluArea / JYONYUL) / 3.3058; } // 전용㎡ → 공급평
 let LAWD_CD='11680',selectedUmdNm='',selectedJibun='',selectedBjdongCd='',selectedName='';
 
 // 법정동코드 매핑 (강남3구 주요동)
@@ -448,7 +451,7 @@ function displayPrice(sales,rents,periodLabel,isStale){
     const s=sales[0];
     const p=parseInt((s.dealAmount||'0').replace(/,/g,''));
     const a=parseFloat(s.excluUseAr||s.exclusiveArea||0);
-    const py=a/3.3058;
+    const py=toPy(a);
     document.getElementById('v-price').textContent=fmtPrice(p);
     document.getElementById('v-price-sub').textContent=`${s.dealYear}.${String(s.dealMonth).padStart(2,'0')} | ${a}㎡ | ${s.floor||'?'}층`;
     document.getElementById('v-ppy').textContent=py>0?Math.round(p/py).toLocaleString():'—';
@@ -512,7 +515,7 @@ function displayTradeTable(sales,rents){
   sales.forEach(t=>{
     const p=parseInt((t.dealAmount||'0').replace(/,/g,''));
     const a=parseFloat(t.excluUseAr||t.exclusiveArea||0);
-    const py=a/3.3058;
+    const py=toPy(a);
     html+=`<tr><td>${t.dealYear}.${String(t.dealMonth).padStart(2,'0')}.${String(t.dealDay||'').padStart(2,'0')}</td>
     <td>매매</td><td>${a}㎡</td><td>${t.floor||'—'}층</td>
     <td class="price">${fmtPrice(p)}</td><td>${py>0?Math.round(p/py).toLocaleString()+'만/평':'—'}</td></tr>`;
@@ -541,11 +544,11 @@ function calculateAllIndices(sales,rents,allSales,bld,land){
   const areas=sales.map(t=>parseFloat(t.excluUseAr||t.exclusiveArea||0));
   const avgPrice=prices.length?prices.reduce((a,b)=>a+b,0)/prices.length:0;
   const avgArea=areas.length?areas.reduce((a,b)=>a+b,0)/areas.length:0;
-  const avgPy=avgArea/3.3058;
+  const avgPy=toPy(avgArea);
   const ppy=avgPy>0?Math.round(avgPrice/avgPy):0;
 
   // 동 평균 평당가 (전체 6개월 데이터)
-  const allPpys=allSales.map(t=>{const p=parseInt((t.dealAmount||'0').replace(/,/g,''));const a=parseFloat(t.excluUseAr||t.exclusiveArea||0)/3.3058;return a>0?p/a:0;}).filter(v=>v>0);
+  const allPpys=allSales.map(t=>{const p=parseInt((t.dealAmount||'0').replace(/,/g,''));const a=parseFloat(t.excluUseAr||t.exclusiveArea||0);const py=toPy(a);return py>0?p/py:0;}).filter(v=>v>0);
   const dongAvgPpy=allPpys.length?allPpys.reduce((a,b)=>a+b,0)/allPpys.length:0;
 
   // 건축물대장 파싱
