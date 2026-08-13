@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AptFinder - 재건축 RVI 대시보드</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#1a1a2e;color:#e0e0e0;font-size:14px}
+.container{max-width:1100px;margin:0 auto;min-height:100vh}
+header{background:#0f0f23;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a4a}
+header h1{font-size:20px;color:#fff;font-weight:700}
+header .sub{font-size:11px;color:#888;margin-top:2px}
+header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;border-radius:4px;font-weight:600}
+.top-bar{padding:12px 24px;background:#12122b;display:flex;gap:10px;align-items:center;border-bottom:1px solid #2a2a4a}
+.top-bar input{flex:1;padding:10px 14px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:8px;color:#fff;font-size:14px}
+.top-bar input::placeholder{color:#666}
+.top-bar button{padding:10px 18px;background:#0066cc;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+#map{width:100%;height:300px;border-bottom:1px solid #2a2a4a}
+.dashboard{display:none;padding:20px 24px}
+.dash-header{margin-bottom:16px}
+.dash-header h2{font-size:22px;color:#fff;margin-bottom:4px}
+.dash-header p{font-size:13px;color:#888}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.info-card{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:14px}
+.info-card .label{font-size:11px;color:#888;margin-bottom:4px}
+.info-card .value{font-size:16px;font-weight:700;color:#fff}
+.info-card .sub{font-size:11px;color:#666;margin-top:2px}
+
+/* RVI 총점 영역 */
+.rvi-hero{text-align:center;padding:24px;background:linear-gradient(135deg,#0f0f23,#1e1e3f);border:1px solid #2a2a4a;border-radius:12px;margin-bottom:16px}
+.rvi-hero .rvi-label{font-size:12px;color:#888;letter-spacing:1px}
+.rvi-hero .rvi-score{font-size:64px;font-weight:900;margin:8px 0}
+.rvi-hero .rvi-grade{font-size:22px;font-weight:700;margin-left:4px}
+.rvi-hero .rvi-desc{font-size:13px;color:#aaa;margin-top:4px}
+
+/* 색상 클래스 */
+.c-s{color:#42A5F5}.c-a{color:#66BB6A}.c-b{color:#FFA726}.c-c{color:#EF5350}.c-d{color:#9E9E9E}
+.bg-s{background:#0D47A1;border-color:#1565C0}
+.bg-a{background:#1B5E20;border-color:#2E7D32}
+.bg-b{background:#E65100;border-color:#F57C00}
+.bg-c{background:#B71C1C;border-color:#C62828}
+.bar-s{background:#42A5F5}.bar-a{background:#66BB6A}.bar-b{background:#FFA726}.bar-c{background:#EF5350}.bar-d{background:#9E9E9E}
+
+.section-title{font-size:16px;font-weight:700;color:#fff;margin:16px 0 12px;padding-bottom:8px;border-bottom:1px solid #2a2a4a}
+.index-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.index-card{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;position:relative;transition:border-color .3s}
+.index-card .idx-label{font-size:10px;color:#666;font-weight:600;letter-spacing:0.5px}
+.index-card .idx-name{font-size:13px;color:#ccc;margin:4px 0 8px}
+.index-card .idx-score{font-size:28px;font-weight:800}
+.index-card .idx-sub{font-size:11px;color:#888;margin-top:6px;line-height:1.4}
+.idx-bar{height:4px;background:#2a2a4a;border-radius:2px;margin-top:8px;overflow:hidden}
+.idx-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+
+/* NVP 비교 단지 */
+.nvp-compare{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;margin-bottom:16px}
+.nvp-compare h4{font-size:13px;color:#aaa;margin-bottom:10px}
+.nvp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #252545}
+.nvp-row:last-child{border-bottom:none}
+.nvp-row .left{font-size:12px;color:#ccc}
+.nvp-row .right{font-size:13px;font-weight:700;color:#42A5F5}
+
+/* 거래내역 */
+.trade-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.trade-table th{background:#12122b;padding:10px 8px;font-size:11px;color:#888;text-align:left;font-weight:600}
+.trade-table td{padding:10px 8px;border-bottom:1px solid #1e1e3f;font-size:13px}
+.trade-table .price{color:#ff6b6b;font-weight:700}
+
+.quick-section{padding:16px 24px;border-top:1px solid #2a2a4a}
+.quick-section h3{font-size:12px;color:#888;margin-bottom:8px}
+.quick-btns{display:flex;flex-wrap:wrap;gap:6px}
+.quick-btn{padding:7px 12px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:16px;font-size:12px;color:#ccc;cursor:pointer;transition:all .2s}
+.quick-btn:hover{background:#2a2a5a;border-color:#42A5F5;color:#fff}
+
+.loading{text-align:center;padding:30px;color:#888}
+.disclaimer{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:8px;padding:12px 16px;margin-top:16px}
+.disclaimer p{font-size:11px;color:#666;line-height:1.5}
+@media(max-width:768px){.grid-3,.index-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.grid-3{grid-template-columns:1fr}.index-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div><h1>🏗️ 재건축 RVI 대시보드</h1><div class="sub">Reconstruction Value Index — 7대 지표 자동 산출</div></div>
+  <span class="badge">LIVE API</span>
+</header>
+<div class="top-bar">
+  <input type="text" id="searchInput" placeholder="재건축 단지 검색 (예: 은마아파트, 잠실주공5단지)"/>
+  <button onclick="searchAddress()">검색</button>
+</div>
+<div id="map"></div>
+
+<!-- 빠른 선택 -->
+<div class="quick-section">
+  <h3>빠른 선택 — 강남3구 재건축 주요 단지</h3>
+  <div class="quick-btns">
+    <button class="quick-btn" onclick="quickLoad('은마아파트','서울 강남구 대치동 316')">은마아파트</button>
+    <button class="quick-btn" onclick="quickLoad('잠실주공5단지','서울 송파구 잠실동 27')">잠실주공5단지</button>
+    <button class="quick-btn" onclick="quickLoad('개포주공아파트','서울 강남구 개포동 185')">개포주공5단지</button>
+    <button class="quick-btn" onclick="quickLoad('압구정현대','서울 강남구 압구정동 456')">압구정현대</button>
+    <button class="quick-btn" onclick="quickLoad('미도맨션아파트','서울 강남구 대치동 511')">미도아파트</button>
+    <button class="quick-btn" onclick="quickLoad('선경아파트','서울 강남구 대치동 506')">선경아파트</button>
+    <button class="quick-btn" onclick="quickLoad('래미안대치팰리스','서울 강남구 대치동 1027')">래미안대치팰리스</button>
+  </div>
+</div>
+
+<div class="dashboard" id="dashboard">
+  <div class="dash-header"><h2 id="complexName">—</h2><p id="complexAddr">단지를 선택하세요</p></div>
+
+  <!-- 기본정보 -->
+  <div class="section-title">🏢 기본 정보</div>
+  <div class="grid-3" id="basicInfo">
+    <div class="info-card"><div class="label">준공년도</div><div class="value" id="v-year">—</div></div>
+    <div class="info-card"><div class="label">경과년수</div><div class="value" id="v-age">—</div></div>
+    <div class="info-card"><div class="label">총 세대수</div><div class="value" id="v-units">—</div></div>
+    <div class="info-card"><div class="label">대지면적</div><div class="value" id="v-land">—</div></div>
+    <div class="info-card"><div class="label">용적률</div><div class="value" id="v-far">—</div></div>
+    <div class="info-card"><div class="label">최근접 역</div><div class="value" id="v-station">—</div></div>
+  </div>
+
+  <!-- RVI 총점 -->
+  <div class="rvi-hero" id="rviHero">
+    <div class="rvi-label">RVI RECONSTRUCTION VALUE INDEX</div>
+    <div><span class="rvi-score" id="rviScore">—</span><span class="rvi-grade" id="rviGrade"></span></div>
+    <div class="rvi-desc" id="rviDesc">산출 중...</div>
+  </div>
+
+  <!-- 7대 지표 -->
+  <div class="section-title">📊 7대 평가지표</div>
+  <div class="index-grid" id="indexGrid"></div>
+
+  <!-- NVP 비교 -->
+  <div class="nvp-compare" id="nvpCompare">
+    <h4>🏠 NVP 비교 신축 단지</h4>
+    <div id="nvpRows"></div>
+  </div>
+
+  <!-- 최근 거래내역 -->
+  <div class="section-title">📋 최근 거래 내역</div>
+  <table class="trade-table"><thead><tr><th>거래일</th><th>면적</th><th>층</th><th>가격</th><th>평당가</th></tr></thead>
+  <tbody id="tradeBody"><tr><td colspan="5" style="text-align:center;color:#666">단지를 선택하세요</td></tr></tbody></table>
+
+  <div class="disclaimer">
+    <p>ℹ️ RVI는 국토부 실거래가 + 건축물대장 데이터를 기반으로 자동 산출됩니다. 실시간 시세와 다를 수 있으며, 투자 판단의 참고 자료로만 활용하세요.</p>
+    <p style="margin-top:4px">📐 산출 기준: NVP Rate(30%) + LPS(15%) + FAR(15%) + TLA(12%) + NRT(10%) + STD(10%) + AGE(8%) | 신축프리미엄 ×1.25</p>
+  </div>
+</div>
+
+<div class="loading" id="loading" style="display:none">
+  <p style="font-size:16px">⏳</p>
+  <p style="margin-top:8px" id="loadingText">재건축 인덱스를 산출 중입니다...</p>
+</div>
+</div>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
+<script>
+// ====== 설정 ======
+const LAMBDA_URL='https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/';
+const BLD_KEY='Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
+const NVP_PREMIUM=1.25;
+
+// 서울 지하철 주요역 좌표 (강남3구 중심)
+const STATIONS=[
+  {name:'대치역',lat:37.4947,lng:127.0564},
+  {name:'도곡역',lat:37.4910,lng:127.0536},
+  {name:'한티역',lat:37.4987,lng:127.0620},
+  {name:'선릉역',lat:37.5045,lng:127.0490},
+  {name:'삼성역',lat:37.5088,lng:127.0631},
+  {name:'잠실역',lat:37.5133,lng:127.1001},
+  {name:'잠실새내역',lat:37.5117,lng:127.0863},
+  {name:'종합운동장역',lat:37.5109,lng:127.0740},
+  {name:'압구정역',lat:37.5270,lng:127.0285},
+  {name:'압구정로데오역',lat:37.5274,lng:127.0400},
+  {name:'청담역',lat:37.5200,lng:127.0530},
+  {name:'강남구청역',lat:37.5169,lng:127.0417},
+  {name:'개포디지털단지역',lat:37.4781,lng:127.0466},
+  {name:'대모산입구역',lat:37.4874,lng:127.0571},
+  {name:'수서역',lat:37.4875,lng:127.1017},
+  {name:'일원역',lat:37.4835,lng:127.0847},
+  {name:'반포역',lat:37.5082,lng:126.9968},
+  {name:'서초역',lat:37.4919,lng:127.0078},
+  {name:'교대역',lat:37.4935,lng:127.0144},
+  {name:'방배역',lat:37.4815,lng:126.9977},
+  {name:'석촌역',lat:37.5056,lng:127.1052},
+  {name:'송파역',lat:37.5025,lng:127.1131},
+  {name:'가락시장역',lat:37.4929,lng:127.1183},
+  {name:'문정역',lat:37.4850,lng:127.1222},
+  {name:'강남역',lat:37.4980,lng:127.0276},
+  {name:'역삼역',lat:37.5007,lng:127.0365},
+  {name:'선정릉역',lat:37.5102,lng:127.0430},
+  {name:'학여울역',lat:37.4969,lng:127.0651},
+  {name:'대청역',lat:37.4920,lng:127.0714},
+  {name:'잠실나루역',lat:37.5200,lng:127.0970},
+];
+
+// 주변 신축 단지 DB (강남3구 2006년 이후 준공 대단지)
+const NEW_COMPLEXES=[
+  {name:'래미안대치팰리스',keyword:'래미안대치팰',lat:37.4948,lng:127.0575,households:1608,year:2015,lawd:'11680'},
+  {name:'개포자이프레지던스',keyword:'개포자이프레',lat:37.4830,lng:127.0530,households:3375,year:2023,lawd:'11680'},
+  {name:'디에이치자이개포',keyword:'디에이치자이',lat:37.4860,lng:127.0550,households:1996,year:2021,lawd:'11680'},
+  {name:'개포래미안포레스트',keyword:'개포래미안포',lat:37.4810,lng:127.0490,households:2296,year:2022,lawd:'11680'},
+  {name:'잠실르엘',keyword:'잠실르엘',lat:37.5133,lng:127.0830,households:2678,year:2025,lawd:'11710'},
+  {name:'잠실엘스',keyword:'잠실엘스',lat:37.5100,lng:127.0830,households:5678,year:2008,lawd:'11710'},
+  {name:'리센츠',keyword:'리센츠',lat:37.5130,lng:127.0900,households:5563,year:2008,lawd:'11710'},
+  {name:'트리지움',keyword:'트리지움',lat:37.5080,lng:127.0860,households:3696,year:2007,lawd:'11710'},
+  {name:'헬리오시티',keyword:'헬리오시티',lat:37.4850,lng:127.1280,households:9510,year:2018,lawd:'11710'},
+  {name:'파크리오',keyword:'파크리오',lat:37.5107,lng:127.0950,households:6864,year:2008,lawd:'11710'},
+];
+
+let LAWD_CD='11680', selectedBjdongCd='10600', selectedJibun='316', selectedName='';
+
+// ====== 유틸 ======
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.asin(Math.sqrt(a));
+}
+function nearestStation(lat,lng){
+  let min=999,best=STATIONS[0];
+  STATIONS.forEach(s=>{const d=haversine(lat,lng,s.lat,s.lng);if(d<min){min=d;best=s;}});
+  return {name:best.name,dist:Math.round(min*1000)};
+}
+function scoreColor(s){return s>=85?'s':s>=70?'a':s>=55?'b':s>=40?'c':'d';}
+function grade(s){return s>=85?'S':s>=70?'A':s>=55?'B':s>=40?'C':'D';}
+function gradeDesc(s){return s>=85?'최상위 투자 매력':s>=70?'우수 · 투자 매력 높음':s>=55?'양호':s>=40?'보통':'매력 낮음';}
+
+function weightScale(h){
+  const t=[[300,1],[500,1.5],[800,2],[1000,2.5],[1500,3.5],[2000,4.5],[2500,5.5],[3000,6],[5000,7]];
+  if(h<300)return 0;if(h>=5000)return 7;
+  for(let i=0;i<t.length-1;i++){if(h>=t[i][0]&&h<t[i+1][0])return t[i][1]+(t[i+1][1]-t[i][1])*(h-t[i][0])/(t[i+1][0]-t[i][0]);}
+  return 7;
+}
+
+// IQR 이상치 제거
+function removeOutliers(arr){
+  if(arr.length<4)return arr;
+  const sorted=[...arr].sort((a,b)=>a-b);
+  const q1=sorted[Math.floor(sorted.length*0.25)];
+  const q3=sorted[Math.floor(sorted.length*0.75)];
+  const iqr=q3-q1;
+  return arr.filter(v=>v>=q1-iqr&&v<=q3+iqr);
+}
+
+// ====== API 호출 ======
+async function fetchTrades(lawdCd,months,type='sale'){
+  const now=new Date(),promises=[];
+  for(let i=0;i<months;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const ym=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0');
+    const url=type==='rent'
+      ?`${LAMBDA_URL}?type=rent&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`
+      :`${LAMBDA_URL}?LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
+    promises.push(fetch(url).then(r=>r.text()).then(xml=>{
+      const doc=new DOMParser().parseFromString(xml,'text/xml');
+      const items=[];
+      doc.querySelectorAll('item').forEach(el=>{const o={};el.childNodes.forEach(n=>{if(n.nodeType===1)o[n.nodeName]=n.textContent.trim();});items.push(o);});
+      return items;
+    }).catch(()=>[]));
+  }
+  return(await Promise.all(promises)).flat();
+}
+
+async function fetchBuilding(lawdCd,bjdongCd,jibun){
+  const parts=jibun.split('-');
+  const bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
+  // 표제부에서 useAprDay 확인
+  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=5&pageNo=1&_type=json`;
+  try{
+    const r=await fetch(url);const data=await r.json();
+    const items=data.response?.body?.items?.item;
+    if(!items)return null;
+    const arr=Array.isArray(items)?items:[items];
+    return arr[0]||null;
+  }catch(e){return null;}
+}
+
+async function fetchRecap(lawdCd,bjdongCd,jibun){
+  const parts=jibun.split('-');
+  const bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
+  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=5&pageNo=1&_type=json`;
+  try{
+    const r=await fetch(url);const data=await r.json();
+    const items=data.response?.body?.items?.item;
+    if(!items)return null;
+    return Array.isArray(items)?items[0]:items;
+  }catch(e){return null;}
+}
+
+// ====== 메인 로직 ======
+async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
+  document.getElementById('dashboard').style.display='block';
+  document.getElementById('loading').style.display='block';
+  document.getElementById('complexName').textContent=name;
+  document.getElementById('complexAddr').textContent=address;
+
+  // 1) 건축물대장
+  const [titleData, recapData] = await Promise.all([
+    fetchBuilding(lawdCd,bjdongCd,jibun),
+    fetchRecap(lawdCd,bjdongCd,jibun)
+  ]);
+
+  const useApr=titleData?.useAprDay||'';
+  const builtYear=useApr.length>=4?parseInt(useApr.substring(0,4)):0;
+  const age=builtYear?2026-builtYear:0;
+  const households=parseInt(recapData?.hhldCnt||titleData?.hhldCnt||0);
+  const totArea=parseFloat(recapData?.totArea||0);
+  // 대지면적: 총괄에서 시도, 없으면 세대수×16㎡ 추정
+  let platArea=parseFloat(recapData?.platArea||0);
+  if(platArea===0)platArea=households*16.5; // 추정
+
+  const far=platArea>0?(totArea/platArea*100):0;
+  const lps=households>0?(platArea/households):0;
+
+  // 역거리
+  const st=nearestStation(lat,lng);
+
+  // 기본정보 표시
+  document.getElementById('v-year').textContent=builtYear?builtYear+'년':'—';
+  document.getElementById('v-age').textContent=age?age+'년':'—';
+  document.getElementById('v-units').textContent=households?households.toLocaleString()+'세대':'—';
+  document.getElementById('v-land').textContent=platArea>0?Math.round(platArea).toLocaleString()+'㎡':'—';
+  document.getElementById('v-far').textContent=far>0?far.toFixed(0)+'%':'—';
+  document.getElementById('v-station').textContent=st.name+' '+st.dist+'m';
+
+  // 2) 실거래가 (해당 단지 + 주변 신축)
+  document.getElementById('loadingText').textContent='실거래가 조회 중...';
+  const allTrades=await fetchTrades(lawdCd,6);
+  // 전월세
+  const allRents=await fetchTrades(lawdCd,6,'rent');
+
+  // 해당 단지 매매 필터
+  const myTrades=allTrades.filter(t=>{
+    const n=t.aptNm||'';
+    return n.includes(name.substring(0,3))||n.includes(name.substring(0,4));
+  }).filter(t=>parseInt(t.floor||0)>1); // 1층 제외
+
+  // 평당가 산출 (IQR 제거)
+  let myPPPs=myTrades.map(t=>{
+    const amt=parseInt((t.dealAmount||'0').replace(/,/g,''));
+    const area=parseFloat(t.excluUseAr||0);
+    return area>0?amt/(area/3.3058):0;
+  }).filter(v=>v>0);
+  myPPPs=removeOutliers(myPPPs);
+  const myAvgPPP=myPPPs.length>0?myPPPs.reduce((a,b)=>a+b,0)/myPPPs.length:0;
+
+  // 3) NVP 산출 — 2km 이내 신축
+  document.getElementById('loadingText').textContent='NVP 산출 중...';
+  const nearby=NEW_COMPLEXES.filter(c=>haversine(lat,lng,c.lat,c.lng)<=2.0);
+
+  // 다른 LAWD_CD의 신축이 있으면 추가 조회 필요
+  const otherLawds=[...new Set(nearby.filter(c=>c.lawd!==lawdCd).map(c=>c.lawd))];
+  let extraTrades=[],extraRents=[];
+  for(const lc of otherLawds){
+    const t=await fetchTrades(lc,6);
+    extraTrades=extraTrades.concat(t);
+    const r=await fetchTrades(lc,6,'rent');
+    extraRents=extraRents.concat(r);
+  }
+  const combinedTrades=allTrades.concat(extraTrades);
+  const combinedRents=allRents.concat(extraRents);
+
+  let totalW=0,totalWP=0,nvpDetails=[];
+  let totalRentW=0,totalRentWP=0;
+
+  for(const comp of nearby){
+    const dist=haversine(lat,lng,comp.lat,comp.lng);
+    // 해당 신축 단지 거래 추출
+    const trades=combinedTrades.filter(t=>(t.aptNm||'').includes(comp.keyword));
+    let ppps=trades.filter(t=>parseInt(t.floor||0)>1).map(t=>{
+      const amt=parseInt((t.dealAmount||'0').replace(/,/g,''));
+      const area=parseFloat(t.excluUseAr||0);
+      return area>0?amt/(area/3.3058):0;
+    }).filter(v=>v>0);
+    ppps=removeOutliers(ppps);
+    if(ppps.length<2)continue;
+    const avgP=ppps.reduce((a,b)=>a+b,0)/ppps.length;
+
+    const wd=1/(dist+0.1)**2;
+    const ws=weightScale(comp.households);
+    const w=wd*ws;
+    totalW+=w;totalWP+=w*avgP;
+    nvpDetails.push({name:comp.name,dist,avgP,w,cnt:ppps.length});
+
+    // 전세
+    const rents=combinedRents.filter(t=>(t.aptNm||'').includes(comp.keyword)&&(!t.monthlyRent||parseInt(t.monthlyRent)===0));
+    let rentPPPs=rents.map(t=>{
+      const dep=parseInt((t.deposit||'0').replace(/,/g,''));
+      const area=parseFloat(t.excluUseAr||0);
+      return area>0?dep/(area/3.3058):0;
+    }).filter(v=>v>0);
+    if(rentPPPs.length>0){
+      rentPPPs=removeOutliers(rentPPPs);
+      const avgR=rentPPPs.reduce((a,b)=>a+b,0)/rentPPPs.length;
+      totalRentW+=w;totalRentWP+=w*avgR;
+    }
+  }
+
+  const nvpRaw=totalW>0?totalWP/totalW:0;
+  const nvp=nvpRaw*NVP_PREMIUM;
+  const nvpRate=myAvgPPP>0?((nvp-myAvgPPP)/myAvgPPP*100):0;
+  const nrt=totalRentW>0?(totalRentWP/totalRentW)*NVP_PREMIUM:0;
+
+  // 4) 점수화
+  function scoreNVPRate(r){return r>=40?100:r>=30?85:r>=20?70:r>=10?50:r>0?30:0;}
+  function scoreLPS(v){const py=v/3.3058;return py>=18?100:py>=12?75:py>=8?50:25;}
+  function scoreFAR(v){return v<=170?100:v<=200?75:v<=220?50:v<=250?25:0;}
+  function scoreTLA(v){return v>=50000?100:v>=30000?75:v>=10000?50:25;}
+  function scoreNRT(v){return v>=8000?100:v>=6500?75:v>=5000?50:25;}
+  function scoreSTD(d){return d<=200?100:d<=400?85:d<=700?65:d<=1000?40:20;}
+  function scoreAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
+
+  const scores={
+    nvp_rate:{score:scoreNVPRate(nvpRate),value:nvpRate,detail:`NVP ${(nvp/10000).toFixed(0)}만 vs 현재 ${(myAvgPPP/10000).toFixed(0)}만/평`},
+    lps:{score:scoreLPS(lps),value:lps,detail:`${platArea.toLocaleString()}㎡ ÷ ${households}세대 = ${(lps/3.3058).toFixed(1)}평`},
+    far:{score:scoreFAR(far),value:far,detail:`현 용적률 ${far.toFixed(0)}%`},
+    tla:{score:scoreTLA(platArea),value:platArea,detail:`${Math.round(platArea).toLocaleString()}㎡`},
+    nrt:{score:scoreNRT(nrt),value:nrt,detail:`신축전세 평당 ${(nrt).toFixed(0)}만`},
+    std:{score:scoreSTD(st.dist),value:st.dist,detail:`${st.name} ${st.dist}m`},
+    age:{score:scoreAGE(age),value:age,detail:`${builtYear}년 준공, ${age}년 경과`}
+  };
+
+  // RVI 종합
+  const rvi=Math.round(
+    scores.nvp_rate.score*0.30+scores.lps.score*0.15+scores.far.score*0.15+
+    scores.tla.score*0.12+scores.nrt.score*0.10+scores.std.score*0.10+scores.age.score*0.08
+  );
+
+  // 5) 렌더링
+  document.getElementById('loading').style.display='none';
+  const cls=scoreColor(rvi);
+  document.getElementById('rviScore').textContent=rvi;
+  document.getElementById('rviScore').className='rvi-score c-'+cls;
+  document.getElementById('rviGrade').textContent=grade(rvi);
+  document.getElementById('rviGrade').className='rvi-grade c-'+cls;
+  document.getElementById('rviDesc').textContent=gradeDesc(rvi);
+
+  // 7대 지표
+  const META={
+    nvp_rate:{label:'NVP Rate',name:'상승여력률'},
+    lps:{label:'LPS',name:'세대당 대지지분'},
+    far:{label:'FAR',name:'용적률'},
+    tla:{label:'TLA',name:'대지 총면적'},
+    nrt:{label:'NRT',name:'신축전세 평당가'},
+    std:{label:'STD',name:'역거리'},
+    age:{label:'AGE',name:'준공경과년수'}
+  };
+  const grid=document.getElementById('indexGrid');
+  grid.innerHTML='';
+  ['nvp_rate','lps','far','tla','nrt','std','age'].forEach(k=>{
+    const s=scores[k],m=META[k],c=scoreColor(s.score);
+    grid.innerHTML+=`<div class="index-card" style="border-color:var(--c)">
+      <div class="idx-label">${m.label}</div>
+      <div class="idx-name">${m.name}</div>
+      <div class="idx-score c-${c}">${s.score}<span style="font-size:12px;color:#666">/100</span></div>
+      <div class="idx-sub">${s.detail}</div>
+      <div class="idx-bar"><div class="idx-bar-fill bar-${c}" style="width:${s.score}%"></div></div>
+    </div>`;
+  });
+
+  // NVP 비교 단지
+  const nvpRows=document.getElementById('nvpRows');
+  nvpRows.innerHTML='';
+  nvpDetails.sort((a,b)=>b.w-a.w);
+  if(nvpDetails.length>0){
+    nvpDetails.slice(0,5).forEach(d=>{
+      nvpRows.innerHTML+=`<div class="nvp-row"><span class="left">${d.name} (${d.dist.toFixed(1)}km, ${d.cnt}건)</span><span class="right">${(d.avgP/10000).toFixed(0)}만/평</span></div>`;
+    });
+    nvpRows.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×1.25 프리미엄)</span><span class="right" style="font-size:15px">${(nvp/10000).toFixed(0)}만/평</span></div>`;
+  }else{
+    nvpRows.innerHTML='<p style="color:#666;font-size:12px">2km 이내 비교 가능한 신축 단지 없음</p>';
+  }
+
+  // 거래내역
+  const tbody=document.getElementById('tradeBody');
+  tbody.innerHTML='';
+  const displayTrades=myTrades.slice(0,8);
+  if(displayTrades.length===0){
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">최근 6개월 거래 없음</td></tr>';
+  }else{
+    displayTrades.forEach(t=>{
+      const amt=parseInt((t.dealAmount||'0').replace(/,/g,''));
+      const area=parseFloat(t.excluUseAr||0);
+      const ppp=area>0?amt/(area/3.3058):0;
+      const priceStr=amt>=10000?(amt/10000).toFixed(1)+'억':amt.toLocaleString()+'만';
+      tbody.innerHTML+=`<tr>
+        <td>${t.dealYear}.${t.dealMonth}.${(t.dealDay||'').trim()}</td>
+        <td>${area}㎡</td>
+        <td>${t.floor||''}층</td>
+        <td class="price">${priceStr}</td>
+        <td>${(ppp/10000).toFixed(0)}만/평</td>
+      </tr>`;
+    });
+  }
+
+  document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
+}
+
+// ====== 빠른 선택 ======
+const QUICK_MAP={
+  '은마아파트':{lat:37.5015,lng:127.0580,lawd:'11680',bjdong:'10600',jibun:'316'},
+  '잠실주공5단지':{lat:37.5117,lng:127.0830,lawd:'11710',bjdong:'10100',jibun:'27'},
+  '개포주공아파트':{lat:37.4835,lng:127.0555,lawd:'11680',bjdong:'10300',jibun:'185'},
+  '압구정현대':{lat:37.5280,lng:127.0280,lawd:'11680',bjdong:'11000',jibun:'456'},
+  '미도맨션아파트':{lat:37.4960,lng:127.0600,lawd:'11680',bjdong:'10600',jibun:'511'},
+  '선경아파트':{lat:37.4955,lng:127.0590,lawd:'11680',bjdong:'10600',jibun:'506'},
+  '래미안대치팰리스':{lat:37.4948,lng:127.0575,lawd:'11680',bjdong:'10600',jibun:'1027'},
+};
+function quickLoad(name,address){
+  const q=QUICK_MAP[name];
+  if(!q)return;
+  LAWD_CD=q.lawd;selectedBjdongCd=q.bjdong;selectedJibun=q.jibun;selectedName=name;
+  map.setCenter(new kakao.maps.LatLng(q.lat,q.lng));
+  map.setLevel(4);
+  marker.setPosition(new kakao.maps.LatLng(q.lat,q.lng));
+  loadRVI(name,address,q.lat,q.lng,q.lawd,q.bjdong,q.jibun);
+}
+
+// ====== 카카오맵 ======
+const map=new kakao.maps.Map(document.getElementById('map'),{center:new kakao.maps.LatLng(37.500,127.055),level:5});
+const marker=new kakao.maps.Marker({position:map.getCenter()});
+marker.setMap(map);
+const geocoder=new kakao.maps.services.Geocoder();
+const ps=new kakao.maps.services.Places();
+
+kakao.maps.event.addListener(map,'click',function(e){
+  marker.setPosition(e.latLng);
+  geocoder.coord2Address(e.latLng.getLng(),e.latLng.getLat(),function(result,status){
+    if(status!==kakao.maps.services.Status.OK)return;
+    const addr=result[0].address;
+    const bldg=(result[0].road_address&&result[0].road_address.building_name)||'';
+    const jibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!=='0'?'-'+addr.sub_address_no:'');
+    const name=bldg||addr.address_name;
+    geocoder.coord2RegionCode(e.latLng.getLng(),e.latLng.getLat(),function(rr,rs){
+      if(rs===kakao.maps.services.Status.OK){
+        for(let i=0;i<rr.length;i++){if(rr[i].region_type==='B'){LAWD_CD=rr[i].code.substring(0,5);selectedBjdongCd=rr[i].code.substring(5,10);break;}}
+      }
+      loadRVI(name,addr.address_name,e.latLng.getLat(),e.latLng.getLng(),LAWD_CD,selectedBjdongCd,jibun);
+    });
+  });
+});
+
+function searchAddress(){
+  const kw=document.getElementById('searchInput').value.trim();if(!kw)return;
+  ps.keywordSearch(kw,function(data,status){
+    if(status!==kakao.maps.services.Status.OK){alert('검색 결과 없음');return;}
+    const p=data[0];
+    map.setCenter(new kakao.maps.LatLng(p.y,p.x));map.setLevel(4);
+    marker.setPosition(new kakao.maps.LatLng(p.y,p.x));
+    geocoder.coord2Address(p.x,p.y,function(result,status){
+      if(status!==kakao.maps.services.Status.OK)return;
+      const addr=result[0].address;
+      const jibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!=='0'?'-'+addr.sub_address_no:'');
+      geocoder.coord2RegionCode(p.x,p.y,function(rr,rs){
+        let lc=LAWD_CD,bc=selectedBjdongCd;
+        if(rs===kakao.maps.services.Status.OK){for(let i=0;i<rr.length;i++){if(rr[i].region_type==='B'){lc=rr[i].code.substring(0,5);bc=rr[i].code.substring(5,10);break;}}}
+        LAWD_CD=lc;selectedBjdongCd=bc;
+        loadRVI(p.place_name,p.address_name,parseFloat(p.y),parseFloat(p.x),lc,bc,jibun);
+      });
+    });
+  });
+}
+document.getElementById('searchInput').addEventListener('keypress',e=>{if(e.key==='Enter')searchAddress();});
+</script>
+</body>
+</html>
