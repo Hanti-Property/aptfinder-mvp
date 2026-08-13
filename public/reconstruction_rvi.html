@@ -338,10 +338,56 @@ function quickLoad(name,address){
 }
 
 // 카카오맵
-const map=new kakao.maps.Map(document.getElementById('map'),{center:new kakao.maps.LatLng(37.500,127.055),level:5});
+const map=new kakao.maps.Map(document.getElementById('map'),{center:new kakao.maps.LatLng(37.500,127.055),level:6});
 const marker=new kakao.maps.Marker({position:map.getCenter()});marker.setMap(map);
 const geocoder=new kakao.maps.services.Geocoder();
 const ps=new kakao.maps.services.Places();
+
+// 재건축 단지 마커 표시 (강남3구 주요 단지)
+const RECON_LIST=[
+  '은마아파트','잠실주공5단지 아파트','개포주공 아파트 185','압구정현대아파트',
+  '미도맨션아파트 대치','선경아파트 대치','대치쌍용아파트','대치우성아파트',
+  '개포경남아파트','개포현대아파트 653','개포우성아파트 652',
+  '잠실우성아파트','아시아선수촌아파트','장미아파트 잠실',
+  '올림픽선수기자촌','올림픽훼밀리타운','가락삼익아파트',
+  '신반포아파트 2차','방배삼호아파트','삼성진흥아파트',
+  '래미안대치팰리스','개포자이프레지던스','잠실르엘'
+];
+const reconOverlays=[];
+function loadReconMarkers(){
+  let idx=0;
+  function searchNext(){
+    if(idx>=RECON_LIST.length)return;
+    const kw=RECON_LIST[idx];idx++;
+    ps.keywordSearch(kw,function(data,status){
+      if(status===kakao.maps.services.Status.OK&&data.length>0){
+        const p=data[0];
+        const pos=new kakao.maps.LatLng(p.y,p.x);
+        const shortName=p.place_name.replace(/아파트|단지/g,'').substring(0,6);
+        const content='<div style="background:#2E7D32;color:#fff;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;cursor:pointer;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.3);" onclick="clickMarker(\''+p.place_name.replace(/'/g,'')+'\',\''+p.address_name.replace(/'/g,'')+'\','+p.y+','+p.x+')">'+shortName+'</div>';
+        const ov=new kakao.maps.CustomOverlay({position:pos,content:content,yAnchor:1.5});
+        ov.setMap(map);reconOverlays.push(ov);
+      }
+      setTimeout(searchNext,150); // 150ms 간격으로 순차 호출
+    },{size:1,page:1});
+  }
+  searchNext();
+}
+function clickMarker(name,address,lat,lng){
+  marker.setPosition(new kakao.maps.LatLng(lat,lng));
+  map.setCenter(new kakao.maps.LatLng(lat,lng));map.setLevel(4);
+  geocoder.coord2RegionCode(lng,lat,function(rr,rs){
+    let lc=LAWD_CD,bc=selectedBjdongCd;
+    if(rs===kakao.maps.services.Status.OK){for(let i=0;i<rr.length;i++){if(rr[i].region_type==='B'){lc=rr[i].code.substring(0,5);bc=rr[i].code.substring(5,10);break;}}}
+    geocoder.coord2Address(lng,lat,function(result,status2){
+      let jibun='';
+      if(status2===kakao.maps.services.Status.OK){const addr=result[0].address;jibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!=='0'?'-'+addr.sub_address_no:'');}
+      LAWD_CD=lc;selectedBjdongCd=bc;
+      loadRVI(name,address,lat,lng,lc,bc,jibun);
+    });
+  });
+}
+loadReconMarkers();
 
 kakao.maps.event.addListener(map,'click',function(e){
   marker.setPosition(e.latLng);
