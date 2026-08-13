@@ -278,7 +278,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   function sAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
 
   const scores={
-    nvp_rate:{score:sNVP(nvpRate),detail:`NVP ${Math.round(nvp/10000).toLocaleString()}만 vs 현재 ${Math.round(myAvgPPP/10000).toLocaleString()}만/평`},
+    nvp_rate:{score:sNVP(nvpRate),detail:`NVP ${Math.round(nvp).toLocaleString()}만 vs 현재 ${Math.round(myAvgPPP).toLocaleString()}만/평`},
     lps:{score:sLPS(lps),detail:`${Math.round(platArea).toLocaleString()}㎡ ÷ ${households} = ${(lps/3.3058).toFixed(1)}평`},
     far:{score:sFAR(far),detail:`현 용적률 ${far.toFixed(0)}%`},
     tla:{score:sTLA(platArea),detail:`${Math.round(platArea).toLocaleString()}㎡`},
@@ -306,14 +306,14 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   // NVP 비교
   const nvpR=document.getElementById('nvpRows');nvpR.innerHTML='';
   nvpDetails.sort((a,b)=>b.w-a.w);
-  nvpDetails.slice(0,5).forEach(d=>{nvpR.innerHTML+=`<div class="nvp-row"><span class="left">${d.name} (${d.dist.toFixed(1)}km, ${d.cnt}건)</span><span class="right">${Math.round(d.avgP/10000).toLocaleString()}만/평</span></div>`;});
-  if(nvpDetails.length)nvpR.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×1.25)</span><span class="right" style="font-size:15px">${Math.round(nvp/10000).toLocaleString()}만/평</span></div>`;
+  nvpDetails.slice(0,5).forEach(d=>{nvpR.innerHTML+=`<div class="nvp-row"><span class="left">${d.name} (${d.dist.toFixed(1)}km, ${d.cnt}건)</span><span class="right">${Math.round(d.avgP).toLocaleString()}만/평</span></div>`;});
+  if(nvpDetails.length)nvpR.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×1.25)</span><span class="right" style="font-size:15px">${Math.round(nvp).toLocaleString()}만/평</span></div>`;
 
   // 거래내역
   const tbody=document.getElementById('tradeBody');tbody.innerHTML='';
   myTrades.slice(0,8).forEach(t=>{
     const amt=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0),ppp=ar>0?amt/(ar/3.3058):0;
-    tbody.innerHTML+=`<tr><td>${t.dealYear}.${t.dealMonth}.${(t.dealDay||'').trim()}</td><td>${ar}㎡</td><td>${t.floor||''}층</td><td class="price">${amt>=10000?(amt/10000).toFixed(1)+'억':amt.toLocaleString()+'만'}</td><td>${Math.round(ppp/10000).toLocaleString()}만/평</td></tr>`;
+    tbody.innerHTML+=`<tr><td>${t.dealYear}.${t.dealMonth}.${(t.dealDay||'').trim()}</td><td>${ar}㎡</td><td>${t.floor||''}층</td><td class="price">${amt>=10000?(amt/10000).toFixed(1)+'억':amt.toLocaleString()+'만'}</td><td>${Math.round(ppp).toLocaleString()}만/평</td></tr>`;
   });
   if(!myTrades.length)tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">최근 6개월 거래 없음</td></tr>';
   document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
