@@ -116,7 +116,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
     <div class="info-card"><div class="label">총 세대수</div><div class="value" id="v-units">—</div></div>
     <div class="info-card"><div class="label">대지면적</div><div class="value" id="v-land">—</div></div>
     <div class="info-card"><div class="label">용적률</div><div class="value" id="v-far">—</div></div>
-    <div class="info-card"><div class="label">최근접 역</div><div class="value" id="v-station">—</div></div>
+    <div class="info-card"><div class="label">세대당 대지지분</div><div class="value" id="v-station">—</div></div>
   </div>
 
   <!-- RVI 총점 -->
@@ -143,7 +143,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 
   <div class="disclaimer">
     <p>ℹ️ RVI는 국토부 실거래가 + 건축물대장 데이터를 기반으로 자동 산출됩니다. 실시간 시세와 다를 수 있으며, 투자 판단의 참고 자료로만 활용하세요.</p>
-    <p style="margin-top:4px">📐 산출 기준: NVP Rate(30%) + LPS(15%) + FAR(15%) + TLA(12%) + NRT(10%) + STD(10%) + AGE(8%) | 신축프리미엄 ×1.25</p>
+    <p style="margin-top:4px">📐 산출 기준: NVP Rate(35%) + LPS(20%) + FAR(20%) + TLA(12%) + NRT(5%) + AGE(8%) | 신축프리미엄 ×1.25</p>
   </div>
 </div>
 
@@ -371,9 +371,9 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   document.getElementById('v-year').textContent=builtYear?builtYear+'년':'—';
   document.getElementById('v-age').textContent=age?age+'년':'—';
   document.getElementById('v-units').textContent=households?households.toLocaleString()+'세대':'—';
-  document.getElementById('v-land').textContent=platArea>0?Math.round(platArea).toLocaleString()+'㎡'+(landData?' (토지대장)':' (추정)'):'—';
+  document.getElementById('v-land').textContent=platArea>0?Math.round(platArea).toLocaleString()+'㎡ (토지대장)':'—';
   document.getElementById('v-far').textContent=far>0?far.toFixed(0)+'%':'—';
-  document.getElementById('v-station').textContent=st.name+' '+st.dist+'m';
+  document.getElementById('v-station').textContent=lps>0?(lps/3.3058).toFixed(1)+'평':'—';
 
   // 평당가 산출 (IQR 제거)
   let myPPPs=myTrades.map(t=>{
@@ -447,23 +447,21 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   function scoreFAR(v){return v<=170?100:v<=200?75:v<=220?50:v<=250?25:0;}
   function scoreTLA(v){return v>=50000?100:v>=30000?75:v>=10000?50:25;}
   function scoreNRT(v){return v>=8000?100:v>=6500?75:v>=5000?50:25;}
-  function scoreSTD(d){return d<=200?100:d<=400?85:d<=700?65:d<=1000?40:20;}
   function scoreAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
 
   const scores={
     nvp_rate:{score:scoreNVPRate(nvpRate),value:nvpRate,detail:`NVP ${(nvp/10000).toFixed(0)}만 vs 현재 ${(myAvgPPP/10000).toFixed(0)}만/평`},
-    lps:{score:scoreLPS(lps),value:lps,detail:`${platArea.toLocaleString()}㎡ ÷ ${households}세대 = ${(lps/3.3058).toFixed(1)}평`},
+    lps:{score:scoreLPS(lps),value:lps,detail:`${Math.round(platArea).toLocaleString()}㎡ ÷ ${households}세대 = ${(lps/3.3058).toFixed(1)}평`},
     far:{score:scoreFAR(far),value:far,detail:`현 용적률 ${far.toFixed(0)}%`},
     tla:{score:scoreTLA(platArea),value:platArea,detail:`${Math.round(platArea).toLocaleString()}㎡`},
-    nrt:{score:scoreNRT(nrt),value:nrt,detail:`신축전세 평당 ${(nrt).toFixed(0)}만`},
-    std:{score:scoreSTD(st.dist),value:st.dist,detail:`${st.name} ${st.dist}m`},
+    nrt:{score:scoreNRT(nrt),value:nrt,detail:`신축전세 평당 ${Math.round(nrt).toLocaleString()}만`},
     age:{score:scoreAGE(age),value:age,detail:`${builtYear}년 준공, ${age}년 경과`}
   };
 
-  // RVI 종합
+  // RVI 종합 (6대 지표: STD 제거)
   const rvi=Math.round(
-    scores.nvp_rate.score*0.30+scores.lps.score*0.15+scores.far.score*0.15+
-    scores.tla.score*0.12+scores.nrt.score*0.10+scores.std.score*0.10+scores.age.score*0.08
+    scores.nvp_rate.score*0.35+scores.lps.score*0.20+scores.far.score*0.20+
+    scores.tla.score*0.12+scores.nrt.score*0.05+scores.age.score*0.08
   );
 
   // 5) 렌더링
@@ -475,14 +473,18 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   document.getElementById('rviGrade').className='rvi-grade c-'+cls;
   document.getElementById('rviDesc').textContent=gradeDesc(rvi);
 
-  // 7대 지표
+  // 6대 지표
   const META={
     nvp_rate:{label:'NVP Rate',name:'상승여력률'},
     lps:{label:'LPS',name:'세대당 대지지분'},
     far:{label:'FAR',name:'용적률'},
     tla:{label:'TLA',name:'대지 총면적'},
     nrt:{label:'NRT',name:'신축전세 평당가'},
-    std:{label:'STD',name:'역거리'},
+    age:{label:'AGE',name:'준공경과년수'}
+  };
+  const grid=document.getElementById('indexGrid');
+  grid.innerHTML='';
+  ['nvp_rate','lps','far','tla','nrt','age'].forEach(k=>{
     age:{label:'AGE',name:'준공경과년수'}
   };
   const grid=document.getElementById('indexGrid');
