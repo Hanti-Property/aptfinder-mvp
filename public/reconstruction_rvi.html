@@ -157,6 +157,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 <script>
 // ====== 설정 ======
 const LAMBDA_URL='https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/';
+const LAND_LAMBDA_URL='https://3b77wfcneqfnywtzw3z333kw6a0gtrzt.lambda-url.ap-northeast-2.on.aws/';
 const BLD_KEY='Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
 const NVP_PREMIUM=1.25;
 
@@ -264,26 +265,34 @@ async function fetchTrades(lawdCd,months,type='sale'){
 async function fetchBuilding(lawdCd,bjdongCd,jibun){
   const parts=jibun.split('-');
   const bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
-  // 표제부에서 useAprDay 확인
-  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=5&pageNo=1&_type=json`;
-  try{
-    const r=await fetch(url);const data=await r.json();
-    const items=data.response?.body?.items?.item;
-    if(!items)return null;
-    const arr=Array.isArray(items)?items:[items];
-    return arr[0]||null;
-  }catch(e){return null;}
-}
-
-async function fetchRecap(lawdCd,bjdongCd,jibun){
-  const parts=jibun.split('-');
-  const bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
+  // 총괄표제부 (JSON 정상 작동)
   const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=5&pageNo=1&_type=json`;
   try{
     const r=await fetch(url);const data=await r.json();
     const items=data.response?.body?.items?.item;
     if(!items)return null;
     return Array.isArray(items)?items[0]:items;
+  }catch(e){return null;}
+}
+
+async function fetchRecap(lawdCd,bjdongCd,jibun){
+  return fetchBuilding(lawdCd,bjdongCd,jibun);
+}
+
+// 토지특성 API (V-World Lambda 프록시) — 대지면적 확보
+async function fetchLandInfo(lawdCd,bjdongCd,jibun){
+  const parts=jibun.split('-');
+  const bun=(parts[0]||'0').padStart(4,'0');
+  const ji=(parts[1]||'0').padStart(4,'0');
+  // PNU = 시군구(5) + 법정동(5) + 대지구분(1=대지) + 본번(4) + 부번(4)
+  const pnu=lawdCd+bjdongCd+'1'+bun+ji;
+  const url=`${LAND_LAMBDA_URL}?pnu=${pnu}`;
+  try{
+    const r=await fetch(url);const data=await r.json();
+    const items=data.landCharacteristicss?.field;
+    if(!items||items.length===0)return null;
+    const sorted=[...items].sort((a,b)=>parseInt(b.stdrYear||0)-parseInt(a.stdrYear||0));
+    return sorted[0];
   }catch(e){return null;}
 }
 
@@ -294,46 +303,74 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   document.getElementById('complexName').textContent=name;
   document.getElementById('complexAddr').textContent=address;
 
-  // 1) 건축물대장
-  const [titleData, recapData] = await Promise.all([
+  // 1) 건축물대장 + 토지특성 병렬 호출
+  const [recapData, landData] = await Promise.all([
     fetchBuilding(lawdCd,bjdongCd,jibun),
-    fetchRecap(lawdCd,bjdongCd,jibun)
+    fetchLandInfo(lawdCd,bjdongCd,jibun)
   ]);
 
-  const useApr=titleData?.useAprDay||'';
-  const builtYear=useApr.length>=4?parseInt(useApr.substring(0,4)):0;
-  const age=builtYear?2026-builtYear:0;
-  const households=parseInt(recapData?.hhldCnt||titleData?.hhldCnt||0);
+  const households=parseInt(recapData?.hhldCnt||0);
   const totArea=parseFloat(recapData?.totArea||0);
-  // 대지면적: 총괄에서 시도, 없으면 세대수×16㎡ 추정
-  let platArea=parseFloat(recapData?.platArea||0);
-  if(platArea===0)platArea=households*16.5; // 추정
+  const vlRatEstm=parseFloat(recapData?.vlRatEstmTotArea||0);
 
-  const far=platArea>0?(totArea/platArea*100):0;
-  const lps=households>0?(platArea/households):0;
+  // 대지면적: 토지특성 API 우선, 없으면 총괄표제부
+  let platArea=0;
+  if(landData&&parseFloat(landData.lndpclAr||0)>0){
+    platArea=parseFloat(landData.lndpclAr);
+  }else if(parseFloat(recapData?.platArea||0)>0){
+    platArea=parseFloat(recapData.platArea);
+  }
+
+  // 용적률 역산: vlRatEstmTotArea ÷ 토지면적
+  let far=0;
+  if(recapData?.vlRat&&parseFloat(recapData.vlRat)>0){
+    far=parseFloat(recapData.vlRat);
+  }else if(platArea>0&&vlRatEstm>0){
+    far=(vlRatEstm/platArea)*100;
+  }else if(platArea>0&&totArea>0){
+    far=(totArea/platArea)*100;
+  }
+
+  const lps=(households>0&&platArea>0)?(platArea/households):0;
 
   // 역거리
   const st=nearestStation(lat,lng);
+
+  // 2) 실거래가 (해당 단지 + 주변 신축)
+  document.getElementById('loadingText').textContent='실거래가 조회 중...';
+  const allTrades=await fetchTrades(lawdCd,6);
+  const allRents=await fetchTrades(lawdCd,6,'rent');
+
+  // 해당 단지 매매 필터
+  const nameClean=name.replace(/아파트|단지|맨션|[0-9]+동/g,'').trim();
+  const nameShort=nameClean.substring(0,Math.min(nameClean.length,4));
+  let myTrades=allTrades.filter(t=>{
+    const n=(t.aptNm||'').trim();
+    return n.includes(nameShort)||n.includes(name.substring(0,3));
+  });
+  if(myTrades.length===0){
+    myTrades=allTrades.filter(t=>(t.jibun||'').trim()===jibun.trim());
+  }
+  // 1층 + 취소 거래 제외
+  myTrades=myTrades.filter(t=>parseInt(t.floor||0)>1&&!(t.cdealType&&t.cdealType.trim()));
+
+  // 준공년도: 실거래가 buildYear 활용 (총괄표제부 useAprDay 빈값일 때)
+  let builtYear=0;
+  const useApr=recapData?.useAprDay||'';
+  if(useApr.length>=4&&parseInt(useApr.substring(0,4))>1900){
+    builtYear=parseInt(useApr.substring(0,4));
+  }else if(myTrades.length>0&&myTrades[0].buildYear){
+    builtYear=parseInt(myTrades[0].buildYear);
+  }
+  const age=builtYear>0?2026-builtYear:0;
 
   // 기본정보 표시
   document.getElementById('v-year').textContent=builtYear?builtYear+'년':'—';
   document.getElementById('v-age').textContent=age?age+'년':'—';
   document.getElementById('v-units').textContent=households?households.toLocaleString()+'세대':'—';
-  document.getElementById('v-land').textContent=platArea>0?Math.round(platArea).toLocaleString()+'㎡':'—';
+  document.getElementById('v-land').textContent=platArea>0?Math.round(platArea).toLocaleString()+'㎡'+(landData?' (토지대장)':' (추정)'):'—';
   document.getElementById('v-far').textContent=far>0?far.toFixed(0)+'%':'—';
   document.getElementById('v-station').textContent=st.name+' '+st.dist+'m';
-
-  // 2) 실거래가 (해당 단지 + 주변 신축)
-  document.getElementById('loadingText').textContent='실거래가 조회 중...';
-  const allTrades=await fetchTrades(lawdCd,6);
-  // 전월세
-  const allRents=await fetchTrades(lawdCd,6,'rent');
-
-  // 해당 단지 매매 필터
-  const myTrades=allTrades.filter(t=>{
-    const n=t.aptNm||'';
-    return n.includes(name.substring(0,3))||n.includes(name.substring(0,4));
-  }).filter(t=>parseInt(t.floor||0)>1); // 1층 제외
 
   // 평당가 산출 (IQR 제거)
   let myPPPs=myTrades.map(t=>{
