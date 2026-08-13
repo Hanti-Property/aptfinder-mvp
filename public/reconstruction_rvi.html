@@ -155,316 +155,139 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services"></script>
 <script>
-// ====== 설정 ======
 const LAMBDA_URL='https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/';
-const LAND_LAMBDA_URL='https://3b77wfcneqfnywtzw3z333kw6a0gtrzt.lambda-url.ap-northeast-2.on.aws/';
+const LAND_LAMBDA='https://3b77wfcneqfnywtzw3z333kw6a0gtrzt.lambda-url.ap-northeast-2.on.aws/';
 const BLD_KEY='Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
 const NVP_PREMIUM=1.25;
-
-// 서울 지하철 주요역 좌표 (강남3구 중심 — 카카오맵 실측 기준)
-const STATIONS=[
-  {name:'대치역',lat:37.4944,lng:127.0563},
-  {name:'도곡역',lat:37.4913,lng:127.0427},
-  {name:'한티역',lat:37.4986,lng:127.0534},
-  {name:'선릉역',lat:37.5045,lng:127.0490},
-  {name:'삼성역',lat:37.5088,lng:127.0631},
-  {name:'잠실역',lat:37.5133,lng:127.1001},
-  {name:'잠실새내역',lat:37.5117,lng:127.0863},
-  {name:'종합운동장역',lat:37.5109,lng:127.0740},
-  {name:'압구정역',lat:37.5270,lng:127.0285},
-  {name:'압구정로데오역',lat:37.5274,lng:127.0400},
-  {name:'청담역',lat:37.5200,lng:127.0530},
-  {name:'강남구청역',lat:37.5169,lng:127.0417},
-  {name:'개포디지털단지역',lat:37.4781,lng:127.0466},
-  {name:'대모산입구역',lat:37.4874,lng:127.0571},
-  {name:'수서역',lat:37.4875,lng:127.1017},
-  {name:'일원역',lat:37.4835,lng:127.0847},
-  {name:'반포역',lat:37.5082,lng:126.9968},
-  {name:'서초역',lat:37.4919,lng:127.0078},
-  {name:'교대역',lat:37.4935,lng:127.0144},
-  {name:'방배역',lat:37.4815,lng:126.9977},
-  {name:'석촌역',lat:37.5056,lng:127.1052},
-  {name:'송파역',lat:37.5025,lng:127.1131},
-  {name:'가락시장역',lat:37.4929,lng:127.1183},
-  {name:'문정역',lat:37.4850,lng:127.1222},
-  {name:'강남역',lat:37.4980,lng:127.0276},
-  {name:'역삼역',lat:37.5007,lng:127.0365},
-  {name:'선정릉역',lat:37.5102,lng:127.0430},
-  {name:'학여울역',lat:37.4965,lng:127.0643},
-  {name:'대청역',lat:37.4920,lng:127.0714},
-  {name:'잠실나루역',lat:37.5200,lng:127.0970},
-  {name:'매봉역',lat:37.4869,lng:127.0347},
-  {name:'양재역',lat:37.4841,lng:127.0345},
-  {name:'남부터미널역',lat:37.4848,lng:127.0145},
-];
-
-// 주변 신축 단지 DB (강남3구 2006년 이후 준공 대단지)
 const NEW_COMPLEXES=[
-  {name:'래미안대치팰리스',keyword:'래미안대치팰',lat:37.4948,lng:127.0575,households:1608,year:2015,lawd:'11680'},
-  {name:'개포자이프레지던스',keyword:'개포자이프레',lat:37.4830,lng:127.0530,households:3375,year:2023,lawd:'11680'},
-  {name:'디에이치자이개포',keyword:'디에이치자이',lat:37.4860,lng:127.0550,households:1996,year:2021,lawd:'11680'},
-  {name:'개포래미안포레스트',keyword:'개포래미안포',lat:37.4810,lng:127.0490,households:2296,year:2022,lawd:'11680'},
-  {name:'잠실르엘',keyword:'잠실르엘',lat:37.5133,lng:127.0830,households:2678,year:2025,lawd:'11710'},
-  {name:'잠실엘스',keyword:'잠실엘스',lat:37.5100,lng:127.0830,households:5678,year:2008,lawd:'11710'},
-  {name:'리센츠',keyword:'리센츠',lat:37.5130,lng:127.0900,households:5563,year:2008,lawd:'11710'},
-  {name:'트리지움',keyword:'트리지움',lat:37.5080,lng:127.0860,households:3696,year:2007,lawd:'11710'},
-  {name:'헬리오시티',keyword:'헬리오시티',lat:37.4850,lng:127.1280,households:9510,year:2018,lawd:'11710'},
-  {name:'파크리오',keyword:'파크리오',lat:37.5107,lng:127.0950,households:6864,year:2008,lawd:'11710'},
+  {name:'래미안대치팰리스',keyword:'래미안대치팰',lat:37.4948,lng:127.0575,households:1608,lawd:'11680'},
+  {name:'개포자이프레지던스',keyword:'개포자이프레',lat:37.4830,lng:127.0530,households:3375,lawd:'11680'},
+  {name:'디에이치자이개포',keyword:'디에이치자이',lat:37.4860,lng:127.0550,households:1996,lawd:'11680'},
+  {name:'개포래미안포레스트',keyword:'개포래미안포',lat:37.4810,lng:127.0490,households:2296,lawd:'11680'},
+  {name:'잠실르엘',keyword:'잠실르엘',lat:37.5133,lng:127.0830,households:2678,lawd:'11710'},
+  {name:'잠실엘스',keyword:'잠실엘스',lat:37.5100,lng:127.0830,households:5678,lawd:'11710'},
+  {name:'리센츠',keyword:'리센츠',lat:37.5130,lng:127.0900,households:5563,lawd:'11710'},
+  {name:'트리지움',keyword:'트리지움',lat:37.5080,lng:127.0860,households:3696,lawd:'11710'},
+  {name:'헬리오시티',keyword:'헬리오시티',lat:37.4850,lng:127.1280,households:9510,lawd:'11710'},
+  {name:'파크리오',keyword:'파크리오',lat:37.5107,lng:127.0950,households:6864,lawd:'11710'},
 ];
+let LAWD_CD='11680',selectedBjdongCd='10600',selectedJibun='316';
 
-let LAWD_CD='11680', selectedBjdongCd='10600', selectedJibun='316', selectedName='';
-
-// ====== 유틸 ======
-function haversine(lat1,lng1,lat2,lng2){
-  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R*2*Math.asin(Math.sqrt(a));
-}
-function nearestStation(lat,lng){
-  let min=999,best=STATIONS[0];
-  STATIONS.forEach(s=>{const d=haversine(lat,lng,s.lat,s.lng);if(d<min){min=d;best=s;}});
-  return {name:best.name,dist:Math.round(min*1000)};
-}
+function haversine(lat1,lng1,lat2,lng2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.asin(Math.sqrt(a));}
 function scoreColor(s){return s>=85?'s':s>=70?'a':s>=55?'b':s>=40?'c':'d';}
 function grade(s){return s>=85?'S':s>=70?'A':s>=55?'B':s>=40?'C':'D';}
 function gradeDesc(s){return s>=85?'최상위 투자 매력':s>=70?'우수 · 투자 매력 높음':s>=55?'양호':s>=40?'보통':'매력 낮음';}
+function weightScale(h){const t=[[300,1],[500,1.5],[800,2],[1000,2.5],[1500,3.5],[2000,4.5],[2500,5.5],[3000,6],[5000,7]];if(h<300)return 0;if(h>=5000)return 7;for(let i=0;i<t.length-1;i++){if(h>=t[i][0]&&h<t[i+1][0])return t[i][1]+(t[i+1][1]-t[i][1])*(h-t[i][0])/(t[i+1][0]-t[i][0]);}return 7;}
+function removeOutliers(arr){if(arr.length<4)return arr;const s=[...arr].sort((a,b)=>a-b);const q1=s[Math.floor(s.length*.25)],q3=s[Math.floor(s.length*.75)],iqr=q3-q1;return arr.filter(v=>v>=q1-iqr&&v<=q3+iqr);}
 
-function weightScale(h){
-  const t=[[300,1],[500,1.5],[800,2],[1000,2.5],[1500,3.5],[2000,4.5],[2500,5.5],[3000,6],[5000,7]];
-  if(h<300)return 0;if(h>=5000)return 7;
-  for(let i=0;i<t.length-1;i++){if(h>=t[i][0]&&h<t[i+1][0])return t[i][1]+(t[i+1][1]-t[i][1])*(h-t[i][0])/(t[i+1][0]-t[i][0]);}
-  return 7;
-}
-
-// IQR 이상치 제거
-function removeOutliers(arr){
-  if(arr.length<4)return arr;
-  const sorted=[...arr].sort((a,b)=>a-b);
-  const q1=sorted[Math.floor(sorted.length*0.25)];
-  const q3=sorted[Math.floor(sorted.length*0.75)];
-  const iqr=q3-q1;
-  return arr.filter(v=>v>=q1-iqr&&v<=q3+iqr);
-}
-
-// ====== API 호출 ======
-async function fetchTrades(lawdCd,months,type='sale'){
+async function fetchTrades(lawdCd,months,type){
   const now=new Date(),promises=[];
-  for(let i=0;i<months;i++){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    const ym=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0');
-    const url=type==='rent'
-      ?`${LAMBDA_URL}?type=rent&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`
-      :`${LAMBDA_URL}?LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
-    promises.push(fetch(url).then(r=>r.text()).then(xml=>{
-      const doc=new DOMParser().parseFromString(xml,'text/xml');
-      const items=[];
-      doc.querySelectorAll('item').forEach(el=>{const o={};el.childNodes.forEach(n=>{if(n.nodeType===1)o[n.nodeName]=n.textContent.trim();});items.push(o);});
-      return items;
-    }).catch(()=>[]));
+  for(let i=0;i<months;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const ym=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0');
+    const url=type==='rent'?`${LAMBDA_URL}?type=rent&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`:`${LAMBDA_URL}?LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
+    promises.push(fetch(url).then(r=>r.text()).then(xml=>{const doc=new DOMParser().parseFromString(xml,'text/xml');const items=[];doc.querySelectorAll('item').forEach(el=>{const o={};el.childNodes.forEach(n=>{if(n.nodeType===1)o[n.nodeName]=n.textContent.trim();});items.push(o);});return items;}).catch(()=>[]));
   }
   return(await Promise.all(promises)).flat();
 }
-
-async function fetchBuilding(lawdCd,bjdongCd,jibun){
-  const parts=jibun.split('-');
-  const bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
-  // 총괄표제부 (JSON 정상 작동)
-  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=5&pageNo=1&_type=json`;
-  try{
-    const r=await fetch(url);const data=await r.json();
-    const items=data.response?.body?.items?.item;
-    if(!items)return null;
-    return Array.isArray(items)?items[0]:items;
-  }catch(e){return null;}
-}
-
 async function fetchRecap(lawdCd,bjdongCd,jibun){
-  return fetchBuilding(lawdCd,bjdongCd,jibun);
+  const parts=jibun.split('-'),bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
+  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=5&pageNo=1&_type=json`;
+  try{const r=await fetch(url);const d=await r.json();const it=d.response?.body?.items?.item;if(!it)return null;return Array.isArray(it)?it[0]:it;}catch(e){return null;}
 }
-
-// 토지특성 API (V-World Lambda 프록시) — 대지면적 확보
-async function fetchLandInfo(lawdCd,bjdongCd,jibun){
-  const parts=jibun.split('-');
-  const bun=(parts[0]||'0').padStart(4,'0');
-  const ji=(parts[1]||'0').padStart(4,'0');
-  // PNU = 시군구(5) + 법정동(5) + 대지구분(1=대지) + 본번(4) + 부번(4)
+async function fetchLand(lawdCd,bjdongCd,jibun){
+  const parts=jibun.split('-'),bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
   const pnu=lawdCd+bjdongCd+'1'+bun+ji;
-  const url=`${LAND_LAMBDA_URL}?pnu=${pnu}`;
-  try{
-    const r=await fetch(url);const data=await r.json();
-    const items=data.landCharacteristicss?.field;
-    if(!items||items.length===0)return null;
-    const sorted=[...items].sort((a,b)=>parseInt(b.stdrYear||0)-parseInt(a.stdrYear||0));
-    return sorted[0];
-  }catch(e){return null;}
+  try{const r=await fetch(`${LAND_LAMBDA}?pnu=${pnu}`);const d=await r.json();const it=d.landCharacteristicss?.field;if(!it||!it.length)return null;return[...it].sort((a,b)=>parseInt(b.stdrYear||0)-parseInt(a.stdrYear||0))[0];}catch(e){return null;}
 }
 
-// ====== 메인 로직 ======
 async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   document.getElementById('dashboard').style.display='block';
   document.getElementById('loading').style.display='block';
   document.getElementById('complexName').textContent=name;
   document.getElementById('complexAddr').textContent=address;
 
-  // 1) 건축물대장 + 토지특성 병렬 호출
-  const [recapData, landData] = await Promise.all([
-    fetchBuilding(lawdCd,bjdongCd,jibun),
-    fetchLandInfo(lawdCd,bjdongCd,jibun)
+  const[recapData,landData,allTrades,allRents]=await Promise.all([
+    fetchRecap(lawdCd,bjdongCd,jibun),fetchLand(lawdCd,bjdongCd,jibun),
+    fetchTrades(lawdCd,6),fetchTrades(lawdCd,6,'rent')
   ]);
 
   const households=parseInt(recapData?.hhldCnt||0);
   const totArea=parseFloat(recapData?.totArea||0);
   const vlRatEstm=parseFloat(recapData?.vlRatEstmTotArea||0);
-
-  // 대지면적: 토지특성 API 우선, 없으면 총괄표제부
-  let platArea=0;
-  if(landData&&parseFloat(landData.lndpclAr||0)>0){
-    platArea=parseFloat(landData.lndpclAr);
-  }else if(parseFloat(recapData?.platArea||0)>0){
-    platArea=parseFloat(recapData.platArea);
-  }
-
-  // 용적률 역산: vlRatEstmTotArea ÷ 토지면적
+  let platArea=landData?parseFloat(landData.lndpclAr||0):0;
+  if(!platArea)platArea=parseFloat(recapData?.platArea||0);
   let far=0;
-  if(recapData?.vlRat&&parseFloat(recapData.vlRat)>0){
-    far=parseFloat(recapData.vlRat);
-  }else if(platArea>0&&vlRatEstm>0){
-    far=(vlRatEstm/platArea)*100;
-  }else if(platArea>0&&totArea>0){
-    far=(totArea/platArea)*100;
-  }
-
+  if(recapData?.vlRat&&parseFloat(recapData.vlRat)>0)far=parseFloat(recapData.vlRat);
+  else if(platArea>0&&vlRatEstm>0)far=(vlRatEstm/platArea)*100;
   const lps=(households>0&&platArea>0)?(platArea/households):0;
 
-  // 역거리
-  const st=nearestStation(lat,lng);
-
-  // 2) 실거래가 (해당 단지 + 주변 신축)
-  document.getElementById('loadingText').textContent='실거래가 조회 중...';
-  const allTrades=await fetchTrades(lawdCd,6);
-  const allRents=await fetchTrades(lawdCd,6,'rent');
-
-  // 해당 단지 매매 필터
-  const nameClean=name.replace(/아파트|단지|맨션|[0-9]+동/g,'').trim();
-  const nameShort=nameClean.substring(0,Math.min(nameClean.length,4));
-  let myTrades=allTrades.filter(t=>{
-    const n=(t.aptNm||'').trim();
-    return n.includes(nameShort)||n.includes(name.substring(0,3));
-  });
-  if(myTrades.length===0){
-    myTrades=allTrades.filter(t=>(t.jibun||'').trim()===jibun.trim());
-  }
-  // 1층 + 취소 거래 제외
+  // 실거래 매칭
+  const kw=name.replace(/아파트|단지|맨션/g,'').substring(0,4);
+  let myTrades=allTrades.filter(t=>(t.aptNm||'').includes(kw)||(t.aptNm||'').includes(name.substring(0,3)));
+  if(!myTrades.length)myTrades=allTrades.filter(t=>(t.jibun||'').trim()===jibun);
   myTrades=myTrades.filter(t=>parseInt(t.floor||0)>1&&!(t.cdealType&&t.cdealType.trim()));
 
-  // 준공년도: 실거래가 buildYear 활용 (총괄표제부 useAprDay 빈값일 때)
   let builtYear=0;
-  const useApr=recapData?.useAprDay||'';
-  if(useApr.length>=4&&parseInt(useApr.substring(0,4))>1900){
-    builtYear=parseInt(useApr.substring(0,4));
-  }else if(myTrades.length>0&&myTrades[0].buildYear){
-    builtYear=parseInt(myTrades[0].buildYear);
-  }
-  const age=builtYear>0?2026-builtYear:0;
+  const ua=recapData?.useAprDay||'';
+  if(ua.length>=4&&parseInt(ua.substring(0,4))>1900)builtYear=parseInt(ua.substring(0,4));
+  else if(myTrades.length&&myTrades[0].buildYear)builtYear=parseInt(myTrades[0].buildYear);
+  const age=builtYear?2026-builtYear:0;
 
   // 기본정보 표시
   document.getElementById('v-year').textContent=builtYear?builtYear+'년':'—';
   document.getElementById('v-age').textContent=age?age+'년':'—';
   document.getElementById('v-units').textContent=households?households.toLocaleString()+'세대':'—';
-  document.getElementById('v-land').textContent=platArea>0?Math.round(platArea).toLocaleString()+'㎡ (토지대장)':'—';
+  document.getElementById('v-land').textContent=platArea>0?Math.round(platArea).toLocaleString()+'㎡':'—';
   document.getElementById('v-far').textContent=far>0?far.toFixed(0)+'%':'—';
   document.getElementById('v-station').textContent=lps>0?(lps/3.3058).toFixed(1)+'평':'—';
 
-  // 평당가 산출 (IQR 제거)
-  let myPPPs=myTrades.map(t=>{
-    const amt=parseInt((t.dealAmount||'0').replace(/,/g,''));
-    const area=parseFloat(t.excluUseAr||0);
-    return area>0?amt/(area/3.3058):0;
-  }).filter(v=>v>0);
+  // 평당가
+  let myPPPs=myTrades.map(t=>{const a=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return ar>0?a/(ar/3.3058):0;}).filter(v=>v>0);
   myPPPs=removeOutliers(myPPPs);
-  const myAvgPPP=myPPPs.length>0?myPPPs.reduce((a,b)=>a+b,0)/myPPPs.length:0;
+  const myAvgPPP=myPPPs.length?myPPPs.reduce((a,b)=>a+b,0)/myPPPs.length:0;
 
-  // 3) NVP 산출 — 2km 이내 신축
+  // NVP
   document.getElementById('loadingText').textContent='NVP 산출 중...';
   const nearby=NEW_COMPLEXES.filter(c=>haversine(lat,lng,c.lat,c.lng)<=2.0);
-
-  // 다른 LAWD_CD의 신축이 있으면 추가 조회 필요
   const otherLawds=[...new Set(nearby.filter(c=>c.lawd!==lawdCd).map(c=>c.lawd))];
-  let extraTrades=[],extraRents=[];
-  for(const lc of otherLawds){
-    const t=await fetchTrades(lc,6);
-    extraTrades=extraTrades.concat(t);
-    const r=await fetchTrades(lc,6,'rent');
-    extraRents=extraRents.concat(r);
-  }
-  const combinedTrades=allTrades.concat(extraTrades);
-  const combinedRents=allRents.concat(extraRents);
+  let extra=[];for(const lc of otherLawds){extra=extra.concat(await fetchTrades(lc,6));}
+  let extraRents=[];for(const lc of otherLawds){extraRents=extraRents.concat(await fetchTrades(lc,6,'rent'));}
+  const combined=allTrades.concat(extra),combinedRents=allRents.concat(extraRents);
 
-  let totalW=0,totalWP=0,nvpDetails=[];
-  let totalRentW=0,totalRentWP=0;
-
+  let totalW=0,totalWP=0,nvpDetails=[],totalRW=0,totalRWP=0;
   for(const comp of nearby){
     const dist=haversine(lat,lng,comp.lat,comp.lng);
-    // 해당 신축 단지 거래 추출
-    const trades=combinedTrades.filter(t=>(t.aptNm||'').includes(comp.keyword));
-    let ppps=trades.filter(t=>parseInt(t.floor||0)>1).map(t=>{
-      const amt=parseInt((t.dealAmount||'0').replace(/,/g,''));
-      const area=parseFloat(t.excluUseAr||0);
-      return area>0?amt/(area/3.3058):0;
-    }).filter(v=>v>0);
-    ppps=removeOutliers(ppps);
-    if(ppps.length<2)continue;
+    let ppps=combined.filter(t=>(t.aptNm||'').includes(comp.keyword)).filter(t=>parseInt(t.floor||0)>1).map(t=>{const a=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return ar>0?a/(ar/3.3058):0;}).filter(v=>v>0);
+    ppps=removeOutliers(ppps);if(ppps.length<2)continue;
     const avgP=ppps.reduce((a,b)=>a+b,0)/ppps.length;
-
-    const wd=1/(dist+0.1)**2;
-    const ws=weightScale(comp.households);
-    const w=wd*ws;
-    totalW+=w;totalWP+=w*avgP;
-    nvpDetails.push({name:comp.name,dist,avgP,w,cnt:ppps.length});
-
-    // 전세
+    const wd=1/(dist+0.1)**2,ws=weightScale(comp.households),w=wd*ws;
+    totalW+=w;totalWP+=w*avgP;nvpDetails.push({name:comp.name,dist,avgP,w,cnt:ppps.length});
     const rents=combinedRents.filter(t=>(t.aptNm||'').includes(comp.keyword)&&(!t.monthlyRent||parseInt(t.monthlyRent)===0));
-    let rentPPPs=rents.map(t=>{
-      const dep=parseInt((t.deposit||'0').replace(/,/g,''));
-      const area=parseFloat(t.excluUseAr||0);
-      return area>0?dep/(area/3.3058):0;
-    }).filter(v=>v>0);
-    if(rentPPPs.length>0){
-      rentPPPs=removeOutliers(rentPPPs);
-      const avgR=rentPPPs.reduce((a,b)=>a+b,0)/rentPPPs.length;
-      totalRentW+=w;totalRentWP+=w*avgR;
-    }
+    let rPPPs=rents.map(t=>{const d2=parseInt((t.deposit||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return ar>0?d2/(ar/3.3058):0;}).filter(v=>v>0);
+    if(rPPPs.length){rPPPs=removeOutliers(rPPPs);const avg=rPPPs.reduce((a,b)=>a+b,0)/rPPPs.length;totalRW+=w;totalRWP+=w*avg;}
   }
-
-  const nvpRaw=totalW>0?totalWP/totalW:0;
-  const nvp=nvpRaw*NVP_PREMIUM;
+  const nvpRaw=totalW>0?totalWP/totalW:0,nvp=nvpRaw*NVP_PREMIUM;
   const nvpRate=myAvgPPP>0?((nvp-myAvgPPP)/myAvgPPP*100):0;
-  const nrt=totalRentW>0?(totalRentWP/totalRentW)*NVP_PREMIUM:0;
+  const nrt=totalRW>0?(totalRWP/totalRW)*NVP_PREMIUM:0;
 
-  // 4) 점수화
-  function scoreNVPRate(r){return r>=40?100:r>=30?85:r>=20?70:r>=10?50:r>0?30:0;}
-  function scoreLPS(v){const py=v/3.3058;return py>=18?100:py>=12?75:py>=8?50:25;}
-  function scoreFAR(v){return v<=170?100:v<=200?75:v<=220?50:v<=250?25:0;}
-  function scoreTLA(v){return v>=50000?100:v>=30000?75:v>=10000?50:25;}
-  function scoreNRT(v){return v>=8000?100:v>=6500?75:v>=5000?50:25;}
-  function scoreAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
+  // 점수화
+  function sNVP(r){return r>=40?100:r>=30?85:r>=20?70:r>=10?50:r>0?30:0;}
+  function sLPS(v){const p=v/3.3058;return p>=18?100:p>=12?75:p>=8?50:25;}
+  function sFAR(v){return v<=170?100:v<=200?75:v<=220?50:v<=250?25:0;}
+  function sTLA(v){return v>=50000?100:v>=30000?75:v>=10000?50:25;}
+  function sNRT(v){return v>=8000?100:v>=6500?75:v>=5000?50:25;}
+  function sAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
 
   const scores={
-    nvp_rate:{score:scoreNVPRate(nvpRate),value:nvpRate,detail:`NVP ${(nvp/10000).toFixed(0)}만 vs 현재 ${(myAvgPPP/10000).toFixed(0)}만/평`},
-    lps:{score:scoreLPS(lps),value:lps,detail:`${Math.round(platArea).toLocaleString()}㎡ ÷ ${households}세대 = ${(lps/3.3058).toFixed(1)}평`},
-    far:{score:scoreFAR(far),value:far,detail:`현 용적률 ${far.toFixed(0)}%`},
-    tla:{score:scoreTLA(platArea),value:platArea,detail:`${Math.round(platArea).toLocaleString()}㎡`},
-    nrt:{score:scoreNRT(nrt),value:nrt,detail:`신축전세 평당 ${Math.round(nrt).toLocaleString()}만`},
-    age:{score:scoreAGE(age),value:age,detail:`${builtYear}년 준공, ${age}년 경과`}
+    nvp_rate:{score:sNVP(nvpRate),detail:`NVP ${Math.round(nvp/10000).toLocaleString()}만 vs 현재 ${Math.round(myAvgPPP/10000).toLocaleString()}만/평`},
+    lps:{score:sLPS(lps),detail:`${Math.round(platArea).toLocaleString()}㎡ ÷ ${households} = ${(lps/3.3058).toFixed(1)}평`},
+    far:{score:sFAR(far),detail:`현 용적률 ${far.toFixed(0)}%`},
+    tla:{score:sTLA(platArea),detail:`${Math.round(platArea).toLocaleString()}㎡`},
+    nrt:{score:sNRT(nrt),detail:`신축전세 평당 ${Math.round(nrt).toLocaleString()}만`},
+    age:{score:sAGE(age),detail:`${builtYear}년 준공, ${age}년 경과`}
   };
+  const rvi=Math.round(scores.nvp_rate.score*0.35+scores.lps.score*0.20+scores.far.score*0.20+scores.tla.score*0.12+scores.nrt.score*0.05+scores.age.score*0.08);
 
-  // RVI 종합 (6대 지표: STD 제거)
-  const rvi=Math.round(
-    scores.nvp_rate.score*0.35+scores.lps.score*0.20+scores.far.score*0.20+
-    scores.tla.score*0.12+scores.nrt.score*0.05+scores.age.score*0.08
-  );
-
-  // 5) 렌더링
+  // 렌더링
   document.getElementById('loading').style.display='none';
   const cls=scoreColor(rvi);
   document.getElementById('rviScore').textContent=rvi;
@@ -473,73 +296,31 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   document.getElementById('rviGrade').className='rvi-grade c-'+cls;
   document.getElementById('rviDesc').textContent=gradeDesc(rvi);
 
-  // 6대 지표
-  const META={
-    nvp_rate:{label:'NVP Rate',name:'상승여력률'},
-    lps:{label:'LPS',name:'세대당 대지지분'},
-    far:{label:'FAR',name:'용적률'},
-    tla:{label:'TLA',name:'대지 총면적'},
-    nrt:{label:'NRT',name:'신축전세 평당가'},
-    age:{label:'AGE',name:'준공경과년수'}
-  };
-  const grid=document.getElementById('indexGrid');
-  grid.innerHTML='';
+  const META={nvp_rate:{label:'NVP Rate',name:'상승여력률'},lps:{label:'LPS',name:'세대당 대지지분'},far:{label:'FAR',name:'용적률'},tla:{label:'TLA',name:'대지 총면적'},nrt:{label:'NRT',name:'신축전세 평당가'},age:{label:'AGE',name:'준공경과년수'}};
+  const grid=document.getElementById('indexGrid');grid.innerHTML='';
   ['nvp_rate','lps','far','tla','nrt','age'].forEach(k=>{
-    age:{label:'AGE',name:'준공경과년수'}
-  };
-  const grid=document.getElementById('indexGrid');
-  grid.innerHTML='';
-  ['nvp_rate','lps','far','tla','nrt','std','age'].forEach(k=>{
     const s=scores[k],m=META[k],c=scoreColor(s.score);
-    grid.innerHTML+=`<div class="index-card" style="border-color:var(--c)">
-      <div class="idx-label">${m.label}</div>
-      <div class="idx-name">${m.name}</div>
-      <div class="idx-score c-${c}">${s.score}<span style="font-size:12px;color:#666">/100</span></div>
-      <div class="idx-sub">${s.detail}</div>
-      <div class="idx-bar"><div class="idx-bar-fill bar-${c}" style="width:${s.score}%"></div></div>
-    </div>`;
+    grid.innerHTML+=`<div class="index-card"><div class="idx-label">${m.label}</div><div class="idx-name">${m.name}</div><div class="idx-score c-${c}">${s.score}<span style="font-size:12px;color:#666">/100</span></div><div class="idx-sub">${s.detail}</div><div class="idx-bar"><div class="idx-bar-fill bar-${c}" style="width:${s.score}%"></div></div></div>`;
   });
 
-  // NVP 비교 단지
-  const nvpRows=document.getElementById('nvpRows');
-  nvpRows.innerHTML='';
+  // NVP 비교
+  const nvpR=document.getElementById('nvpRows');nvpR.innerHTML='';
   nvpDetails.sort((a,b)=>b.w-a.w);
-  if(nvpDetails.length>0){
-    nvpDetails.slice(0,5).forEach(d=>{
-      nvpRows.innerHTML+=`<div class="nvp-row"><span class="left">${d.name} (${d.dist.toFixed(1)}km, ${d.cnt}건)</span><span class="right">${(d.avgP/10000).toFixed(0)}만/평</span></div>`;
-    });
-    nvpRows.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×1.25 프리미엄)</span><span class="right" style="font-size:15px">${(nvp/10000).toFixed(0)}만/평</span></div>`;
-  }else{
-    nvpRows.innerHTML='<p style="color:#666;font-size:12px">2km 이내 비교 가능한 신축 단지 없음</p>';
-  }
+  nvpDetails.slice(0,5).forEach(d=>{nvpR.innerHTML+=`<div class="nvp-row"><span class="left">${d.name} (${d.dist.toFixed(1)}km, ${d.cnt}건)</span><span class="right">${Math.round(d.avgP/10000).toLocaleString()}만/평</span></div>`;});
+  if(nvpDetails.length)nvpR.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×1.25)</span><span class="right" style="font-size:15px">${Math.round(nvp/10000).toLocaleString()}만/평</span></div>`;
 
   // 거래내역
-  const tbody=document.getElementById('tradeBody');
-  tbody.innerHTML='';
-  const displayTrades=myTrades.slice(0,8);
-  if(displayTrades.length===0){
-    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">최근 6개월 거래 없음</td></tr>';
-  }else{
-    displayTrades.forEach(t=>{
-      const amt=parseInt((t.dealAmount||'0').replace(/,/g,''));
-      const area=parseFloat(t.excluUseAr||0);
-      const ppp=area>0?amt/(area/3.3058):0;
-      const priceStr=amt>=10000?(amt/10000).toFixed(1)+'억':amt.toLocaleString()+'만';
-      tbody.innerHTML+=`<tr>
-        <td>${t.dealYear}.${t.dealMonth}.${(t.dealDay||'').trim()}</td>
-        <td>${area}㎡</td>
-        <td>${t.floor||''}층</td>
-        <td class="price">${priceStr}</td>
-        <td>${(ppp/10000).toFixed(0)}만/평</td>
-      </tr>`;
-    });
-  }
-
+  const tbody=document.getElementById('tradeBody');tbody.innerHTML='';
+  myTrades.slice(0,8).forEach(t=>{
+    const amt=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0),ppp=ar>0?amt/(ar/3.3058):0;
+    tbody.innerHTML+=`<tr><td>${t.dealYear}.${t.dealMonth}.${(t.dealDay||'').trim()}</td><td>${ar}㎡</td><td>${t.floor||''}층</td><td class="price">${amt>=10000?(amt/10000).toFixed(1)+'억':amt.toLocaleString()+'만'}</td><td>${Math.round(ppp/10000).toLocaleString()}만/평</td></tr>`;
+  });
+  if(!myTrades.length)tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">최근 6개월 거래 없음</td></tr>';
   document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
 }
 
-// ====== 빠른 선택 ======
-const QUICK_MAP={
+// 빠른선택
+const QM={
   '은마아파트':{lat:37.4968,lng:127.0562,lawd:'11680',bjdong:'10600',jibun:'316'},
   '잠실주공5단지':{lat:37.5117,lng:127.0830,lawd:'11710',bjdong:'10100',jibun:'27'},
   '개포주공아파트':{lat:37.4835,lng:127.0555,lawd:'11680',bjdong:'10300',jibun:'185'},
@@ -549,19 +330,16 @@ const QUICK_MAP={
   '래미안대치팰리스':{lat:37.4948,lng:127.0575,lawd:'11680',bjdong:'10600',jibun:'1027'},
 };
 function quickLoad(name,address){
-  const q=QUICK_MAP[name];
-  if(!q)return;
-  LAWD_CD=q.lawd;selectedBjdongCd=q.bjdong;selectedJibun=q.jibun;selectedName=name;
-  map.setCenter(new kakao.maps.LatLng(q.lat,q.lng));
-  map.setLevel(4);
+  const q=QM[name];if(!q)return;
+  LAWD_CD=q.lawd;selectedBjdongCd=q.bjdong;selectedJibun=q.jibun;
+  map.setCenter(new kakao.maps.LatLng(q.lat,q.lng));map.setLevel(4);
   marker.setPosition(new kakao.maps.LatLng(q.lat,q.lng));
   loadRVI(name,address,q.lat,q.lng,q.lawd,q.bjdong,q.jibun);
 }
 
-// ====== 카카오맵 ======
+// 카카오맵
 const map=new kakao.maps.Map(document.getElementById('map'),{center:new kakao.maps.LatLng(37.500,127.055),level:5});
-const marker=new kakao.maps.Marker({position:map.getCenter()});
-marker.setMap(map);
+const marker=new kakao.maps.Marker({position:map.getCenter()});marker.setMap(map);
 const geocoder=new kakao.maps.services.Geocoder();
 const ps=new kakao.maps.services.Places();
 
@@ -572,23 +350,20 @@ kakao.maps.event.addListener(map,'click',function(e){
     const addr=result[0].address;
     const bldg=(result[0].road_address&&result[0].road_address.building_name)||'';
     const jibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!=='0'?'-'+addr.sub_address_no:'');
-    const name=bldg||addr.address_name;
+    const nm=bldg||addr.address_name;
     geocoder.coord2RegionCode(e.latLng.getLng(),e.latLng.getLat(),function(rr,rs){
-      if(rs===kakao.maps.services.Status.OK){
-        for(let i=0;i<rr.length;i++){if(rr[i].region_type==='B'){LAWD_CD=rr[i].code.substring(0,5);selectedBjdongCd=rr[i].code.substring(5,10);break;}}
-      }
-      loadRVI(name,addr.address_name,e.latLng.getLat(),e.latLng.getLng(),LAWD_CD,selectedBjdongCd,jibun);
+      let lc=LAWD_CD,bc=selectedBjdongCd;
+      if(rs===kakao.maps.services.Status.OK){for(let i=0;i<rr.length;i++){if(rr[i].region_type==='B'){lc=rr[i].code.substring(0,5);bc=rr[i].code.substring(5,10);break;}}}
+      LAWD_CD=lc;selectedBjdongCd=bc;
+      loadRVI(nm,addr.address_name,e.latLng.getLat(),e.latLng.getLng(),lc,bc,jibun);
     });
   });
 });
-
 function searchAddress(){
   const kw=document.getElementById('searchInput').value.trim();if(!kw)return;
   ps.keywordSearch(kw,function(data,status){
     if(status!==kakao.maps.services.Status.OK){alert('검색 결과 없음');return;}
-    const p=data[0];
-    map.setCenter(new kakao.maps.LatLng(p.y,p.x));map.setLevel(4);
-    marker.setPosition(new kakao.maps.LatLng(p.y,p.x));
+    const p=data[0];map.setCenter(new kakao.maps.LatLng(p.y,p.x));map.setLevel(4);marker.setPosition(new kakao.maps.LatLng(p.y,p.x));
     geocoder.coord2Address(p.x,p.y,function(result,status){
       if(status!==kakao.maps.services.Status.OK)return;
       const addr=result[0].address;
