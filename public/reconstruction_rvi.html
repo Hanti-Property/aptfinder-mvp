@@ -161,11 +161,11 @@ const LAND_LAMBDA_URL='https://3b77wfcneqfnywtzw3z333kw6a0gtrzt.lambda-url.ap-no
 const BLD_KEY='Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
 const NVP_PREMIUM=1.25;
 
-// 서울 지하철 주요역 좌표 (강남3구 중심)
+// 서울 지하철 주요역 좌표 (강남3구 중심 — 카카오맵 실측 기준)
 const STATIONS=[
-  {name:'대치역',lat:37.4947,lng:127.0564},
-  {name:'도곡역',lat:37.4910,lng:127.0536},
-  {name:'한티역',lat:37.4987,lng:127.0620},
+  {name:'대치역',lat:37.4944,lng:127.0563},
+  {name:'도곡역',lat:37.4913,lng:127.0427},
+  {name:'한티역',lat:37.4986,lng:127.0534},
   {name:'선릉역',lat:37.5045,lng:127.0490},
   {name:'삼성역',lat:37.5088,lng:127.0631},
   {name:'잠실역',lat:37.5133,lng:127.1001},
@@ -190,9 +190,12 @@ const STATIONS=[
   {name:'강남역',lat:37.4980,lng:127.0276},
   {name:'역삼역',lat:37.5007,lng:127.0365},
   {name:'선정릉역',lat:37.5102,lng:127.0430},
-  {name:'학여울역',lat:37.4969,lng:127.0651},
+  {name:'학여울역',lat:37.4965,lng:127.0643},
   {name:'대청역',lat:37.4920,lng:127.0714},
   {name:'잠실나루역',lat:37.5200,lng:127.0970},
+  {name:'매봉역',lat:37.4869,lng:127.0347},
+  {name:'양재역',lat:37.4841,lng:127.0345},
+  {name:'남부터미널역',lat:37.4848,lng:127.0145},
 ];
 
 // 주변 신축 단지 DB (강남3구 2006년 이후 준공 대단지)
@@ -535,7 +538,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
 
 // ====== 빠른 선택 ======
 const QUICK_MAP={
-  '은마아파트':{lat:37.5015,lng:127.0580,lawd:'11680',bjdong:'10600',jibun:'316'},
+  '은마아파트':{lat:37.4968,lng:127.0562,lawd:'11680',bjdong:'10600',jibun:'316'},
   '잠실주공5단지':{lat:37.5117,lng:127.0830,lawd:'11710',bjdong:'10100',jibun:'27'},
   '개포주공아파트':{lat:37.4835,lng:127.0555,lawd:'11680',bjdong:'10300',jibun:'185'},
   '압구정현대':{lat:37.5280,lng:127.0280,lawd:'11680',bjdong:'11000',jibun:'456'},
