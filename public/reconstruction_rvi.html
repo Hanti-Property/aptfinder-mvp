@@ -260,7 +260,18 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   // 용적률 범위 검증 (50~500% 범위 밖이면 신뢰할 수 없음)
   if(far>0&&(far<50||far>500))far=0;
 
-  const lps=(households>0&&platArea>0)?(platArea/households):0;
+  // [다필지 보정] LPS가 6평 미만이면 V-World가 일부 필지만 반환한 것으로 판단
+  // vlRatEstmTotArea / 추정용적률(250%)로 실제 대지면적 역산
+  let lps=(households>0&&platArea>0)?(platArea/households):0;
+  if(lps>0&&lps/3.3058<6&&vlRatEstm>0&&households>0){
+    const estPlat=vlRatEstm/2.5; // 강남3구 평균 용적률 250% 가정
+    if(estPlat>platArea){
+      platArea=estPlat;
+      lps=platArea/households;
+      // 용적률도 재계산 (250%로 수렴하겠지만, 정확값 반영)
+      far=(vlRatEstm/platArea)*100;
+    }
+  }
 
   // 실거래 매칭
   const kw=name.replace(/아파트|단지|맨션/g,'').substring(0,4);
