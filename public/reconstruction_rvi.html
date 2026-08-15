@@ -223,11 +223,29 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   const households=parseInt(recapData?.hhldCnt||0);
   const totArea=parseFloat(recapData?.totArea||0);
   const vlRatEstm=parseFloat(recapData?.vlRatEstmTotArea||0);
+  const archArea=parseFloat(recapData?.archArea||0);
+  const bcRat=parseFloat(recapData?.bcRat||0);
   let platArea=landData?parseFloat(landData.lndpclAr||0):0;
   if(!platArea)platArea=parseFloat(recapData?.platArea||0);
+
+  // [P1 FIX] 용적률 fallback 로직 강화
+  // 우선순위: 1) 건축물대장 vlRat → 2) vlRatEstmTotArea/platArea → 3) vlRatEstmTotArea/(archArea/bcRat) → 4) totArea/platArea
   let far=0;
-  if(recapData?.vlRat&&parseFloat(recapData.vlRat)>0)far=parseFloat(recapData.vlRat);
-  else if(platArea>0&&vlRatEstm>0)far=(vlRatEstm/platArea)*100;
+  if(recapData?.vlRat&&parseFloat(recapData.vlRat)>0){
+    far=parseFloat(recapData.vlRat);
+  } else if(platArea>0&&vlRatEstm>0){
+    far=(vlRatEstm/platArea)*100;
+  } else if(archArea>0&&bcRat>0&&vlRatEstm>0){
+    // 건폐율 역산: 대지면적 = 건축면적 / 건폐율 × 100
+    const estPlatArea=(archArea/bcRat)*100;
+    far=(vlRatEstm/estPlatArea)*100;
+    if(!platArea)platArea=estPlatArea; // 대지면적도 보완
+  } else if(platArea>0&&totArea>0){
+    far=(totArea/platArea)*100;
+  }
+  // 용적률 범위 검증 (50~500% 범위 밖이면 신뢰할 수 없음)
+  if(far>0&&(far<50||far>500))far=0;
+
   const lps=(households>0&&platArea>0)?(platArea/households):0;
 
   // 실거래 매칭
@@ -255,9 +273,12 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   myPPPs=removeOutliers(myPPPs);
   const myAvgPPP=myPPPs.length?myPPPs.reduce((a,b)=>a+b,0)/myPPPs.length:0;
 
-  // NVP
+  // [P1 FIX] NVP — 비교 단지 부족 시 3km까지 확대
   document.getElementById('loadingText').textContent='NVP 산출 중...';
-  const nearby=NEW_COMPLEXES.filter(c=>haversine(lat,lng,c.lat,c.lng)<=2.0);
+  let searchRadius=2.0;
+  let nearby=NEW_COMPLEXES.filter(c=>haversine(lat,lng,c.lat,c.lng)<=searchRadius);
+  // 2km 내 신축 1개 이하면 3km로 확대
+  if(nearby.length<=1){searchRadius=3.0;nearby=NEW_COMPLEXES.filter(c=>haversine(lat,lng,c.lat,c.lng)<=searchRadius);}
   const otherLawds=[...new Set(nearby.filter(c=>c.lawd!==lawdCd).map(c=>c.lawd))];
   let extra=[];for(const lc of otherLawds){extra=extra.concat(await fetchTrades(lc,6));}
   let extraRents=[];for(const lc of otherLawds){extraRents=extraRents.concat(await fetchTrades(lc,6,'rent'));}
@@ -276,48 +297,70 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
     if(rPPPs.length){rPPPs=removeOutliers(rPPPs);const avg=rPPPs.reduce((a,b)=>a+b,0)/rPPPs.length;totalRW+=w;totalRWP+=w*avg;}
   }
   const nvpRaw=totalW>0?totalWP/totalW:0,nvp=nvpRaw*NVP_PREMIUM;
-  const nvpRate=myAvgPPP>0?((nvp-myAvgPPP)/myAvgPPP*100):0;
+  const nvpRate=myAvgPPP>0&&nvp>0?((nvp-myAvgPPP)/myAvgPPP*100):0;
   const nrt=totalRW>0?(totalRWP/totalRW)*NVP_PREMIUM:0;
 
   // 점수화
   function sNVP(r){return r>=40?100:r>=30?85:r>=20?70:r>=10?50:r>0?30:0;}
   function sLPS(v){const p=v/3.3058;return p>=18?100:p>=12?75:p>=8?50:25;}
-  function sFAR(v){return v<=170?100:v<=200?75:v<=220?50:v<=250?25:0;}
+  function sFAR(v){if(v===0)return -1;return v<=170?100:v<=200?75:v<=220?50:v<=250?25:0;} // -1 = 산출불가
   function sTLA(v){return v>=50000?100:v>=30000?75:v>=10000?50:25;}
-  function sNRT(v){return v>=8000?100:v>=6500?75:v>=5000?50:25;}
+  function sNRT(v){if(v===0)return -1;return v>=8000?100:v>=6500?75:v>=5000?50:25;}
   function sAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
 
+  // [P1 FIX] NVP Rate 0점 방지 — 비교 단지 없으면 "산출 불가" 처리
+  const nvpAvailable=nvp>0&&myAvgPPP>0;
+  const nvpRateScore=nvpAvailable?sNVP(nvpRate):-1; // -1 = 산출불가
+
   const scores={
-    nvp_rate:{score:sNVP(nvpRate),detail:`NVP ${Math.round(nvp).toLocaleString()}만 vs 현재 ${Math.round(myAvgPPP).toLocaleString()}만/평`},
-    lps:{score:sLPS(lps),detail:`${Math.round(platArea).toLocaleString()}㎡ ÷ ${households} = ${(lps/3.3058).toFixed(1)}평`},
-    far:{score:sFAR(far),detail:`현 용적률 ${far.toFixed(0)}%`},
+    nvp_rate:{score:nvpRateScore,detail:nvpAvailable?`NVP ${Math.round(nvp).toLocaleString()}만 vs 현재 ${Math.round(myAvgPPP).toLocaleString()}만/평`:'비교 신축 단지 부족 (산출 불가)'},
+    lps:{score:sLPS(lps),detail:platArea>0&&households>0?`${Math.round(platArea).toLocaleString()}㎡ ÷ ${households} = ${(lps/3.3058).toFixed(1)}평`:'대지면적 미확보'},
+    far:{score:sFAR(far),detail:far>0?`현 용적률 ${far.toFixed(0)}%`:'용적률 미확보'},
     tla:{score:sTLA(platArea),detail:`${Math.round(platArea).toLocaleString()}㎡`},
-    nrt:{score:sNRT(nrt),detail:`신축전세 평당 ${Math.round(nrt).toLocaleString()}만`},
-    age:{score:sAGE(age),detail:`${builtYear}년 준공, ${age}년 경과`}
+    nrt:{score:sNRT(nrt),detail:nrt>0?`신축전세 평당 ${Math.round(nrt).toLocaleString()}만`:'전세 데이터 부족'},
+    age:{score:sAGE(age),detail:builtYear?`${builtYear}년 준공, ${age}년 경과`:'준공년도 미확인'}
   };
-  const rvi=Math.round(scores.nvp_rate.score*0.35+scores.lps.score*0.20+scores.far.score*0.20+scores.tla.score*0.12+scores.nrt.score*0.05+scores.age.score*0.08);
+
+  // RVI 산출: 산출불가(-1) 지표는 제외하고 나머지 가중치 재배분
+  const weights={nvp_rate:0.35,lps:0.20,far:0.20,tla:0.12,nrt:0.05,age:0.08};
+  let totalWeight=0,weightedSum=0;
+  for(const[k,w] of Object.entries(weights)){
+    if(scores[k].score>=0){totalWeight+=w;weightedSum+=scores[k].score*w;}
+  }
+  const rviNorm=totalWeight>0?Math.round(weightedSum/totalWeight):0;
 
   // 렌더링
   document.getElementById('loading').style.display='none';
-  const cls=scoreColor(rvi);
-  document.getElementById('rviScore').textContent=rvi;
+  const cls=scoreColor(rviNorm);
+  document.getElementById('rviScore').textContent=rviNorm;
   document.getElementById('rviScore').className='rvi-score c-'+cls;
-  document.getElementById('rviGrade').textContent=grade(rvi);
+  document.getElementById('rviGrade').textContent=grade(rviNorm);
   document.getElementById('rviGrade').className='rvi-grade c-'+cls;
-  document.getElementById('rviDesc').textContent=gradeDesc(rvi);
+  document.getElementById('rviDesc').textContent=gradeDesc(rviNorm);
 
   const META={nvp_rate:{label:'NVP Rate',name:'상승여력률'},lps:{label:'LPS',name:'세대당 대지지분'},far:{label:'FAR',name:'용적률'},tla:{label:'TLA',name:'대지 총면적'},nrt:{label:'NRT',name:'신축전세 평당가'},age:{label:'AGE',name:'준공경과년수'}};
   const grid=document.getElementById('indexGrid');grid.innerHTML='';
   ['nvp_rate','lps','far','tla','nrt','age'].forEach(k=>{
-    const s=scores[k],m=META[k],c=scoreColor(s.score);
-    grid.innerHTML+=`<div class="index-card"><div class="idx-label">${m.label}</div><div class="idx-name">${m.name}</div><div class="idx-score c-${c}">${s.score}<span style="font-size:12px;color:#666">/100</span></div><div class="idx-sub">${s.detail}</div><div class="idx-bar"><div class="idx-bar-fill bar-${c}" style="width:${s.score}%"></div></div></div>`;
+    const s=scores[k],m=META[k];
+    if(s.score<0){
+      // 산출 불가 지표
+      grid.innerHTML+=`<div class="index-card" style="opacity:0.6"><div class="idx-label">${m.label}</div><div class="idx-name">${m.name}</div><div class="idx-score c-d">—<span style="font-size:12px;color:#666">/100</span></div><div class="idx-sub">${s.detail}</div><div class="idx-bar"><div class="idx-bar-fill bar-d" style="width:0%"></div></div></div>`;
+    } else {
+      const c=scoreColor(s.score);
+      grid.innerHTML+=`<div class="index-card"><div class="idx-label">${m.label}</div><div class="idx-name">${m.name}</div><div class="idx-score c-${c}">${s.score}<span style="font-size:12px;color:#666">/100</span></div><div class="idx-sub">${s.detail}</div><div class="idx-bar"><div class="idx-bar-fill bar-${c}" style="width:${s.score}%"></div></div></div>`;
+    }
   });
 
   // NVP 비교
   const nvpR=document.getElementById('nvpRows');nvpR.innerHTML='';
   nvpDetails.sort((a,b)=>b.w-a.w);
   nvpDetails.slice(0,5).forEach(d=>{nvpR.innerHTML+=`<div class="nvp-row"><span class="left">${d.name} (${d.dist.toFixed(1)}km, ${d.cnt}건)</span><span class="right">${Math.round(d.avgP).toLocaleString()}만/평</span></div>`;});
-  if(nvpDetails.length)nvpR.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×1.25)</span><span class="right" style="font-size:15px">${Math.round(nvp).toLocaleString()}만/평</span></div>`;
+  if(nvpDetails.length){
+    nvpR.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×1.25)</span><span class="right" style="font-size:15px">${Math.round(nvp).toLocaleString()}만/평</span></div>`;
+    if(myAvgPPP>0)nvpR.innerHTML+=`<div class="nvp-row"><span class="left" style="color:#aaa">현재 평당가</span><span class="right" style="color:#FFA726">${Math.round(myAvgPPP).toLocaleString()}만/평</span></div><div class="nvp-row"><span class="left" style="color:#aaa">NVP Rate</span><span class="right" style="color:${nvpRate>=20?'#66BB6A':'#42A5F5'}">${nvpRate>=0?'+':''}${nvpRate.toFixed(1)}%</span></div>`;
+  } else {
+    nvpR.innerHTML=`<div style="text-align:center;padding:12px;color:#666">반경 ${searchRadius}km 내 비교 가능한 신축 단지가 부족합니다</div>`;
+  }
 
   // 거래내역
   const tbody=document.getElementById('tradeBody');tbody.innerHTML='';
@@ -513,7 +556,7 @@ function quickLoad(name,address){
 }
 function quickLoad2(name,address,lawd,bjdong,jibun){
   LAWD_CD=lawd;selectedBjdongCd=bjdong;selectedJibun=jibun;
-  // 카카오 주소검색으로 좌표 확보 후 loadRVI 호출
+  // [P1 FIX] 카카오 검색 결과가 아닌 name 파라미터 직접 사용
   ps.keywordSearch(name+' '+address.split(' ').slice(2,3),function(data,status){
     let lat=37.5,lng=127.05;
     if(status===kakao.maps.services.Status.OK&&data.length){lat=parseFloat(data[0].y);lng=parseFloat(data[0].x);}
