@@ -227,6 +227,12 @@ async function fetchRecap(lawdCd,bjdongCd,jibun){
     return pool[0];
   }catch(e){return null;}
 }
+// 표제부 호출 — 총괄표제부에 useAprDay 없을 때 준공년도 보완
+async function fetchTitle(lawdCd,bjdongCd,jibun){
+  const parts=jibun.split('-'),bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
+  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=100&pageNo=1&_type=json`;
+  try{const r=await fetch(url);const d=await r.json();const it=d.response?.body?.items?.item;if(!it)return [];return Array.isArray(it)?it:[it];}catch(e){return [];}
+}
 async function fetchLand(lawdCd,bjdongCd,jibun){
   const parts=jibun.split('-'),bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
   const pnu=lawdCd+bjdongCd+'1'+bun+ji;
@@ -243,6 +249,12 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
     fetchRecap(lawdCd,bjdongCd,jibun),fetchLand(lawdCd,bjdongCd,jibun),
     fetchTrades(lawdCd,6),fetchTrades(lawdCd,6,'rent')
   ]);
+  // 총괄표제부에 준공년도 없으면 표제부에서 보완 (admin_index와 동일 방식)
+  let titleItems=[];
+  const ua0=recapData?.useAprDay||'';
+  if(!ua0||ua0.trim()===''||ua0.trim()==='-'){
+    titleItems=await fetchTitle(lawdCd,bjdongCd,jibun);
+  }
 
   const households=parseInt(recapData?.hhldCnt||0);
   const totArea=parseFloat(recapData?.totArea||0);
@@ -291,8 +303,22 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
 
   let builtYear=0;
   const ua=recapData?.useAprDay||'';
-  if(ua.length>=4&&parseInt(ua.substring(0,4))>1900)builtYear=parseInt(ua.substring(0,4));
-  else if(myTrades.length&&myTrades[0].buildYear)builtYear=parseInt(myTrades[0].buildYear);
+  if(ua.length>=4&&parseInt(ua.substring(0,4))>1900){
+    builtYear=parseInt(ua.substring(0,4));
+  } else if(titleItems.length>0){
+    // 표제부에서 주거시설 동 필터 → 가장 이른 useAprDay (admin_index 동일 로직)
+    const residential=titleItems.filter(t=>{const p=(t.etcPurps||'').trim();return p==='주거시설'||p==='아파트'||p==='공동주택'||(t.mainPurpsCdNm||'')==='공동주택';});
+    const targets=residential.length>0?residential:titleItems;
+    const dates=targets.map(t=>t.useAprDay).filter(d=>d&&d.trim()!==''&&d.trim()!=='-'&&d.length>=4);
+    if(dates.length>0){
+      dates.sort();
+      builtYear=parseInt(dates[0].substring(0,4));
+    }
+  }
+  // 최종 fallback: 실거래 데이터의 buildYear
+  if(!builtYear&&myTrades.length&&myTrades[0].buildYear){
+    builtYear=parseInt(myTrades[0].buildYear);
+  }
   const age=builtYear?2026-builtYear:0;
 
   // 기본정보 표시
