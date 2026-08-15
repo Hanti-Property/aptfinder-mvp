@@ -202,12 +202,19 @@ async function fetchRecap(lawdCd,bjdongCd,jibun){
   const parts=jibun.split('-'),bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
   const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=10&pageNo=1&_type=json`;
   try{const r=await fetch(url);const d=await r.json();const it=d.response?.body?.items?.item;if(!it)return null;
-    // 여러 건 반환 시 세대수(hhldCnt) 가장 큰 항목 선택 (상가동 제외)
-    if(Array.isArray(it)){
-      const sorted=[...it].sort((a,b)=>parseInt(b.hhldCnt||0)-parseInt(a.hhldCnt||0));
-      return sorted[0];
-    }
-    return it;
+    if(!Array.isArray(it))return it;
+    // 다건 반환 시 선택 우선순위:
+    // 1) 용도가 '공동주택'인 것만 필터
+    // 2) 그 중 세대수(hhldCnt) 최대
+    // 3) 동일 세대수면 연면적(totArea) 최대
+    const apts=it.filter(x=>(x.mainPurpsCdNm||'').includes('공동주택'));
+    const pool=apts.length?apts:it; // 공동주택 필터 결과 없으면 전체에서 선택
+    pool.sort((a,b)=>{
+      const hDiff=parseInt(b.hhldCnt||0)-parseInt(a.hhldCnt||0);
+      if(hDiff!==0)return hDiff;
+      return parseFloat(b.totArea||0)-parseFloat(a.totArea||0);
+    });
+    return pool[0];
   }catch(e){return null;}
 }
 async function fetchLand(lawdCd,bjdongCd,jibun){
