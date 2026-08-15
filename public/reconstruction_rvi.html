@@ -200,8 +200,15 @@ async function fetchTrades(lawdCd,months,type){
 }
 async function fetchRecap(lawdCd,bjdongCd,jibun){
   const parts=jibun.split('-'),bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
-  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=5&pageNo=1&_type=json`;
-  try{const r=await fetch(url);const d=await r.json();const it=d.response?.body?.items?.item;if(!it)return null;return Array.isArray(it)?it[0]:it;}catch(e){return null;}
+  const url=`https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawdCd}&bjdongCd=${bjdongCd}&bun=${bun}&ji=${ji}&numOfRows=10&pageNo=1&_type=json`;
+  try{const r=await fetch(url);const d=await r.json();const it=d.response?.body?.items?.item;if(!it)return null;
+    // 여러 건 반환 시 세대수(hhldCnt) 가장 큰 항목 선택 (상가동 제외)
+    if(Array.isArray(it)){
+      const sorted=[...it].sort((a,b)=>parseInt(b.hhldCnt||0)-parseInt(a.hhldCnt||0));
+      return sorted[0];
+    }
+    return it;
+  }catch(e){return null;}
 }
 async function fetchLand(lawdCd,bjdongCd,jibun){
   const parts=jibun.split('-'),bun=(parts[0]||'0').padStart(4,'0'),ji=(parts[1]||'0').padStart(4,'0');
