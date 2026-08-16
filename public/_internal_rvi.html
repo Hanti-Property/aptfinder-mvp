@@ -239,30 +239,104 @@ async function fetchLand(lawdCd,bjdongCd,jibun){
   try{const r=await fetch(`${LAND_LAMBDA}?pnu=${pnu}`);const d=await r.json();const it=d.landCharacteristicss?.field;if(!it||!it.length)return null;return[...it].sort((a,b)=>parseInt(b.stdrYear||0)-parseInt(a.stdrYear||0))[0];}catch(e){return null;}
 }
 
-async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
+// ============================================================
+// 총괄표제부 + 표제부 병합 (admin_index_dashboard와 동일 로직)
+// ============================================================
+function mergeBldData(recap, titleItems){
+  const merged = recap ? {...recap} : {};
+  if(!titleItems||titleItems.length===0) return merged;
+
+  // 주거시설 동만 필터
+  const residential = titleItems.filter(t=>{
+    const p=(t.etcPurps||'').trim();
+    return p==='주거시설'||p==='아파트'||p==='공동주택'||(t.mainPurpsCdNm||'')==='공동주택';
+  });
+  const targets = residential.length>0 ? residential : titleItems;
+
+  // 준공년도: 총괄에 없으면 표제부에서 가장 이른 useAprDay
+  if(!merged.useAprDay||merged.useAprDay.trim()===''||merged.useAprDay.trim()==='-'){
+    const dates=targets.map(t=>t.useAprDay).filter(d=>d&&d.trim()!==''&&d.trim()!=='-'&&d.length>=4);
+    if(dates.length>0){dates.sort();merged.useAprDay=dates[0];}
+  }
+
+  // 세대수: 총괄에 없거나 0이면 동별 합산
+  if(!merged.hhldCnt||parseInt(merged.hhldCnt)===0){
+    const total=targets.reduce((sum,t)=>sum+parseInt(t.hhldCnt||0),0);
+    if(total>0) merged.hhldCnt=total;
+  }
+
+  // 용적률: 총괄에 없으면 표제부에서 첫 유효값
+  if(!merged.vlRat||parseFloat(merged.vlRat)===0){
+    const valid=targets.find(t=>t.vlRat&&parseFloat(t.vlRat)>0);
+    if(valid) merged.vlRat=valid.vlRat;
+  }
+
+  // 연면적: 총괄에 없으면 동별 합산
+  if(!merged.totArea||parseFloat(merged.totArea)===0){
+    const total=targets.reduce((sum,t)=>sum+parseFloat(t.totArea||0),0);
+    if(total>0) merged.totArea=total;
+  }
+
+  // 용적률산정연면적: 합산
+  if(!merged.vlRatEstmTotArea||parseFloat(merged.vlRatEstmTotArea)===0){
+    const total=targets.reduce((sum,t)=>sum+parseFloat(t.vlRatEstmTotArea||0),0);
+    if(total>0) merged.vlRatEstmTotArea=total;
+  }
+
+  // 건축면적: 합산
+  if(!merged.archArea||parseFloat(merged.archArea)===0){
+    const total=targets.reduce((sum,t)=>sum+parseFloat(t.archArea||0),0);
+    if(total>0) merged.archArea=total;
+  }
+
+  // 건폐율: 첫 유효값
+  if(!merged.bcRat||parseFloat(merged.bcRat)===0){
+    const valid=targets.find(t=>t.bcRat&&parseFloat(t.bcRat)>0);
+    if(valid) merged.bcRat=valid.bcRat;
+  }
+
+  // 대지면적: 총괄에 없으면 표제부에서
+  if(!merged.platArea||parseFloat(merged.platArea)===0){
+    const valid=targets.find(t=>t.platArea&&parseFloat(t.platArea)>0);
+    if(valid) merged.platArea=valid.platArea;
+  }
+
+  // 주차: 총괄에 없으면 동별 합산
+  if(!merged.totPkngCnt||parseInt(merged.totPkngCnt)===0){
+    const total=targets.reduce((sum,t)=>{
+      return sum+parseInt(t.indrMechUtcnt||0)+parseInt(t.oudrMechUtcnt||0)+parseInt(t.indrAutoUtcnt||0)+parseInt(t.oudrAutoUtcnt||0);
+    },0);
+    if(total>0) merged.totPkngCnt=total;
+  }
+
+  return merged;
+}
+
+async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHouseholds){
+  knownHouseholds=knownHouseholds||0;
   document.getElementById('dashboard').style.display='block';
   document.getElementById('loading').style.display='block';
   document.getElementById('complexName').textContent=name;
   document.getElementById('complexAddr').textContent=address;
 
-  const[recapData,landData,allTrades,allRents]=await Promise.all([
+  const[recapData,landData,allTrades,allRents,titleItems]=await Promise.all([
     fetchRecap(lawdCd,bjdongCd,jibun),fetchLand(lawdCd,bjdongCd,jibun),
-    fetchTrades(lawdCd,6),fetchTrades(lawdCd,6,'rent')
+    fetchTrades(lawdCd,6),fetchTrades(lawdCd,6,'rent'),
+    fetchTitle(lawdCd,bjdongCd,jibun)
   ]);
-  // 총괄표제부에 준공년도 없으면 표제부에서 보완 (admin_index와 동일 방식)
-  let titleItems=[];
-  const ua0=recapData?.useAprDay||'';
-  if(!ua0||ua0.trim()===''||ua0.trim()==='-'){
-    titleItems=await fetchTitle(lawdCd,bjdongCd,jibun);
-  }
 
-  const households=parseInt(recapData?.hhldCnt||0);
-  const totArea=parseFloat(recapData?.totArea||0);
-  const vlRatEstm=parseFloat(recapData?.vlRatEstmTotArea||0);
-  const archArea=parseFloat(recapData?.archArea||0);
-  const bcRat=parseFloat(recapData?.bcRat||0);
+  // 총괄표제부 + 표제부 병합 (인덱스 대시보드와 동일한 mergeBuildingData 로직)
+  const merged = mergeBldData(recapData, titleItems);
+
+  let households=parseInt(merged.hhldCnt||0);
+  // fallback: quickLoad2에서 전달된 마스터리스트 세대수
+  if(!households&&knownHouseholds>0) households=knownHouseholds;
+  const totArea=parseFloat(merged.totArea||0);
+  const vlRatEstm=parseFloat(merged.vlRatEstmTotArea||0);
+  const archArea=parseFloat(merged.archArea||0);
+  const bcRat=parseFloat(merged.bcRat||0);
   let platArea=landData?parseFloat(landData.lndpclAr||0):0;
-  if(!platArea)platArea=parseFloat(recapData?.platArea||0);
+  if(!platArea)platArea=parseFloat(merged.platArea||0);
 
   // [P1 FIX] 용적률 fallback 로직 강화
   // 우선순위: 1) 건축물대장 vlRat → 2) vlRatEstmTotArea/platArea → 3) vlRatEstmTotArea/(archArea/bcRat) → 4) totArea/platArea
@@ -302,18 +376,9 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun){
   myTrades=myTrades.filter(t=>parseInt(t.floor||0)>1&&!(t.cdealType&&t.cdealType.trim()));
 
   let builtYear=0;
-  const ua=recapData?.useAprDay||'';
+  const ua=merged.useAprDay||'';
   if(ua.length>=4&&parseInt(ua.substring(0,4))>1900){
     builtYear=parseInt(ua.substring(0,4));
-  } else if(titleItems.length>0){
-    // 표제부에서 주거시설 동 필터 → 가장 이른 useAprDay (admin_index 동일 로직)
-    const residential=titleItems.filter(t=>{const p=(t.etcPurps||'').trim();return p==='주거시설'||p==='아파트'||p==='공동주택'||(t.mainPurpsCdNm||'')==='공동주택';});
-    const targets=residential.length>0?residential:titleItems;
-    const dates=targets.map(t=>t.useAprDay).filter(d=>d&&d.trim()!==''&&d.trim()!=='-'&&d.length>=4);
-    if(dates.length>0){
-      dates.sort();
-      builtYear=parseInt(dates[0].substring(0,4));
-    }
   }
   // 최종 fallback: 실거래 데이터의 buildYear
   if(!builtYear&&myTrades.length&&myTrades[0].buildYear){
@@ -619,13 +684,16 @@ function quickLoad(name,address){
 }
 function quickLoad2(name,address,lawd,bjdong,jibun){
   LAWD_CD=lawd;selectedBjdongCd=bjdong;selectedJibun=jibun;
+  // ALL_COMPLEXES에서 세대수(h) 찾아서 fallback으로 전달
+  const complexInfo=ALL_COMPLEXES.find(c=>c.jibun===jibun&&c.bjdong===bjdong&&LAWD_MAP[c.gu]===lawd);
+  const knownHouseholds=complexInfo?complexInfo.h:0;
   // [P1 FIX] 카카오 검색 결과가 아닌 name 파라미터 직접 사용
   ps.keywordSearch(name+' '+address.split(' ').slice(2,3),function(data,status){
     let lat=37.5,lng=127.05;
     if(status===kakao.maps.services.Status.OK&&data.length){lat=parseFloat(data[0].y);lng=parseFloat(data[0].x);}
     map.setCenter(new kakao.maps.LatLng(lat,lng));map.setLevel(4);
     marker.setPosition(new kakao.maps.LatLng(lat,lng));
-    loadRVI(name,address,lat,lng,lawd,bjdong,jibun);
+    loadRVI(name,address,lat,lng,lawd,bjdong,jibun,knownHouseholds);
   },{size:1});
 }
 
