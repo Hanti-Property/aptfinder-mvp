@@ -164,6 +164,11 @@ async function loadDashboard(name,address){
   document.getElementById('indexGrid').innerHTML='';
   document.getElementById('tradeBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:#666">조회 중...</td></tr>';
 
+  // 즉시 모든 필드 리셋 (이전 데이터 잔류 방지)
+  ['v-built','v-units','v-age','v-far','v-plat','v-park'].forEach(id=>document.getElementById(id).textContent='—');
+  ['v-price','v-ppy','v-count','v-jeonse','v-wolse','v-jgr'].forEach(id=>document.getElementById(id).textContent='—');
+  ['v-price-sub','v-jeonse-sub','v-wolse-sub','v-period'].forEach(id=>document.getElementById(id).textContent='—');
+
   // 병렬 호출: 매매실거래 + 전월세실거래 + 건축물대장(총괄+표제부) + 토지특성
   // 초기 6개월 조회, 데이터 부족 시 확장
   let [saleItems, rentItems, bldgData, titleItems, landData] = await Promise.all([
