@@ -30,7 +30,6 @@ export default function AdminDashboard() {
     async function fetchData() {
       const today = new Date().toISOString().split('T')[0]
 
-      // 통계
       const [listings, todayL, notes, agencies, complexes, inquiries, columns] = await Promise.all([
         supabase.from('listings').select('id', { count: 'exact', head: true }),
         supabase.from('listings').select('id', { count: 'exact', head: true }).gte('created_at', today),
@@ -51,37 +50,35 @@ export default function AdminDashboard() {
         totalInquiries: inquiries.count || 0,
       })
 
-      // 최근 활동 수집
       const recent: RecentItem[] = []
 
       const { data: recentAgencies } = await supabase.from('agencies').select('*').order('created_at', { ascending: false }).limit(5)
       recentAgencies?.forEach(a => recent.push({
-        id: a.id, label: `🏢 신규 부동산: ${a.name}`, sub: `대표: ${a.representative || '-'}`, time: a.created_at, type: 'agency'
+        id: a.id, label: `신규 부동산: ${a.name}`, sub: `대표: ${a.representative || '-'}`, time: a.created_at, type: 'agency'
       }))
 
       const { data: recentComplexes } = await supabase.from('complexes').select('*').order('created_at', { ascending: false }).limit(5)
       recentComplexes?.forEach(c => recent.push({
-        id: c.id, label: `🏠 신규 단지: ${c.name}`, sub: c.dong || '', time: c.created_at, type: 'complex'
+        id: c.id, label: `신규 단지: ${c.name}`, sub: c.dong || '', time: c.created_at, type: 'complex'
       }))
 
       const { data: recentListings } = await supabase.from('listings').select('*').order('created_at', { ascending: false }).limit(5)
       recentListings?.forEach(l => recent.push({
-        id: l.id, label: `📋 매물 등록: ${l.complex_name} ${l.building_no || ''}동`, sub: `${l.transaction_type} ${l.sale_price || l.deposit || ''}`, time: l.created_at, type: 'listing'
+        id: l.id, label: `매물 등록: ${l.complex_name} ${l.building_no || ''}동`, sub: `${l.transaction_type} ${l.sale_price || l.deposit || ''}`, time: l.created_at, type: 'listing'
       }))
 
       const { data: recentNotes } = await supabase.from('research_notes').select('*').order('created_at', { ascending: false }).limit(3)
       recentNotes?.forEach(n => recent.push({
-        id: n.id, label: `📝 노트 발행: ${n.title}`, sub: n.category || '', time: n.created_at, type: 'note'
+        id: n.id, label: `노트: ${n.title}`, sub: n.category || '', time: n.created_at, type: 'note'
       }))
 
       const { data: recentColumns } = await supabase.from('expert_columns').select('*').order('created_at', { ascending: false }).limit(3)
       recentColumns?.forEach(c => recent.push({
-        id: c.id, label: `🎓 칼럼 발행: ${c.title}`, sub: c.series || '', time: c.created_at, type: 'column'
+        id: c.id, label: `칼럼: ${c.title}`, sub: c.series || '', time: c.created_at, type: 'column'
       }))
 
-      // 시간순 정렬
       recent.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-      setRecentItems(recent.slice(0, 15))
+      setRecentItems(recent.slice(0, 12))
       setLoading(false)
     }
     fetchData()
@@ -99,167 +96,217 @@ export default function AdminDashboard() {
 
   function getTypeBadge(type: string) {
     const badges: Record<string, string> = {
-      agency: 'bg-orange-100 text-orange-700',
-      complex: 'bg-blue-100 text-blue-700',
-      listing: 'bg-green-100 text-green-700',
-      note: 'bg-purple-100 text-purple-700',
-      inquiry: 'bg-red-100 text-red-700',
-      column: 'bg-yellow-100 text-yellow-700',
+      agency: 'bg-orange-500/20 text-orange-300',
+      complex: 'bg-blue-500/20 text-blue-300',
+      listing: 'bg-emerald-500/20 text-emerald-300',
+      note: 'bg-purple-500/20 text-purple-300',
+      inquiry: 'bg-red-500/20 text-red-300',
+      column: 'bg-amber-500/20 text-amber-300',
     }
-    return badges[type] || 'bg-gray-100 text-gray-700'
+    return badges[type] || 'bg-gray-500/20 text-gray-300'
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">로딩 중...</div>
+  if (loading) return (
+    <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-8 h-8 border-2 border-[#C49A3C] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+        <p className="text-sm text-gray-400">로딩 중...</p>
+      </div>
+    </div>
+  )
 
   return (
-    <div className="min-h-screen bg-gray-50 max-w-2xl mx-auto">
-      <header className="bg-[#1B3A5C] text-white p-4 flex items-center justify-between">
+    <div className="min-h-screen bg-[#1a1a2e] max-w-2xl mx-auto">
+      {/* Header */}
+      <header className="bg-[#0f0f23] border-b border-[#2a2a4a] px-5 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold">📊 관리자 대시보드</h1>
-          <p className="text-xs opacity-80 mt-1">AptFinder 운영 현황</p>
+          <h1 className="text-xl font-bold text-white tracking-tight">AptFinder</h1>
+          <p className="text-[11px] text-[#C49A3C] font-medium mt-0.5">Admin Console</p>
         </div>
-        <button
-          onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
-          className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded"
-        >
-          로그아웃
-        </button>
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] bg-[#e74c3c] text-white px-2 py-0.5 rounded font-semibold">ADMIN</span>
+          <button
+            onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
+            className="text-[11px] text-gray-400 hover:text-white border border-[#2a2a4a] hover:border-[#3a3a5a] px-3 py-1.5 rounded-md transition-colors"
+          >
+            로그아웃
+          </button>
+        </div>
       </header>
 
-      <div className="p-4 space-y-4">
+      <div className="p-5 space-y-5">
         {/* 통계 카드 */}
-        <div className="grid grid-cols-3 gap-2">
-          <a href="/listings" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
-            <p className="text-2xl font-bold text-[#1B3A5C]">{stats.totalListings}</p>
-            <p className="text-[10px] text-gray-500">총 매물</p>
-            {stats.todayListings > 0 && <p className="text-[9px] text-green-600">+{stats.todayListings} 오늘</p>}
-          </a>
-          <a href="/notes" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
-            <p className="text-2xl font-bold text-[#1B3A5C]">{stats.totalNotes}</p>
-            <p className="text-[10px] text-gray-500">리서치 노트</p>
-          </a>
-          <a href="/admin/columns/list" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
-            <p className="text-2xl font-bold text-[#C49A3C]">{stats.totalColumns}</p>
-            <p className="text-[10px] text-gray-500">전문가 칼럼</p>
-          </a>
-          <a href="/admin/inquiries" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
-            <p className="text-2xl font-bold text-[#1B3A5C]">{stats.totalInquiries}</p>
-            <p className="text-[10px] text-gray-500">상담 문의</p>
-          </a>
-          <a href="/admin" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
-            <p className="text-2xl font-bold text-orange-600">{stats.totalAgencies}</p>
-            <p className="text-[10px] text-gray-500">입점 부동산</p>
-          </a>
-          <a href="/admin" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50">
-            <p className="text-2xl font-bold text-blue-600">{stats.totalComplexes}</p>
-            <p className="text-[10px] text-gray-500">등록 단지</p>
-          </a>
-        </div>
-
-        {/* 서비스 모듈 (개발 도구) */}
-        <div>
-          <h2 className="text-sm font-semibold mb-2">🧩 서비스 모듈</h2>
-          <div className="grid grid-cols-2 gap-2">
-            <a href="/real_trade.html" target="_blank" className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
-              <p className="text-lg">🗺️</p>
-              <p className="text-xs font-semibold text-blue-800">실거래가 조회</p>
-              <p className="text-[10px] text-blue-600">지도 기반</p>
+        <section>
+          <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Overview</h2>
+          <div className="grid grid-cols-3 gap-3">
+            <a href="/listings" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
+              <p className="text-3xl font-extrabold text-white group-hover:text-[#C49A3C] transition-colors">{stats.totalListings}</p>
+              <p className="text-[11px] text-gray-500 mt-1">총 매물</p>
+              {stats.todayListings > 0 && <p className="text-[10px] text-emerald-400 mt-1">+{stats.todayListings} today</p>}
             </a>
-            <a href="/tax_calc.html" target="_blank" className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
-              <p className="text-lg">🧮</p>
-              <p className="text-xs font-semibold text-green-800">보유세 계산기</p>
-              <p className="text-[10px] text-green-600">공시가격 연동</p>
+            <a href="/notes" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
+              <p className="text-3xl font-extrabold text-white group-hover:text-[#C49A3C] transition-colors">{stats.totalNotes}</p>
+              <p className="text-[11px] text-gray-500 mt-1">리서치 노트</p>
             </a>
-            <a href="/building_register_map.html" target="_blank" className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
-              <p className="text-lg">🏗️</p>
-              <p className="text-xs font-semibold text-purple-800">건축물대장</p>
-              <p className="text-[10px] text-purple-600">지도 기반 조회</p>
+            <a href="/admin/columns/list" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
+              <p className="text-3xl font-extrabold text-[#C49A3C]">{stats.totalColumns}</p>
+              <p className="text-[11px] text-gray-500 mt-1">전문가 칼럼</p>
             </a>
-            <a href="/tax_map.html" target="_blank" className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
-              <p className="text-lg">📍</p>
-              <p className="text-xs font-semibold text-amber-800">보유세 (지도)</p>
-              <p className="text-[10px] text-amber-600">지도 기반 계산</p>
+            <a href="/admin/inquiries" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
+              <p className="text-3xl font-extrabold text-white group-hover:text-[#C49A3C] transition-colors">{stats.totalInquiries}</p>
+              <p className="text-[11px] text-gray-500 mt-1">상담 문의</p>
             </a>
-            <a href="/kakao_map_register.html" target="_blank" className="bg-gradient-to-br from-rose-50 to-rose-100 border border-rose-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
-              <p className="text-lg">📌</p>
-              <p className="text-xs font-semibold text-rose-800">매물 등록 (지도)</p>
-              <p className="text-[10px] text-rose-600">카카오맵 연동</p>
+            <a href="/admin" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
+              <p className="text-3xl font-extrabold text-orange-400">{stats.totalAgencies}</p>
+              <p className="text-[11px] text-gray-500 mt-1">입점 부동산</p>
             </a>
-            <a href="/building_register_api.html" target="_blank" className="bg-gradient-to-br from-teal-50 to-teal-100 border border-teal-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
-              <p className="text-lg">📄</p>
-              <p className="text-xs font-semibold text-teal-800">건축물대장 API</p>
-              <p className="text-[10px] text-teal-600">직접 조회</p>
-            </a>
-            <a href="/rent_trade.html" target="_blank" className="bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
-              <p className="text-lg">🏘️</p>
-              <p className="text-xs font-semibold text-indigo-800">전월세 실거래가</p>
-              <p className="text-[10px] text-indigo-600">지도 기반 조회</p>
-            </a>
-            <a href="/admin_index_dashboard.html" target="_blank" className="bg-gradient-to-br from-cyan-50 to-cyan-100 border border-cyan-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
-              <p className="text-lg">📊</p>
-              <p className="text-xs font-semibold text-cyan-800">단지 인덱스</p>
-              <p className="text-[10px] text-cyan-600">9개 평가지수</p>
-            </a>
-            <a href="/admin/rvi" className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
-              <p className="text-lg">🏗️</p>
-              <p className="text-xs font-semibold text-red-800">재건축 RVI</p>
-              <p className="text-[10px] text-red-600">143개 단지 가치지수</p>
+            <a href="/admin" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
+              <p className="text-3xl font-extrabold text-blue-400">{stats.totalComplexes}</p>
+              <p className="text-[11px] text-gray-500 mt-1">등록 단지</p>
             </a>
           </div>
-        </div>
+        </section>
 
-        {/* 빠른 메뉴 */}
-        <div className="grid grid-cols-2 gap-2">
-          <a href="/admin/inquiries" className="bg-[#C49A3C] text-white rounded-lg p-3 text-center text-sm font-semibold">📋 상담 신청 목록</a>
-          <a href="/admin/notes" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 노트 작성</a>
-          <a href="/admin/columns" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 칼럼 작성</a>
-          <a href="/admin/register" className="bg-[#1B3A5C] text-white rounded-lg p-3 text-center text-sm font-semibold">+ 매물 등록</a>
-          <a href="/admin/columns/list" className="bg-white border border-gray-300 rounded-lg p-3 text-center text-sm">칼럼 관리</a>
-          <a href="/listings" className="bg-white border border-gray-300 rounded-lg p-3 text-center text-sm">매물 목록</a>
-          <a href="/notes" className="bg-white border border-gray-300 rounded-lg p-3 text-center text-sm">노트 목록</a>
-        </div>
+        {/* 서비스 모듈 */}
+        <section>
+          <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Service Modules</h2>
+          <div className="grid grid-cols-3 gap-3">
+            <a href="/real_trade.html" target="_blank" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-blue-500/50 hover:bg-[#1e1e4f] transition-all group">
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <span className="text-lg">🗺️</span>
+              </div>
+              <p className="text-[11px] font-semibold text-white">실거래가</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">지도 기반</p>
+            </a>
+            <a href="/tax_calc.html" target="_blank" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-emerald-500/50 hover:bg-[#1e1e4f] transition-all group">
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <span className="text-lg">🧮</span>
+              </div>
+              <p className="text-[11px] font-semibold text-white">보유세 계산</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">공시가격 연동</p>
+            </a>
+            <a href="/building_register_map.html" target="_blank" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-purple-500/50 hover:bg-[#1e1e4f] transition-all group">
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <span className="text-lg">🏗️</span>
+              </div>
+              <p className="text-[11px] font-semibold text-white">건축물대장</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">지도 조회</p>
+            </a>
+            <a href="/tax_map.html" target="_blank" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-amber-500/50 hover:bg-[#1e1e4f] transition-all group">
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <span className="text-lg">📍</span>
+              </div>
+              <p className="text-[11px] font-semibold text-white">보유세 (지도)</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">지도 기반</p>
+            </a>
+            <a href="/kakao_map_register.html" target="_blank" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-rose-500/50 hover:bg-[#1e1e4f] transition-all group">
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                <span className="text-lg">📌</span>
+              </div>
+              <p className="text-[11px] font-semibold text-white">매물 등록</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">카카오맵</p>
+            </a>
+            <a href="/building_register_api.html" target="_blank" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-teal-500/50 hover:bg-[#1e1e4f] transition-all group">
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-teal-500/10 flex items-center justify-center">
+                <span className="text-lg">📄</span>
+              </div>
+              <p className="text-[11px] font-semibold text-white">건축물대장 API</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">직접 조회</p>
+            </a>
+            <a href="/rent_trade.html" target="_blank" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-indigo-500/50 hover:bg-[#1e1e4f] transition-all group">
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                <span className="text-lg">🏘️</span>
+              </div>
+              <p className="text-[11px] font-semibold text-white">전월세</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">실거래가</p>
+            </a>
+            <a href="/admin_index_dashboard.html" target="_blank" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-cyan-500/50 hover:bg-[#1e1e4f] transition-all group">
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                <span className="text-lg">📊</span>
+              </div>
+              <p className="text-[11px] font-semibold text-white">단지 인덱스</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">9개 평가지수</p>
+            </a>
+            <a href="/admin/rvi" className="bg-[#1e1e3f] border border-[#C49A3C]/30 rounded-xl p-4 text-center hover:border-[#C49A3C] hover:bg-[#1e1e4f] transition-all group relative">
+              <div className="absolute top-2 right-2 w-2 h-2 bg-[#C49A3C] rounded-full animate-pulse"></div>
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-[#C49A3C]/10 flex items-center justify-center">
+                <span className="text-lg">🏗️</span>
+              </div>
+              <p className="text-[11px] font-semibold text-[#C49A3C]">재건축 RVI</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">143개 단지</p>
+            </a>
+          </div>
+        </section>
+
+        {/* 빠른 작업 */}
+        <section>
+          <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Quick Actions</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <a href="/admin/inquiries" className="bg-gradient-to-r from-[#C49A3C] to-[#d4aa4c] text-[#0f0f23] rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#C49A3C]/20 transition-all">
+              상담 신청 목록
+            </a>
+            <a href="/admin/notes" className="bg-gradient-to-r from-[#1B3A5C] to-[#2a4f78] text-white rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#1B3A5C]/30 transition-all">
+              + 노트 작성
+            </a>
+            <a href="/admin/columns" className="bg-gradient-to-r from-[#1B3A5C] to-[#2a4f78] text-white rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#1B3A5C]/30 transition-all">
+              + 칼럼 작성
+            </a>
+            <a href="/admin/register" className="bg-gradient-to-r from-[#1B3A5C] to-[#2a4f78] text-white rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#1B3A5C]/30 transition-all">
+              + 매물 등록
+            </a>
+          </div>
+        </section>
 
         {/* 최근 활동 */}
-        <div>
-          <h2 className="text-sm font-semibold mb-2">🔔 최근 활동</h2>
-          <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
+        <section>
+          <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Recent Activity</h2>
+          <div className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl overflow-hidden">
             {recentItems.length === 0 ? (
-              <p className="p-4 text-center text-xs text-gray-400">활동 내역이 없습니다.</p>
+              <p className="p-5 text-center text-xs text-gray-500">활동 내역이 없습니다.</p>
             ) : (
-              recentItems.map(item => (
-                <div key={`${item.type}-${item.id}`} className="p-3 flex items-center justify-between">
-                  <div>
-                    <p style={{color:'#111827'}} className="text-xs font-medium">{item.label}</p>
-                    <p className="text-[10px] text-gray-500">{item.sub}</p>
+              recentItems.map((item, idx) => (
+                <div key={`${item.type}-${item.id}`} className={`px-4 py-3 flex items-center justify-between ${idx !== recentItems.length - 1 ? 'border-b border-[#2a2a4a]' : ''} hover:bg-[#12122b] transition-colors`}>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[12px] font-medium text-gray-200 truncate">{item.label}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">{item.sub}</p>
                   </div>
-                  <div className="text-right">
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded ${getTypeBadge(item.type)}`}>
+                  <div className="text-right ml-3 shrink-0">
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-medium ${getTypeBadge(item.type)}`}>
                       {item.type === 'agency' ? '부동산' : item.type === 'complex' ? '단지' : item.type === 'listing' ? '매물' : item.type === 'note' ? '노트' : item.type === 'column' ? '칼럼' : '문의'}
                     </span>
-                    <p className="text-[10px] text-gray-400 mt-0.5">{formatTime(item.time)}</p>
+                    <p className="text-[10px] text-gray-600 mt-1">{formatTime(item.time)}</p>
                   </div>
                 </div>
               ))
             )}
           </div>
-        </div>
+        </section>
 
-        {/* 관리 링크 */}
-        <div>
-          <h2 className="text-sm font-semibold mb-2">⚙️ 관리</h2>
-          <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
-            <a href="/admin/inquiries" className="block p-3 text-xs hover:bg-gray-50">💬 상담 문의 관리</a>
-            <a href="/admin/register" className="block p-3 text-xs hover:bg-gray-50">🏠 매물 등록</a>
-            <a href="/admin/notes" className="block p-3 text-xs hover:bg-gray-50">📝 리서치 노트 작성</a>
-            <a href="/admin/columns" className="block p-3 text-xs hover:bg-gray-50">✍️ 전문가 칼럼 작성</a>
-            <a href="/admin/columns/list" className="block p-3 text-xs hover:bg-gray-50">📰 칼럼 목록 (수정/삭제)</a>
-            <a href="/notes" className="block p-3 text-xs hover:bg-gray-50">📋 노트 목록 (수정/삭제)</a>
-            <a href="/listings" className="block p-3 text-xs hover:bg-gray-50">📦 매물 목록 관리</a>
+        {/* 관리 메뉴 */}
+        <section>
+          <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Management</h2>
+          <div className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl overflow-hidden">
+            {[
+              { href: '/admin/inquiries', icon: '💬', label: '상담 문의 관리' },
+              { href: '/admin/register', icon: '🏠', label: '매물 등록' },
+              { href: '/admin/notes', icon: '📝', label: '리서치 노트 작성' },
+              { href: '/admin/columns', icon: '✍️', label: '전문가 칼럼 작성' },
+              { href: '/admin/columns/list', icon: '📰', label: '칼럼 목록 (수정/삭제)' },
+              { href: '/notes', icon: '📋', label: '노트 목록' },
+              { href: '/listings', icon: '📦', label: '매물 목록 관리' },
+            ].map((item, idx) => (
+              <a key={item.href + idx} href={item.href} className={`flex items-center gap-3 px-4 py-3 text-[12px] text-gray-300 hover:bg-[#12122b] hover:text-white transition-colors ${idx !== 6 ? 'border-b border-[#2a2a4a]' : ''}`}>
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </a>
+            ))}
           </div>
-        </div>
+        </section>
 
-        <div className="text-center">
-          <a href="/" className="text-xs text-gray-400 underline">← 홈으로</a>
+        {/* Footer */}
+        <div className="text-center pb-6 pt-2">
+          <a href="/" className="text-[11px] text-gray-600 hover:text-gray-400 transition-colors">aptfinder.net</a>
+          <p className="text-[10px] text-gray-700 mt-1">v2.0 Admin Console</p>
         </div>
       </div>
     </div>
