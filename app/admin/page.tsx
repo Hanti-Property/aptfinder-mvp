@@ -200,6 +200,11 @@ export default function AdminDashboard() {
               <p className="text-xs font-semibold text-cyan-800">단지 인덱스</p>
               <p className="text-[10px] text-cyan-600">9개 평가지수</p>
             </a>
+            <a href="/admin/rvi" className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+              <p className="text-lg">🏗️</p>
+              <p className="text-xs font-semibold text-red-800">재건축 RVI</p>
+              <p className="text-[10px] text-red-600">143개 단지 가치지수</p>
+            </a>
           </div>
         </div>
 

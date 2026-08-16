@@ -3,6 +3,16 @@ import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
+  // _internal_ 접두어 파일 직접 접근 차단 (관리자 전용 콘텐츠)
+  if (request.nextUrl.pathname.startsWith('/_internal_')) {
+    // Referer가 같은 도메인의 /admin 경로면 허용 (iframe 로드)
+    const referer = request.headers.get('referer') || ''
+    const isAdminReferer = referer.includes('/admin/')
+    if (!isAdminReferer) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
+
   // /admin 경로가 아니면 통과
   if (!request.nextUrl.pathname.startsWith('/admin')) {
     return NextResponse.next()
@@ -48,5 +58,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/_internal_:path*'],
 }
