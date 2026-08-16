@@ -362,6 +362,26 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   document.getElementById('complexName').textContent=name;
   document.getElementById('complexAddr').textContent=address;
 
+  // 즉시 모든 필드 리셋 (이전 데이터 잔류 방지)
+  ['v-year','v-age','v-units','v-land','v-far','v-station'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('rviScore').textContent='—';
+  document.getElementById('rviGrade').textContent='';
+  document.getElementById('rviDesc').textContent='산출 중...';
+  document.getElementById('indexGrid').innerHTML='';
+  document.getElementById('nvpRows').innerHTML='';
+  document.getElementById('tradeBody').innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">조회 중...</td></tr>';
+  document.getElementById('rri-current').textContent='—';
+  document.getElementById('rri-current-sub').textContent='—';
+  document.getElementById('rri-future').textContent='—';
+  document.getElementById('rri-future-sub').textContent='—';
+  document.getElementById('rri-area').textContent='—';
+  document.getElementById('rri-cost').textContent='—';
+  document.getElementById('rri-total').textContent='—';
+  document.getElementById('rri-rate').textContent='—';
+  document.getElementById('rri-rate').style.color='#fff';
+  document.getElementById('rri-cagr').textContent='—';
+  window._rriData=null;
+
   const[recapData,landData,allTrades,allRents,titleItems]=await Promise.all([
     fetchRecap(lawdCd,bjdongCd,jibun),fetchLand(lawdCd,bjdongCd,jibun),
     fetchTrades(lawdCd,6),fetchTrades(lawdCd,6,'rent'),
