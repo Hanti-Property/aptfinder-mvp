@@ -161,7 +161,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
         <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;" id="rri-area">—</div>
       </div>
       <div>
-        <div style="font-size:10px;color:#888;">추가비용 (분담금+이주비)</div>
+        <div style="font-size:10px;color:#888;">추가비용 (용적률 비례)</div>
         <div style="font-size:15px;font-weight:700;color:#EF5350;margin-top:2px;" id="rri-cost">—</div>
       </div>
       <div>
@@ -175,15 +175,12 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
       <div style="font-size:12px;color:#aaa;" id="rri-cagr">—</div>
     </div>
     <div style="margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <div style="font-size:11px;color:#888;">분담금</div>
-      <input type="range" id="rriSliderCost" min="1000" max="1500" value="1250" step="50" style="flex:1;accent-color:#C49A3C;min-width:80px;" oninput="updateRRI()">
-      <span style="font-size:12px;color:#ccc;min-width:70px;" id="rriCostLabel">1,250만/평</span>
-      <div style="font-size:11px;color:#888;margin-left:8px;">상승률</div>
-      <input type="range" id="rriSliderRate" min="3" max="7" value="5" step="1" style="flex:1;accent-color:#42A5F5;min-width:80px;" oninput="updateRRI()">
+      <div style="font-size:11px;color:#888;">상승률</div>
+      <input type="range" id="rriSliderRate" min="3" max="7" value="5" step="1" style="flex:1;accent-color:#42A5F5;min-width:120px;" oninput="updateRRI()">
       <span style="font-size:12px;color:#ccc;min-width:50px;" id="rriRateLabel">연 5%</span>
     </div>
     <div style="font-size:10px;color:#555;margin-top:10px;line-height:1.5;">
-      ※ 동일 평형 재건축 가정 | 사업기간 10년 통일 | 분담금 = 추가분담금 + 이주비이자
+      ※ 동일 평형 재건축 가정 | 사업기간 10년 | 분담금 = 용적률 비례 자동 산출 (150%↓ 0원 ~ 200%↑ 1,500만/평)
     </div>
   </div>
 
@@ -557,6 +554,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     currentPPP: myAvgPPP,          // 현재 평당가
     avgArea: myTrades.length > 0 ? myTrades.reduce((s,t)=>s+parseFloat(t.excluUseAr||0),0)/myTrades.length : 0,
     currentPrice: myTrades.length > 0 ? parseInt((myTrades[0].dealAmount||'0').replace(/,/g,'')) : 0,
+    far: far,                      // 용적률 (분담금 비례 산출용)
   };
   updateRRI();
 
@@ -570,10 +568,16 @@ function updateRRI(){
     document.getElementById('rri-rate').textContent='—';
     return;
   }
-  const costPerPy=parseInt(document.getElementById('rriSliderCost').value);
   const annualRate=parseInt(document.getElementById('rriSliderRate').value)/100;
-  document.getElementById('rriCostLabel').textContent=costPerPy.toLocaleString()+'만/평';
   document.getElementById('rriRateLabel').textContent='연 '+(annualRate*100).toFixed(0)+'%';
+
+  // 분담금: 용적률 비례 자동 산출
+  // 150% 이하 → 0, 200% 이상 → 1500만/평, 중간 → 선형 보간
+  let costPerPy=0;
+  if(d.far>=200) costPerPy=1500;
+  else if(d.far>150) costPerPy=Math.round((d.far-150)/50*1500);
+  // far=0(미확보)이면 중간값 750 적용
+  if(!d.far||d.far===0) costPerPy=750;
 
   // 공급면적 (전용 → 공급평)
   const JYONYUL=0.74;
@@ -604,6 +608,7 @@ function updateRRI(){
   document.getElementById('rri-future-sub').textContent=`NVP ${Math.round(d.nvpPPP).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^10 = ${Math.round(futurePPP).toLocaleString()}만/평`;
   document.getElementById('rri-area').textContent=supplyPy.toFixed(1)+'평';
   document.getElementById('rri-cost').textContent=fmtP(addCost);
+  document.getElementById('rri-cost').title=`용적률 ${d.far?d.far.toFixed(0)+'%':'미확보'} → ${costPerPy.toLocaleString()}만/평`;
   document.getElementById('rri-total').textContent=fmtP(totalInvest);
 
   // RRI 색상
