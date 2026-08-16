@@ -354,8 +354,9 @@ function mergeBldData(recap, titleItems){
   return merged;
 }
 
-async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHouseholds){
+async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHouseholds,knownFar){
   knownHouseholds=knownHouseholds||0;
+  knownFar=knownFar||0;
   document.getElementById('dashboard').style.display='block';
   document.getElementById('loading').style.display='block';
   document.getElementById('complexName').textContent=name;
@@ -397,6 +398,8 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   }
   // 용적률 범위 검증 (50~500% 범위 밖이면 신뢰할 수 없음)
   if(far>0&&(far<50||far>500))far=0;
+  // fallback: ALL_COMPLEXES에서 전달된 용적률
+  if(!far&&knownFar>0) far=knownFar;
 
   // [다필지 보정] LPS가 6평 미만이면 V-World가 일부 필지만 반환한 것으로 판단
   // vlRatEstmTotArea / 추정용적률(250%)로 실제 대지면적 역산
@@ -621,7 +624,7 @@ function updateRRI(){
 // 빠른선택 — 143개 단지 데이터 (구/동/단지명/지번)
 // 강남3구 재건축 후보 단지 전체 (143개)
 const ALL_COMPLEXES=[
-{gu:'강남구',dong:'대치동',name:'은마아파트',jibun:'316',h:4424,bjdong:'10600'},
+{gu:'강남구',dong:'대치동',name:'은마아파트',jibun:'316',h:4424,bjdong:'10600',far:204},
 {gu:'강남구',dong:'개포동',name:'대치,대청 아파트',jibun:'12',h:4199,bjdong:'10300'},
 {gu:'강남구',dong:'일원동',name:'수서1단지아파트',jibun:'711',h:2934,bjdong:'11400'},
 {gu:'강남구',dong:'수서동',name:'수서주공영구임대아파트',jibun:'707',h:2560,bjdong:'11500'},
@@ -718,7 +721,7 @@ const ALL_COMPLEXES=[
 {gu:'서초구',dong:'서초동',name:'삼호아파트',jibun:'759-2',h:120,bjdong:'10100'},
 {gu:'송파구',dong:'방이동',name:'올림픽선수기자촌',jibun:'89',h:5540,bjdong:'11100'},
 {gu:'송파구',dong:'문정동',name:'문정동 150번지',jibun:'150',h:4524,bjdong:'10800'},
-{gu:'송파구',dong:'잠실동',name:'잠실동 27번지',jibun:'27',h:3930,bjdong:'10100'},
+{gu:'송파구',dong:'잠실동',name:'잠실동 27번지',jibun:'27',h:3930,bjdong:'10100',far:152},
 {gu:'송파구',dong:'잠실동',name:'우성아파트',jibun:'101-1',h:1512,bjdong:'10100'},
 {gu:'송파구',dong:'신천동',name:'신천동 11번지',jibun:'11',h:1422,bjdong:'10200'},
 {gu:'송파구',dong:'잠실동',name:'잠실동 86번지',jibun:'86',h:1356,bjdong:'10100'},
@@ -802,16 +805,17 @@ function quickLoad(name,address){
 }
 function quickLoad2(name,address,lawd,bjdong,jibun){
   LAWD_CD=lawd;selectedBjdongCd=bjdong;selectedJibun=jibun;
-  // ALL_COMPLEXES에서 세대수(h) 찾아서 fallback으로 전달
+  // ALL_COMPLEXES에서 세대수(h), 용적률(far) 찾아서 fallback으로 전달
   const complexInfo=ALL_COMPLEXES.find(c=>c.jibun===jibun&&c.bjdong===bjdong&&LAWD_MAP[c.gu]===lawd);
   const knownHouseholds=complexInfo?complexInfo.h:0;
+  const knownFar=complexInfo&&complexInfo.far?complexInfo.far:0;
   // [P1 FIX] 카카오 검색 결과가 아닌 name 파라미터 직접 사용
   ps.keywordSearch(name+' '+address.split(' ').slice(2,3),function(data,status){
     let lat=37.5,lng=127.05;
     if(status===kakao.maps.services.Status.OK&&data.length){lat=parseFloat(data[0].y);lng=parseFloat(data[0].x);}
     map.setCenter(new kakao.maps.LatLng(lat,lng));map.setLevel(4);
     marker.setPosition(new kakao.maps.LatLng(lat,lng));
-    loadRVI(name,address,lat,lng,lawd,bjdong,jibun,knownHouseholds);
+    loadRVI(name,address,lat,lng,lawd,bjdong,jibun,knownHouseholds,knownFar);
   },{size:1});
 }
 
