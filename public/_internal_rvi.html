@@ -552,12 +552,15 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
 
   // === RRI 투자수익률 산출 ===
   // 전역 저장 (슬라이더 변경 시 재계산용)
+  // 최근 거래 1건 기준 (평균이 아닌 최신 실거래 기준으로 정확도 확보)
+  const latestTrade = myTrades.length > 0 ? myTrades[0] : null;
   window._rriData = {
-    nvpPPP: nvp,                   // NVP 평당가 (신축 가중평균 × 1.25)
-    currentPPP: myAvgPPP,          // 현재 평당가
-    avgArea: myTrades.length > 0 ? myTrades.reduce((s,t)=>s+parseFloat(t.excluUseAr||0),0)/myTrades.length : 0,
-    currentPrice: myTrades.length > 0 ? parseInt((myTrades[0].dealAmount||'0').replace(/,/g,'')) : 0,
-    far: far,                      // 용적률 (분담금 비례 산출용)
+    nvpPPP: nvp,
+    currentPPP: myAvgPPP,
+    avgArea: latestTrade ? parseFloat(latestTrade.excluUseAr || 0) : 0,
+    currentPrice: latestTrade ? parseInt((latestTrade.dealAmount || '0').replace(/,/g, '')) : 0,
+    far: far,
+    tradeInfo: latestTrade ? `${latestTrade.dealYear}.${String(latestTrade.dealMonth).padStart(2,'0')} | ${latestTrade.excluUseAr}㎡ | ${latestTrade.floor}층` : '',
   };
   updateRRI();
 
@@ -606,7 +609,7 @@ function updateRRI(){
   // 표시
   const fmtP=v=>v>=10000?(v/10000).toFixed(1)+'억':Math.round(v).toLocaleString()+'만';
   document.getElementById('rri-current').textContent=fmtP(currentPrice);
-  document.getElementById('rri-current-sub').textContent=`전용 ${d.avgArea.toFixed(1)}㎡ | 공급 ${supplyPy.toFixed(1)}평 | ${Math.round(d.currentPPP).toLocaleString()}만/평`;
+  document.getElementById('rri-current-sub').textContent=d.tradeInfo ? d.tradeInfo : `전용 ${d.avgArea.toFixed(1)}㎡ | 공급 ${supplyPy.toFixed(1)}평`;
   document.getElementById('rri-future').textContent=fmtP(futureValue);
   document.getElementById('rri-future-sub').textContent=`NVP ${Math.round(d.nvpPPP).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^10 = ${Math.round(futurePPP).toLocaleString()}만/평`;
   document.getElementById('rri-area').textContent=supplyPy.toFixed(1)+'평';
