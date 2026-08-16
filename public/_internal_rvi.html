@@ -176,12 +176,10 @@ const NEW_COMPLEXES=[
   {name:'디에이치자이개포',keyword:'디에이치자이',lat:37.4860,lng:127.0550,households:1996,lawd:'11680'},
   {name:'개포래미안포레스트',keyword:'개포래미안포',lat:37.4810,lng:127.0490,households:2296,lawd:'11680'},
   // 잠실/송파 신축
-  {name:'잠실르엘',keyword:'잠실르엘',lat:37.5133,lng:127.0830,households:2678,lawd:'11710'},
-  {name:'잠실엘스',keyword:'잠실엘스',lat:37.5100,lng:127.0830,households:5678,lawd:'11710'},
-  {name:'리센츠',keyword:'리센츠',lat:37.5130,lng:127.0900,households:5563,lawd:'11710'},
-  {name:'트리지움',keyword:'트리지움',lat:37.5080,lng:127.0860,households:3696,lawd:'11710'},
+  {name:'잠실래미안아이파크',keyword:'잠실래미안아이파크',lat:37.5133,lng:127.0830,households:2678,lawd:'11710',manualPPP:19500},
+  {name:'잠실올림픽공원아이파크',keyword:'잠실올림픽',lat:37.5240,lng:127.1050,households:2678,lawd:'11710'},
   {name:'헬리오시티',keyword:'헬리오시티',lat:37.4850,lng:127.1280,households:9510,lawd:'11710'},
-  {name:'파크리오',keyword:'파크리오',lat:37.5107,lng:127.0950,households:6864,lawd:'11710'},
+  {name:'힐스테이트e편한세상문정',keyword:'힐스테이트e편한세상문정',lat:37.4850,lng:127.1240,households:1265,lawd:'11710'},
   // 반포/서초 신축 (한강벨트 — 압구정 비교용)
   {name:'아크로리버파크',keyword:'아크로리버파크',lat:37.5090,lng:127.0120,households:1612,lawd:'11650'},
   {name:'래미안원베일리',keyword:'래미안원베일리',lat:37.5050,lng:127.0080,households:2990,lawd:'11650'},
@@ -190,7 +188,7 @@ const NEW_COMPLEXES=[
   {name:'디에이치라클라스',keyword:'디에이치라클라스',lat:37.5060,lng:127.0150,households:928,lawd:'11650'},
 ];
 // 한강벨트 법정동 — 이 지역 단지는 NVP 비교 시 벨트 내 전체 신축과 비교 (거리 제한 5km)
-const HAN_RIVER_BELT=['11000','10200','10300','10400']; // 압구정동, 잠원동, 반포동, 청담동 (bjdongCd)
+const HAN_RIVER_BELT=['11000','10200','10300','10400','10100']; // 압구정동, 잠원동, 반포동, 청담동, 잠실동(송파구 bjdongCd)
 let LAWD_CD='11680',selectedBjdongCd='10600',selectedJibun='316';
 
 function haversine(lat1,lng1,lat2,lng2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.asin(Math.sqrt(a));}
@@ -402,7 +400,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   // [P1 FIX] NVP — 비교 단지 부족 시 3km까지 확대
   // [한강벨트] 압구정/청담/반포/잠원동은 벨트 내 전체 신축과 비교 (5km)
   document.getElementById('loadingText').textContent='NVP 산출 중...';
-  const isHanRiverBelt=HAN_RIVER_BELT.includes(bjdongCd);
+  const isHanRiverBelt=HAN_RIVER_BELT.includes(bjdongCd)||(lawdCd==='11710'&&['10100','10200','10300'].includes(bjdongCd));
   let searchRadius=isHanRiverBelt?5.0:2.0;
   let nearby=NEW_COMPLEXES.filter(c=>haversine(lat,lng,c.lat,c.lng)<=searchRadius);
   // 비한강벨트: 2km 내 신축 1개 이하면 3km로 확대
@@ -415,6 +413,13 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   let totalW=0,totalWP=0,nvpDetails=[],totalRW=0,totalRWP=0;
   for(const comp of nearby){
     const dist=haversine(lat,lng,comp.lat,comp.lng);
+    // manualPPP가 있으면 API 조회 없이 수동 평당가 사용 (입주 초기 거래 없는 단지)
+    if(comp.manualPPP){
+      const avgP=comp.manualPPP;
+      const wd=1/(dist+0.1)**2,ws=weightScale(comp.households),w=wd*ws;
+      totalW+=w;totalWP+=w*avgP;nvpDetails.push({name:comp.name,dist,avgP,w,cnt:0});
+      continue;
+    }
     let ppps=combined.filter(t=>(t.aptNm||'').includes(comp.keyword)).filter(t=>parseInt(t.floor||0)>1).map(t=>{const a=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return ar>0?a/(ar/3.3058):0;}).filter(v=>v>0);
     ppps=removeOutliers(ppps);if(ppps.length<2)continue;
     const avgP=ppps.reduce((a,b)=>a+b,0)/ppps.length;
