@@ -140,6 +140,53 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
   <div class="section-title">📊 7대 평가지표</div>
   <div class="index-grid" id="indexGrid"></div>
 
+  <!-- RRI 투자수익률 -->
+  <div class="section-title">💰 재건축 투자수익률 (RRI)</div>
+  <div id="rriCard" style="background:#1e1e3f;border:1px solid #2a2a4a;border-radius:12px;padding:20px;margin-bottom:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div>
+        <div style="font-size:11px;color:#888;">현재 매매가</div>
+        <div style="font-size:20px;font-weight:800;color:#FFA726;margin-top:4px;" id="rri-current">—</div>
+        <div style="font-size:10px;color:#666;margin-top:2px;" id="rri-current-sub">—</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#888;">10년 후 예상가</div>
+        <div style="font-size:20px;font-weight:800;color:#42A5F5;margin-top:4px;" id="rri-future">—</div>
+        <div style="font-size:10px;color:#666;margin-top:2px;" id="rri-future-sub">NVP × (1+5%)^10</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div>
+        <div style="font-size:10px;color:#888;">공급면적</div>
+        <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;" id="rri-area">—</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#888;">추가비용 (분담금+이주비)</div>
+        <div style="font-size:15px;font-weight:700;color:#EF5350;margin-top:2px;" id="rri-cost">—</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#888;">총 투자비</div>
+        <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;" id="rri-total">—</div>
+      </div>
+    </div>
+    <div style="background:#12122b;border-radius:8px;padding:14px;text-align:center;">
+      <div style="font-size:11px;color:#888;letter-spacing:1px;">예상 투자수익률 (RRI)</div>
+      <div style="font-size:36px;font-weight:900;margin:6px 0;" id="rri-rate">—</div>
+      <div style="font-size:12px;color:#aaa;" id="rri-cagr">—</div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div style="font-size:11px;color:#888;">분담금</div>
+      <input type="range" id="rriSliderCost" min="1000" max="1500" value="1250" step="50" style="flex:1;accent-color:#C49A3C;min-width:80px;" oninput="updateRRI()">
+      <span style="font-size:12px;color:#ccc;min-width:70px;" id="rriCostLabel">1,250만/평</span>
+      <div style="font-size:11px;color:#888;margin-left:8px;">상승률</div>
+      <input type="range" id="rriSliderRate" min="3" max="7" value="5" step="1" style="flex:1;accent-color:#42A5F5;min-width:80px;" oninput="updateRRI()">
+      <span style="font-size:12px;color:#ccc;min-width:50px;" id="rriRateLabel">연 5%</span>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:10px;line-height:1.5;">
+      ※ 동일 평형 재건축 가정 | 사업기간 10년 통일 | 분담금 = 추가분담금 + 이주비이자
+    </div>
+  </div>
+
   <!-- NVP 비교 -->
   <div class="nvp-compare" id="nvpCompare">
     <h4>🏠 NVP 비교 신축 단지</h4>
@@ -502,7 +549,68 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     tbody.innerHTML+=`<tr><td>${t.dealYear}.${t.dealMonth}.${(t.dealDay||'').trim()}</td><td>${ar}㎡</td><td>${t.floor||''}층</td><td class="price">${amt>=10000?(amt/10000).toFixed(1)+'억':amt.toLocaleString()+'만'}</td><td>${Math.round(ppp).toLocaleString()}만/평</td></tr>`;
   });
   if(!myTrades.length)tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">최근 6개월 거래 없음</td></tr>';
+
+  // === RRI 투자수익률 산출 ===
+  // 전역 저장 (슬라이더 변경 시 재계산용)
+  window._rriData = {
+    nvpPPP: nvp,                   // NVP 평당가 (신축 가중평균 × 1.25)
+    currentPPP: myAvgPPP,          // 현재 평당가
+    avgArea: myTrades.length > 0 ? myTrades.reduce((s,t)=>s+parseFloat(t.excluUseAr||0),0)/myTrades.length : 0,
+    currentPrice: myTrades.length > 0 ? parseInt((myTrades[0].dealAmount||'0').replace(/,/g,'')) : 0,
+  };
+  updateRRI();
+
   document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
+}
+
+// === RRI 업데이트 함수 (슬라이더 조절 시에도 호출) ===
+function updateRRI(){
+  const d=window._rriData;
+  if(!d||!d.nvpPPP||!d.currentPPP||!d.avgArea){
+    document.getElementById('rri-rate').textContent='—';
+    return;
+  }
+  const costPerPy=parseInt(document.getElementById('rriSliderCost').value);
+  const annualRate=parseInt(document.getElementById('rriSliderRate').value)/100;
+  document.getElementById('rriCostLabel').textContent=costPerPy.toLocaleString()+'만/평';
+  document.getElementById('rriRateLabel').textContent='연 '+(annualRate*100).toFixed(0)+'%';
+
+  // 공급면적 (전용 → 공급평)
+  const JYONYUL=0.74;
+  const supplyPy=(d.avgArea/JYONYUL)/3.3058;
+
+  // 현재 매매가 (최근 거래 기준)
+  const currentPrice=d.currentPrice;
+
+  // 추가비용 = 공급면적(평) × 분담금 단가
+  const addCost=supplyPy*costPerPy;
+
+  // 총 투자비
+  const totalInvest=currentPrice+addCost;
+
+  // 미래 가치 = NVP평당가 × (1+r)^10 × 공급평
+  const futurePPP=d.nvpPPP*Math.pow(1+annualRate,10);
+  const futureValue=futurePPP*supplyPy;
+
+  // RRI, CAGR
+  const rri=((futureValue-totalInvest)/totalInvest)*100;
+  const cagr=(Math.pow(futureValue/totalInvest,1/10)-1)*100;
+
+  // 표시
+  const fmtP=v=>v>=10000?(v/10000).toFixed(1)+'억':Math.round(v).toLocaleString()+'만';
+  document.getElementById('rri-current').textContent=fmtP(currentPrice);
+  document.getElementById('rri-current-sub').textContent=`전용 ${d.avgArea.toFixed(1)}㎡ | 공급 ${supplyPy.toFixed(1)}평 | ${Math.round(d.currentPPP).toLocaleString()}만/평`;
+  document.getElementById('rri-future').textContent=fmtP(futureValue);
+  document.getElementById('rri-future-sub').textContent=`NVP ${Math.round(d.nvpPPP).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^10 = ${Math.round(futurePPP).toLocaleString()}만/평`;
+  document.getElementById('rri-area').textContent=supplyPy.toFixed(1)+'평';
+  document.getElementById('rri-cost').textContent=fmtP(addCost);
+  document.getElementById('rri-total').textContent=fmtP(totalInvest);
+
+  // RRI 색상
+  const rriColor=rri>=50?'#66BB6A':rri>=20?'#42A5F5':rri>=0?'#FFA726':'#EF5350';
+  document.getElementById('rri-rate').style.color=rriColor;
+  document.getElementById('rri-rate').textContent=(rri>=0?'+':'')+rri.toFixed(1)+'%';
+  document.getElementById('rri-cagr').textContent=`연환산 CAGR ${(cagr>=0?'+':'')+cagr.toFixed(2)}%/년 | 순수익 ${fmtP(futureValue-totalInvest)}`;
 }
 
 // 빠른선택 — 143개 단지 데이터 (구/동/단지명/지번)
