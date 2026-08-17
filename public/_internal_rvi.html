@@ -526,17 +526,23 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   const nvpAvailable=nvp>0&&myAvgPPP>0;
   const nvpRateScore=nvpAvailable?sNVP(nvpRate):-1; // -1 = 산출불가
 
+  // LOC (지역등급) 점수 산출
+  const LOC_GRADES={'압구정동':100,'대치동':100,'청담동':100,'개포동':80,'도곡동':80,'삼성동':80,'논현동':60,'일원동':60};
+  const umdForLoc=(function(){const parts=(address||'').split(' ');for(const p of parts){if(p.endsWith('동'))return p;}return '';})();
+  const locScore=LOC_GRADES[umdForLoc]||50; // 미등록 동은 50점 기본
+
   const scores={
     nvp_rate:{score:nvpRateScore,detail:nvpAvailable?`NVP ${Math.round(nvp).toLocaleString()}만 vs 현재 ${Math.round(myAvgPPP).toLocaleString()}만/평`:'비교 신축 단지 부족 (산출 불가)'},
     lps:{score:sLPS(lps),detail:platArea>0&&households>0?`${Math.round(platArea).toLocaleString()}㎡ ÷ ${households} = ${(lps/3.3058).toFixed(1)}평`:'대지면적 미확보'},
     far:{score:sFAR(far),detail:far>0?`현 용적률 ${far.toFixed(0)}%`:'용적률 미확보'},
     tla:{score:sTLA(platArea),detail:`${Math.round(platArea).toLocaleString()}㎡`},
     nrt:{score:sNRT(nrt),detail:nrt>0?`신축전세 평당 ${Math.round(nrt).toLocaleString()}만`:'전세 데이터 부족'},
-    age:{score:sAGE(age),detail:builtYear?`${builtYear}년 준공, ${age}년 경과`:'준공년도 미확인'}
+    age:{score:sAGE(age),detail:builtYear?`${builtYear}년 준공, ${age}년 경과`:'준공년도 미확인'},
+    loc:{score:locScore,detail:`${umdForLoc||'미확인'} (${locScore>=100?'1등급':locScore>=80?'2등급':'3등급'})`}
   };
 
   // RVI 산출: 산출불가(-1) 지표는 제외하고 나머지 가중치 재배분
-  const weights={nvp_rate:0.25,lps:0.10,far:0.15,tla:0.35,nrt:0.10,age:0.05};
+  const weights={tla:0.35,nvp_rate:0.20,far:0.15,loc:0.10,age:0.10,lps:0.05,nrt:0.05};
   let totalWeight=0,weightedSum=0;
   for(const[k,w] of Object.entries(weights)){
     if(scores[k].score>=0){totalWeight+=w;weightedSum+=scores[k].score*w;}
@@ -552,9 +558,9 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   document.getElementById('rviGrade').className='rvi-grade c-'+cls;
   document.getElementById('rviDesc').textContent=gradeDesc(rviNorm);
 
-  const META={nvp_rate:{label:'NVP Rate',name:'상승여력률'},lps:{label:'LPS',name:'세대당 대지지분'},far:{label:'FAR',name:'용적률'},tla:{label:'TLA',name:'대지 총면적'},nrt:{label:'NRT',name:'신축전세 평당가'},age:{label:'AGE',name:'준공경과년수'}};
+  const META={nvp_rate:{label:'NVP Rate',name:'상승여력률'},lps:{label:'LPS',name:'세대당 대지지분'},far:{label:'FAR',name:'용적률'},tla:{label:'TLA',name:'대지 총면적'},nrt:{label:'NRT',name:'신축전세 평당가'},age:{label:'AGE',name:'준공경과년수'},loc:{label:'LOC',name:'지역등급'}};
   const grid=document.getElementById('indexGrid');grid.innerHTML='';
-  ['nvp_rate','lps','far','tla','nrt','age'].forEach(k=>{
+  ['tla','nvp_rate','far','loc','age','lps','nrt'].forEach(k=>{
     const s=scores[k],m=META[k];
     if(s.score<0){
       // 산출 불가 지표
