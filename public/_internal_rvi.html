@@ -675,8 +675,8 @@ function loadRRIRanking(){
   if(_rriRankLoaded)return;
   fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
     const gangnam=data.filter(d=>d.gu==='강남구'&&d.far>0&&d.avgPPP>0);
-    const NVP_PPP=18480,RATE=0.02,YEARS=10;
-    const futurePPP=NVP_PPP*Math.pow(1+RATE,YEARS);
+    const NVP_BY_DONG={'압구정동':23000,'청담동':23000,'대치동':18000,'개포동':15000,'도곡동':15000,'일원동':15000,'논현동':15000,'삼성동':15000};
+    const RATE=0.02,YEARS=10;
     // LOC 등급
     const LOC_G={'압구정동':100,'대치동':100,'청담동':100,'개포동':80,'도곡동':80,'삼성동':80,'논현동':60,'일원동':60};
     // 점수화 함수 (loadRVI와 동일)
@@ -686,6 +686,8 @@ function loadRRIRanking(){
     function sAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
     const results=[];
     gangnam.forEach(d=>{
+      const NVP_PPP=NVP_BY_DONG[d.dong]||15000;
+      const futurePPP=NVP_PPP*Math.pow(1+RATE,YEARS);
       const area=d.latestArea||76;
       const excluPy=area/3.3058;
       const currentPrice=d.latestPrice||d.avgPPP*excluPy;
