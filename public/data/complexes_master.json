@@ -142,11 +142,11 @@
     "h": 630,
     "bjdong": "10600",
     "lawd": "11680",
-    "far": 169.9,
+    "far": 170,
     "hhldCnt": 630,
     "vlRatEstmTotArea": 80273.35,
     "totArea": 92303.75,
-    "farSource": "역산(vlRatEstm/대지)",
+    "farSource": "수동입력",
     "type": "reconstruction"
   },
   {
@@ -241,32 +241,17 @@
   },
   {
     "gu": "강남구",
-    "dong": "청담동",
-    "name": "진흥아파트",
-    "jibun": "65",
-    "h": 375,
-    "bjdong": "10400",
-    "lawd": "11680",
-    "far": 383.4,
-    "hhldCnt": 375,
-    "vlRatEstmTotArea": 50763.19,
-    "totArea": 54206.9,
-    "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "대치동",
     "name": "쌍용대치아파트",
     "jibun": "65",
     "h": 364,
     "bjdong": "10600",
     "lawd": "11680",
-    "far": 0,
+    "far": 170,
     "hhldCnt": 364,
     "vlRatEstmTotArea": 43015.56,
     "totArea": 46163.04,
-    "farSource": "",
+    "farSource": "수동입력",
     "type": "reconstruction"
   },
   {
@@ -312,21 +297,6 @@
     "vlRatEstmTotArea": 24024.99,
     "totArea": 26710.28,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "삼성동",
-    "name": "진흥아파트",
-    "jibun": "53-2",
-    "h": 255,
-    "bjdong": "10500",
-    "lawd": "11680",
-    "far": 0,
-    "hhldCnt": 255,
-    "vlRatEstmTotArea": 40532.06,
-    "totArea": 43374.75,
-    "farSource": "",
     "type": "reconstruction"
   },
   {
@@ -1537,12 +1507,12 @@
     "h": 900,
     "bjdong": "10500",
     "lawd": "11680",
-    "far": 0,
+    "far": 145,
     "hhldCnt": 900,
     "vlRatEstmTotArea": 0,
     "totArea": 0,
     "platArea": 0,
-    "farSource": "",
+    "farSource": "수동입력",
     "type": "reconstruction"
   },
   {
@@ -1553,12 +1523,12 @@
     "h": 910,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 93,
     "hhldCnt": 910,
     "vlRatEstmTotArea": 110967.39,
     "totArea": 118617.25,
     "platArea": 0,
-    "farSource": "",
+    "farSource": "수동입력",
     "type": "reconstruction"
   },
   {
@@ -1569,12 +1539,12 @@
     "h": 322,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 183.6,
+    "far": 93,
     "hhldCnt": 322,
     "vlRatEstmTotArea": 45723.3,
     "totArea": 48677.9,
     "platArea": 0,
-    "farSource": "역산(vlRatEstm/대지)",
+    "farSource": "수동입력",
     "type": "reconstruction"
   },
   {
@@ -1617,12 +1587,12 @@
     "h": 432,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 225,
     "hhldCnt": 432,
     "vlRatEstmTotArea": 40188.93,
     "totArea": 43280.27,
     "platArea": 0,
-    "farSource": "",
+    "farSource": "수동입력",
     "type": "reconstruction"
   },
   {
@@ -1697,12 +1667,12 @@
     "h": 144,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 228,
     "hhldCnt": 144,
     "vlRatEstmTotArea": 18034.56,
     "totArea": 19765.47,
     "platArea": 0,
-    "farSource": "",
+    "farSource": "수동입력",
     "type": "reconstruction"
   },
   {
@@ -1713,12 +1683,12 @@
     "h": 234,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 150,
     "hhldCnt": 234,
     "vlRatEstmTotArea": 25060.62,
     "totArea": 27606.8,
     "platArea": 0,
-    "farSource": "",
+    "farSource": "수동입력",
     "type": "reconstruction"
   },
   {
@@ -1857,12 +1827,12 @@
     "h": 0,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 195,
     "hhldCnt": 0,
     "vlRatEstmTotArea": 0,
     "totArea": 0,
     "platArea": 0,
-    "farSource": "",
+    "farSource": "수동입력",
     "type": "reconstruction"
   }
 ]
