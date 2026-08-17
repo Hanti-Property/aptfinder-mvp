@@ -2143,5 +2143,21 @@
     "totArea": 12610.47,
     "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
+  },
+  {
+    "gu": "강남구",
+    "dong": "도곡동",
+    "name": "한신(개포)",
+    "jibun": "464",
+    "h": 900,
+    "bjdong": "10500",
+    "lawd": "11680",
+    "far": 0,
+    "hhldCnt": 900,
+    "vlRatEstmTotArea": 0,
+    "totArea": 0,
+    "platArea": 0,
+    "farSource": "",
+    "type": "reconstruction"
   }
 ]
