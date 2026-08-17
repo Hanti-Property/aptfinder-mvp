@@ -360,21 +360,6 @@
     "type": "reconstruction"
   },
   {
-    "gu": "강남구",
-    "dong": "삼성동",
-    "name": "청구아파트",
-    "jibun": "78-4",
-    "h": 167,
-    "bjdong": "10500",
-    "lawd": "11680",
-    "far": 239.9,
-    "hhldCnt": 167,
-    "vlRatEstmTotArea": 16662.03,
-    "totArea": 18168.44,
-    "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
     "gu": "서초구",
     "dong": "내곡동",
     "name": "신반포아파트",
