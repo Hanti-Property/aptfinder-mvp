@@ -395,10 +395,18 @@ async function fetchLandInfo(){
 // ============================================================
 function filterByComplex(allItems,name){
   let filtered=[];
-  if(selectedUmdNm&&selectedJibun){
-    const umd=selectedUmdNm.replace(/[0-9]/g,'').trim();
+  const umd=selectedUmdNm?selectedUmdNm.replace(/[0-9]/g,'').trim():'';
+  // 1차: 동 + 지번 매칭 (가장 정확)
+  if(umd&&selectedJibun){
     filtered=allItems.filter(it=>(it.umdNm||'').trim()===umd&&(it.jibun||'').trim()===selectedJibun.trim());
   }
+  // 2차: 키워드 + 동 매칭
+  if(filtered.length===0&&umd){
+    let kw=name.replace(/아파트|단지|맨션|[0-9]+동|[0-9]+$|서울|강남구|서초구|송파구/g,'').trim();
+    kw=kw.replace(/^(대치동|도곡동|개포동|삼성동|압구정동|청담동|역삼동|논현동|일원동|수서동|서초동|반포동|잠원동|방배동|양재동|잠실동|송파동|가락동|문정동|방이동|신천동)/,'').trim();
+    if(kw.length>=2){filtered=allItems.filter(it=>(it.umdNm||'').trim()===umd&&((it.aptNm||'').indexOf(kw)>=0||kw.indexOf((it.aptNm||'').trim())>=0));}
+  }
+  // 3차: 키워드만 (동 정보 없을 때)
   if(filtered.length===0){
     let kw=name.replace(/아파트|단지|맨션|[0-9]+동|[0-9]+$|서울|강남구|서초구|송파구/g,'').trim();
     kw=kw.replace(/^(대치동|도곡동|개포동|삼성동|압구정동|청담동|역삼동|논현동|일원동|수서동|서초동|반포동|잠원동|방배동|양재동|잠실동|송파동|가락동|문정동|방이동|신천동)/,'').trim();
