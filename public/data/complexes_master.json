@@ -12,7 +12,15 @@
     "vlRatEstmTotArea": 488472.85,
     "totArea": 528772.0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 11137,
+    "tradeCount": 16,
+    "latestPrice": 334000,
+    "latestArea": 76.79,
+    "latestSupplyPy": 31.4,
+    "latestFloor": 3,
+    "latestDate": "2026.08",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -27,7 +35,15 @@
     "vlRatEstmTotArea": 21833.55,
     "totArea": 224217.01,
     "farSource": "표제부",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 10620,
+    "tradeCount": 61,
+    "latestPrice": 126000,
+    "latestArea": 39.53,
+    "latestSupplyPy": 16.2,
+    "latestFloor": 12,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -42,7 +58,15 @@
     "vlRatEstmTotArea": 346355.29,
     "totArea": 372573.64,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 9414,
+    "tradeCount": 19,
+    "latestPrice": 388000,
+    "latestArea": 128.01,
+    "latestSupplyPy": 52.3,
+    "latestFloor": 2,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -57,7 +81,15 @@
     "vlRatEstmTotArea": 166471.99,
     "totArea": 184280.09,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 12864,
+    "tradeCount": 5,
+    "latestPrice": 383000,
+    "latestArea": 83.7,
+    "latestSupplyPy": 34.2,
+    "latestFloor": 7,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -72,7 +104,15 @@
     "vlRatEstmTotArea": 141025.0,
     "totArea": 152146.6,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 9199,
+    "tradeCount": 6,
+    "latestPrice": 507000,
+    "latestArea": 136.68,
+    "latestSupplyPy": 55.9,
+    "latestFloor": 8,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -87,7 +127,15 @@
     "vlRatEstmTotArea": 84368.32,
     "totArea": 93810.76,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 9562,
+    "tradeCount": 1,
+    "latestPrice": 211000,
+    "latestArea": 53.98,
+    "latestSupplyPy": 22.1,
+    "latestFloor": 2,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -102,7 +150,15 @@
     "vlRatEstmTotArea": 74892.135,
     "totArea": 82165.705,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 9417,
+    "tradeCount": 2,
+    "latestPrice": 303000,
+    "latestArea": 84.06,
+    "latestSupplyPy": 34.4,
+    "latestFloor": 4,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -117,7 +173,15 @@
     "vlRatEstmTotArea": 93114.47,
     "totArea": 101213.76,
     "farSource": "총괄표제부",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 11249,
+    "tradeCount": 4,
+    "latestPrice": 390000,
+    "latestArea": 84.81,
+    "latestSupplyPy": 34.7,
+    "latestFloor": 11,
+    "latestDate": "2026.04",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -132,7 +196,15 @@
     "vlRatEstmTotArea": 96706.63,
     "totArea": 104962.27,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 6673,
+    "tradeCount": 1,
+    "latestPrice": 497000,
+    "latestArea": 182.2,
+    "latestSupplyPy": 74.5,
+    "latestFloor": 14,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -147,7 +219,15 @@
     "vlRatEstmTotArea": 80273.35,
     "totArea": 92303.75,
     "farSource": "수동입력",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 8000,
+    "tradeCount": 4,
+    "latestPrice": 470000,
+    "latestArea": 148.8,
+    "latestSupplyPy": 60.8,
+    "latestFloor": 14,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -162,7 +242,15 @@
     "vlRatEstmTotArea": 82123.83,
     "totArea": 91344.79,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 7237,
+    "tradeCount": 1,
+    "latestPrice": 390000,
+    "latestArea": 131.83,
+    "latestSupplyPy": 53.9,
+    "latestFloor": 8,
+    "latestDate": "2026.03",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -177,7 +265,15 @@
     "vlRatEstmTotArea": 62006.74,
     "totArea": 67189.42,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 7572,
+    "tradeCount": 5,
+    "latestPrice": 250000,
+    "latestArea": 84.92,
+    "latestSupplyPy": 34.7,
+    "latestFloor": 2,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -192,7 +288,15 @@
     "vlRatEstmTotArea": 53749.44,
     "totArea": 57986.2,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 8874,
+    "tradeCount": 5,
+    "latestPrice": 407000,
+    "latestArea": 115.59,
+    "latestSupplyPy": 47.3,
+    "latestFloor": 10,
+    "latestDate": "2026.04",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -207,7 +311,15 @@
     "vlRatEstmTotArea": 58606.8,
     "totArea": 72027.55,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 10142,
+    "tradeCount": 6,
+    "latestPrice": 500000,
+    "latestArea": 127.78,
+    "latestSupplyPy": 52.2,
+    "latestFloor": 5,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -222,7 +334,15 @@
     "vlRatEstmTotArea": 64010.27,
     "totArea": 69347.6,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 7486,
+    "tradeCount": 4,
+    "latestPrice": 357000,
+    "latestArea": 128.62,
+    "latestSupplyPy": 52.6,
+    "latestFloor": 9,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -237,7 +357,15 @@
     "vlRatEstmTotArea": 57395.16,
     "totArea": 61999.08,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 7004,
+    "tradeCount": 1,
+    "latestPrice": 299000,
+    "latestArea": 104.43,
+    "latestSupplyPy": 42.7,
+    "latestFloor": 9,
+    "latestDate": "2026.04",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -252,7 +380,15 @@
     "vlRatEstmTotArea": 43015.56,
     "totArea": 46163.04,
     "farSource": "수동입력",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 9608,
+    "tradeCount": 4,
+    "latestPrice": 348500,
+    "latestArea": 84.49,
+    "latestSupplyPy": 34.5,
+    "latestFloor": 3,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -267,7 +403,15 @@
     "vlRatEstmTotArea": 37487.94,
     "totArea": 42259.1,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 8620,
+    "tradeCount": 1,
+    "latestPrice": 290000,
+    "latestArea": 82.3,
+    "latestSupplyPy": 33.6,
+    "latestFloor": 4,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -297,7 +441,15 @@
     "vlRatEstmTotArea": 24024.99,
     "totArea": 26710.28,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 8182,
+    "tradeCount": 1,
+    "latestPrice": 264000,
+    "latestArea": 78.93,
+    "latestSupplyPy": 32.3,
+    "latestFloor": 6,
+    "latestDate": "2026.04",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -312,7 +464,15 @@
     "vlRatEstmTotArea": 21494.42,
     "totArea": 21602.42,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 6513,
+    "tradeCount": 3,
+    "latestPrice": 248000,
+    "latestArea": 84.76,
+    "latestSupplyPy": 34.6,
+    "latestFloor": 6,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -327,7 +487,15 @@
     "vlRatEstmTotArea": 29461.44,
     "totArea": 32857.3,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 5987,
+    "tradeCount": 1,
+    "latestPrice": 401000,
+    "latestArea": 163.85,
+    "latestSupplyPy": 67.0,
+    "latestFloor": 6,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "서초구",
@@ -1513,7 +1681,15 @@
     "totArea": 0,
     "platArea": 0,
     "farSource": "수동입력",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 13147,
+    "tradeCount": 9,
+    "latestPrice": 310000,
+    "latestArea": 52.73,
+    "latestSupplyPy": 21.6,
+    "latestFloor": 2,
+    "latestDate": "2026.08",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1529,7 +1705,15 @@
     "totArea": 118617.25,
     "platArea": 0,
     "farSource": "수동입력",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 13503,
+    "tradeCount": 4,
+    "latestPrice": 515000,
+    "latestArea": 118.63,
+    "latestSupplyPy": 48.5,
+    "latestFloor": 5,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1545,7 +1729,15 @@
     "totArea": 48677.9,
     "platArea": 0,
     "farSource": "수동입력",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 10952,
+    "tradeCount": 1,
+    "latestPrice": 473000,
+    "latestArea": 105.65,
+    "latestSupplyPy": 43.2,
+    "latestFloor": 2,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1561,7 +1753,15 @@
     "totArea": 81881.62,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 14063,
+    "tradeCount": 8,
+    "latestPrice": 650000,
+    "latestArea": 109.24,
+    "latestSupplyPy": 44.7,
+    "latestFloor": 10,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1577,7 +1777,15 @@
     "totArea": 177290.37,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 12178,
+    "tradeCount": 7,
+    "latestPrice": 660000,
+    "latestArea": 131.48,
+    "latestSupplyPy": 53.7,
+    "latestFloor": 3,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1593,7 +1801,15 @@
     "totArea": 43280.27,
     "platArea": 0,
     "farSource": "수동입력",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 14381,
+    "tradeCount": 1,
+    "latestPrice": 485000,
+    "latestArea": 82.5,
+    "latestSupplyPy": 33.7,
+    "latestFloor": 4,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1609,7 +1825,15 @@
     "totArea": 23886.39,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 14109,
+    "tradeCount": 2,
+    "latestPrice": 680000,
+    "latestArea": 117.91,
+    "latestSupplyPy": 48.2,
+    "latestFloor": 3,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1625,7 +1849,15 @@
     "totArea": 31133.99,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 16263,
+    "tradeCount": 3,
+    "latestPrice": 550000,
+    "latestArea": 82.23,
+    "latestSupplyPy": 33.6,
+    "latestFloor": 4,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1641,7 +1873,15 @@
     "totArea": 252503.42,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 12366,
+    "tradeCount": 4,
+    "latestPrice": 745000,
+    "latestArea": 144.7,
+    "latestSupplyPy": 59.2,
+    "latestFloor": 8,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1657,7 +1897,15 @@
     "totArea": 72351.1,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 10785,
+    "tradeCount": 9,
+    "latestPrice": 570000,
+    "latestArea": 107.64,
+    "latestSupplyPy": 44.0,
+    "latestFloor": 12,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1689,7 +1937,15 @@
     "totArea": 27606.8,
     "platArea": 0,
     "farSource": "수동입력",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 13983,
+    "tradeCount": 3,
+    "latestPrice": 610000,
+    "latestArea": 108.47,
+    "latestSupplyPy": 44.3,
+    "latestFloor": 11,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1705,7 +1961,15 @@
     "totArea": 39056.71,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 16784,
+    "tradeCount": 6,
+    "latestPrice": 586000,
+    "latestArea": 84.98,
+    "latestSupplyPy": 34.7,
+    "latestFloor": 6,
+    "latestDate": "2026.07",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1721,7 +1985,15 @@
     "totArea": 88234.75,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 14702,
+    "tradeCount": 9,
+    "latestPrice": 389000,
+    "latestArea": 49.98,
+    "latestSupplyPy": 20.4,
+    "latestFloor": 11,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1737,7 +2009,15 @@
     "totArea": 52388.79,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 10429,
+    "tradeCount": 1,
+    "latestPrice": 750000,
+    "latestArea": 175.92,
+    "latestSupplyPy": 71.9,
+    "latestFloor": 7,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1753,7 +2033,15 @@
     "totArea": 44827.95,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 12370,
+    "tradeCount": 4,
+    "latestPrice": 587000,
+    "latestArea": 116.94,
+    "latestSupplyPy": 47.8,
+    "latestFloor": 12,
+    "latestDate": "2026.08",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1769,7 +2057,15 @@
     "totArea": 43329.54,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 10200,
+    "tradeCount": 1,
+    "latestPrice": 870000,
+    "latestArea": 208.65,
+    "latestSupplyPy": 85.3,
+    "latestFloor": 12,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1801,7 +2097,15 @@
     "totArea": 29975.27,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 11918,
+    "tradeCount": 3,
+    "latestPrice": 525000,
+    "latestArea": 106.71,
+    "latestSupplyPy": 43.6,
+    "latestFloor": 12,
+    "latestDate": "2026.04",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
@@ -1817,7 +2121,15 @@
     "totArea": 29985.87,
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
+    "type": "reconstruction",
+    "avgPPP": 11285,
+    "tradeCount": 1,
+    "latestPrice": 490000,
+    "latestArea": 106.22,
+    "latestSupplyPy": 43.4,
+    "latestFloor": 12,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-17"
   },
   {
     "gu": "강남구",
