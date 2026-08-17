@@ -46,21 +46,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "수서동",
-    "name": "수서주공영구임대아파트",
-    "jibun": "707",
-    "h": 2560,
-    "bjdong": "11500",
-    "lawd": "11680",
-    "far": 192.6,
-    "hhldCnt": 2560,
-    "vlRatEstmTotArea": 104597.1,
-    "totArea": 114619.57,
-    "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "대치동",
     "name": "미도맨션아파트",
     "jibun": "511",
@@ -91,36 +76,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "수서동",
-    "name": "수서6단지아파트",
-    "jibun": "723",
-    "h": 1512,
-    "bjdong": "11500",
-    "lawd": "11680",
-    "far": 197.6,
-    "hhldCnt": 1512,
-    "vlRatEstmTotArea": 57880.05,
-    "totArea": 6005.481,
-    "farSource": "총괄표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "수서동",
-    "name": "까치마을아파트",
-    "jibun": "746",
-    "h": 1403,
-    "bjdong": "11500",
-    "lawd": "11680",
-    "far": 208.4,
-    "hhldCnt": 1403,
-    "vlRatEstmTotArea": 76481.99,
-    "totArea": 83490.86,
-    "farSource": "총괄표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "압구정동",
     "name": "현대아파트",
     "jibun": "456",
@@ -132,21 +87,6 @@
     "vlRatEstmTotArea": 233793.25,
     "totArea": 252503.42,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "수서동",
-    "name": "신동아아파트",
-    "jibun": "736",
-    "h": 1163,
-    "bjdong": "11500",
-    "lawd": "11680",
-    "far": 202.3,
-    "hhldCnt": 1163,
-    "vlRatEstmTotArea": 64453.92,
-    "totArea": 65535.25,
-    "farSource": "총괄표제부",
     "type": "reconstruction"
   },
   {
@@ -331,21 +271,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "수서동",
-    "name": "삼익아파트",
-    "jibun": "708",
-    "h": 645,
-    "bjdong": "11500",
-    "lawd": "11680",
-    "far": 224.9,
-    "hhldCnt": 645,
-    "vlRatEstmTotArea": 53326.35,
-    "totArea": 57127.18,
-    "farSource": "총괄표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "대치동",
     "name": "쌍용대치아파트",
     "jibun": "66",
@@ -462,21 +387,6 @@
     "vlRatEstmTotArea": 65963.48,
     "totArea": 72351.1,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "수서동",
-    "name": "수서한아름아파트",
-    "jibun": "712",
-    "h": 498,
-    "bjdong": "11500",
-    "lawd": "11680",
-    "far": 247.7,
-    "hhldCnt": 498,
-    "vlRatEstmTotArea": 67060.04,
-    "totArea": 72593.61,
-    "farSource": "총괄표제부",
     "type": "reconstruction"
   },
   {
@@ -642,21 +552,6 @@
     "vlRatEstmTotArea": 40661.67,
     "totArea": 43799.3,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "수서동",
-    "name": "동익아파트",
-    "jibun": "738",
-    "h": 330,
-    "bjdong": "11500",
-    "lawd": "11680",
-    "far": 202.0,
-    "hhldCnt": 330,
-    "vlRatEstmTotArea": 30545.005,
-    "totArea": 33090.63,
-    "farSource": "총괄표제부",
     "type": "reconstruction"
   },
   {
