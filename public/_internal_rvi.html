@@ -536,7 +536,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   };
 
   // RVI 산출: 산출불가(-1) 지표는 제외하고 나머지 가중치 재배분
-  const weights={nvp_rate:0.35,lps:0.20,far:0.20,tla:0.12,nrt:0.05,age:0.08};
+  const weights={nvp_rate:0.25,lps:0.10,far:0.15,tla:0.35,nrt:0.10,age:0.05};
   let totalWeight=0,weightedSum=0;
   for(const[k,w] of Object.entries(weights)){
     if(scores[k].score>=0){totalWeight+=w;weightedSum+=scores[k].score*w;}
