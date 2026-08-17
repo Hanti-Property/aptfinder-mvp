@@ -441,9 +441,17 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   }
 
   // 실거래 매칭
-  const kw=name.replace(/아파트|단지|맨션/g,'').substring(0,4);
-  let myTrades=allTrades.filter(t=>(t.aptNm||'').includes(kw)||(t.aptNm||'').includes(name.substring(0,3)));
-  if(!myTrades.length)myTrades=allTrades.filter(t=>(t.jibun||'').trim()===jibun);
+  // 실거래 매칭: 1) 지번 우선, 2) 키워드 + 동 필터
+  const umdFromAddr=(function(){const parts=(address||'').split(' ');for(const p of parts){if(p.endsWith('동'))return p;}return '';})();
+  const kw=name.replace(/아파트|단지|맨션|[0-9·]/g,'').substring(0,4);
+  // 1차: 지번 매칭 (가장 정확)
+  let myTrades=allTrades.filter(t=>(t.jibun||'').trim()===jibun&&(t.umdNm||'').trim()===umdFromAddr);
+  // 2차: 키워드 + 동 매칭
+  if(!myTrades.length&&umdFromAddr){
+    myTrades=allTrades.filter(t=>(t.umdNm||'').trim()===umdFromAddr&&((t.aptNm||'').includes(kw)||(t.aptNm||'').includes(name.substring(0,3))));
+  }
+  // 3차: 지번만 (동 무관)
+  if(!myTrades.length) myTrades=allTrades.filter(t=>(t.jibun||'').trim()===jibun);
   myTrades=myTrades.filter(t=>parseInt(t.floor||0)>1&&!(t.cdealType&&t.cdealType.trim()));
 
   let builtYear=0;
