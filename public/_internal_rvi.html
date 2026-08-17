@@ -524,7 +524,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   function sNVP(r){return r>=40?100:r>=30?85:r>=20?70:r>=10?50:r>0?30:0;}
   function sLPS(v){const p=v/3.3058;return p>=18?100:p>=12?75:p>=8?50:25;}
   function sFAR(v){if(v===0)return -1;return v<=170?100:v<=200?75:v<=220?50:v<=250?25:0;} // -1 = 산출불가
-  function sTLA(v){return v>=50000?100:v>=30000?75:v>=10000?50:25;}
+  function sTLA(v){return v>=200000?100:v>=150000?90:v>=100000?80:v>=70000?70:v>=50000?60:v>=30000?45:v>=10000?30:15;}
   function sNRT(v){if(v===0)return -1;return v>=8000?100:v>=6500?75:v>=5000?50:25;}
   function sAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
 
@@ -682,7 +682,7 @@ function loadRRIRanking(){
     // 점수화 함수 (loadRVI와 동일)
     function sNVP(r){return r>=40?100:r>=30?85:r>=20?70:r>=10?50:r>0?30:0;}
     function sFAR(v){if(v===0)return 0;return v<=170?100:v<=200?75:v<=220?50:v<=250?25:0;}
-    function sTLA(v){return v>=50000?100:v>=30000?75:v>=10000?50:25;}
+    function sTLA(v){return v>=200000?100:v>=150000?90:v>=100000?80:v>=70000?70:v>=50000?60:v>=30000?45:v>=10000?30:15;}
     function sAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
     const results=[];
     gangnam.forEach(d=>{
