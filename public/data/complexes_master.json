@@ -706,21 +706,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "대치동",
-    "name": "대치동 992번지",
-    "jibun": "992",
-    "h": 120,
-    "bjdong": "10600",
-    "lawd": "11680",
-    "far": 321.7,
-    "hhldCnt": 120,
-    "vlRatEstmTotArea": 0.0,
-    "totArea": 13075.69,
-    "farSource": "역산(totArea/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "논현동",
     "name": "쌍용아파트",
     "jibun": "103",
