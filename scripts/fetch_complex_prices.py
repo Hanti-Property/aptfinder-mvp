@@ -17,7 +17,6 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 LAMBDA_URL = 'https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/'
-JYONYUL = 0.74  # 전용률 (전용 → 공급 환산)
 
 def fetch_trades(lawd_cd, deal_ymd):
     """월별 실거래 조회"""
@@ -72,16 +71,16 @@ def match_trades(all_trades, complex_info):
 
 
 def calculate_price_stats(trades):
-    """거래 목록에서 시세 통계 산출"""
+    """거래 목록에서 시세 통계 산출 (전용면적 기준)"""
     if not trades:
         return None
     
-    # 평당가 산출 (공급면적 기준)
+    # 평당가 산출 (전용면적 기준)
     ppps = []
     for t in trades:
         if t['excluUseAr'] > 0 and t['dealAmount'] > 0:
-            supply_py = (t['excluUseAr'] / JYONYUL) / 3.3058
-            ppp = t['dealAmount'] / supply_py
+            exclu_py = t['excluUseAr'] / 3.3058  # 전용 평
+            ppp = t['dealAmount'] / exclu_py
             ppps.append(ppp)
     
     if not ppps:
@@ -105,14 +104,14 @@ def calculate_price_stats(trades):
     latest = trades_sorted[0]
     latest_area = latest['excluUseAr']
     latest_price = latest['dealAmount']
-    latest_supply_py = (latest_area / JYONYUL) / 3.3058
+    latest_exclu_py = latest_area / 3.3058  # 전용 평
     
     return {
-        'avgPPP': round(avg_ppp),           # 평균 평당가 (만원)
+        'avgPPP': round(avg_ppp),           # 평균 전용 평당가 (만원)
         'tradeCount': len(trades),          # 거래건수
         'latestPrice': latest_price,        # 최근 거래가 (만원)
         'latestArea': latest_area,          # 최근 거래 전용면적
-        'latestSupplyPy': round(latest_supply_py, 1),  # 공급평
+        'latestExcluPy': round(latest_exclu_py, 1),  # 전용 평
         'latestFloor': latest['floor'],
         'latestDate': f"{latest['dealYear']}.{latest['dealMonth'].zfill(2)}",
     }
@@ -161,7 +160,7 @@ def main():
             data[idx]['tradeCount'] = stats['tradeCount']
             data[idx]['latestPrice'] = stats['latestPrice']
             data[idx]['latestArea'] = stats['latestArea']
-            data[idx]['latestSupplyPy'] = stats['latestSupplyPy']
+            data[idx]['latestExcluPy'] = stats['latestExcluPy']
             data[idx]['latestFloor'] = stats['latestFloor']
             data[idx]['latestDate'] = stats['latestDate']
             data[idx]['priceUpdated'] = now.strftime('%Y-%m-%d')
