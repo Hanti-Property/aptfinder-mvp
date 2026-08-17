@@ -332,22 +332,7 @@
   {
     "gu": "강남구",
     "dong": "청담동",
-    "name": "건영아파트",
-    "jibun": "108",
-    "h": 240,
-    "bjdong": "10400",
-    "lawd": "11680",
-    "far": 397.6,
-    "hhldCnt": 240,
-    "vlRatEstmTotArea": 23779.835,
-    "totArea": 25123.143,
-    "farSource": "표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "청담동",
-    "name": "현대아파트",
+    "name": "청담현대3차",
     "jibun": "23",
     "h": 214,
     "bjdong": "10400",
@@ -387,21 +372,6 @@
     "vlRatEstmTotArea": 16662.03,
     "totArea": 18168.44,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "청담동",
-    "name": "청담동 130번지",
-    "jibun": "130",
-    "h": 108,
-    "bjdong": "10400",
-    "lawd": "11680",
-    "far": 423.4,
-    "hhldCnt": 108,
-    "vlRatEstmTotArea": 15058.58,
-    "totArea": 21171.78,
-    "farSource": "총괄표제부",
     "type": "reconstruction"
   },
   {
