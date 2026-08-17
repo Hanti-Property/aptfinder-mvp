@@ -154,7 +154,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
       <div>
-        <div style="font-size:10px;color:#888;">공급면적</div>
+        <div style="font-size:10px;color:#888;">전용면적</div>
         <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;" id="rri-area">—</div>
       </div>
       <div>
@@ -177,7 +177,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
       <span style="font-size:12px;color:#ccc;min-width:50px;" id="rriRateLabel">연 2%</span>
     </div>
     <div style="font-size:10px;color:#555;margin-top:10px;line-height:1.5;">
-      ※ 동일 평형 재건축 가정 | 사업기간 10년 | 분담금 = 용적률 비례 자동 산출 (150%↓ 0원 ~ 200%↑ 1,500만/평)
+      ※ 동일 평형 재건축 가정 | 사업기간 10년 | 분담금 = 용적률 비례 자동 산출 (150%↓ 0원 ~ 200%↑ 1,500만/전용평)
     </div>
   </div>
 
@@ -185,6 +185,15 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
   <div class="nvp-compare" id="nvpCompare">
     <h4>🏠 NVP 비교 신축 단지</h4>
     <div id="nvpRows"></div>
+  </div>
+
+  <!-- RRI 랭킹 테이블 -->
+  <div class="section-title">🏆 강남구 RRI 랭킹 (43개 단지)</div>
+  <div style="overflow-x:auto;margin-bottom:16px;">
+    <table class="trade-table" id="rriRankTable">
+      <thead><tr><th>#</th><th>단지명</th><th>용적률</th><th>현재가</th><th>RRI</th><th>CAGR</th></tr></thead>
+      <tbody id="rriRankBody"><tr><td colspan="6" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
+    </table>
   </div>
 
   <!-- 최근 거래내역 -->
@@ -602,22 +611,21 @@ function updateRRI(){
   // far=0(미확보)이면 중간값 750 적용
   if(!d.far||d.far===0) costPerPy=750;
 
-  // 공급면적 (전용 → 공급평)
-  const JYONYUL=0.74;
-  const supplyPy=(d.avgArea/JYONYUL)/3.3058;
+  // 전용면적 기준 (전용평)
+  const excluPy=d.avgArea/3.3058;
 
   // 현재 매매가 (최근 거래 기준)
   const currentPrice=d.currentPrice;
 
-  // 추가비용 = 공급면적(평) × 분담금 단가
-  const addCost=supplyPy*costPerPy;
+  // 추가비용 = 전용평 × 분담금 단가
+  const addCost=excluPy*costPerPy;
 
   // 총 투자비
   const totalInvest=currentPrice+addCost;
 
-  // 미래 가치 = NVP평당가 × (1+r)^10 × 공급평
+  // 미래 가치 = NVP평당가 × (1+r)^10 × 전용평
   const futurePPP=d.nvpPPP*Math.pow(1+annualRate,10);
-  const futureValue=futurePPP*supplyPy;
+  const futureValue=futurePPP*excluPy;
 
   // RRI, CAGR
   const rri=((futureValue-totalInvest)/totalInvest)*100;
@@ -626,12 +634,12 @@ function updateRRI(){
   // 표시
   const fmtP=v=>v>=10000?(v/10000).toFixed(1)+'억':Math.round(v).toLocaleString()+'만';
   document.getElementById('rri-current').textContent=fmtP(currentPrice);
-  document.getElementById('rri-current-sub').textContent=d.tradeInfo ? d.tradeInfo : `전용 ${d.avgArea.toFixed(1)}㎡ | 공급 ${supplyPy.toFixed(1)}평`;
+  document.getElementById('rri-current-sub').textContent=d.tradeInfo ? d.tradeInfo : `전용 ${d.avgArea.toFixed(1)}㎡ (${excluPy.toFixed(1)}평)`;
   document.getElementById('rri-future').textContent=fmtP(futureValue);
-  document.getElementById('rri-future-sub').textContent=`NVP ${Math.round(d.nvpPPP).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^10 = ${Math.round(futurePPP).toLocaleString()}만/평`;
-  document.getElementById('rri-area').textContent=supplyPy.toFixed(1)+'평';
+  document.getElementById('rri-future-sub').textContent=`NVP ${Math.round(d.nvpPPP).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^10 = ${Math.round(futurePPP).toLocaleString()}만/전용평`;
+  document.getElementById('rri-area').textContent=excluPy.toFixed(1)+'평(전용)';
   document.getElementById('rri-cost').textContent=fmtP(addCost);
-  document.getElementById('rri-cost').title=`용적률 ${d.far?d.far.toFixed(0)+'%':'미확보'} → ${costPerPy.toLocaleString()}만/평`;
+  document.getElementById('rri-cost').title=`용적률 ${d.far?d.far.toFixed(0)+'%':'미확보'} → ${costPerPy.toLocaleString()}만/전용평`;
   document.getElementById('rri-total').textContent=fmtP(totalInvest);
 
   // RRI 색상
@@ -640,6 +648,43 @@ function updateRRI(){
   document.getElementById('rri-rate').textContent=(rri>=0?'+':'')+rri.toFixed(1)+'%';
   document.getElementById('rri-cagr').textContent=`연환산 CAGR ${(cagr>=0?'+':'')+cagr.toFixed(2)}%/년 | 순수익 ${fmtP(futureValue-totalInvest)}`;
 }
+
+// === RRI 랭킹 테이블 로드 (complexes_master.json) ===
+let _rriRankLoaded=false;
+function loadRRIRanking(){
+  if(_rriRankLoaded)return;
+  fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
+    const gangnam=data.filter(d=>d.gu==='강남구'&&d.far>0&&d.avgPPP>0);
+    const NVP_PPP=18480,RATE=0.02,YEARS=10;
+    const futurePPP=NVP_PPP*Math.pow(1+RATE,YEARS);
+    const results=[];
+    gangnam.forEach(d=>{
+      const area=d.latestArea||76;
+      const excluPy=area/3.3058;
+      const currentPrice=d.latestPrice||d.avgPPP*excluPy;
+      let costPerPy=0;
+      if(d.far>=200)costPerPy=1500;
+      else if(d.far>150)costPerPy=Math.round((d.far-150)/50*1500);
+      const addCost=excluPy*costPerPy;
+      const totalInvest=currentPrice+addCost;
+      const futureValue=futurePPP*excluPy;
+      const rri=(futureValue-totalInvest)/totalInvest*100;
+      const cagr=(Math.pow(futureValue/totalInvest,1/YEARS)-1)*100;
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr});
+    });
+    results.sort((a,b)=>b.rri-a.rri);
+    const tbody=document.getElementById('rriRankBody');
+    tbody.innerHTML='';
+    results.forEach((r,i)=>{
+      const cur=r.currentPrice>=10000?(r.currentPrice/10000).toFixed(1)+'억':Math.round(r.currentPrice).toLocaleString()+'만';
+      const rriColor=r.rri>=50?'#66BB6A':r.rri>=20?'#42A5F5':r.rri>=0?'#FFA726':'#EF5350';
+      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${r.name}<br><span style="color:#666;font-size:10px">${r.dong}</span></td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
+    });
+    _rriRankLoaded=true;
+  }).catch(()=>{});
+}
+// 대시보드 표시 시 랭킹 로드
+setTimeout(loadRRIRanking,2000);
 
 // 빠른선택 — 143개 단지 데이터 (구/동/단지명/지번)
 // 강남3구 재건축 후보 단지 전체 (143개)
