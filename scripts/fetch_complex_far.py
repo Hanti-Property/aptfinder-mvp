@@ -15,6 +15,7 @@ import urllib.parse
 import os
 
 BLD_KEY = 'Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D'
+LAND_LAMBDA = 'https://3b77wfcneqfnywtzw3z333kw6a0gtrzt.lambda-url.ap-northeast-2.on.aws/'
 LAWD_MAP = {'강남구': '11680', '서초구': '11650', '송파구': '11710'}
 
 # 143개 단지 마스터 리스트 (RVI 대시보드와 동일)
@@ -176,12 +177,12 @@ def fetch_json(url, timeout=15):
 
 
 def get_far_for_complex(lawd_cd, bjdong_cd, jibun):
-    """단지의 용적률을 건축물대장에서 조회 (총괄표제부 → 표제부 fallback)"""
+    """단지의 용적률을 건축물대장에서 조회 (총괄표제부 → 표제부 → 역산 순)"""
     parts = jibun.split('-')
     bun = parts[0].zfill(4)
     ji = (parts[1] if len(parts) > 1 else '0').zfill(4)
     
-    result = {'far': 0, 'hhldCnt': 0, 'vlRatEstmTotArea': 0, 'totArea': 0, 'source': ''}
+    result = {'far': 0, 'hhldCnt': 0, 'vlRatEstmTotArea': 0, 'totArea': 0, 'platArea': 0, 'source': ''}
     
     # 1) 총괄표제부
     url = (f"https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo"
@@ -194,7 +195,6 @@ def get_far_for_complex(lawd_cd, bjdong_cd, jibun):
         if items:
             if not isinstance(items, list):
                 items = [items]
-            # 공동주택 + 세대수 최대 선택
             apts = [x for x in items if '공동주택' in (x.get('mainPurpsCdNm', '') or '')]
             pool = apts if apts else items
             pool.sort(key=lambda x: -int(x.get('hhldCnt', 0) or 0))
@@ -207,9 +207,10 @@ def get_far_for_complex(lawd_cd, bjdong_cd, jibun):
             result['hhldCnt'] = int(item.get('hhldCnt', 0) or 0)
             result['vlRatEstmTotArea'] = float(item.get('vlRatEstmTotArea', 0) or 0)
             result['totArea'] = float(item.get('totArea', 0) or 0)
+            result['platArea'] = float(item.get('platArea', 0) or 0)
     
-    # 2) 용적률 못 구했으면 표제부에서 시도
-    if result['far'] == 0:
+    # 2) 표제부에서 보완 (용적률 또는 totArea)
+    if result['far'] == 0 or result['totArea'] == 0:
         url2 = (f"https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo"
                 f"?serviceKey={BLD_KEY}&sigunguCd={lawd_cd}&bjdongCd={bjdong_cd}"
                 f"&bun={bun}&ji={ji}&numOfRows=100&pageNo=1&_type=json")
@@ -220,30 +221,63 @@ def get_far_for_complex(lawd_cd, bjdong_cd, jibun):
             if items2:
                 if not isinstance(items2, list):
                     items2 = [items2]
-                # 주거시설 필터
                 residential = [t for t in items2 if '공동주택' in 
                               ((t.get('mainPurpsCdNm', '') or '') + (t.get('etcPurps', '') or ''))]
                 targets = residential if residential else items2
                 
-                # 세대수 합산
                 if result['hhldCnt'] == 0:
                     result['hhldCnt'] = sum(int(t.get('hhldCnt', 0) or 0) for t in targets)
                 
-                # 용적률: 첫 유효값
-                for t in targets:
-                    vr = float(t.get('vlRat', 0) or 0)
-                    if 50 < vr < 500:
-                        result['far'] = round(vr, 1)
-                        result['source'] = '표제부'
-                        break
+                # 용적률 직접값
+                if result['far'] == 0:
+                    for t in targets:
+                        vr = float(t.get('vlRat', 0) or 0)
+                        if 50 < vr < 500:
+                            result['far'] = round(vr, 1)
+                            result['source'] = '표제부'
+                            break
+                
+                # totArea 합산 (역산용)
+                if result['totArea'] == 0:
+                    result['totArea'] = sum(float(t.get('totArea', 0) or 0) for t in targets)
                 
                 # vlRatEstmTotArea 합산
                 if result['vlRatEstmTotArea'] == 0:
                     result['vlRatEstmTotArea'] = sum(float(t.get('vlRatEstmTotArea', 0) or 0) for t in targets)
                 
-                # totArea 합산
-                if result['totArea'] == 0:
-                    result['totArea'] = sum(float(t.get('totArea', 0) or 0) for t in targets)
+                # platArea (표제부에서)
+                if result['platArea'] == 0:
+                    for t in targets:
+                        pa = float(t.get('platArea', 0) or 0)
+                        if pa > 0:
+                            result['platArea'] = pa
+                            break
+    
+    # 3) V-World 토지특성으로 대지면적 확보 (역산용)
+    if result['platArea'] == 0:
+        pnu = lawd_cd + bjdong_cd + '1' + bun + ji
+        land_url = f"{LAND_LAMBDA}?pnu={pnu}"
+        land_data = fetch_json(land_url)
+        if land_data:
+            fields = land_data.get('landCharacteristicss', {}).get('field', [])
+            if fields:
+                fields.sort(key=lambda x: -int(x.get('stdrYear', 0) or 0))
+                result['platArea'] = float(fields[0].get('lndpclAr', 0) or 0)
+    
+    # 4) 용적률 역산: 설계서 기준 (연면적 ÷ 토지면적 × 100)
+    if result['far'] == 0 and result['platArea'] > 0:
+        # vlRatEstmTotArea(용적률산정연면적)가 있으면 우선 사용 (지하 미포함)
+        if result['vlRatEstmTotArea'] > 0:
+            calc = result['vlRatEstmTotArea'] / result['platArea'] * 100
+            if 50 < calc < 500:
+                result['far'] = round(calc, 1)
+                result['source'] = '역산(vlRatEstm/대지)'
+        # 없으면 totArea(연면적) 사용 — 보정 없이 그대로 (설계서 기준)
+        elif result['totArea'] > 0:
+            calc = result['totArea'] / result['platArea'] * 100
+            if 50 < calc < 500:
+                result['far'] = round(calc, 1)
+                result['source'] = '역산(totArea/대지)'
     
     return result
 

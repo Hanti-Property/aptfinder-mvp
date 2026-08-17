@@ -7,11 +7,11 @@
     "h": 4424,
     "bjdong": "10600",
     "lawd": "11680",
-    "far": 0,
+    "far": 204.2,
     "hhldCnt": 4424,
     "vlRatEstmTotArea": 488472.85,
     "totArea": 528772.0,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -52,11 +52,11 @@
     "h": 2560,
     "bjdong": "11500",
     "lawd": "11680",
-    "far": 0,
+    "far": 192.6,
     "hhldCnt": 2560,
     "vlRatEstmTotArea": 104597.1,
     "totArea": 114619.57,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -67,11 +67,11 @@
     "h": 2435,
     "bjdong": "10600",
     "lawd": "11680",
-    "far": 0,
+    "far": 177.5,
     "hhldCnt": 2435,
     "vlRatEstmTotArea": 346355.29,
     "totArea": 372573.64,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -82,11 +82,11 @@
     "h": 1960,
     "bjdong": "10300",
     "lawd": "11680",
-    "far": 0,
+    "far": 146.1,
     "hhldCnt": 1960,
     "vlRatEstmTotArea": 166471.99,
     "totArea": 184280.09,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -127,11 +127,11 @@
     "h": 1340,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 369.2,
     "hhldCnt": 1340,
     "vlRatEstmTotArea": 233793.25,
     "totArea": 252503.42,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -157,11 +157,11 @@
     "h": 1033,
     "bjdong": "10600",
     "lawd": "11680",
-    "far": 0,
+    "far": 179.3,
     "hhldCnt": 1033,
     "vlRatEstmTotArea": 141025.0,
     "totArea": 152146.6,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -172,11 +172,11 @@
     "h": 960,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 224.8,
     "hhldCnt": 960,
     "vlRatEstmTotArea": 163345.72,
     "totArea": 177290.37,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -187,11 +187,11 @@
     "h": 940,
     "bjdong": "10300",
     "lawd": "11680",
-    "far": 0,
+    "far": 151.0,
     "hhldCnt": 940,
     "vlRatEstmTotArea": 84368.32,
     "totArea": 93810.76,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -202,11 +202,11 @@
     "h": 936,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 211.2,
     "hhldCnt": 936,
     "vlRatEstmTotArea": 80949.21,
     "totArea": 88234.75,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -247,11 +247,11 @@
     "h": 802,
     "bjdong": "11400",
     "lawd": "11680",
-    "far": 0,
+    "far": 157.7,
     "hhldCnt": 802,
     "vlRatEstmTotArea": 74892.135,
     "totArea": 82165.705,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -262,11 +262,11 @@
     "h": 765,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 180.0,
     "hhldCnt": 765,
     "vlRatEstmTotArea": 109097.68,
     "totArea": 117068.12,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -307,11 +307,11 @@
     "h": 675,
     "bjdong": "10300",
     "lawd": "11680",
-    "far": 0,
+    "far": 175.7,
     "hhldCnt": 675,
     "vlRatEstmTotArea": 96706.63,
     "totArea": 104962.27,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -352,11 +352,11 @@
     "h": 630,
     "bjdong": "10600",
     "lawd": "11680",
-    "far": 0,
+    "far": 169.9,
     "hhldCnt": 630,
     "vlRatEstmTotArea": 80273.35,
     "totArea": 92303.75,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -382,11 +382,11 @@
     "h": 600,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 174.4,
     "hhldCnt": 600,
     "vlRatEstmTotArea": 75221.31,
     "totArea": 81881.62,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -412,11 +412,11 @@
     "h": 559,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 176.2,
     "hhldCnt": 559,
     "vlRatEstmTotArea": 92603.68,
     "totArea": 102031.99,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -427,11 +427,11 @@
     "h": 557,
     "bjdong": "10300",
     "lawd": "11680",
-    "far": 0,
+    "far": 156.8,
     "hhldCnt": 557,
     "vlRatEstmTotArea": 82123.83,
     "totArea": 91344.79,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -442,11 +442,11 @@
     "h": 548,
     "bjdong": "10800",
     "lawd": "11680",
-    "far": 0,
+    "far": 174.5,
     "hhldCnt": 548,
     "vlRatEstmTotArea": 62006.74,
     "totArea": 67189.42,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -457,11 +457,11 @@
     "h": 516,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 298.5,
     "hhldCnt": 516,
     "vlRatEstmTotArea": 65963.48,
     "totArea": 72351.1,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -502,11 +502,11 @@
     "h": 476,
     "bjdong": "10600",
     "lawd": "11680",
-    "far": 0,
+    "far": 179.9,
     "hhldCnt": 476,
     "vlRatEstmTotArea": 53749.44,
     "totArea": 57986.2,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -517,11 +517,11 @@
     "h": 450,
     "bjdong": "10600",
     "lawd": "11680",
-    "far": 0,
+    "far": 158.6,
     "hhldCnt": 450,
     "vlRatEstmTotArea": 58606.8,
     "totArea": 72027.55,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -547,11 +547,11 @@
     "h": 416,
     "bjdong": "10300",
     "lawd": "11680",
-    "far": 0,
+    "far": 179.4,
     "hhldCnt": 416,
     "vlRatEstmTotArea": 64010.27,
     "totArea": 69347.6,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -562,11 +562,11 @@
     "h": 405,
     "bjdong": "10300",
     "lawd": "11680",
-    "far": 0,
+    "far": 178.8,
     "hhldCnt": 405,
     "vlRatEstmTotArea": 57395.16,
     "totArea": 61999.08,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -577,11 +577,11 @@
     "h": 388,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 194.2,
     "hhldCnt": 388,
     "vlRatEstmTotArea": 37653.96,
     "totArea": 39056.71,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -592,11 +592,11 @@
     "h": 375,
     "bjdong": "10400",
     "lawd": "11680",
-    "far": 0,
+    "far": 383.4,
     "hhldCnt": 375,
     "vlRatEstmTotArea": 50763.19,
     "totArea": 54206.9,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -622,11 +622,11 @@
     "h": 364,
     "bjdong": "11400",
     "lawd": "11680",
-    "far": 0,
+    "far": 179.6,
     "hhldCnt": 364,
     "vlRatEstmTotArea": 37487.94,
     "totArea": 42259.1,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -637,11 +637,11 @@
     "h": 343,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 192.1,
     "hhldCnt": 343,
     "vlRatEstmTotArea": 40661.67,
     "totArea": 43799.3,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -667,11 +667,11 @@
     "h": 322,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 183.6,
     "hhldCnt": 322,
     "vlRatEstmTotArea": 45723.3,
     "totArea": 48677.9,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -682,11 +682,11 @@
     "h": 312,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 198.0,
     "hhldCnt": 312,
     "vlRatEstmTotArea": 41735.98,
     "totArea": 44827.95,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -697,11 +697,11 @@
     "h": 296,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 143.4,
     "hhldCnt": 296,
     "vlRatEstmTotArea": 38501.57,
     "totArea": 52388.79,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -727,11 +727,11 @@
     "h": 286,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 187.2,
     "hhldCnt": 286,
     "vlRatEstmTotArea": 40451.97,
     "totArea": 43329.54,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -742,11 +742,11 @@
     "h": 270,
     "bjdong": "10300",
     "lawd": "11680",
-    "far": 0,
+    "far": 106.8,
     "hhldCnt": 270,
     "vlRatEstmTotArea": 22136.79,
     "totArea": 22305.93,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -757,11 +757,11 @@
     "h": 261,
     "bjdong": "10300",
     "lawd": "11680",
-    "far": 0,
+    "far": 192.7,
     "hhldCnt": 261,
     "vlRatEstmTotArea": 24024.99,
     "totArea": 26710.28,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -802,11 +802,11 @@
     "h": 239,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 320.2,
     "hhldCnt": 239,
     "vlRatEstmTotArea": 27756.11,
     "totArea": 29985.87,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -832,11 +832,11 @@
     "h": 228,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 316.5,
     "hhldCnt": 228,
     "vlRatEstmTotArea": 27748.55,
     "totArea": 29975.27,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -847,11 +847,11 @@
     "h": 224,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 170.7,
     "hhldCnt": 224,
     "vlRatEstmTotArea": 27371.97,
     "totArea": 31133.99,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -862,11 +862,11 @@
     "h": 214,
     "bjdong": "10400",
     "lawd": "11680",
-    "far": 0,
+    "far": 200.4,
     "hhldCnt": 214,
     "vlRatEstmTotArea": 21494.42,
     "totArea": 21602.42,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -877,11 +877,11 @@
     "h": 198,
     "bjdong": "10300",
     "lawd": "11680",
-    "far": 0,
+    "far": 147.6,
     "hhldCnt": 198,
     "vlRatEstmTotArea": 29461.44,
     "totArea": 32857.3,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -892,11 +892,11 @@
     "h": 170,
     "bjdong": "11000",
     "lawd": "11680",
-    "far": 0,
+    "far": 125.0,
     "hhldCnt": 170,
     "vlRatEstmTotArea": 23118.39,
     "totArea": 23886.39,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -907,11 +907,11 @@
     "h": 167,
     "bjdong": "10500",
     "lawd": "11680",
-    "far": 0,
+    "far": 239.9,
     "hhldCnt": 167,
     "vlRatEstmTotArea": 16662.03,
     "totArea": 18168.44,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -937,11 +937,11 @@
     "h": 120,
     "bjdong": "10600",
     "lawd": "11680",
-    "far": 0,
+    "far": 321.7,
     "hhldCnt": 120,
     "vlRatEstmTotArea": 0.0,
     "totArea": 13075.69,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -997,11 +997,11 @@
     "h": 1212,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 176.5,
     "hhldCnt": 1212,
     "vlRatEstmTotArea": 150677.36,
     "totArea": 166886.99,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1042,11 +1042,11 @@
     "h": 540,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 238.0,
     "hhldCnt": 540,
     "vlRatEstmTotArea": 53020.06,
     "totArea": 54107.08,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1057,11 +1057,11 @@
     "h": 481,
     "bjdong": "10100",
     "lawd": "11650",
-    "far": 0,
+    "far": 180.7,
     "hhldCnt": 481,
     "vlRatEstmTotArea": 78566.27,
     "totArea": 87774.24,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1072,11 +1072,11 @@
     "h": 468,
     "bjdong": "10100",
     "lawd": "11650",
-    "far": 0,
+    "far": 442.4,
     "hhldCnt": 468,
     "vlRatEstmTotArea": 52204.613,
     "totArea": 57557.789,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1117,11 +1117,11 @@
     "h": 418,
     "bjdong": "10100",
     "lawd": "11650",
-    "far": 0,
+    "far": 184.9,
     "hhldCnt": 418,
     "vlRatEstmTotArea": 58253.31,
     "totArea": 64805.44,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1147,11 +1147,11 @@
     "h": 396,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 349.3,
     "hhldCnt": 396,
     "vlRatEstmTotArea": 23453.52,
     "totArea": 25812.48,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1162,11 +1162,11 @@
     "h": 360,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 243.2,
     "hhldCnt": 360,
     "vlRatEstmTotArea": 32472.3,
     "totArea": 34673.75,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1207,11 +1207,11 @@
     "h": 324,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 132.9,
     "hhldCnt": 324,
     "vlRatEstmTotArea": 23532.06,
     "totArea": 25277.52,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1222,11 +1222,11 @@
     "h": 320,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 145.1,
     "hhldCnt": 320,
     "vlRatEstmTotArea": 50722.96,
     "totArea": 58870.99,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1252,11 +1252,11 @@
     "h": 288,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 288.8,
     "hhldCnt": 288,
     "vlRatEstmTotArea": 29267.16,
     "totArea": 33445.42,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1297,11 +1297,11 @@
     "h": 242,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 179.1,
     "hhldCnt": 242,
     "vlRatEstmTotArea": 23973.72,
     "totArea": 28940.63,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1342,11 +1342,11 @@
     "h": 208,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 426.1,
     "hhldCnt": 208,
     "vlRatEstmTotArea": 19367.67,
     "totArea": 23728.39,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1357,11 +1357,11 @@
     "h": 169,
     "bjdong": "10600",
     "lawd": "11650",
-    "far": 0,
+    "far": 176.4,
     "hhldCnt": 169,
     "vlRatEstmTotArea": 18752.11,
     "totArea": 23020.46,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1372,11 +1372,11 @@
     "h": 158,
     "bjdong": "10100",
     "lawd": "11650",
-    "far": 0,
+    "far": 232.3,
     "hhldCnt": 158,
     "vlRatEstmTotArea": 12181.2,
     "totArea": 14843.32,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1387,11 +1387,11 @@
     "h": 158,
     "bjdong": "10100",
     "lawd": "11650",
-    "far": 0,
+    "far": 227.5,
     "hhldCnt": 158,
     "vlRatEstmTotArea": 14646.4,
     "totArea": 17856.81,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1402,11 +1402,11 @@
     "h": 144,
     "bjdong": "10100",
     "lawd": "11650",
-    "far": 0,
+    "far": 297.5,
     "hhldCnt": 144,
     "vlRatEstmTotArea": 19094.39,
     "totArea": 20383.26,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1417,11 +1417,11 @@
     "h": 120,
     "bjdong": "10100",
     "lawd": "11650",
-    "far": 0,
+    "far": 251.3,
     "hhldCnt": 120,
     "vlRatEstmTotArea": 17742.67,
     "totArea": 19116.35,
-    "farSource": "",
+    "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction"
   },
   {
@@ -1447,11 +1447,11 @@
     "h": 4524,
     "bjdong": "10800",
     "lawd": "11710",
-    "far": 0,
+    "far": 273.3,
     "hhldCnt": 4524,
     "vlRatEstmTotArea": 0.0,
     "totArea": 650085.9214,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1462,11 +1462,11 @@
     "h": 3930,
     "bjdong": "10100",
     "lawd": "11710",
-    "far": 0,
+    "far": 152.2,
     "hhldCnt": 3930,
     "vlRatEstmTotArea": 0.0,
     "totArea": 451776.28,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1492,11 +1492,11 @@
     "h": 1422,
     "bjdong": "10200",
     "lawd": "11710",
-    "far": 0,
+    "far": 200.8,
     "hhldCnt": 1422,
     "vlRatEstmTotArea": 0.0,
     "totArea": 169118.9795,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1507,11 +1507,11 @@
     "h": 1356,
     "bjdong": "10100",
     "lawd": "11710",
-    "far": 0,
+    "far": 191.4,
     "hhldCnt": 1356,
     "vlRatEstmTotArea": 0.0,
     "totArea": 227115.961,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1522,11 +1522,11 @@
     "h": 1316,
     "bjdong": "10800",
     "lawd": "11710",
-    "far": 0,
+    "far": 443.0,
     "hhldCnt": 1316,
     "vlRatEstmTotArea": 0.0,
     "totArea": 93833.393,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1567,11 +1567,11 @@
     "h": 936,
     "bjdong": "10400",
     "lawd": "11710",
-    "far": 0,
+    "far": 200.7,
     "hhldCnt": 936,
     "vlRatEstmTotArea": 0.0,
     "totArea": 124524.318,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1582,11 +1582,11 @@
     "h": 935,
     "bjdong": "10700",
     "lawd": "11710",
-    "far": 0,
+    "far": 230.9,
     "hhldCnt": 935,
     "vlRatEstmTotArea": 0.0,
     "totArea": 80924.646,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1627,11 +1627,11 @@
     "h": 750,
     "bjdong": "11200",
     "lawd": "11710",
-    "far": 0,
+    "far": 272.6,
     "hhldCnt": 750,
     "vlRatEstmTotArea": 0.0,
     "totArea": 66979.77,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1642,11 +1642,11 @@
     "h": 744,
     "bjdong": "10400",
     "lawd": "11710",
-    "far": 0,
+    "far": 217.0,
     "hhldCnt": 744,
     "vlRatEstmTotArea": 0.0,
     "totArea": 87965.857,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1672,11 +1672,11 @@
     "h": 727,
     "bjdong": "10700",
     "lawd": "11710",
-    "far": 0,
+    "far": 230.2,
     "hhldCnt": 727,
     "vlRatEstmTotArea": 0.0,
     "totArea": 110066.316,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1687,11 +1687,11 @@
     "h": 648,
     "bjdong": "10700",
     "lawd": "11710",
-    "far": 0,
+    "far": 207.0,
     "hhldCnt": 648,
     "vlRatEstmTotArea": 0.0,
     "totArea": 84351.413,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1702,11 +1702,11 @@
     "h": 606,
     "bjdong": "10100",
     "lawd": "11710",
-    "far": 0,
+    "far": 204.3,
     "hhldCnt": 606,
     "vlRatEstmTotArea": 0.0,
     "totArea": 64624.82,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1732,11 +1732,11 @@
     "h": 555,
     "bjdong": "10700",
     "lawd": "11710",
-    "far": 0,
+    "far": 222.1,
     "hhldCnt": 555,
     "vlRatEstmTotArea": 0.0,
     "totArea": 89097.79,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1762,11 +1762,11 @@
     "h": 514,
     "bjdong": "10800",
     "lawd": "11710",
-    "far": 0,
+    "far": 205.4,
     "hhldCnt": 514,
     "vlRatEstmTotArea": 0.0,
     "totArea": 69744.2512,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1777,11 +1777,11 @@
     "h": 497,
     "bjdong": "11100",
     "lawd": "11710",
-    "far": 0,
+    "far": 192.7,
     "hhldCnt": 497,
     "vlRatEstmTotArea": 0.0,
     "totArea": 67912.225,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1822,11 +1822,11 @@
     "h": 435,
     "bjdong": "10700",
     "lawd": "11710",
-    "far": 0,
+    "far": 211.7,
     "hhldCnt": 435,
     "vlRatEstmTotArea": 0.0,
     "totArea": 42976.642,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1852,11 +1852,11 @@
     "h": 378,
     "bjdong": "10400",
     "lawd": "11710",
-    "far": 0,
+    "far": 199.9,
     "hhldCnt": 378,
     "vlRatEstmTotArea": 0.0,
     "totArea": 57862.195,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1867,11 +1867,11 @@
     "h": 338,
     "bjdong": "10100",
     "lawd": "11710",
-    "far": 0,
+    "far": 257.6,
     "hhldCnt": 338,
     "vlRatEstmTotArea": 0.0,
     "totArea": 34104.26,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1882,11 +1882,11 @@
     "h": 330,
     "bjdong": "10100",
     "lawd": "11710",
-    "far": 0,
+    "far": 191.6,
     "hhldCnt": 330,
     "vlRatEstmTotArea": 0.0,
     "totArea": 38947.56,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1912,11 +1912,11 @@
     "h": 307,
     "bjdong": "10300",
     "lawd": "11710",
-    "far": 0,
+    "far": 285.7,
     "hhldCnt": 307,
     "vlRatEstmTotArea": 0.0,
     "totArea": 31672.577,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1927,11 +1927,11 @@
     "h": 293,
     "bjdong": "11200",
     "lawd": "11710",
-    "far": 0,
+    "far": 212.2,
     "hhldCnt": 293,
     "vlRatEstmTotArea": 0.0,
     "totArea": 35430.58,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1942,11 +1942,11 @@
     "h": 275,
     "bjdong": "10300",
     "lawd": "11710",
-    "far": 0,
+    "far": 202.4,
     "hhldCnt": 275,
     "vlRatEstmTotArea": 0.0,
     "totArea": 39484.01,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1957,11 +1957,11 @@
     "h": 273,
     "bjdong": "11100",
     "lawd": "11710",
-    "far": 0,
+    "far": 152.7,
     "hhldCnt": 273,
     "vlRatEstmTotArea": 0.0,
     "totArea": 30654.741,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1972,11 +1972,11 @@
     "h": 269,
     "bjdong": "11200",
     "lawd": "11710",
-    "far": 0,
+    "far": 238.9,
     "hhldCnt": 269,
     "vlRatEstmTotArea": 0.0,
     "totArea": 34292.5,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -1987,11 +1987,11 @@
     "h": 256,
     "bjdong": "10700",
     "lawd": "11710",
-    "far": 0,
+    "far": 357.4,
     "hhldCnt": 256,
     "vlRatEstmTotArea": 0.0,
     "totArea": 33552.33,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -2002,11 +2002,11 @@
     "h": 237,
     "bjdong": "11200",
     "lawd": "11710",
-    "far": 0,
+    "far": 227.0,
     "hhldCnt": 237,
     "vlRatEstmTotArea": 0.0,
     "totArea": 22062.98,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -2032,11 +2032,11 @@
     "h": 226,
     "bjdong": "11200",
     "lawd": "11710",
-    "far": 0,
+    "far": 259.2,
     "hhldCnt": 226,
     "vlRatEstmTotArea": 0.0,
     "totArea": 26349.07,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -2047,11 +2047,11 @@
     "h": 160,
     "bjdong": "10700",
     "lawd": "11710",
-    "far": 0,
+    "far": 234.3,
     "hhldCnt": 160,
     "vlRatEstmTotArea": 0.0,
     "totArea": 17689.84,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -2092,11 +2092,11 @@
     "h": 120,
     "bjdong": "10600",
     "lawd": "11710",
-    "far": 0,
+    "far": 254.5,
     "hhldCnt": 120,
     "vlRatEstmTotArea": 0.0,
     "totArea": 12947.36,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   },
   {
@@ -2137,11 +2137,11 @@
     "h": 104,
     "bjdong": "10300",
     "lawd": "11710",
-    "far": 0,
+    "far": 244.2,
     "hhldCnt": 104,
     "vlRatEstmTotArea": 0.0,
     "totArea": 12610.47,
-    "farSource": "",
+    "farSource": "역산(totArea/대지)",
     "type": "reconstruction"
   }
 ]
