@@ -197,8 +197,8 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
   <div class="section-title">🏆 강남구 RRI 랭킹 (43개 단지)</div>
   <div style="overflow-x:auto;margin-bottom:16px;">
     <table class="trade-table" id="rriRankTable">
-      <thead><tr><th>#</th><th>단지명</th><th>용적률</th><th>현재가</th><th>RRI</th><th>CAGR</th></tr></thead>
-      <tbody id="rriRankBody"><tr><td colspan="6" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
+      <thead><tr><th>#</th><th>단지명</th><th>RVI</th><th>용적률</th><th>현재가</th><th>RRI</th><th>CAGR</th></tr></thead>
+      <tbody id="rriRankBody"><tr><td colspan="7" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
     </table>
   </div>
 
@@ -669,7 +669,7 @@ function updateRRI(){
   document.getElementById('rri-cagr').textContent=`연환산 CAGR ${(cagr>=0?'+':'')+cagr.toFixed(2)}%/년 | 순수익 ${fmtP(futureValue-totalInvest)}`;
 }
 
-// === RRI 랭킹 테이블 로드 (complexes_master.json) ===
+// === RVI 랭킹 테이블 로드 (complexes_master.json) ===
 let _rriRankLoaded=false;
 function loadRRIRanking(){
   if(_rriRankLoaded)return;
@@ -677,6 +677,13 @@ function loadRRIRanking(){
     const gangnam=data.filter(d=>d.gu==='강남구'&&d.far>0&&d.avgPPP>0);
     const NVP_PPP=18480,RATE=0.02,YEARS=10;
     const futurePPP=NVP_PPP*Math.pow(1+RATE,YEARS);
+    // LOC 등급
+    const LOC_G={'압구정동':100,'대치동':100,'청담동':100,'개포동':80,'도곡동':80,'삼성동':80,'논현동':60,'일원동':60};
+    // 점수화 함수 (loadRVI와 동일)
+    function sNVP(r){return r>=40?100:r>=30?85:r>=20?70:r>=10?50:r>0?30:0;}
+    function sFAR(v){if(v===0)return 0;return v<=170?100:v<=200?75:v<=220?50:v<=250?25:0;}
+    function sTLA(v){return v>=50000?100:v>=30000?75:v>=10000?50:25;}
+    function sAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
     const results=[];
     gangnam.forEach(d=>{
       const area=d.latestArea||76;
@@ -690,15 +697,30 @@ function loadRRIRanking(){
       const futureValue=futurePPP*excluPy;
       const rri=(futureValue-totalInvest)/totalInvest*100;
       const cagr=(Math.pow(futureValue/totalInvest,1/YEARS)-1)*100;
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area:area});
+      // RVI 점수 산출
+      const nvpRate=d.avgPPP>0?((NVP_PPP-d.avgPPP)/d.avgPPP*100):0;
+      const platArea=d.platArea||d.vlRatEstmTotArea/(d.far/100)||0;
+      const hhld=d.hhldCnt||d.h||0;
+      const lps=hhld>0&&platArea>0?(platArea/hhld)/3.3058:0;
+      const age=d.totArea?47:47; // 대부분 40년+
+      const locScore=LOC_G[d.dong]||50;
+      const tlaScore=sTLA(platArea);
+      const nvpScore=sNVP(nvpRate);
+      const farScore=sFAR(d.far);
+      const ageScore=sAGE(47);
+      const lpsScore=lps>=18?100:lps>=12?75:lps>=8?50:25;
+      const nrtScore=50; // 배치에서는 기본값
+      const rvi=Math.round(tlaScore*0.50+locScore*0.15+nvpScore*0.10+farScore*0.10+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi});
     });
-    results.sort((a,b)=>b.rri-a.rri);
+    results.sort((a,b)=>b.rvi-a.rvi);
     const tbody=document.getElementById('rriRankBody');
     tbody.innerHTML='';
     results.forEach((r,i)=>{
       const cur=r.currentPrice>=10000?(r.currentPrice/10000).toFixed(1)+'억':Math.round(r.currentPrice).toLocaleString()+'만';
+      const rviColor=r.rvi>=80?'#66BB6A':r.rvi>=60?'#42A5F5':r.rvi>=40?'#FFA726':'#EF5350';
       const rriColor=r.rri>=50?'#66BB6A':r.rri>=20?'#42A5F5':r.rri>=0?'#FFA726':'#EF5350';
-      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${r.name}<br><span style="color:#999;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
+      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${r.name}<br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
     });
     _rriRankLoaded=true;
   }).catch(()=>{});
