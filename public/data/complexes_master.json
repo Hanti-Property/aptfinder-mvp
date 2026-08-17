@@ -31,21 +31,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "일원동",
-    "name": "수서1단지아파트",
-    "jibun": "711",
-    "h": 2934,
-    "bjdong": "11400",
-    "lawd": "11680",
-    "far": 189.6,
-    "hhldCnt": 2934,
-    "vlRatEstmTotArea": 150889.89,
-    "totArea": 157121.09,
-    "farSource": "총괄표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "대치동",
     "name": "미도맨션아파트",
     "jibun": "511",
@@ -151,21 +136,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "일원동",
-    "name": "푸른마을아파트",
-    "jibun": "719",
-    "h": 930,
-    "bjdong": "11400",
-    "lawd": "11680",
-    "far": 248.3,
-    "hhldCnt": 930,
-    "vlRatEstmTotArea": 82456.01,
-    "totArea": 88164.487,
-    "farSource": "총괄표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "압구정동",
     "name": "미성아파트",
     "jibun": "397",
@@ -211,21 +181,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "일원동",
-    "name": "상록수아파트",
-    "jibun": "734",
-    "h": 740,
-    "bjdong": "11400",
-    "lawd": "11680",
-    "far": 109.2,
-    "hhldCnt": 740,
-    "vlRatEstmTotArea": 67163.36,
-    "totArea": 81914.07,
-    "farSource": "총괄표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "대치동",
     "name": "개포1차우성아파트",
     "jibun": "503",
@@ -256,21 +211,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "일원동",
-    "name": "목련타운",
-    "jibun": "716",
-    "h": 650,
-    "bjdong": "11400",
-    "lawd": "11680",
-    "far": 248.2,
-    "hhldCnt": 650,
-    "vlRatEstmTotArea": 86365.65,
-    "totArea": 92505.72,
-    "farSource": "총괄표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "대치동",
     "name": "쌍용대치아파트",
     "jibun": "66",
@@ -286,21 +226,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "일원동",
-    "name": "샘터마을아파트",
-    "jibun": "718",
-    "h": 628,
-    "bjdong": "11400",
-    "lawd": "11680",
-    "far": 247.3,
-    "hhldCnt": 628,
-    "vlRatEstmTotArea": 82111.44,
-    "totArea": 88550.254,
-    "farSource": "총괄표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "압구정동",
     "name": "현대아파트",
     "jibun": "426",
@@ -312,21 +237,6 @@
     "vlRatEstmTotArea": 75221.31,
     "totArea": 81881.62,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "일원동",
-    "name": "한솔마을",
-    "jibun": "731",
-    "h": 570,
-    "bjdong": "11400",
-    "lawd": "11680",
-    "far": 108.0,
-    "hhldCnt": 570,
-    "vlRatEstmTotArea": 50776.404,
-    "totArea": 62080.178,
-    "farSource": "총괄표제부",
     "type": "reconstruction"
   },
   {
@@ -387,21 +297,6 @@
     "vlRatEstmTotArea": 65963.48,
     "totArea": 72351.1,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "일원동",
-    "name": "가람아파트",
-    "jibun": "735",
-    "h": 496,
-    "bjdong": "11400",
-    "lawd": "11680",
-    "far": 109.2,
-    "hhldCnt": 496,
-    "vlRatEstmTotArea": 44847.2,
-    "totArea": 54358.97,
-    "farSource": "총괄표제부",
     "type": "reconstruction"
   },
   {
@@ -597,21 +492,6 @@
     "vlRatEstmTotArea": 38501.57,
     "totArea": 52388.79,
     "farSource": "역산(vlRatEstm/대지)",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
-    "dong": "일원동",
-    "name": "청솔빌리지",
-    "jibun": "739",
-    "h": 291,
-    "bjdong": "11400",
-    "lawd": "11680",
-    "far": 89.5,
-    "hhldCnt": 291,
-    "vlRatEstmTotArea": 22402.68,
-    "totArea": 29001.72,
-    "farSource": "총괄표제부",
     "type": "reconstruction"
   },
   {
