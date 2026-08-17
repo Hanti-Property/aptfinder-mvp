@@ -391,21 +391,6 @@
   },
   {
     "gu": "강남구",
-    "dong": "논현동",
-    "name": "쌍용아파트",
-    "jibun": "103",
-    "h": 111,
-    "bjdong": "10800",
-    "lawd": "11680",
-    "far": 331.9,
-    "hhldCnt": 111,
-    "vlRatEstmTotArea": 10694.39,
-    "totArea": 14502.78,
-    "farSource": "총괄표제부",
-    "type": "reconstruction"
-  },
-  {
-    "gu": "강남구",
     "dong": "청담동",
     "name": "청담동 130번지",
     "jibun": "130",
