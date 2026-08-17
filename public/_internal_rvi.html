@@ -198,7 +198,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 
   <!-- 최근 거래내역 -->
   <div class="section-title">📋 최근 거래 내역</div>
-  <table class="trade-table"><thead><tr><th>거래일</th><th>면적</th><th>층</th><th>가격</th><th>평당가</th></tr></thead>
+  <table class="trade-table"><thead><tr><th>거래일</th><th>전용면적</th><th>층</th><th>가격</th><th>전용평당가</th></tr></thead>
   <tbody id="tradeBody"><tr><td colspan="5" style="text-align:center;color:#666">단지를 선택하세요</td></tr></tbody></table>
 
   <div class="disclaimer">
@@ -580,7 +580,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   const tbody=document.getElementById('tradeBody');tbody.innerHTML='';
   myTrades.slice(0,8).forEach(t=>{
     const amt=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0),ppp=ar>0?amt/(ar/3.3058):0;
-    tbody.innerHTML+=`<tr><td>${t.dealYear}.${t.dealMonth}.${(t.dealDay||'').trim()}</td><td>${ar}㎡</td><td>${t.floor||''}층</td><td class="price">${amt>=10000?(amt/10000).toFixed(1)+'억':amt.toLocaleString()+'만'}</td><td>${Math.round(ppp).toLocaleString()}만/평</td></tr>`;
+    tbody.innerHTML+=`<tr><td>${t.dealYear}.${t.dealMonth}.${(t.dealDay||'').trim()}</td><td>전용 ${ar}㎡</td><td>${t.floor||''}층</td><td class="price">${amt>=10000?(amt/10000).toFixed(1)+'억':amt.toLocaleString()+'만'}</td><td>${Math.round(ppp).toLocaleString()}만/평</td></tr>`;
   });
   if(!myTrades.length)tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">최근 6개월 거래 없음</td></tr>';
 
@@ -594,7 +594,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     avgArea: latestTrade ? parseFloat(latestTrade.excluUseAr || 0) : 0,
     currentPrice: latestTrade ? parseInt((latestTrade.dealAmount || '0').replace(/,/g, '')) : 0,
     far: far,
-    tradeInfo: latestTrade ? `${latestTrade.dealYear}.${String(latestTrade.dealMonth).padStart(2,'0')} | ${latestTrade.excluUseAr}㎡ | ${latestTrade.floor}층` : '',
+    tradeInfo: latestTrade ? `${latestTrade.dealYear}.${String(latestTrade.dealMonth).padStart(2,'0')} | 전용${latestTrade.excluUseAr}㎡ | ${latestTrade.floor}층` : '',
   };
   updateRRI();
 
