@@ -195,7 +195,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
       <span style="font-size:12px;color:#ccc;min-width:50px;" id="rriRateLabel">연 3%</span>
     </div>
     <div style="font-size:14px;color:#bbb;margin-top:10px;line-height:1.5;">
-      ※ 동일 평형 재건축 가정 | 사업기간 10년 | 분담금 = 용적률 비례 자동 산출 (150%↓ 0원 ~ 200%↑ 1,500만/전용평)
+      ※ 동일 평형 재건축 가정 | 사업기간 10년 | 분담금 = 실데이터 보간 (잠실5·개포6·7·은마 기준)
     </div>
     <div style="margin-top:12px;background:#12122b;border-radius:8px;padding:14px;">
       <div style="font-size:13px;color:#ccc;font-weight:600;margin-bottom:8px;">📐 RVI 평가지표 가중치</div>
@@ -266,6 +266,30 @@ const NEW_COMPLEXES=[
 // 한강벨트 법정동 — 이 지역 단지는 NVP 비교 시 벨트 내 전체 신축과 비교 (거리 제한 5km)
 const HAN_RIVER_BELT=['11000','10200','10300','10400','10100']; // 압구정동, 잠원동, 반포동, 청담동, 잠실동(송파구 bjdongCd)
 let LAWD_CD='11680',selectedBjdongCd='10600',selectedJibun='316';
+
+// === 분담금 보간 모델 (실데이터 기반) ===
+// 샘플 추가 시 이 배열에만 추가하면 자동으로 구간 세분화됨
+const COST_SAMPLES=[
+  {far:150, costPerPy:0},       // 기준점 (150% 이하 분담금 0)
+  {far:152, costPerPy:0},       // 잠실주공5단지
+  {far:175, costPerPy:394},     // 개포주공6·7단지
+  {far:204, costPerPy:1830},    // 은마아파트
+];
+function interpolateCost(far){
+  if(!far||far<=0) return 750; // 미확보 시 중간값
+  const samples=COST_SAMPLES.slice().sort((a,b)=>a.far-b.far);
+  // 범위 밖
+  if(far<=samples[0].far) return samples[0].costPerPy;
+  if(far>=samples[samples.length-1].far) return samples[samples.length-1].costPerPy;
+  // 구간 찾기
+  for(let i=0;i<samples.length-1;i++){
+    if(far>=samples[i].far&&far<=samples[i+1].far){
+      const ratio=(far-samples[i].far)/(samples[i+1].far-samples[i].far);
+      return Math.round(samples[i].costPerPy+ratio*(samples[i+1].costPerPy-samples[i].costPerPy));
+    }
+  }
+  return samples[samples.length-1].costPerPy;
+}
 
 // === 동적 코멘트 생성 ===
 function generateRVIComment(data){
@@ -744,13 +768,8 @@ function updateRRI(){
   const annualRate=parseInt(document.getElementById('rriSliderRate').value)/100;
   document.getElementById('rriRateLabel').textContent='연 '+(annualRate*100).toFixed(0)+'%';
 
-  // 분담금: 용적률 비례 자동 산출
-  // 150% 이하 → 0, 200% 이상 → 1500만/평, 중간 → 선형 보간
-  let costPerPy=0;
-  if(d.far>=200) costPerPy=1500;
-  else if(d.far>150) costPerPy=Math.round((d.far-150)/50*1500);
-  // far=0(미확보)이면 중간값 750 적용
-  if(!d.far||d.far===0) costPerPy=750;
+  // 분담금: 실데이터 보간 모델
+  let costPerPy=interpolateCost(d.far);
 
   // 전용면적 기준 (전용평)
   const excluPy=d.avgArea/3.3058;
@@ -829,9 +848,7 @@ function loadRRIRanking(){
       const area=d.latestArea||76;
       const excluPy=area/3.3058;
       const currentPrice=d.latestPrice||d.avgPPP*excluPy;
-      let costPerPy=0;
-      if(d.far>=200)costPerPy=1500;
-      else if(d.far>150)costPerPy=Math.round((d.far-150)/50*1500);
+      let costPerPy=interpolateCost(d.far);
       const addCost=excluPy*costPerPy;
       const totalInvest=currentPrice+addCost;
       const futureValue=futurePPP*excluPy;
