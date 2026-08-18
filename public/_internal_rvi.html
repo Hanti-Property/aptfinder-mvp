@@ -36,8 +36,10 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 
 /* 색상 클래스 */
 /* RVI 코멘트 박스 */
-.rvi-comment-box{background:#12122b;border:1px solid #2a2a4a;border-left:3px solid #42A5F5;border-radius:8px;padding:14px 18px;margin-bottom:16px;text-align:right}
-.rvi-comment-box .comment-text{font-size:13px;color:#ccc;line-height:1.7;white-space:pre-line}
+.rvi-summary-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.rvi-comment-box{background:#12122b;border:1px solid #2a2a4a;border-left:3px solid #42A5F5;border-radius:8px;padding:14px 18px;display:flex;align-items:center}
+.rvi-comment-box .comment-text{font-size:13px;color:#ccc;line-height:1.7}
+@media(max-width:768px){.rvi-summary-row{grid-template-columns:1fr}}
 
 .c-s{color:#42A5F5}.c-a{color:#66BB6A}.c-b{color:#FFA726}.c-c{color:#EF5350}.c-d{color:#9E9E9E}
 .bg-s{background:#0D47A1;border-color:#1565C0}
@@ -137,14 +139,14 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
     <div class="rvi-desc" id="rviDesc">산출 중...</div>
   </div>
 
-  <!-- RVI 코멘트 박스 (동적 생성) -->
-  <div class="rvi-comment-box" id="rviCommentBox" style="display:none;">
-    <div class="comment-text" id="rviCommentText"></div>
-  </div>
-
-  <!-- RVI 요약 카드 -->
-  <div id="rviSummary" style="background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;margin-bottom:16px;display:none;">
-    <div id="rviSummaryText" style="font-size:14px;color:#ccc;line-height:1.8;"></div>
+  <!-- RVI 요약 + 코멘트 (좌우 배치) -->
+  <div class="rvi-summary-row" id="rviSummaryRow" style="display:none;">
+    <div id="rviSummary" style="background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;">
+      <div id="rviSummaryText" style="font-size:14px;color:#ccc;line-height:1.8;"></div>
+    </div>
+    <div class="rvi-comment-box" id="rviCommentBox">
+      <div class="comment-text" id="rviCommentText"></div>
+    </div>
   </div>
 
   <!-- 7대 지표 -->
@@ -266,71 +268,50 @@ let LAWD_CD='11680',selectedBjdongCd='10600',selectedJibun='316';
 // === 동적 코멘트 생성 ===
 function generateRVIComment(data){
   // data: {name, dong, far, platArea, households, nvpRate, locScore, rviScore, lps, age, nvp, myAvgPPP}
+  // 정책: 정량 데이터에서 직접 도출되는 팩트만 사용. 근거 없는 추론(시공사 선호, 환급 가능성 등) 금지.
   const parts=[];
 
-  // 1) 용적률 판단 (핵심 변수)
+  // 1) 용적률 → 분담금 (RVI 공식에서 직접 산출)
   if(data.far>0){
-    if(data.far<=150) parts.push(`용적률 ${data.far.toFixed(0)}%로 분담금 제로`);
-    else if(data.far<=170) parts.push(`용적률 ${data.far.toFixed(0)}%로 추가비용 극소`);
-    else if(data.far<=200) parts.push(`용적률 ${data.far.toFixed(0)}%로 분담금 보통 수준`);
-    else parts.push(`용적률 ${data.far.toFixed(0)}%로 분담금 부담 있으나`);
-  }
-
-  // 2) 대지면적 + 규모 (TLA)
-  if(data.platArea>=200000){
-    parts.push(`대지 ${(data.platArea/10000).toFixed(1)}만㎡ 초대형 단지로 시공사 선호도 최상`);
-  } else if(data.platArea>=100000){
-    parts.push(`대지 ${(data.platArea/10000).toFixed(1)}만㎡ 대규모로 일반분양 확보 유리`);
-  } else if(data.platArea>=50000){
-    parts.push(`대지 ${(data.platArea/10000).toFixed(1)}만㎡ 중대형 규모`);
-  }
-
-  // 3) 입지 프리미엄 (LOC)
-  if(data.locScore>=100){
-    parts.push(`${data.dong} 1등급 프리미엄 입지로 사업성 최상위`);
-  } else if(data.locScore>=80){
-    parts.push(`${data.dong} 2등급 우수 입지`);
-  }
-
-  // 4) 상승여력 (NVP Rate) — 용적률 낮을 때와 결합
-  if(data.nvpRate>0){
-    if(data.far<=170&&data.nvpRate>=15){
-      parts.push(`낮은 용적률 + 상승여력 ${data.nvpRate>=0?'+':''}${data.nvpRate.toFixed(0)}%로 높은 수익성 기대`);
-    } else if(data.nvpRate>=30){
-      parts.push(`상승여력 +${data.nvpRate.toFixed(0)}%로 투자 매력 높음`);
-    } else if(data.nvpRate>=15){
-      parts.push(`상승여력 +${data.nvpRate.toFixed(0)}%로 수익성 기대`);
+    if(data.far<=150) parts.push(`용적률 ${data.far.toFixed(0)}%로 분담금 0원`);
+    else if(data.far<=170){
+      const cost=Math.round((data.far-150)/50*1500);
+      parts.push(`용적률 ${data.far.toFixed(0)}%로 분담금 ${cost.toLocaleString()}만/평 수준`);
+    }
+    else if(data.far<=200){
+      const cost=Math.round((data.far-150)/50*1500);
+      parts.push(`용적률 ${data.far.toFixed(0)}% → 분담금 약 ${cost.toLocaleString()}만/평`);
+    }
+    else{
+      parts.push(`용적률 ${data.far.toFixed(0)}% → 분담금 1,500만/평 상한`);
     }
   }
 
-  // 5) 세대당 대지지분 (LPS) — 보너스 언급
-  const lpsPy=data.lps>0?(data.lps/3.3058):0;
-  if(lpsPy>=18){
-    parts.push(`세대당 지분 ${lpsPy.toFixed(1)}평으로 환급 가능성`);
+  // 2) 대지면적 (TLA 점수 근거)
+  if(data.platArea>=200000){
+    parts.push(`대지 ${(data.platArea/10000).toFixed(1)}만㎡(TLA 100점)`);
+  } else if(data.platArea>=100000){
+    parts.push(`대지 ${(data.platArea/10000).toFixed(1)}만㎡(TLA 80점)`);
+  } else if(data.platArea>=50000){
+    parts.push(`대지 ${(data.platArea/10000).toFixed(1)}만㎡(TLA 60점)`);
   }
 
-  // 6) 대단지 세대수 — 시공사 관점
-  if(data.households>=3000){
-    parts.push(`${data.households.toLocaleString()}세대 대단지로 시공사 수주 경쟁 예상`);
+  // 3) NVP Rate (정량 비교: 현재가 vs 신축 기준가)
+  if(data.nvpRate>0&&data.myAvgPPP>0&&data.nvp>0){
+    parts.push(`현재 ${Math.round(data.myAvgPPP).toLocaleString()}만 → NVP ${Math.round(data.nvp).toLocaleString()}만/평(+${data.nvpRate.toFixed(0)}%)`);
   }
 
-  // 문장 조합: 최대 2문장 (예시의 두 배 길이까지 허용)
-  // 첫 문장: 용적률 + 긍정요소 결합
-  // 두번째 문장: 추가 강점
+  // 4) 입지등급 (LOC 기준표에 근거)
+  if(data.locScore>=100){
+    parts.push(`${data.dong} LOC 1등급`);
+  } else if(data.locScore>=80){
+    parts.push(`${data.dong} LOC 2등급`);
+  }
+
   if(parts.length===0) return '';
 
-  // 용적률이 높을 때(200%+) "~있으나" 로 시작했으면 다음 긍정 요소와 연결
-  let result='';
-  if(data.far>200&&parts.length>=2){
-    result=parts[0]+', '+parts.slice(1).join('. ');
-  } else {
-    result=parts.join('. ');
-  }
-
-  // 길이 제한 (약 120자 × 2줄 정도)
-  if(result.length>200) result=result.substring(0,197)+'…';
-
-  return result;
+  // 연결: 용적률이 높을 때(200%+) 분담금 부담 팩트 + 다른 강점 병렬
+  return parts.join('. ');
 }
 
 function haversine(lat1,lng1,lat2,lng2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.asin(Math.sqrt(a));}
@@ -465,9 +446,8 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   document.getElementById('rviScore').textContent='—';
   document.getElementById('rviGrade').textContent='';
   document.getElementById('rviDesc').textContent='산출 중...';
-  document.getElementById('rviSummary').style.display='none';
+  document.getElementById('rviSummaryRow').style.display='none';
   document.getElementById('rviSummaryText').innerHTML='';
-  document.getElementById('rviCommentBox').style.display='none';
   document.getElementById('rviCommentText').textContent='';
   document.getElementById('indexGrid').innerHTML='';
   document.getElementById('nvpRows').innerHTML='';
@@ -675,20 +655,14 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     const nvpComment=nvpRate>=30?'상승여력 매우 큼':nvpRate>=15?'상승여력 있음':nvpRate>=0?'상승여력 제한적':'현재가가 NVP 초과 (프리미엄 이미 반영)';
     summaryLines.push(`📈 상승여력 ${nvpRate>=0?'+':''}${nvpRate.toFixed(0)}% — ${nvpComment}`);
   }
-  document.getElementById('rviSummary').style.display='block';
+  document.getElementById('rviSummaryRow').style.display='grid';
   document.getElementById('rviSummaryText').innerHTML=summaryLines.join('<br>');
 
   // === RVI 코멘트 박스 렌더링 ===
   const commentData={name,dong:umdForLoc,far,platArea,households,nvpRate,locScore,rviScore:rviNorm,lps,age,nvp,myAvgPPP};
   const comment=generateRVIComment(commentData);
-  const commentBox=document.getElementById('rviCommentBox');
   const commentText=document.getElementById('rviCommentText');
-  if(comment){
-    commentText.textContent=comment;
-    commentBox.style.display='block';
-  } else {
-    commentBox.style.display='none';
-  }
+  commentText.textContent=comment||'';
 
   const META={nvp_rate:{label:'NVP Rate',name:'상승여력률'},lps:{label:'LPS',name:'세대당 대지지분'},far:{label:'FAR',name:'용적률'},tla:{label:'TLA',name:'대지 총면적'},nrt:{label:'NRT',name:'신축전세 평당가'},age:{label:'AGE',name:'준공경과년수'},loc:{label:'LOC',name:'지역등급'}};
   const grid=document.getElementById('indexGrid');grid.innerHTML='';
