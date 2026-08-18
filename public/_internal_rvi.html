@@ -581,7 +581,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   nvpDetails.sort((a,b)=>b.w-a.w);
   nvpDetails.slice(0,5).forEach(d=>{nvpR.innerHTML+=`<div class="nvp-row"><span class="left">${d.name} (${d.dist.toFixed(1)}km, ${d.cnt}건)</span><span class="right">${Math.round(d.avgP).toLocaleString()}만/평</span></div>`;});
   if(nvpDetails.length){
-    nvpR.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×1.25)</span><span class="right" style="font-size:15px">${Math.round(nvp).toLocaleString()}만/평</span></div>`;
+    nvpR.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×${NVP_PREMIUM})</span><span class="right" style="font-size:15px">${Math.round(nvp).toLocaleString()}만/평</span></div>`;
     if(myAvgPPP>0)nvpR.innerHTML+=`<div class="nvp-row"><span class="left" style="color:#aaa">현재 평당가</span><span class="right" style="color:#FFA726">${Math.round(myAvgPPP).toLocaleString()}만/평</span></div><div class="nvp-row"><span class="left" style="color:#aaa">NVP Rate</span><span class="right" style="color:${nvpRate>=20?'#66BB6A':'#42A5F5'}">${nvpRate>=0?'+':''}${nvpRate.toFixed(1)}%</span></div>`;
   } else {
     nvpR.innerHTML=`<div style="text-align:center;padding:12px;color:#666">반경 ${searchRadius}km 내 비교 가능한 신축 단지가 부족합니다</div>`;
