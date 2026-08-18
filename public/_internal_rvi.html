@@ -1123,16 +1123,36 @@ function loadReconMarkers(){
 function clickMarker(name,address,lat,lng){
   marker.setPosition(new kakao.maps.LatLng(lat,lng));
   map.setCenter(new kakao.maps.LatLng(lat,lng));map.setLevel(4);
-  geocoder.coord2RegionCode(lng,lat,function(rr,rs){
-    let lc=LAWD_CD,bc=selectedBjdongCd;
-    if(rs===kakao.maps.services.Status.OK){for(let i=0;i<rr.length;i++){if(rr[i].region_type==='B'){lc=rr[i].code.substring(0,5);bc=rr[i].code.substring(5,10);break;}}}
-    geocoder.coord2Address(lng,lat,function(result,status2){
-      let jibun='';
-      if(status2===kakao.maps.services.Status.OK){const addr=result[0].address;jibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!=='0'?'-'+addr.sub_address_no:'');}
-      LAWD_CD=lc;selectedBjdongCd=bc;
-      loadRVI(name,address,lat,lng,lc,bc,jibun);
-    });
+  // ALL_COMPLEXES에서 단지명 또는 주소로 정확한 데이터 매칭
+  const addrParts=(address||'').split(' ');
+  const addrDong=addrParts.find(p=>p.endsWith('동'))||'';
+  const matched=ALL_COMPLEXES.find(c=>{
+    // 단지명 포함 매칭
+    if(name.includes(c.name.replace(/아파트|단지/g,'').substring(0,3))) return c.dong===addrDong||!addrDong;
+    return false;
+  })||ALL_COMPLEXES.find(c=>{
+    // 주소 동+지번 매칭
+    return addrDong&&c.dong===addrDong&&address.includes(c.jibun);
   });
+  if(matched){
+    const lawd=LAWD_MAP[matched.gu]||'11680';
+    const bjdong=matched.bjdong||BJDONG_MAP2[matched.dong]||'10600';
+    const addr2=`서울 ${matched.gu} ${matched.dong} ${matched.jibun}`;
+    LAWD_CD=lawd;selectedBjdongCd=bjdong;selectedJibun=matched.jibun;
+    loadRVI(matched.name,addr2,lat,lng,lawd,bjdong,matched.jibun,matched.h,matched.far||0);
+  } else {
+    // fallback: 기존 역지오코딩 방식
+    geocoder.coord2RegionCode(lng,lat,function(rr,rs){
+      let lc=LAWD_CD,bc=selectedBjdongCd;
+      if(rs===kakao.maps.services.Status.OK){for(let i=0;i<rr.length;i++){if(rr[i].region_type==='B'){lc=rr[i].code.substring(0,5);bc=rr[i].code.substring(5,10);break;}}}
+      geocoder.coord2Address(lng,lat,function(result,status2){
+        let jibun='';
+        if(status2===kakao.maps.services.Status.OK){const addr=result[0].address;jibun=(addr.main_address_no||'')+(addr.sub_address_no&&addr.sub_address_no!=='0'?'-'+addr.sub_address_no:'');}
+        LAWD_CD=lc;selectedBjdongCd=bc;
+        loadRVI(name,address,lat,lng,lc,bc,jibun);
+      });
+    });
+  }
 }
 loadReconMarkers();
 
