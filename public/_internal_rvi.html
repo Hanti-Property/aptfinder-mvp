@@ -182,7 +182,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
     <div style="margin-top:12px;background:#12122b;border-radius:8px;padding:14px;">
       <div style="font-size:13px;color:#ccc;font-weight:600;margin-bottom:8px;">📐 RVI 평가지표 가중치</div>
       <div style="font-size:13px;color:#bbb;line-height:2;">
-        TLA 대지면적 <span style="color:#42A5F5">40%</span> | LOC 지역등급 <span style="color:#42A5F5">20%</span> | NVP 상승여력 <span style="color:#42A5F5">15%</span> | FAR 용적률 <span style="color:#42A5F5">10%</span> | AGE 경과년수 <span style="color:#42A5F5">5%</span> | LPS 세대당지분 <span style="color:#42A5F5">5%</span> | NRT 신축전세 <span style="color:#42A5F5">5%</span>
+        TLA 대지면적 <span style="color:#42A5F5">30%</span> | LOC 지역등급 <span style="color:#42A5F5">20%</span> | NVP 상승여력 <span style="color:#42A5F5">15%</span> | FAR 용적률 <span style="color:#42A5F5">20%</span> | AGE 경과년수 <span style="color:#42A5F5">5%</span> | LPS 세대당지분 <span style="color:#42A5F5">5%</span> | NRT 신축전세 <span style="color:#42A5F5">5%</span>
       </div>
     </div>
   </div>
@@ -548,7 +548,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   };
 
   // RVI 산출: 산출불가(-1) 지표는 제외하고 나머지 가중치 재배분
-  const weights={tla:0.40,loc:0.20,nvp_rate:0.15,far:0.10,age:0.05,nrt:0.05,lps:0.05};
+  const weights={tla:0.30,loc:0.20,nvp_rate:0.15,far:0.20,age:0.05,nrt:0.05,lps:0.05};
   let totalWeight=0,weightedSum=0;
   for(const[k,w] of Object.entries(weights)){
     if(scores[k].score>=0){totalWeight+=w;weightedSum+=scores[k].score*w;}
@@ -712,7 +712,7 @@ function loadRRIRanking(){
       const ageScore=sAGE(47);
       const lpsScore=lps>=18?100:lps>=12?75:lps>=8?50:25;
       const nrtScore=50; // 배치에서는 기본값
-      const rvi=Math.round(tlaScore*0.40+locScore*0.20+nvpScore*0.15+farScore*0.10+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
+      const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
       results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi});
     });
     results.sort((a,b)=>b.rvi-a.rvi);
