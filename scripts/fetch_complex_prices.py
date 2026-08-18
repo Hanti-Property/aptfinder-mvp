@@ -145,7 +145,7 @@ def main():
     # 6개월 거래 일괄 조회
     now = datetime.now()
     all_trades = []
-    for i in range(6):
+    for i in range(12):  # 12개월로 확대 (면적 정책 충족을 위해)
         d = datetime(now.year, now.month - i if now.month - i > 0 else now.month - i + 12, 1)
         if now.month - i <= 0:
             d = datetime(now.year - 1, now.month - i + 12, 1)
