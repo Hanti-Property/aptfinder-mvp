@@ -796,12 +796,15 @@ function openIndexDashboard(){
   if(!d) return;
   const name=document.getElementById('complexName').textContent||'';
   const addr=document.getElementById('complexAddr').textContent||'';
-  // 단지명 + 주소(동까지)로 정확한 검색 쿼리 생성
-  // 예: "은마아파트 서울 강남구 대치동"
-  const parts=addr.split(' ');
-  const addrWithoutJibun=parts.filter(p=>!/^\d/.test(p)).join(' '); // 지번(숫자시작) 제외
-  const q=name+' '+addrWithoutJibun;
-  window.open('/admin_index_dashboard.html?q='+encodeURIComponent(q),'_blank');
+  // 직접 파라미터로 정확한 단지 정보 전달
+  const params=new URLSearchParams({
+    lawd:LAWD_CD,
+    bjdong:selectedBjdongCd,
+    jibun:selectedJibun,
+    name:name,
+    addr:addr
+  });
+  window.open('/admin_index_dashboard.html?'+params.toString(),'_blank');
 }
 
 // === RVI 랭킹 테이블 로드 (complexes_master.json) ===

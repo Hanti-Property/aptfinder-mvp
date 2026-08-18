@@ -153,8 +153,25 @@ function searchAddress(){
 }
 document.getElementById('searchInput').addEventListener('keypress',e=>{if(e.key==='Enter')searchAddress();});
 
-// URL 파라미터 ?q= 자동 검색
-(function(){const params=new URLSearchParams(window.location.search);const q=params.get('q');if(q){document.getElementById('searchInput').value=q;setTimeout(searchAddress,500);}})();
+// URL 파라미터 ?q= 자동 검색 또는 ?lawd=&bjdong=&jibun=&name=&addr= 직접 로드
+(function(){
+  const params=new URLSearchParams(window.location.search);
+  // 직접 파라미터 방식 (RVI 대시보드에서 전달)
+  const lawd=params.get('lawd'),bjdong=params.get('bjdong'),jibun=params.get('jibun'),name=params.get('name'),addr=params.get('addr');
+  if(lawd&&bjdong&&jibun&&name){
+    LAWD_CD=lawd;
+    selectedBjdongCd=bjdong;
+    selectedJibun=jibun;
+    selectedName=name;
+    const parts=(addr||'').split(' ');
+    selectedUmdNm=parts.find(p=>p.endsWith('동'))||'';
+    setTimeout(function(){loadDashboard(name,addr||name);},300);
+    return;
+  }
+  // 기존 키워드 검색 방식
+  const q=params.get('q');
+  if(q){document.getElementById('searchInput').value=q;setTimeout(searchAddress,500);}
+})();
 
 // ============================================================
 // MAIN LOAD
