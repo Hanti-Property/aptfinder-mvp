@@ -37,8 +37,9 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 /* 색상 클래스 */
 /* RVI 코멘트 박스 */
 .rvi-summary-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.rvi-comment-box{background:#12122b;border:1px solid #2a2a4a;border-left:3px solid #42A5F5;border-radius:8px;padding:14px 18px;display:flex;align-items:center}
-.rvi-comment-box .comment-text{font-size:13px;color:#ccc;line-height:1.7}
+.rvi-comment-box{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;display:flex;flex-direction:column;justify-content:center}
+.rvi-comment-box .comment-label{font-size:14px;color:#bbb;font-weight:600;letter-spacing:0.5px;margin-bottom:10px}
+.rvi-comment-box .comment-text{font-size:13px;color:#ccc;line-height:1.8}
 @media(max-width:768px){.rvi-summary-row{grid-template-columns:1fr}}
 
 .c-s{color:#42A5F5}.c-a{color:#66BB6A}.c-b{color:#FFA726}.c-c{color:#EF5350}.c-d{color:#9E9E9E}
@@ -145,7 +146,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
       <div id="rviSummaryText" style="font-size:14px;color:#ccc;line-height:1.8;"></div>
     </div>
     <div class="rvi-comment-box" id="rviCommentBox">
-      <div style="font-size:14px;color:#bbb;font-weight:600;letter-spacing:0.5px;margin-bottom:8px;">RVI Comment</div>
+      <div class="comment-label">RVI Comment</div>
       <div class="comment-text" id="rviCommentText"></div>
     </div>
   </div>
