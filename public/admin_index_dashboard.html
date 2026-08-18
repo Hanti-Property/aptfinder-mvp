@@ -153,6 +153,9 @@ function searchAddress(){
 }
 document.getElementById('searchInput').addEventListener('keypress',e=>{if(e.key==='Enter')searchAddress();});
 
+// URL 파라미터 ?q= 자동 검색
+(function(){const params=new URLSearchParams(window.location.search);const q=params.get('q');if(q){document.getElementById('searchInput').value=q;setTimeout(searchAddress,500);}})();
+
 // ============================================================
 // MAIN LOAD
 // ============================================================
