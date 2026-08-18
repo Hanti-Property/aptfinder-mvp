@@ -712,8 +712,16 @@ function loadRRIRanking(){
       const lpsScore=lps>=18?100:lps>=12?75:lps>=8?50:25;
       const nrtScore=50; // 배치에서는 기본값
       const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi});
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun});
     });
+    // 미성1,2차 합치기 (같은 단지로 취급)
+    const misung1=results.findIndex(r=>r.name==='미성1차');
+    const misung2=results.findIndex(r=>r.name==='미성2차');
+    if(misung1>=0&&misung2>=0){
+      results[misung1].name='미성1·2차';
+      results[misung1].rvi=Math.max(results[misung1].rvi,results[misung2].rvi);
+      results.splice(misung2,1);
+    }
     results.sort((a,b)=>b.rvi-a.rvi);
     const tbody=document.getElementById('rriRankBody');
     tbody.innerHTML='';
@@ -721,8 +729,8 @@ function loadRRIRanking(){
       const cur=r.currentPrice>=10000?(r.currentPrice/10000).toFixed(1)+'억':Math.round(r.currentPrice).toLocaleString()+'만';
       const rviColor=r.rvi>=80?'#66BB6A':r.rvi>=60?'#42A5F5':r.rvi>=40?'#FFA726':'#EF5350';
       const rriColor=r.rri>=50?'#66BB6A':r.rri>=20?'#42A5F5':r.rri>=0?'#FFA726':'#EF5350';
-      const nameLink=`<a href="/admin_index_dashboard.html?q=${encodeURIComponent(r.name+' '+r.dong)}" target="_blank" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;">${r.name}</a>`;
-      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${nameLink}<br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
+      const infoBtn=`<a href="/admin_index_dashboard.html?q=${encodeURIComponent(r.name+' '+r.dong)}" target="_blank" style="font-size:10px;color:#888;background:#2a2a4a;padding:2px 5px;border-radius:3px;margin-left:6px;text-decoration:none;">단지정보</a>`;
+      tbody.innerHTML+=`<tr><td>${i+1}</td><td><a href="javascript:void(0)" onclick="quickLoad('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${r.name}</a>${infoBtn}<br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
     });
     _rriRankLoaded=true;
   }).catch(()=>{});
