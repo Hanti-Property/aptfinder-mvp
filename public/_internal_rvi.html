@@ -268,50 +268,66 @@ let LAWD_CD='11680',selectedBjdongCd='10600',selectedJibun='316';
 // === 동적 코멘트 생성 ===
 function generateRVIComment(data){
   // data: {name, dong, far, platArea, households, nvpRate, locScore, rviScore, lps, age, nvp, myAvgPPP}
-  // 정책: 정량 데이터에서 직접 도출되는 팩트만 사용. 근거 없는 추론(시공사 선호, 환급 가능성 등) 금지.
-  const parts=[];
+  // 정책: 정량 데이터 근거가 있는 판단 문장. 자연스러운 문체.
+  const segments=[];
 
-  // 1) 용적률 → 분담금 (RVI 공식에서 직접 산출)
+  // --- 1) 용적률 → 분담금 (문장 시작) ---
   if(data.far>0){
-    if(data.far<=150) parts.push(`용적률 ${data.far.toFixed(0)}%로 분담금 0원`);
-    else if(data.far<=170){
+    if(data.far<=150){
+      segments.push({type:'positive',text:`용적률 ${data.far.toFixed(0)}%로 분담금 제로`});
+    } else if(data.far<=180){
       const cost=Math.round((data.far-150)/50*1500);
-      parts.push(`용적률 ${data.far.toFixed(0)}%로 분담금 ${cost.toLocaleString()}만/평 수준`);
-    }
-    else if(data.far<=200){
+      segments.push({type:'positive',text:`용적률 ${data.far.toFixed(0)}%로 분담금 ${cost.toLocaleString()}만/평 수준`});
+    } else if(data.far<=200){
       const cost=Math.round((data.far-150)/50*1500);
-      parts.push(`용적률 ${data.far.toFixed(0)}% → 분담금 약 ${cost.toLocaleString()}만/평`);
-    }
-    else{
-      parts.push(`용적률 ${data.far.toFixed(0)}% → 분담금 1,500만/평 상한`);
+      segments.push({type:'neutral',text:`용적률 ${data.far.toFixed(0)}%로 분담금 ${cost.toLocaleString()}만/평`});
+    } else {
+      segments.push({type:'negative',text:`용적률 ${data.far.toFixed(0)}%로 분담금 부담 있으나`});
     }
   }
 
-  // 2) 대지면적 (TLA 점수 근거)
+  // --- 2) 대지면적 (규모 표현) ---
   if(data.platArea>=200000){
-    parts.push(`대지 ${(data.platArea/10000).toFixed(1)}만㎡(TLA 100점)`);
+    segments.push({type:'positive',text:`대지 ${(data.platArea/10000).toFixed(1)}만㎡ 초대형 단지`});
   } else if(data.platArea>=100000){
-    parts.push(`대지 ${(data.platArea/10000).toFixed(1)}만㎡(TLA 80점)`);
+    segments.push({type:'positive',text:`대지 ${(data.platArea/10000).toFixed(1)}만㎡ 대단지 규모`});
   } else if(data.platArea>=50000){
-    parts.push(`대지 ${(data.platArea/10000).toFixed(1)}만㎡(TLA 60점)`);
+    segments.push({type:'neutral',text:`대지 ${(data.platArea/10000).toFixed(1)}만㎡ 중대형 규모`});
   }
 
-  // 3) NVP Rate (정량 비교: 현재가 vs 신축 기준가)
-  if(data.nvpRate>0&&data.myAvgPPP>0&&data.nvp>0){
-    parts.push(`현재 ${Math.round(data.myAvgPPP).toLocaleString()}만 → NVP ${Math.round(data.nvp).toLocaleString()}만/평(+${data.nvpRate.toFixed(0)}%)`);
-  }
-
-  // 4) 입지등급 (LOC 기준표에 근거)
+  // --- 3) 입지 등급 + 사업성 판단 ---
   if(data.locScore>=100){
-    parts.push(`${data.dong} LOC 1등급`);
+    segments.push({type:'positive',text:`${data.dong} 1등급 프리미엄 입지로 사업성 최상위`});
   } else if(data.locScore>=80){
-    parts.push(`${data.dong} LOC 2등급`);
+    segments.push({type:'positive',text:`${data.dong} 2등급 우수 입지`});
   }
 
-  if(parts.length===0) return '';
+  // --- 4) NVP 상승여력 → 수익성 ---
+  if(data.nvpRate>=30){
+    segments.push({type:'positive',text:`상승여력 +${data.nvpRate.toFixed(0)}%로 높은 수익성 기대`});
+  } else if(data.nvpRate>=15){
+    segments.push({type:'positive',text:`상승여력 +${data.nvpRate.toFixed(0)}%로 수익성 기대`});
+  } else if(data.nvpRate>0&&data.nvpRate<15){
+    segments.push({type:'neutral',text:`상승여력 +${data.nvpRate.toFixed(0)}%`});
+  }
 
-  // 연결: 용적률이 높을 때(200%+) 분담금 부담 팩트 + 다른 강점 병렬
-  return parts.join('. ');
+  if(segments.length===0) return '';
+
+  // --- 문장 조합 ---
+  // 용적률 높을 때(negative): "~있으나, [긍정]" 구조
+  // 그 외: ". " 으로 연결
+  let result='';
+  const first=segments[0];
+  const rest=segments.slice(1);
+
+  if(first.type==='negative'&&rest.length>0){
+    // "분담금 부담 있으나, 대지 24만㎡ 초대형 단지 + 입지..." 
+    result=first.text+', '+rest.map(s=>s.text).join('. ');
+  } else {
+    result=segments.map(s=>s.text).join('. ');
+  }
+
+  return result;
 }
 
 function haversine(lat1,lng1,lat2,lng2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.asin(Math.sqrt(a));}
