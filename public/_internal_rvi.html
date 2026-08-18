@@ -730,8 +730,7 @@ function loadRRIRanking(){
       const rviColor=r.rvi>=80?'#66BB6A':r.rvi>=60?'#42A5F5':r.rvi>=40?'#FFA726':'#EF5350';
       const rriColor=r.rri>=50?'#66BB6A':r.rri>=20?'#42A5F5':r.rri>=0?'#FFA726':'#EF5350';
       const bjdong=r.bjdong||'11000';
-      const infoBtn=`<a href="/admin_index_dashboard.html?q=${encodeURIComponent(r.name+' '+r.dong)}" target="_blank" style="font-size:10px;color:#888;background:#2a2a4a;padding:2px 5px;border-radius:3px;margin-left:6px;text-decoration:none;">단지정보</a>`;
-      tbody.innerHTML+=`<tr><td>${i+1}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${r.name}</a>${infoBtn}<br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
+      tbody.innerHTML+=`<tr><td>${i+1}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${r.name}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
     });
     _rriRankLoaded=true;
   }).catch(()=>{});
