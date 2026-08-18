@@ -473,9 +473,9 @@ function displayBuilding(bld, land){
   // 대지면적: 건축물대장 우선, 없으면 토지특성 API
   let plat='—';
   if(bld&&bld.platArea&&parseFloat(bld.platArea)>0){
-    plat=parseFloat(bld.platArea).toFixed(0)+'㎡';
+    plat=Math.round(parseFloat(bld.platArea)).toLocaleString()+'㎡';
   }else if(land&&land.lndpclAr&&parseFloat(land.lndpclAr)>0){
-    plat=parseFloat(land.lndpclAr).toFixed(0)+'㎡ (토지대장)';
+    plat=Math.round(parseFloat(land.lndpclAr)).toLocaleString()+'㎡ (토지대장)';
   }
   const parkTotal=bld?(bld.totPkngCnt||'—'):'—';
   document.getElementById('v-built').textContent=builtYear?builtYear+'년':'—';
