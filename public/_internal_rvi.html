@@ -203,7 +203,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
         TLA 대지면적 <span style="color:#42A5F5">30%</span> | LOC 지역등급 <span style="color:#42A5F5">20%</span> | NVP 상승여력 <span style="color:#42A5F5">15%</span> | FAR 용적률 <span style="color:#42A5F5">20%</span> | AGE 경과년수 <span style="color:#42A5F5">5%</span> | LPS 세대당지분 <span style="color:#42A5F5">5%</span> | NRT 신축전세 <span style="color:#42A5F5">5%</span>
       </div>
       <div style="margin-top:10px;text-align:right;">
-        <a id="rri-detail-link" href="javascript:void(0)" onclick="openIndexDashboard()" style="font-size:12px;color:#42A5F5;text-decoration:none;">📊 단지 인덱스에서 상세 확인 →</a>
+        <a id="rri-detail-link" href="javascript:void(0)" onclick="openIndexDashboard()" style="font-size:12px;color:#42A5F5;text-decoration:none;">📊 단지 인덱스 확인 →</a>
       </div>
     </div>
   </div>
@@ -796,7 +796,11 @@ function openIndexDashboard(){
   if(!d) return;
   const name=document.getElementById('complexName').textContent||'';
   const addr=document.getElementById('complexAddr').textContent||'';
-  const q=name+' '+addr.split(' ').slice(-1)[0];
+  // 단지명 + 주소(동까지)로 정확한 검색 쿼리 생성
+  // 예: "은마아파트 서울 강남구 대치동"
+  const parts=addr.split(' ');
+  const addrWithoutJibun=parts.filter(p=>!/^\d/.test(p)).join(' '); // 지번(숫자시작) 제외
+  const q=name+' '+addrWithoutJibun;
   window.open('/admin_index_dashboard.html?q='+encodeURIComponent(q),'_blank');
 }
 
