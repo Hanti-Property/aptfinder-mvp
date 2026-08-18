@@ -133,6 +133,11 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
     <div class="rvi-desc" id="rviDesc">산출 중...</div>
   </div>
 
+  <!-- RVI 요약 카드 -->
+  <div id="rviSummary" style="background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;margin-bottom:16px;display:none;">
+    <div id="rviSummaryText" style="font-size:14px;color:#ccc;line-height:1.8;"></div>
+  </div>
+
   <!-- 7대 지표 -->
   <div class="section-title">📊 7대 평가지표</div>
   <div class="index-grid" id="indexGrid"></div>
@@ -378,6 +383,8 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   document.getElementById('rviScore').textContent='—';
   document.getElementById('rviGrade').textContent='';
   document.getElementById('rviDesc').textContent='산출 중...';
+  document.getElementById('rviSummary').style.display='none';
+  document.getElementById('rviSummaryText').innerHTML='';
   document.getElementById('indexGrid').innerHTML='';
   document.getElementById('nvpRows').innerHTML='';
   document.getElementById('tradeBody').innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">조회 중...</td></tr>';
@@ -562,6 +569,30 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   document.getElementById('rviGrade').textContent=grade(rviNorm);
   document.getElementById('rviGrade').className='rvi-grade c-'+cls;
   document.getElementById('rviDesc').textContent=gradeDesc(rviNorm);
+
+  // === RVI 요약 카드 (규칙 기반) ===
+  const summaryLines=[];
+  // 지역
+  const locLabel=locScore>=100?'1등급 프리미엄 입지':locScore>=80?'2등급 우수 입지':'3등급 입지';
+  summaryLines.push(`📍 ${umdForLoc} ${locLabel}`);
+  // 대지면적
+  if(platArea>0){
+    const platM=platArea>=10000?(platArea/10000).toFixed(1)+'만㎡':Math.round(platArea).toLocaleString()+'㎡';
+    const tlaGrade=platArea>=200000?'최상위':platArea>=100000?'대규모':platArea>=50000?'중대형':'중소형';
+    summaryLines.push(`📐 대지면적 ${platM} (${tlaGrade})`);
+  }
+  // 용적률
+  if(far>0){
+    const farComment=far<=150?'매우 낮음 → 분담금 거의 없음':far<=170?'낮음 → 분담금 유리':far<=200?'보통':far<=220?'다소 높음 → 분담금 부담':'높음 → 분담금 최대';
+    summaryLines.push(`🏗️ 용적률 ${far.toFixed(0)}% — ${farComment}`);
+  }
+  // NVP Rate
+  if(nvpAvailable){
+    const nvpComment=nvpRate>=30?'상승여력 매우 큼':nvpRate>=15?'상승여력 있음':nvpRate>=0?'상승여력 제한적':'현재가가 NVP 초과 (프리미엄 이미 반영)';
+    summaryLines.push(`📈 상승여력 ${nvpRate>=0?'+':''}${nvpRate.toFixed(0)}% — ${nvpComment}`);
+  }
+  document.getElementById('rviSummary').style.display='block';
+  document.getElementById('rviSummaryText').innerHTML=summaryLines.join('<br>');
 
   const META={nvp_rate:{label:'NVP Rate',name:'상승여력률'},lps:{label:'LPS',name:'세대당 대지지분'},far:{label:'FAR',name:'용적률'},tla:{label:'TLA',name:'대지 총면적'},nrt:{label:'NRT',name:'신축전세 평당가'},age:{label:'AGE',name:'준공경과년수'},loc:{label:'LOC',name:'지역등급'}};
   const grid=document.getElementById('indexGrid');grid.innerHTML='';
