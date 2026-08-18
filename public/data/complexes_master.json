@@ -20,7 +20,7 @@
     "latestSupplyPy": 31.4,
     "latestFloor": 3,
     "latestDate": "2026.08",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 23.2
   },
   {
@@ -37,15 +37,15 @@
     "totArea": 224217.01,
     "farSource": "표제부",
     "type": "reconstruction",
-    "avgPPP": 14351,
-    "tradeCount": 61,
-    "latestPrice": 126000,
-    "latestArea": 39.53,
+    "avgPPP": 12782,
+    "tradeCount": 2,
+    "latestPrice": 224000,
+    "latestArea": 60.0,
     "latestSupplyPy": 16.2,
-    "latestFloor": 12,
-    "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 12.0
+    "latestFloor": 4,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 18.1
   },
   {
     "gu": "강남구",
@@ -61,15 +61,15 @@
     "totArea": 372573.64,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 12721,
-    "tradeCount": 19,
-    "latestPrice": 388000,
-    "latestArea": 128.01,
+    "avgPPP": 15091,
+    "tradeCount": 7,
+    "latestPrice": 404000,
+    "latestArea": 84.48,
     "latestSupplyPy": 52.3,
-    "latestFloor": 2,
-    "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 38.7
+    "latestFloor": 11,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 25.6
   },
   {
     "gu": "강남구",
@@ -85,14 +85,14 @@
     "totArea": 184280.09,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 17384,
-    "tradeCount": 5,
+    "avgPPP": 15127,
+    "tradeCount": 1,
     "latestPrice": 383000,
     "latestArea": 83.7,
     "latestSupplyPy": 34.2,
     "latestFloor": 7,
     "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 25.3
   },
   {
@@ -109,15 +109,15 @@
     "totArea": 152146.6,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 12431,
-    "tradeCount": 6,
-    "latestPrice": 507000,
-    "latestArea": 136.68,
+    "avgPPP": 14501,
+    "tradeCount": 1,
+    "latestPrice": 370000,
+    "latestArea": 84.35,
     "latestSupplyPy": 55.9,
-    "latestFloor": 8,
-    "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 41.3
+    "latestFloor": 10,
+    "latestDate": "2026.04",
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 25.5
   },
   {
     "gu": "강남구",
@@ -140,7 +140,7 @@
     "latestSupplyPy": 22.1,
     "latestFloor": 2,
     "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 16.3
   },
   {
@@ -157,14 +157,14 @@
     "totArea": 82165.705,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 12725,
-    "tradeCount": 2,
+    "avgPPP": 11916,
+    "tradeCount": 1,
     "latestPrice": 303000,
     "latestArea": 84.06,
     "latestSupplyPy": 34.4,
     "latestFloor": 4,
     "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 25.4
   },
   {
@@ -182,13 +182,13 @@
     "farSource": "총괄표제부",
     "type": "reconstruction",
     "avgPPP": 15202,
-    "tradeCount": 4,
+    "tradeCount": 3,
     "latestPrice": 390000,
     "latestArea": 84.81,
     "latestSupplyPy": 34.7,
     "latestFloor": 11,
     "latestDate": "2026.04",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 25.7
   },
   {
@@ -212,7 +212,7 @@
     "latestSupplyPy": 74.5,
     "latestFloor": 14,
     "latestDate": "2026.05",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 55.1
   },
   {
@@ -229,15 +229,15 @@
     "totArea": 92303.75,
     "farSource": "수동입력",
     "type": "reconstruction",
-    "avgPPP": 10811,
-    "tradeCount": 4,
-    "latestPrice": 470000,
-    "latestArea": 148.8,
+    "avgPPP": 12779,
+    "tradeCount": 1,
+    "latestPrice": 323000,
+    "latestArea": 83.56,
     "latestSupplyPy": 60.8,
-    "latestFloor": 14,
-    "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 45.0
+    "latestFloor": 3,
+    "latestDate": "2026.04",
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 25.3
   },
   {
     "gu": "강남구",
@@ -260,7 +260,7 @@
     "latestSupplyPy": 53.9,
     "latestFloor": 8,
     "latestDate": "2026.03",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 39.9
   },
   {
@@ -277,14 +277,14 @@
     "totArea": 67189.42,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 10233,
-    "tradeCount": 5,
+    "avgPPP": 10146,
+    "tradeCount": 4,
     "latestPrice": 250000,
     "latestArea": 84.92,
     "latestSupplyPy": 34.7,
     "latestFloor": 2,
     "latestDate": "2026.05",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 25.7
   },
   {
@@ -301,15 +301,15 @@
     "totArea": 57986.2,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 11991,
-    "tradeCount": 5,
-    "latestPrice": 407000,
-    "latestArea": 115.59,
+    "avgPPP": 12647,
+    "tradeCount": 2,
+    "latestPrice": 330000,
+    "latestArea": 84.69,
     "latestSupplyPy": 47.3,
-    "latestFloor": 10,
+    "latestFloor": 2,
     "latestDate": "2026.04",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 35.0
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 25.6
   },
   {
     "gu": "강남구",
@@ -325,15 +325,15 @@
     "totArea": 72027.55,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 13706,
-    "tradeCount": 6,
-    "latestPrice": 500000,
-    "latestArea": 127.78,
+    "avgPPP": 15379,
+    "tradeCount": 2,
+    "latestPrice": 390000,
+    "latestArea": 84.69,
     "latestSupplyPy": 52.2,
-    "latestFloor": 5,
-    "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 38.7
+    "latestFloor": 10,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 25.6
   },
   {
     "gu": "강남구",
@@ -349,15 +349,15 @@
     "totArea": 69347.6,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 10116,
-    "tradeCount": 4,
-    "latestPrice": 357000,
-    "latestArea": 128.62,
+    "avgPPP": 10586,
+    "tradeCount": 2,
+    "latestPrice": 306000,
+    "latestArea": 95.4,
     "latestSupplyPy": 52.6,
-    "latestFloor": 9,
+    "latestFloor": 5,
     "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 38.9
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 28.9
   },
   {
     "gu": "강남구",
@@ -380,7 +380,7 @@
     "latestSupplyPy": 42.7,
     "latestFloor": 9,
     "latestDate": "2026.04",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 31.6
   },
   {
@@ -398,13 +398,13 @@
     "farSource": "수동입력",
     "type": "reconstruction",
     "avgPPP": 12983,
-    "tradeCount": 4,
+    "tradeCount": 3,
     "latestPrice": 348500,
     "latestArea": 84.49,
     "latestSupplyPy": 34.5,
     "latestFloor": 3,
     "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 25.6
   },
   {
@@ -428,7 +428,7 @@
     "latestSupplyPy": 33.6,
     "latestFloor": 4,
     "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 24.9
   },
   {
@@ -445,7 +445,7 @@
     "totArea": 22305.93,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 9465,
+    "avgPPP": 11057,
     "tradeCount": 0,
     "latestPrice": 0,
     "latestDate": "차용(우성652)",
@@ -472,7 +472,7 @@
     "latestSupplyPy": 32.3,
     "latestFloor": 6,
     "latestDate": "2026.04",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 23.9
   },
   {
@@ -496,7 +496,7 @@
     "latestSupplyPy": 34.6,
     "latestFloor": 6,
     "latestDate": "2026.05",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 25.6
   },
   {
@@ -520,7 +520,7 @@
     "latestSupplyPy": 67.0,
     "latestFloor": 6,
     "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 49.6
   },
   {
@@ -1708,15 +1708,15 @@
     "platArea": 0,
     "farSource": "수동입력",
     "type": "reconstruction",
-    "avgPPP": 17766,
-    "tradeCount": 9,
-    "latestPrice": 310000,
-    "latestArea": 52.73,
+    "avgPPP": 14349,
+    "tradeCount": 1,
+    "latestPrice": 364000,
+    "latestArea": 83.86,
     "latestSupplyPy": 21.6,
-    "latestFloor": 2,
-    "latestDate": "2026.08",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 16.0
+    "latestFloor": 8,
+    "latestDate": "2026.06",
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 25.4
   },
   {
     "gu": "강남구",
@@ -1733,15 +1733,15 @@
     "platArea": 0,
     "farSource": "수동입력",
     "type": "reconstruction",
-    "avgPPP": 18247,
-    "tradeCount": 4,
-    "latestPrice": 515000,
-    "latestArea": 118.63,
+    "avgPPP": 18662,
+    "tradeCount": 2,
+    "latestPrice": 420000,
+    "latestArea": 74.4,
     "latestSupplyPy": 48.5,
-    "latestFloor": 5,
-    "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 35.9
+    "latestFloor": 2,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 22.5
   },
   {
     "gu": "강남구",
@@ -1765,7 +1765,7 @@
     "latestSupplyPy": 43.2,
     "latestFloor": 2,
     "latestDate": "2026.05",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 32.0
   },
   {
@@ -1783,14 +1783,14 @@
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 19004,
-    "tradeCount": 8,
+    "avgPPP": 19132,
+    "tradeCount": 6,
     "latestPrice": 650000,
     "latestArea": 109.24,
     "latestSupplyPy": 44.7,
     "latestFloor": 10,
     "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 33.0
   },
   {
@@ -1815,7 +1815,7 @@
     "latestSupplyPy": 53.7,
     "latestFloor": 3,
     "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 39.8
   },
   {
@@ -1840,7 +1840,7 @@
     "latestSupplyPy": 33.7,
     "latestFloor": 4,
     "latestDate": "2026.05",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 25.0
   },
   {
@@ -1865,7 +1865,7 @@
     "latestSupplyPy": 48.2,
     "latestFloor": 3,
     "latestDate": "2026.05",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 35.7
   },
   {
@@ -1890,7 +1890,7 @@
     "latestSupplyPy": 33.6,
     "latestFloor": 4,
     "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 24.9
   },
   {
@@ -1915,7 +1915,7 @@
     "latestSupplyPy": 59.2,
     "latestFloor": 8,
     "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 43.8
   },
   {
@@ -1933,14 +1933,14 @@
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 14575,
-    "tradeCount": 9,
+    "avgPPP": 16186,
+    "tradeCount": 5,
     "latestPrice": 570000,
     "latestArea": 107.64,
     "latestSupplyPy": 44.0,
     "latestFloor": 12,
     "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 32.6
   },
   {
@@ -1986,7 +1986,7 @@
     "latestSupplyPy": 44.3,
     "latestFloor": 11,
     "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 32.8
   },
   {
@@ -2011,7 +2011,7 @@
     "latestSupplyPy": 34.7,
     "latestFloor": 6,
     "latestDate": "2026.07",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 25.7
   },
   {
@@ -2029,15 +2029,15 @@
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 19867,
-    "tradeCount": 9,
-    "latestPrice": 389000,
-    "latestArea": 49.98,
+    "avgPPP": 20627,
+    "tradeCount": 2,
+    "latestPrice": 499000,
+    "latestArea": 78.05,
     "latestSupplyPy": 20.4,
-    "latestFloor": 11,
-    "latestDate": "2026.06",
-    "priceUpdated": "2026-08-17",
-    "latestExcluPy": 15.1
+    "latestFloor": 12,
+    "latestDate": "2026.05",
+    "priceUpdated": "2026-08-18",
+    "latestExcluPy": 23.6
   },
   {
     "gu": "강남구",
@@ -2061,7 +2061,7 @@
     "latestSupplyPy": 71.9,
     "latestFloor": 7,
     "latestDate": "2026.05",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 53.2
   },
   {
@@ -2086,7 +2086,7 @@
     "latestSupplyPy": 47.8,
     "latestFloor": 12,
     "latestDate": "2026.08",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 35.4
   },
   {
@@ -2111,7 +2111,7 @@
     "latestSupplyPy": 85.3,
     "latestFloor": 12,
     "latestDate": "2026.05",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 63.1
   },
   {
@@ -2129,7 +2129,7 @@
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 16105,
+    "avgPPP": 16264,
     "tradeCount": 1,
     "latestPrice": 530000,
     "latestArea": 102.35,
@@ -2153,14 +2153,14 @@
     "platArea": 0,
     "farSource": "역산(vlRatEstm/대지)",
     "type": "reconstruction",
-    "avgPPP": 16105,
-    "tradeCount": 3,
+    "avgPPP": 16264,
+    "tradeCount": 2,
     "latestPrice": 525000,
     "latestArea": 106.71,
     "latestSupplyPy": 43.6,
     "latestFloor": 12,
     "latestDate": "2026.04",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 32.3
   },
   {
@@ -2185,7 +2185,7 @@
     "latestSupplyPy": 43.4,
     "latestFloor": 12,
     "latestDate": "2026.05",
-    "priceUpdated": "2026-08-17",
+    "priceUpdated": "2026-08-18",
     "latestExcluPy": 32.1
   },
   {
@@ -2203,7 +2203,7 @@
     "platArea": 0,
     "farSource": "수동입력",
     "type": "reconstruction",
-    "avgPPP": 15678,
+    "avgPPP": 15757,
     "tradeCount": 0,
     "latestPrice": 0,
     "latestDate": "차용(한양평균)",

@@ -71,13 +71,25 @@ def match_trades(all_trades, complex_info):
 
 
 def calculate_price_stats(trades):
-    """거래 목록에서 시세 통계 산출 (전용면적 기준)"""
+    """거래 목록에서 시세 통계 산출 (전용면적 기준, 84㎡ 전후 우선)"""
     if not trades:
         return None
     
+    # 면적 선택 정책: 1순위 76~90 → 2순위 59~76 → 3순위 90~115 → 4순위 전체
+    def filter_by_area(trades, lo, hi):
+        return [t for t in trades if lo <= t['excluUseAr'] <= hi]
+    
+    selected = filter_by_area(trades, 76, 90)
+    if not selected:
+        selected = filter_by_area(trades, 59, 76)
+    if not selected:
+        selected = filter_by_area(trades, 90, 115)
+    if not selected:
+        selected = trades  # 예외: 전체 사용
+    
     # 평당가 산출 (전용면적 기준)
     ppps = []
-    for t in trades:
+    for t in selected:
         if t['excluUseAr'] > 0 and t['dealAmount'] > 0:
             exclu_py = t['excluUseAr'] / 3.3058  # 전용 평
             ppp = t['dealAmount'] / exclu_py
@@ -99,16 +111,16 @@ def calculate_price_stats(trades):
     
     avg_ppp = sum(ppps) / len(ppps)
     
-    # 최근 거래 (최신 1건)
-    trades_sorted = sorted(trades, key=lambda t: (t['dealYear'], t['dealMonth'], t['dealDay']), reverse=True)
-    latest = trades_sorted[0]
+    # 최근 거래 (선택된 면적대에서 최신 1건)
+    selected_sorted = sorted(selected, key=lambda t: (t['dealYear'], t['dealMonth'], t['dealDay']), reverse=True)
+    latest = selected_sorted[0]
     latest_area = latest['excluUseAr']
     latest_price = latest['dealAmount']
     latest_exclu_py = latest_area / 3.3058  # 전용 평
     
     return {
         'avgPPP': round(avg_ppp),           # 평균 전용 평당가 (만원)
-        'tradeCount': len(trades),          # 거래건수
+        'tradeCount': len(selected),        # 거래건수 (선택 면적대)
         'latestPrice': latest_price,        # 최근 거래가 (만원)
         'latestArea': latest_area,          # 최근 거래 전용면적
         'latestExcluPy': round(latest_exclu_py, 1),  # 전용 평
