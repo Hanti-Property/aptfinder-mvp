@@ -165,6 +165,16 @@ document.getElementById('searchInput').addEventListener('keypress',e=>{if(e.key=
     selectedName=name;
     const parts=(addr||'').split(' ');
     selectedUmdNm=parts.find(p=>p.endsWith('동'))||'';
+    // 카카오 검색으로 좌표 확보 → 지도 포커스
+    const searchQuery=name+' '+(selectedUmdNm||'');
+    ps.keywordSearch(searchQuery,function(data,status){
+      if(status===kakao.maps.services.Status.OK&&data.length){
+        const p=data[0];
+        map.setCenter(new kakao.maps.LatLng(p.y,p.x));
+        map.setLevel(3);
+        marker.setPosition(new kakao.maps.LatLng(p.y,p.x));
+      }
+    },{size:1});
     setTimeout(function(){loadDashboard(name,addr||name);},300);
     return;
   }
