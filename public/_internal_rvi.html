@@ -870,14 +870,7 @@ function loadRRIRanking(){
       const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
       results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong});
     });
-    // 미성1,2차 합치기 (같은 단지로 취급)
-    const misung1=results.findIndex(r=>r.name==='미성1차');
-    const misung2=results.findIndex(r=>r.name==='미성2차');
-    if(misung1>=0&&misung2>=0){
-      results[misung1].name='미성1·2차';
-      results[misung1].rvi=Math.max(results[misung1].rvi,results[misung2].rvi);
-      results.splice(misung2,1);
-    }
+    // 미성1차·2차는 용적률이 다르므로 개별 랭킹 유지
     results.sort((a,b)=>b.rvi-a.rvi);
     const tbody=document.getElementById('rriRankBody');
     tbody.innerHTML='';
