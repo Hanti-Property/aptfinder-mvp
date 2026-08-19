@@ -1123,17 +1123,24 @@ function loadReconMarkers(){
 function clickMarker(name,address,lat,lng){
   marker.setPosition(new kakao.maps.LatLng(lat,lng));
   map.setCenter(new kakao.maps.LatLng(lat,lng));map.setLevel(4);
-  // ALL_COMPLEXES에서 단지명 또는 주소로 정확한 데이터 매칭
+  // 주소에서 동/지번 추출하여 ALL_COMPLEXES 매칭
   const addrParts=(address||'').split(' ');
+  const addrGu=addrParts.find(p=>p.endsWith('구'))||'';
   const addrDong=addrParts.find(p=>p.endsWith('동'))||'';
-  const matched=ALL_COMPLEXES.find(c=>{
-    // 단지명 포함 매칭
-    if(name.includes(c.name.replace(/아파트|단지/g,'').substring(0,3))) return c.dong===addrDong||!addrDong;
-    return false;
-  })||ALL_COMPLEXES.find(c=>{
-    // 주소 동+지번 매칭
-    return addrDong&&c.dong===addrDong&&address.includes(c.jibun);
-  });
+  // 지번: 주소에서 숫자로 시작하는 마지막 부분
+  const addrJibun=addrParts.filter(p=>/^\d/.test(p)).pop()||'';
+  // 1차: 구+동+지번으로 정확 매칭
+  let matched=ALL_COMPLEXES.find(c=>c.dong===addrDong&&c.jibun===addrJibun&&c.gu.includes(addrGu));
+  // 2차: 동+단지명 키워드 매칭
+  if(!matched){
+    const kw=name.replace(/아파트|단지|맨션/g,'').substring(0,4);
+    matched=ALL_COMPLEXES.find(c=>c.dong===addrDong&&c.name.includes(kw));
+  }
+  // 3차: 단지명 키워드만
+  if(!matched){
+    const kw=name.replace(/아파트|단지|맨션/g,'').substring(0,3);
+    matched=ALL_COMPLEXES.find(c=>c.name.includes(kw));
+  }
   if(matched){
     const lawd=LAWD_MAP[matched.gu]||'11680';
     const bjdong=matched.bjdong||BJDONG_MAP2[matched.dong]||'10600';
@@ -1141,7 +1148,7 @@ function clickMarker(name,address,lat,lng){
     LAWD_CD=lawd;selectedBjdongCd=bjdong;selectedJibun=matched.jibun;
     loadRVI(matched.name,addr2,lat,lng,lawd,bjdong,matched.jibun,matched.h,matched.far||0);
   } else {
-    // fallback: 기존 역지오코딩 방식
+    // fallback: 역지오코딩
     geocoder.coord2RegionCode(lng,lat,function(rr,rs){
       let lc=LAWD_CD,bc=selectedBjdongCd;
       if(rs===kakao.maps.services.Status.OK){for(let i=0;i<rr.length;i++){if(rr[i].region_type==='B'){lc=rr[i].code.substring(0,5);bc=rr[i].code.substring(5,10);break;}}}
