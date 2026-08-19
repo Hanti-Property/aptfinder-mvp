@@ -97,13 +97,10 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 
 <!-- 빠른 선택 -->
 <div class="quick-section">
-  <h3>빠른 선택 — 강남3구 재건축 후보 단지 (143개)</h3>
+  <h3 id="quickSelectTitle">빠른 선택 — 강남3구 재건축 후보 단지</h3>
   <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
     <select id="selGu" onchange="filterDong()" style="padding:8px 12px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:6px;color:#fff;font-size:13px;">
       <option value="">구 선택</option>
-      <option value="강남구">강남구 (65)</option>
-      <option value="서초구">서초구 (30)</option>
-      <option value="송파구">송파구 (48)</option>
     </select>
     <select id="selDong" onchange="filterComplex()" style="padding:8px 12px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:6px;color:#fff;font-size:13px;">
       <option value="">동 선택</option>
@@ -1073,7 +1070,7 @@ const ps=new kakao.maps.services.Places();
 const reconOverlays=[];
 function loadReconMarkers(){
   // 강남구 주요 단지만 마커 표시 (세대수 200 이상)
-  const targets=ALL_COMPLEXES.filter(c=>c.gu==='강남구'&&c.h>=200);
+  const targets=ALL_COMPLEXES.filter(c=>c.gu==='강남구');
   let idx=0;
   function searchNext(){
     if(idx>=targets.length)return;
@@ -1137,6 +1134,16 @@ function clickMarker(name,address,lat,lng){
     });
   }
 }
+// 구 드롭다운 동적 생성 (ALL_COMPLEXES 기반)
+(function initGuSelect(){
+  const sel=document.getElementById('selGu');
+  const gus=[...new Set(ALL_COMPLEXES.map(c=>c.gu))];
+  gus.forEach(gu=>{
+    const cnt=ALL_COMPLEXES.filter(c=>c.gu===gu).length;
+    sel.innerHTML+=`<option value="${gu}">${gu} (${cnt})</option>`;
+  });
+  document.getElementById('quickSelectTitle').textContent='빠른 선택 — 강남3구 재건축 후보 단지 ('+ALL_COMPLEXES.length+'개)';
+})();
 loadReconMarkers();
 
 kakao.maps.event.addListener(map,'click',function(e){
