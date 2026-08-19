@@ -1076,46 +1076,29 @@ const marker=new kakao.maps.Marker({position:map.getCenter()});marker.setMap(map
 const geocoder=new kakao.maps.services.Geocoder();
 const ps=new kakao.maps.services.Places();
 
-// 재건축 단지 마커 표시 (강남3구 주요 단지)
-const RECON_LIST=[
-  // 강남구 - 대치동
-  '은마아파트','미도맨션아파트 대치','선경아파트 대치동','쌍용대치아파트','대치우성아파트',
-  '개포1차우성아파트','개포2차우성아파트',
-  // 강남구 - 압구정동
-  '압구정현대아파트','영동한양아파트 압구정','압구정미성아파트',
-  // 강남구 - 개포동
-  '개포주공아파트 185','개포주공아파트 187','경남아파트 개포','개포현대아파트',
-  '개포우성아파트','개포6차우성아파트','개포8차우성아파트',
-  // 강남구 - 기타
-  '동현아파트 논현','진흥아파트 청담동','진흥아파트 삼성동',
-  '일원동우성7차아파트','개포한신아파트',
-  // 서초구
-  '신반포2차아파트','신반포4차아파트','신반포7차아파트',
-  '방배삼호아파트','방배우성아파트','임광아파트 서초동',
-  '삼호아파트 서초동','잠원한신아파트',
-  // 송파구 - 잠실
-  '잠실주공5단지 아파트','잠실우성아파트','아시아선수촌아파트','장미아파트 신천동',
-  // 송파구 - 기타
-  '올림픽선수기자촌','올림픽훼밀리타운','가락삼익맨숀','송파한양아파트',
-  '2차한양아파트 송파','한강극동아파트 풍납','동아한가람아파트 풍납',
-  '코오롱아파트 오금동','건영아파트 문정동'
-];
+// 재건축 단지 마커 표시 (ALL_COMPLEXES 기반 — 강남구만 우선 표시)
 const reconOverlays=[];
 function loadReconMarkers(){
+  // 강남구 주요 단지만 마커 표시 (세대수 200 이상)
+  const targets=ALL_COMPLEXES.filter(c=>c.gu==='강남구'&&c.h>=200);
   let idx=0;
   function searchNext(){
-    if(idx>=RECON_LIST.length)return;
-    const kw=RECON_LIST[idx];idx++;
-    ps.keywordSearch(kw,function(data,status){
+    if(idx>=targets.length)return;
+    const c=targets[idx];idx++;
+    const searchKw=c.name+' '+c.dong;
+    ps.keywordSearch(searchKw,function(data,status){
       if(status===kakao.maps.services.Status.OK&&data.length>0){
         const p=data[0];
         const pos=new kakao.maps.LatLng(p.y,p.x);
-        const shortName=p.place_name.replace(/아파트|단지/g,'').substring(0,6);
-        const content='<div style="background:#2E7D32;color:#fff;padding:3px 8px;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.3);" onclick="clickMarker(\''+p.place_name.replace(/'/g,'')+'\',\''+p.address_name.replace(/'/g,'')+'\','+p.y+','+p.x+')">'+shortName+'</div>';
+        const shortName=c.name.replace(/아파트|단지|맨션/g,'').substring(0,6);
+        const lawd=LAWD_MAP[c.gu]||'11680';
+        const bjdong=c.bjdong||BJDONG_MAP2[c.dong]||'10600';
+        const addr='서울 '+c.gu+' '+c.dong+' '+c.jibun;
+        const content='<div style="background:#2E7D32;color:#fff;padding:3px 8px;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.3);" onclick="quickLoad2(\''+c.name.replace(/'/g,"\\'")+'\',\''+addr.replace(/'/g,"\\'")+'\',\''+lawd+'\',\''+bjdong+'\',\''+c.jibun+'\')">'+shortName+'</div>';
         const ov=new kakao.maps.CustomOverlay({position:pos,content:content,yAnchor:1.5});
         ov.setMap(map);reconOverlays.push(ov);
       }
-      setTimeout(searchNext,150); // 150ms 간격으로 순차 호출
+      setTimeout(searchNext,150);
     },{size:1,page:1});
   }
   searchNext();
