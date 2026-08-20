@@ -628,10 +628,12 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   const nvpRaw=totalW>0?totalWP/totalW:0;
   // 동 이름 추출 (NVP cap + LOC에서 공용)
   const umdForLoc=(function(){const parts=(address||'').split(' ');for(const p of parts){if(p.endsWith('동'))return p;}return '';})();
-  // 동별 NVP 상한 (재건축 후 현실적 도달 가능 가격)
+  // NVP cap: 비교 단지가 모두 타 구(서초구 등)일 때만 적용
+  // 같은 구(강남구) 내 신축이 비교에 포함되면 cap 미적용
   const NVP_CAP={'압구정동':23000,'청담동':23000,'대치동':18000,'개포동':15000,'도곡동':15000,'일원동':15000,'논현동':15000,'삼성동':15000};
+  const hasSameGuCompare=nvpDetails.some(d=>{const comp=NEW_COMPLEXES.find(c=>c.name===d.name);return comp&&comp.lawd===LAWD_CD;});
   const nvpCap=(NVP_CAP[umdForLoc]||15000)*NVP_PREMIUM;
-  const nvp=Math.min(nvpRaw*NVP_PREMIUM, nvpCap);
+  const nvp=hasSameGuCompare?(nvpRaw*NVP_PREMIUM):Math.min(nvpRaw*NVP_PREMIUM, nvpCap);
   const nvpRate=myAvgPPP>0&&nvp>0?((nvp-myAvgPPP)/myAvgPPP*100):0;
   const nrt=totalRW>0?(totalRWP/totalRW)*NVP_PREMIUM:0;
 
@@ -723,7 +725,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
 
   // NVP 비교
   const nvpR=document.getElementById('nvpRows');nvpR.innerHTML='';
-  const nvpWasCapped=nvpRaw*NVP_PREMIUM>nvpCap; // cap이 적용되었는지
+  const nvpWasCapped=!hasSameGuCompare&&(nvpRaw*NVP_PREMIUM>nvpCap); // cap이 적용되었는지
   nvpDetails.sort((a,b)=>b.w-a.w);
   if(!nvpWasCapped&&nvpDetails.length){
     // cap 미적용: 비교 단지 정상 표시
