@@ -625,7 +625,11 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     let rPPPs=rents.map(t=>{const d2=parseInt((t.deposit||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return ar>0?d2/(ar/3.3058):0;}).filter(v=>v>0);
     if(rPPPs.length){rPPPs=removeOutliers(rPPPs);const avg=rPPPs.reduce((a,b)=>a+b,0)/rPPPs.length;totalRW+=w;totalRWP+=w*avg;}
   }
-  const nvpRaw=totalW>0?totalWP/totalW:0,nvp=nvpRaw*NVP_PREMIUM;
+  const nvpRaw=totalW>0?totalWP/totalW:0;
+  // 동별 NVP 상한 (재건축 후 현실적 도달 가능 가격)
+  const NVP_CAP={'압구정동':23000,'청담동':23000,'대치동':18000,'개포동':15000,'도곡동':15000,'일원동':15000,'논현동':15000,'삼성동':15000};
+  const nvpCap=(NVP_CAP[umdForLoc]||15000)*NVP_PREMIUM;
+  const nvp=Math.min(nvpRaw*NVP_PREMIUM, nvpCap);
   const nvpRate=myAvgPPP>0&&nvp>0?((nvp-myAvgPPP)/myAvgPPP*100):0;
   const nrt=totalRW>0?(totalRWP/totalRW)*NVP_PREMIUM:0;
 
