@@ -626,6 +626,8 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     if(rPPPs.length){rPPPs=removeOutliers(rPPPs);const avg=rPPPs.reduce((a,b)=>a+b,0)/rPPPs.length;totalRW+=w;totalRWP+=w*avg;}
   }
   const nvpRaw=totalW>0?totalWP/totalW:0;
+  // 동 이름 추출 (NVP cap + LOC에서 공용)
+  const umdForLoc=(function(){const parts=(address||'').split(' ');for(const p of parts){if(p.endsWith('동'))return p;}return '';})();
   // 동별 NVP 상한 (재건축 후 현실적 도달 가능 가격)
   const NVP_CAP={'압구정동':23000,'청담동':23000,'대치동':18000,'개포동':15000,'도곡동':15000,'일원동':15000,'논현동':15000,'삼성동':15000};
   const nvpCap=(NVP_CAP[umdForLoc]||15000)*NVP_PREMIUM;
@@ -647,7 +649,6 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
 
   // LOC (지역등급) 점수 산출
   const LOC_GRADES={'압구정동':100,'대치동':100,'청담동':100,'개포동':80,'도곡동':80,'삼성동':80,'논현동':60,'일원동':60};
-  const umdForLoc=(function(){const parts=(address||'').split(' ');for(const p of parts){if(p.endsWith('동'))return p;}return '';})();
   const locScore=LOC_GRADES[umdForLoc]||50; // 미등록 동은 50점 기본
 
   const scores={
