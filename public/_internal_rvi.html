@@ -886,12 +886,21 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   if(!myTrades.length)tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">최근 12개월 거래 없음</td></tr>';
 
   // === RRI 투자수익률 산출 ===
-  // 면적 선택 정책: 1순위 76~90(84타입) → 2순위 전체 거래의 평당가로 84㎡ 환산
+  // 면적 선택 규칙:
+  // 1순위: 76~90㎡ (84타입) 거래 → 그대로 사용
+  // 2순위: 150㎡ 미만 거래 중, 84㎡에 가장 가까운 면적의 평당가로 84㎡ 환산
+  //        (150㎡+ 대형은 면적할인으로 평당가 왜곡 → 제외)
   let rriTrades=myTrades.filter(t=>{const a=parseFloat(t.excluUseAr||0);return a>=76&&a<=90;});
   let rriUse84Conversion=false;
   if(!rriTrades.length){
-    // 84타입 없음 → 전체 거래 평당가 기준 84㎡(25.4평) 환산
-    rriTrades=myTrades.slice(); // 전체 거래 사용
+    // 150㎡ 미만 거래만 대상, 84에 가까운 순 정렬
+    const candidates=myTrades.filter(t=>parseFloat(t.excluUseAr||0)<150&&parseFloat(t.excluUseAr||0)>0);
+    if(candidates.length){
+      candidates.sort((a,b)=>Math.abs(parseFloat(a.excluUseAr)-84)-Math.abs(parseFloat(b.excluUseAr)-84));
+      rriTrades=[candidates[0]]; // 84에 가장 가까운 1건
+    } else {
+      rriTrades=myTrades.slice(); // 정말 없으면 전체
+    }
     rriUse84Conversion=true;
   }
   const latestTrade = rriTrades.length > 0 ? rriTrades[0] : null;
