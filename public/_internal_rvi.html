@@ -755,7 +755,11 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   const NVP_CAP={'압구정동':23000,'청담동':23000,'대치동':18000,'개포동':15000,'도곡동':15000,'일원동':15000,'논현동':15000,'삼성동':15000};
   const hasSameGuCompare=nvpDetails.some(d=>{const comp=NEW_COMPLEXES.find(c=>c.name===d.name);return comp&&comp.lawd===LAWD_CD;});
   const nvpCap=(NVP_CAP[umdForLoc]||15000)*NVP_PREMIUM;
-  const nvp=hasSameGuCompare?(nvpRaw*NVP_PREMIUM):Math.min(nvpRaw*NVP_PREMIUM, nvpCap);
+  let nvp=hasSameGuCompare?(nvpRaw*NVP_PREMIUM):Math.min(nvpRaw*NVP_PREMIUM, nvpCap);
+  // NVP 하한: 자체 평당가 > NVP이면, 자체 평당가 × 1.2로 대체 (용적률 프리미엄 반영 단지)
+  if(myAvgPPP>0 && myAvgPPP>nvp/NVP_PREMIUM){
+    nvp=myAvgPPP*NVP_PREMIUM;
+  }
   const nvpRate=myAvgPPP>0&&nvp>0?((nvp-myAvgPPP)/myAvgPPP*100):0;
   const nrt=totalRW>0?(totalRWP/totalRW)*NVP_PREMIUM:0;
 
