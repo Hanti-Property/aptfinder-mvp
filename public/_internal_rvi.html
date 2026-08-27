@@ -627,7 +627,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
 
   const[recapData,landData,allTrades,allRents,titleItems]=await Promise.all([
     fetchRecap(lawdCd,bjdongCd,jibun),fetchLand(lawdCd,bjdongCd,jibun),
-    fetchTrades(lawdCd,6),fetchTrades(lawdCd,6,'rent'),
+    fetchTrades(lawdCd,12),fetchTrades(lawdCd,12,'rent'),
     fetchTitle(lawdCd,bjdongCd,jibun)
   ]);
 
@@ -724,8 +724,8 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   // 비한강벨트: 2km 내 신축 1개 이하면 3km로 확대
   if(!isHanRiverBelt&&nearby.length<=1){searchRadius=3.0;nearby=NEW_COMPLEXES.filter(c=>haversine(lat,lng,c.lat,c.lng)<=searchRadius);}
   const otherLawds=[...new Set(nearby.filter(c=>c.lawd!==lawdCd).map(c=>c.lawd))];
-  let extra=[];for(const lc of otherLawds){extra=extra.concat(await fetchTrades(lc,6));}
-  let extraRents=[];for(const lc of otherLawds){extraRents=extraRents.concat(await fetchTrades(lc,6,'rent'));}
+  let extra=[];for(const lc of otherLawds){extra=extra.concat(await fetchTrades(lc,12));}
+  let extraRents=[];for(const lc of otherLawds){extraRents=extraRents.concat(await fetchTrades(lc,12,'rent'));}
   const combined=allTrades.concat(extra),combinedRents=allRents.concat(extraRents);
 
   let totalW=0,totalWP=0,nvpDetails=[],totalRW=0,totalRWP=0;
@@ -868,22 +868,43 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     const amt=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0),ppp=ar>0?amt/(ar/3.3058):0;
     tbody.innerHTML+=`<tr><td>${t.dealYear}.${t.dealMonth}.${(t.dealDay||'').trim()}</td><td>전용 ${ar}㎡</td><td>${t.floor||''}층</td><td class="price">${amt>=10000?(amt/10000).toFixed(1)+'억':amt.toLocaleString()+'만'}</td><td>${Math.round(ppp).toLocaleString()}만/평</td></tr>`;
   });
-  if(!myTrades.length)tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">최근 6개월 거래 없음</td></tr>';
+  if(!myTrades.length)tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666">최근 12개월 거래 없음</td></tr>';
 
   // === RRI 투자수익률 산출 ===
-  // 면적 선택 정책: 1순위 76~90 → 2순위 59~76 → 3순위 90~115 → 4순위 전체
+  // 면적 선택 정책: 1순위 76~90(84타입) → 2순위 전체 거래의 평당가로 84㎡ 환산
   let rriTrades=myTrades.filter(t=>{const a=parseFloat(t.excluUseAr||0);return a>=76&&a<=90;});
-  if(!rriTrades.length) rriTrades=myTrades.filter(t=>{const a=parseFloat(t.excluUseAr||0);return a>=59&&a<76;});
-  if(!rriTrades.length) rriTrades=myTrades.filter(t=>{const a=parseFloat(t.excluUseAr||0);return a>90&&a<=115;});
-  if(!rriTrades.length) rriTrades=myTrades;
+  let rriUse84Conversion=false;
+  if(!rriTrades.length){
+    // 84타입 없음 → 전체 거래 평당가 기준 84㎡(25.4평) 환산
+    rriTrades=myTrades.slice(); // 전체 거래 사용
+    rriUse84Conversion=true;
+  }
   const latestTrade = rriTrades.length > 0 ? rriTrades[0] : null;
+  
+  // 84 환산 시: 평당가 × 25.4평으로 현재가/면적 재산출
+  let rriArea, rriPrice, rriTradeInfo;
+  if(rriUse84Conversion && latestTrade){
+    const ppp=parseInt((latestTrade.dealAmount||'0').replace(/,/g,''))/( parseFloat(latestTrade.excluUseAr||76)/3.3058);
+    rriArea=84; // 84㎡ 기준
+    rriPrice=Math.round(ppp*84/3.3058); // 평당가 × 25.4평
+    rriTradeInfo=`84㎡ 환산 (평당 ${Math.round(ppp).toLocaleString()}만 기준)`;
+  } else if(latestTrade){
+    rriArea=parseFloat(latestTrade.excluUseAr||0);
+    rriPrice=parseInt((latestTrade.dealAmount||'0').replace(/,/g,''));
+    rriTradeInfo=`${latestTrade.dealYear}.${String(latestTrade.dealMonth).padStart(2,'0')} | 전용${latestTrade.excluUseAr}㎡ | ${latestTrade.floor}층`;
+  } else {
+    rriArea=0; rriPrice=0; rriTradeInfo='';
+  }
+
   window._rriData = {
     nvpPPP: nvp,
     currentPPP: myAvgPPP,
-    avgArea: latestTrade ? parseFloat(latestTrade.excluUseAr || 0) : 0,
-    currentPrice: latestTrade ? parseInt((latestTrade.dealAmount || '0').replace(/,/g, '')) : 0,
+    avgArea: rriArea,
+    currentPrice: rriPrice,
     far: far,
-    tradeInfo: latestTrade ? `${latestTrade.dealYear}.${String(latestTrade.dealMonth).padStart(2,'0')} | 전용${latestTrade.excluUseAr}㎡ | ${latestTrade.floor}층` : '',
+    tradeInfo: rriTradeInfo,
+    name: name,
+    households: households,
   };
   updateRRI();
 
