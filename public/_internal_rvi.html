@@ -153,6 +153,21 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
   <div class="index-grid" id="indexGrid"></div>
 
   <!-- RRI 투자수익률 -->
+  <!-- ETA 카드 -->
+  <div id="etaCard" style="background:#1e1e3f;border:1px solid #2a2a4a;border-radius:12px;padding:16px;margin-bottom:16px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:13px;color:#bbb;">📅 예상 입주시기 (ETA)</div>
+        <div style="font-size:28px;font-weight:900;color:#42A5F5;margin-top:4px;" id="eta-year">—</div>
+        <div style="font-size:13px;color:#888;margin-top:2px;" id="eta-sub">—</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:48px;font-weight:900;color:#FFA726;" id="eta-years">—</div>
+        <div style="font-size:13px;color:#888;">년 후</div>
+      </div>
+    </div>
+  </div>
+
   <div class="section-title">💰 재건축 투자수익률 (RRI)</div>
   <div id="rriCard" style="background:#1e1e3f;border:1px solid #2a2a4a;border-radius:12px;padding:20px;margin-bottom:16px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
@@ -936,9 +951,22 @@ function updateRRI(){
   // 총 투자비
   const totalInvest=currentPrice+addCost;
 
-  // 미래 가치 = NVP평당가 × (1+r)^ETA × 전용평
+  // 미래 가치 = NVP v2 기준 × (1+r)^ETA × 전용평
   const eta=getETA(selectedJibun, window._rriData.name||'');
-  const futurePPP=d.nvpPPP*Math.pow(1+annualRate,eta);
+  
+  // NVP v2 산출 (상단 RRI에 적용)
+  const _dongName=BJDONG_TO_DONG[selectedBjdongCd]||'';
+  const _cName=d.name||document.getElementById('complexName').textContent||'';
+  const _hhld=d.households||0;
+  const _features=getComplexFeatures(_cName, _hhld);
+  const _v2=calcNvpV2(_dongName, _hhld, _features);
+  let nvpForRRI=_v2.nvpV2*NVP_PREMIUM;
+  // v2 하한: 자체 평당가 > v2 NVP이면, 자체 × 1.2
+  if(d.currentPPP>0 && d.currentPPP>_v2.nvpV2){
+    nvpForRRI=d.currentPPP*NVP_PREMIUM;
+  }
+  
+  const futurePPP=nvpForRRI*Math.pow(1+annualRate,eta);
   const futureValue=futurePPP*excluPy;
 
   // RRI, CAGR
@@ -950,7 +978,7 @@ function updateRRI(){
   document.getElementById('rri-current').textContent=fmtP(currentPrice);
   document.getElementById('rri-current-sub').textContent=d.tradeInfo ? d.tradeInfo : `전용 ${d.avgArea.toFixed(1)}㎡ (${excluPy.toFixed(1)}평)`;
   document.getElementById('rri-future').textContent=fmtP(futureValue);
-  document.getElementById('rri-future-sub').textContent=`NVP ${Math.round(d.nvpPPP).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^${eta} = ${Math.round(futurePPP).toLocaleString()}만/전용평`;
+  document.getElementById('rri-future-sub').textContent=`NVP(v2) ${Math.round(nvpForRRI).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^${eta} = ${Math.round(futurePPP).toLocaleString()}만/전용평`;
   document.getElementById('rri-area').textContent=excluPy.toFixed(1)+'평(전용)';
   document.getElementById('rri-cost').textContent=fmtP(addCost);
   document.getElementById('rri-cost').title=`용적률 ${d.far?d.far.toFixed(0)+'%':'미확보'} → ${costPerPy.toLocaleString()}만/전용평`;
@@ -961,6 +989,14 @@ function updateRRI(){
   document.getElementById('rri-rate').style.color=rriColor;
   document.getElementById('rri-rate').textContent=(rri>=0?'+':'')+rri.toFixed(1)+'%';
   document.getElementById('rri-cagr').textContent=`연환산 CAGR ${(cagr>=0?'+':'')+cagr.toFixed(2)}%/년 | 순수익 ${fmtP(futureValue-totalInvest)} | ETA ${eta}년`;
+  // ETA 카드 업데이트
+  const etaCard=document.getElementById('etaCard');
+  if(etaCard){
+    etaCard.style.display='block';
+    document.getElementById('eta-years').textContent=eta;
+    document.getElementById('eta-year').textContent=`${2026+Math.round(eta)}년 입주 예상`;
+    document.getElementById('eta-sub').textContent=`마스터DB 기준 | 상승률 연 ${(annualRate*100).toFixed(0)}% 적용`;
+  }
   // 라벨 업데이트
   const futureLabel=document.querySelector('#rriCard .section-title, [id="rri-future"]');
   const labelEl=document.getElementById('rri-future').previousElementSibling;
