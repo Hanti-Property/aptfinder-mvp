@@ -207,8 +207,14 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 
   <!-- NVP 비교 -->
   <div class="nvp-compare" id="nvpCompare">
-    <h4>🏠 NVP 비교 신축 단지</h4>
+    <h4>🏠 NVP 비교 신축 단지 (v1: API 기반)</h4>
     <div id="nvpRows"></div>
+  </div>
+
+  <!-- NVP v2: 동별 기준 -->
+  <div class="nvp-compare" id="nvpV2Compare" style="margin-top:12px;border-top:1px dashed #2a2a4a;padding-top:12px;">
+    <h4>🏗️ NVP v2 (동별 기준가 × 프리미엄)</h4>
+    <div id="nvpV2Rows" style="font-size:13px;color:#bbb;line-height:2;"></div>
   </div>
 
   <!-- 최근 거래내역 -->
@@ -299,6 +305,52 @@ const ETA_BY_NAME={
   '도곡개포한신':7.0,'일원동우성':10.0,'개포6차':10.0,'개포8차':12.0,
 };
 const ETA_DEFAULT=10; // 매칭 안 될 때 기본값
+
+// === NVP v2: 동별 기준가 (대표님 입력 2026-08-23) ===
+const NVP_V2_BASE={
+  '압구정동':20000, '대치동':15000, '개포동':13000,
+  '도곡동':13000, '일원동':13000, '삼성동':14000, '청담동':17000
+};
+// 동 이름 매핑 (법정동코드 → 동명)
+const BJDONG_TO_DONG={'10600':'대치동','10300':'개포동','11000':'압구정동','10400':'청담동','10500':'삼성동','11400':'일원동','10800':'논현동','10100':'역삼동'};
+// 도곡동은 별도 처리 필요 (개포동 bjdongCd 사용하는 경우 있음)
+
+function calcNvpV2(dongName, units, features){
+  // features: {station, school, river, leader}
+  const base = NVP_V2_BASE[dongName] || 13000;
+  let premium = 0;
+  // 규모
+  if(units>=4000) premium+=0.15;
+  else if(units>=2000) premium+=0.10;
+  else if(units>=1000) premium+=0.05;
+  // 위치
+  if(features.station) premium+=0.05;
+  if(features.school) premium+=0.05;
+  if(features.river) premium+=0.10;
+  // 브랜드
+  if(features.leader) premium+=0.10;
+  return {base, premium, nvpV2: Math.round(base*(1+premium))};
+}
+
+// 단지 특성 매핑 (주요 단지만 — 나머지는 기본값)
+const COMPLEX_FEATURES={
+  '은마아파트':{school:true, leader:true},
+  '미도맨션아파트':{school:true},
+  '선경아파트':{school:true},
+  '현대6':{river:true},'현대1':{river:true},'현대3차':{river:true},
+  '현대5차':{river:true},'현대8차':{river:true},'현대13':{river:true},'현대14':{river:true},
+  '신현대':{river:true},'한양1':{river:true},'한양2':{river:true},
+  '한양3':{river:true},'한양4':{river:true},'한양5':{river:true},
+  '한양6':{river:true},'한양7':{river:true},'미성1':{river:true},'미성2':{river:true},
+};
+
+function getComplexFeatures(name, units){
+  const f={station:false,school:false,river:false,leader:false};
+  for(const [key,val] of Object.entries(COMPLEX_FEATURES)){
+    if(name&&name.includes(key)){Object.assign(f,val);break;}
+  }
+  return f;
+}
 
 function getETA(jibun, name){
   // 1) 지번으로 매칭
@@ -892,6 +944,46 @@ function updateRRI(){
   const futureLabel=document.querySelector('#rriCard .section-title, [id="rri-future"]');
   const labelEl=document.getElementById('rri-future').previousElementSibling;
   if(labelEl) labelEl.textContent=`${eta}년 후 예상가`;
+
+  // === NVP v2 표시 ===
+  const dongName=BJDONG_TO_DONG[selectedBjdongCd]||'';
+  const cName=d.name||document.getElementById('complexName').textContent||'';
+  const hhld=d.households||0;
+  const features=getComplexFeatures(cName, hhld);
+  const v2=calcNvpV2(dongName, hhld, features);
+  const v2FuturePPP=v2.nvpV2*Math.pow(1+annualRate,eta);
+  const v2FutureValue=v2FuturePPP*excluPy;
+  const v2Rri=((v2FutureValue-totalInvest)/totalInvest)*100;
+  const v2Cagr=(Math.pow(v2FutureValue/totalInvest,1/eta)-1)*100;
+  
+  const nvpV2El=document.getElementById('nvpV2Rows');
+  if(nvpV2El){
+    nvpV2El.innerHTML=`
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #2a2a4a;">
+        <span>동별 기준: ${dongName} (${v2.base.toLocaleString()}만/평)</span>
+        <span style="color:#42A5F5;">${v2.base.toLocaleString()}만/평</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #2a2a4a;">
+        <span>프리미엄: ${(v2.premium*100).toFixed(0)}% (규모${hhld>=4000?'+15':hhld>=2000?'+10':hhld>=1000?'+5':'+0'}${features.school?'/학군+5':''}${features.river?'/한강+10':''}${features.leader?'/대장+10':''})</span>
+        <span style="color:#66BB6A;">+${(v2.premium*100).toFixed(0)}%</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-weight:700;">
+        <span>NVP v2</span>
+        <span style="color:#FFA726;">${v2.nvpV2.toLocaleString()}만/평</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #2a2a4a;">
+        <span>v2 기준 ${eta}년 후 예상가</span>
+        <span style="color:#42A5F5;font-weight:700;">${(v2FutureValue/10000).toFixed(1)}억</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;">
+        <span>v2 RRI / CAGR</span>
+        <span style="color:${v2Rri>=50?'#66BB6A':v2Rri>=20?'#42A5F5':'#FFA726'};">${v2Rri>=0?'+':''}${v2Rri.toFixed(1)}% | CAGR ${v2Cagr>=0?'+':''}${v2Cagr.toFixed(2)}%</span>
+      </div>
+      <div style="padding:6px 0;font-size:11px;color:#666;">
+        ※ v1(API): 인근 신축 실거래 가중평균 | v2(기준가): 대표 설정 동별 기준 × 프리미엄
+      </div>
+    `;
+  }
 }
 
 // 단지 인덱스 대시보드로 이동 (새 탭)
