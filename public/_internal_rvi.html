@@ -756,10 +756,6 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   const hasSameGuCompare=nvpDetails.some(d=>{const comp=NEW_COMPLEXES.find(c=>c.name===d.name);return comp&&comp.lawd===LAWD_CD;});
   const nvpCap=(NVP_CAP[umdForLoc]||15000)*NVP_PREMIUM;
   let nvp=hasSameGuCompare?(nvpRaw*NVP_PREMIUM):Math.min(nvpRaw*NVP_PREMIUM, nvpCap);
-  // NVP 하한: 자체 평당가 > NVP이면, 자체 평당가 × 1.2로 대체 (용적률 프리미엄 반영 단지)
-  if(myAvgPPP>0 && myAvgPPP>nvp/NVP_PREMIUM){
-    nvp=myAvgPPP*NVP_PREMIUM;
-  }
   const nvpRate=myAvgPPP>0&&nvp>0?((nvp-myAvgPPP)/myAvgPPP*100):0;
   const nrt=totalRW>0?(totalRWP/totalRW)*NVP_PREMIUM:0;
 
@@ -977,7 +973,13 @@ function updateRRI(){
   const features=getComplexFeatures(cName, hhld);
   const v2=calcNvpV2(dongName, hhld, features);
   // v2에도 동일하게 ×1.2 신축 프리미엄 적용 (v1과 동일 조건)
-  const v2NvpWithPremium=v2.nvpV2*NVP_PREMIUM;
+  let v2NvpWithPremium=v2.nvpV2*NVP_PREMIUM;
+  // NVP v2 하한: 자체 평당가 > v2 NVP이면, 자체 평당가 × 1.2로 대체 (용적률 프리미엄 단지)
+  let v2UseSelf=false;
+  if(d.currentPPP>0 && d.currentPPP>v2.nvpV2){
+    v2NvpWithPremium=d.currentPPP*NVP_PREMIUM;
+    v2UseSelf=true;
+  }
   const v2FuturePPP=v2NvpWithPremium*Math.pow(1+annualRate,eta);
   const v2FutureValue=v2FuturePPP*excluPy;
   const v2Rri=((v2FutureValue-totalInvest)/totalInvest)*100;
@@ -1018,7 +1020,10 @@ function updateRRI(){
         </tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:#666;line-height:1.6;">
-        v2 산출: ${dongName} 기준 ${v2.base.toLocaleString()}만 × (1+${(v2.premium*100).toFixed(0)}%프리미엄) × 1.2 = ${Math.round(v2NvpWithPremium).toLocaleString()}만/평<br>
+        v2 산출: ${v2UseSelf
+          ?`⚠️ 자체 평당가(${Math.round(d.currentPPP).toLocaleString()}만) > 동별기준(${v2.nvpV2.toLocaleString()}만) → 자체 × 1.2 = ${Math.round(v2NvpWithPremium).toLocaleString()}만/평`
+          :`${dongName} 기준 ${v2.base.toLocaleString()}만 × (1+${(v2.premium*100).toFixed(0)}%프리미엄) × 1.2 = ${Math.round(v2NvpWithPremium).toLocaleString()}만/평`
+        }<br>
         프리미엄: 규모${hhld>=4000?'+15':hhld>=2000?'+10':hhld>=1000?'+5':'+0'}%${features.school?' / 학군+5%':''}${features.river?' / 한강+10%':''}${features.leader?' / 대장+10%':''}
       </div>
     `;
