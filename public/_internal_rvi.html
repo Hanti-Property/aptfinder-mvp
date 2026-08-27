@@ -951,36 +951,50 @@ function updateRRI(){
   const hhld=d.households||0;
   const features=getComplexFeatures(cName, hhld);
   const v2=calcNvpV2(dongName, hhld, features);
-  const v2FuturePPP=v2.nvpV2*Math.pow(1+annualRate,eta);
+  // v2에도 동일하게 ×1.2 신축 프리미엄 적용 (v1과 동일 조건)
+  const v2NvpWithPremium=v2.nvpV2*NVP_PREMIUM;
+  const v2FuturePPP=v2NvpWithPremium*Math.pow(1+annualRate,eta);
   const v2FutureValue=v2FuturePPP*excluPy;
   const v2Rri=((v2FutureValue-totalInvest)/totalInvest)*100;
   const v2Cagr=(Math.pow(v2FutureValue/totalInvest,1/eta)-1)*100;
   
+  // v1 값 (비교용 — 현재 RRI 섹션에 표시된 값)
+  const v1NvpPPP=d.nvpPPP; // 이미 ×1.2 적용된 값
+  
   const nvpV2El=document.getElementById('nvpV2Rows');
   if(nvpV2El){
     nvpV2El.innerHTML=`
-      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #2a2a4a;">
-        <span>동별 기준: ${dongName} (${v2.base.toLocaleString()}만/평)</span>
-        <span style="color:#42A5F5;">${v2.base.toLocaleString()}만/평</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #2a2a4a;">
-        <span>프리미엄: ${(v2.premium*100).toFixed(0)}% (규모${hhld>=4000?'+15':hhld>=2000?'+10':hhld>=1000?'+5':'+0'}${features.school?'/학군+5':''}${features.river?'/한강+10':''}${features.leader?'/대장+10':''})</span>
-        <span style="color:#66BB6A;">+${(v2.premium*100).toFixed(0)}%</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:6px 0;font-weight:700;">
-        <span>NVP v2</span>
-        <span style="color:#FFA726;">${v2.nvpV2.toLocaleString()}만/평</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #2a2a4a;">
-        <span>v2 기준 ${eta}년 후 예상가</span>
-        <span style="color:#42A5F5;font-weight:700;">${(v2FutureValue/10000).toFixed(1)}억</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:4px 0;">
-        <span>v2 RRI / CAGR</span>
-        <span style="color:${v2Rri>=50?'#66BB6A':v2Rri>=20?'#42A5F5':'#FFA726'};">${v2Rri>=0?'+':''}${v2Rri.toFixed(1)}% | CAGR ${v2Cagr>=0?'+':''}${v2Cagr.toFixed(2)}%</span>
-      </div>
-      <div style="padding:6px 0;font-size:11px;color:#666;">
-        ※ v1(API): 인근 신축 실거래 가중평균 | v2(기준가): 대표 설정 동별 기준 × 프리미엄
+      <div style="font-size:12px;color:#888;margin-bottom:8px;">동일 조건 비교: ×1.2 신축프리미엄, 연 ${(annualRate*100).toFixed(0)}% 상승률, ETA ${eta}년</div>
+      <table style="width:100%;font-size:13px;border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #2a2a4a;">
+          <th style="text-align:left;padding:6px 4px;color:#888;"></th>
+          <th style="text-align:right;padding:6px 4px;color:#42A5F5;">v1 (API 기반)</th>
+          <th style="text-align:right;padding:6px 4px;color:#FFA726;">v2 (동별 기준)</th>
+        </tr>
+        <tr style="border-bottom:1px solid #1a1a3a;">
+          <td style="padding:5px 4px;color:#bbb;">NVP (×1.2)</td>
+          <td style="text-align:right;padding:5px 4px;color:#42A5F5;">${v1NvpPPP?Math.round(v1NvpPPP).toLocaleString()+'만/평':'—'}</td>
+          <td style="text-align:right;padding:5px 4px;color:#FFA726;">${Math.round(v2NvpWithPremium).toLocaleString()}만/평</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1a1a3a;">
+          <td style="padding:5px 4px;color:#bbb;">${eta}년 후 예상가</td>
+          <td style="text-align:right;padding:5px 4px;color:#42A5F5;">${fmtP(futureValue)}</td>
+          <td style="text-align:right;padding:5px 4px;color:#FFA726;">${fmtP(v2FutureValue)}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1a1a3a;">
+          <td style="padding:5px 4px;color:#bbb;">RRI (수익률)</td>
+          <td style="text-align:right;padding:5px 4px;color:#42A5F5;">${rri>=0?'+':''}${rri.toFixed(1)}%</td>
+          <td style="text-align:right;padding:5px 4px;color:#FFA726;">${v2Rri>=0?'+':''}${v2Rri.toFixed(1)}%</td>
+        </tr>
+        <tr>
+          <td style="padding:5px 4px;color:#bbb;">CAGR (연환산)</td>
+          <td style="text-align:right;padding:5px 4px;color:#42A5F5;">${cagr>=0?'+':''}${cagr.toFixed(2)}%/년</td>
+          <td style="text-align:right;padding:5px 4px;color:#FFA726;">${v2Cagr>=0?'+':''}${v2Cagr.toFixed(2)}%/년</td>
+        </tr>
+      </table>
+      <div style="margin-top:8px;font-size:11px;color:#666;line-height:1.6;">
+        v2 산출: ${dongName} 기준 ${v2.base.toLocaleString()}만 × (1+${(v2.premium*100).toFixed(0)}%프리미엄) × 1.2 = ${Math.round(v2NvpWithPremium).toLocaleString()}만/평<br>
+        프리미엄: 규모${hhld>=4000?'+15':hhld>=2000?'+10':hhld>=1000?'+5':'+0'}%${features.school?' / 학군+5%':''}${features.river?' / 한강+10%':''}${features.leader?' / 대장+10%':''}
       </div>
     `;
   }
