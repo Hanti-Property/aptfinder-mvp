@@ -192,7 +192,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
       <span style="font-size:12px;color:#ccc;min-width:50px;" id="rriRateLabel">연 3%</span>
     </div>
     <div style="font-size:14px;color:#bbb;margin-top:10px;line-height:1.5;">
-      ※ 동일 평형 재건축 가정 | 사업기간 10년 | 분담금 = 실데이터 보간 (잠실5·개포6·7·은마 기준)
+      ※ 동일 평형 재건축 가정 | 사업기간 = ETA(단지별) | 분담금 = 실데이터 보간 (잠실5·개포6·7·은마 기준)
     </div>
     <div style="margin-top:12px;background:#12122b;border-radius:8px;padding:14px;">
       <div style="font-size:13px;color:#ccc;font-weight:600;margin-bottom:8px;">📐 RVI 평가지표 가중치</div>
@@ -242,6 +242,76 @@ const LAMBDA_URL='https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northea
 const LAND_LAMBDA='https://3b77wfcneqfnywtzw3z333kw6a0gtrzt.lambda-url.ap-northeast-2.on.aws/';
 const BLD_KEY='Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
 const NVP_PREMIUM=1.20;
+
+// === ETA (입주예상기간) 마스터 데이터 — 2026-08-23 기준 ===
+// key: 지번(bun) 또는 단지명, value: ETA(년)
+const ETA_BY_JIBUN={
+  // 개포동
+  '0185':7.0,  // 개포주공6·7단지
+  '0187':6.0,  // 개포주공5단지 (개포써밋187)
+  '0012':6.0,  // 한신(개포)=개포한신 (개포동12)
+  '0649':14.0, // 경남아파트 (경우현)
+  '0652':10.0, // 개포6차우아파트 → 확인필요
+  '0654':7.0,  // 도곡개포한신
+  '0179':12.0, // 개포8차우성
+  // 대치동
+  '0316':8.0,  // 은마아파트
+  '0511':12.0, // 미도맨션아파트
+  '0506':12.0, // 선경아파트
+  '0063':8.0,  // 대치우성아파트 (대치우성1차)
+  '0066':9.5,  // 대치쌍용1차
+  '0065':9.0,  // 대치쌍용2차
+  '0548':12.0, // 동현아파트
+  // 압구정동
+  '0369':11.0, // 현대1·2차 (압구정3구역)
+  '0456':11.0, // 현대6·7차 (압구정3구역)
+  '0443':11.0, // 현대3차 (압구정3구역)
+  '0433':11.0, // 현대(3구역) (압구정3구역)
+  '0462':11.0, // 현대14차 추정 (압구정3구역)
+  '0455':11.0, // 현대5차 (압구정3구역)
+  '0448':11.0, // 현대13차 (압구정3구역)
+  '0426':10.0, // 현대(신현대) (압구정2구역)
+  '0481':10.0, // 현대8차 (압구정4구역)
+  '0486':10.0, // 한양4차 (압구정4구역)
+  '0489':10.0, // 한양3차 (압구정4구역)
+  '0484':10.0, // 한양6차 (압구정4구역)
+  '0490':10.0, // 한양1차 (압구정5구역)
+  '0513':10.0, // 한양2차 (압구정5구역)
+  '0493':12.0, // 한양5차 (압구정6구역)
+  '0528':15.0, // 한양7차 (압구정6구역)
+  '0414':14.0, // 미성1차 (압구정1구역)
+  '0397':14.0, // 미성2차 (압구정1구역)
+  // 일원동
+  '0718':10.0, // 일원동우성7차
+  // 도곡동
+  '0175':7.0,  // 도곡개포한신
+};
+// 단지명 기반 fallback (지번 매칭 실패 시)
+const ETA_BY_NAME={
+  '은마아파트':8.0,'미도맨션아파트':12.0,'선경아파트':12.0,
+  '개포주공6':7.0,'개포주공5':6.0,'한신':6.0,
+  '대치우성':8.0,'대치쌍용1':9.5,'대치쌍용2':9.0,
+  '현대6':11.0,'현대1':11.0,'현대3차':11.0,'현대5차':11.0,
+  '현대13':11.0,'현대14':11.0,'현대8차':10.0,
+  '신현대':10.0,'한양1':10.0,'한양2':10.0,'한양3':10.0,
+  '한양4':10.0,'한양5':12.0,'한양6':10.0,'한양7':15.0,
+  '미성1':14.0,'미성2':14.0,'경남':14.0,'동현':12.0,
+  '도곡개포한신':7.0,'일원동우성':10.0,'개포6차':10.0,'개포8차':12.0,
+};
+const ETA_DEFAULT=10; // 매칭 안 될 때 기본값
+
+function getETA(jibun, name){
+  // 1) 지번으로 매칭
+  const bun=(jibun||'').replace(/^0+/,'').padStart(4,'0');
+  if(ETA_BY_JIBUN[bun]) return ETA_BY_JIBUN[bun];
+  // 2) 단지명 부분 매칭
+  if(name){
+    for(const [key,val] of Object.entries(ETA_BY_NAME)){
+      if(name.includes(key)) return val;
+    }
+  }
+  return ETA_DEFAULT;
+}
 const NEW_COMPLEXES=[
   // 개포/대치 신축
   {name:'래미안대치팰리스',keyword:'래미안대치팰',lat:37.4948,lng:127.0575,households:1608,lawd:'11680'},
@@ -793,20 +863,21 @@ function updateRRI(){
   // 총 투자비
   const totalInvest=currentPrice+addCost;
 
-  // 미래 가치 = NVP평당가 × (1+r)^10 × 전용평
-  const futurePPP=d.nvpPPP*Math.pow(1+annualRate,10);
+  // 미래 가치 = NVP평당가 × (1+r)^ETA × 전용평
+  const eta=getETA(selectedJibun, window._rriData.name||'');
+  const futurePPP=d.nvpPPP*Math.pow(1+annualRate,eta);
   const futureValue=futurePPP*excluPy;
 
   // RRI, CAGR
   const rri=((futureValue-totalInvest)/totalInvest)*100;
-  const cagr=(Math.pow(futureValue/totalInvest,1/10)-1)*100;
+  const cagr=(Math.pow(futureValue/totalInvest,1/eta)-1)*100;
 
   // 표시
   const fmtP=v=>v>=10000?(v/10000).toFixed(1)+'억':Math.round(v).toLocaleString()+'만';
   document.getElementById('rri-current').textContent=fmtP(currentPrice);
   document.getElementById('rri-current-sub').textContent=d.tradeInfo ? d.tradeInfo : `전용 ${d.avgArea.toFixed(1)}㎡ (${excluPy.toFixed(1)}평)`;
   document.getElementById('rri-future').textContent=fmtP(futureValue);
-  document.getElementById('rri-future-sub').textContent=`NVP ${Math.round(d.nvpPPP).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^10 = ${Math.round(futurePPP).toLocaleString()}만/전용평`;
+  document.getElementById('rri-future-sub').textContent=`NVP ${Math.round(d.nvpPPP).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^${eta} = ${Math.round(futurePPP).toLocaleString()}만/전용평`;
   document.getElementById('rri-area').textContent=excluPy.toFixed(1)+'평(전용)';
   document.getElementById('rri-cost').textContent=fmtP(addCost);
   document.getElementById('rri-cost').title=`용적률 ${d.far?d.far.toFixed(0)+'%':'미확보'} → ${costPerPy.toLocaleString()}만/전용평`;
@@ -816,7 +887,11 @@ function updateRRI(){
   const rriColor=rri>=50?'#66BB6A':rri>=20?'#42A5F5':rri>=0?'#FFA726':'#EF5350';
   document.getElementById('rri-rate').style.color=rriColor;
   document.getElementById('rri-rate').textContent=(rri>=0?'+':'')+rri.toFixed(1)+'%';
-  document.getElementById('rri-cagr').textContent=`연환산 CAGR ${(cagr>=0?'+':'')+cagr.toFixed(2)}%/년 | 순수익 ${fmtP(futureValue-totalInvest)}`;
+  document.getElementById('rri-cagr').textContent=`연환산 CAGR ${(cagr>=0?'+':'')+cagr.toFixed(2)}%/년 | 순수익 ${fmtP(futureValue-totalInvest)} | ETA ${eta}년`;
+  // 라벨 업데이트
+  const futureLabel=document.querySelector('#rriCard .section-title, [id="rri-future"]');
+  const labelEl=document.getElementById('rri-future').previousElementSibling;
+  if(labelEl) labelEl.textContent=`${eta}년 후 예상가`;
 }
 
 // 단지 인덱스 대시보드로 이동 (새 탭)
@@ -843,7 +918,7 @@ function loadRRIRanking(){
   fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
     const gangnam=data.filter(d=>d.gu==='강남구'&&d.far>0&&d.avgPPP>0);
     const NVP_BY_DONG={'압구정동':23000,'청담동':23000,'대치동':18000,'개포동':15000,'도곡동':15000,'일원동':15000,'논현동':15000,'삼성동':15000};
-    const RATE=0.03,YEARS=10;
+    const RATE=0.03;
     // LOC 등급
     const LOC_G={'압구정동':100,'대치동':100,'청담동':100,'개포동':80,'도곡동':80,'삼성동':80,'논현동':60,'일원동':60};
     // 점수화 함수 (loadRVI와 동일)
@@ -853,6 +928,7 @@ function loadRRIRanking(){
     function sAGE(a){return a>=45?100:a>=40?80:a>=35?60:40;}
     const results=[];
     gangnam.forEach(d=>{
+      const YEARS=getETA(d.jibun, d.name);
       const NVP_PPP=NVP_BY_DONG[d.dong]||15000;
       const futurePPP=NVP_PPP*Math.pow(1+RATE,YEARS);
       const area=d.latestArea||76;
