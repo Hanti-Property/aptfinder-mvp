@@ -231,10 +231,10 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
   <tbody id="tradeBody"><tr><td colspan="5" style="text-align:center;color:#666">단지를 선택하세요</td></tr></tbody></table>
 
   <!-- RVI 랭킹 테이블 -->
-  <div class="section-title">🏆 강남구 RVI 랭킹 (티커 단지 38개)</div>
+  <div class="section-title">⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순 (티커 단지 38개)</div>
   <div style="overflow-x:auto;margin-bottom:16px;">
     <table class="trade-table" id="rriRankTable">
-      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th>RVI</th><th>용적률</th><th>현재가</th><th>입주</th><th>RRI</th><th>CAGR</th></tr></thead>
+      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th>단계</th><th>ETA</th><th>입주</th><th>RVI</th><th>용적률</th><th>현재가</th></tr></thead>
       <tbody id="rriRankBody"><tr><td colspan="9" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
     </table>
   </div>
@@ -1128,21 +1128,32 @@ function loadRRIRanking(){
       const lpsScore=lps>=18?100:lps>=12?75:lps>=8?50:25;
       const nrtScore=50; // 배치에서는 기본값
       const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null});
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null)});
     });
-    // 미성1차·2차는 용적률이 다르므로 개별 랭킹 유지
-    results.sort((a,b)=>b.rvi-a.rvi);
+    // ETA 랭킹: 입주까지 남은 기간(ETA) 짧은 순 → 사업 진행 빠른 단지 먼저
+    // ETA 없는 단지는 맨 뒤로
+    results.sort((a,b)=>{
+      const ea=a.eta!=null?a.eta:999, eb=b.eta!=null?b.eta:999;
+      if(ea!==eb)return ea-eb;
+      return b.rvi-a.rvi; // 동일 ETA면 RVI 높은 순
+    });
     const tbody=document.getElementById('rriRankBody');
     tbody.innerHTML='';
+    const STAGE_NAME={3:'추진위',4:'조합설립',5:'사업시행',6:'관리처분',7:'이주/철거',8:'착공',9:'입주'};
+    const STAGE_COLOR={3:'#EF5350',4:'#FFA726',5:'#FFD54F',6:'#42A5F5',7:'#66BB6A',8:'#66BB6A',9:'#66BB6A'};
     results.forEach((r,i)=>{
       const cur=r.currentPrice>=10000?(r.currentPrice/10000).toFixed(1)+'억':Math.round(r.currentPrice).toLocaleString()+'만';
       const rviColor=r.rvi>=80?'#66BB6A':r.rvi>=60?'#42A5F5':r.rvi>=40?'#FFA726':'#EF5350';
-      const rriColor=r.rri>=50?'#66BB6A':r.rri>=20?'#42A5F5':r.rri>=0?'#FFA726':'#EF5350';
       const bjdong=r.bjdong||'11000';
       const tickerCell=r.ticker?`<span style="font-family:monospace;font-weight:700;color:#FFD54F">${r.ticker}</span>`:'<span style="color:#666">—</span>';
       const nameDisp=r.shortName||r.name;
+      // 단계 셀
+      const stageCell=r.stage?`<span style="color:${STAGE_COLOR[r.stage]||'#bbb'};font-weight:700">${r.stage} ${STAGE_NAME[r.stage]||''}</span>`:'<span style="color:#666">—</span>';
+      // ETA 셀 (짧을수록 초록)
+      const etaColor=r.eta==null?'#666':r.eta<=7?'#66BB6A':r.eta<=10?'#42A5F5':r.eta<=12?'#FFA726':'#EF5350';
+      const etaCell=r.eta!=null?`<span style="color:${etaColor};font-weight:700">${r.eta}년</span>`:'<span style="color:#666">—</span>';
       const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
-      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td>${moveInCell}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
+      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td></tr>`;
     });
     _rriRankLoaded=true;
   }).catch(()=>{});
