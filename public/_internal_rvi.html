@@ -237,6 +237,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
       <thead><tr><th>#</th><th>티커</th><th>단지명</th><th>단계</th><th>ETA</th><th>입주</th><th>RVI</th><th>용적률</th><th>현재가</th></tr></thead>
       <tbody id="rriRankBody"><tr><td colspan="9" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
     </table>
+    <p style="font-size:11px;color:#888;margin-top:6px;">* ETA는 단계 기준 잠정 자동부여값 (추진위 12년·리스크시 최대 14년 / 조합설립 10년·리스크시 11년). 확정 시 대체됩니다.</p>
   </div>
 
   <div class="disclaimer">
@@ -1128,7 +1129,7 @@ function loadRRIRanking(){
       const lpsScore=lps>=18?100:lps>=12?75:lps>=8?50:25;
       const nrtScore=50; // 배치에서는 기본값
       const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null)});
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional});
     });
     // ETA 랭킹: 입주까지 남은 기간(ETA) 짧은 순 → 사업 진행 빠른 단지 먼저
     // ETA 없는 단지는 맨 뒤로
@@ -1151,7 +1152,7 @@ function loadRRIRanking(){
       const stageCell=r.stage?`<span style="color:${STAGE_COLOR[r.stage]||'#bbb'};font-weight:700">${r.stage} ${STAGE_NAME[r.stage]||''}</span>`:'<span style="color:#666">—</span>';
       // ETA 셀 (짧을수록 초록)
       const etaColor=r.eta==null?'#666':r.eta<=7?'#66BB6A':r.eta<=10?'#42A5F5':r.eta<=12?'#FFA726':'#EF5350';
-      const etaCell=r.eta!=null?`<span style="color:${etaColor};font-weight:700">${r.eta}년</span>`:'<span style="color:#666">—</span>';
+      const etaCell=r.eta!=null?`<span style="color:${etaColor};font-weight:700" title="${r.etaProvisional?'잠정(단계기준 자동부여)':'확정'}">${r.eta}년${r.etaProvisional?'*':''}</span>`:'<span style="color:#666">—</span>';
       const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
       tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td></tr>`;
     });

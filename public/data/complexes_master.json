@@ -266,14 +266,16 @@
     "shortName": "대치개포우성1",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 12,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2038,
     "risk": "변경, 추진위 전 단계",
     "reconSource": "ticker_csv(신규/미편입)",
     "platArea": 51759.0,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "gu": "강남구",
@@ -458,14 +460,16 @@
     "shortName": "대치개포우성2",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 12,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2038,
     "risk": "변경, 추진위 전 단계",
     "reconSource": "ticker_csv(신규/미편입)",
     "platArea": 36952.6,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "gu": "강남구",
@@ -494,14 +498,16 @@
     "shortName": "개포현대1",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 14,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2040,
     "risk": "추가, 경우현 통합 추진",
     "reconSource": "ticker_csv(신규/미편입)",
     "platArea": 35680.2,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "gu": "강남구",
@@ -530,14 +536,16 @@
     "shortName": "개포우성3",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 14,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2040,
     "risk": "추가, 경우현 통합 추진",
     "reconSource": "ticker_csv(신규/미편입)",
     "platArea": 32100.2,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "gu": "강남구",
@@ -2553,14 +2561,16 @@
     "shortName": "압구정현대4",
     "stage": 4,
     "builder": "",
-    "eta": null,
+    "eta": 10,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2036,
     "risk": "추가",
     "reconSource": "ticker_csv(신규/미편입)",
     "platArea": 18494.7,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "gu": "강남구",
@@ -2583,9 +2593,9 @@
     "shortName": "압구정현대10",
     "stage": 4,
     "builder": "",
-    "eta": null,
+    "eta": 10,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2036,
     "risk": "추가",
     "reconSource": "ticker_csv(신규/미편입)",
     "avgPPP": 13358,
@@ -2597,7 +2607,9 @@
     "latestDate": "2024.09",
     "latestSupplyPy": 44.2,
     "priceUpdated": "2026-08-29",
-    "priceWindow": "24m"
+    "priceWindow": "24m",
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "gu": "강남구",
@@ -2626,13 +2638,15 @@
     "shortName": "개포현대3",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 12,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2038,
     "risk": "추가, 추진위 전 단계",
     "reconSource": "ticker_csv(신규/미편입)",
     "platArea": 19960.3,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   }
 ]

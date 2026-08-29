@@ -371,11 +371,13 @@
     "bjdong": "11000",
     "stage": 4,
     "builder": "",
-    "eta": null,
+    "eta": 10,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2036,
     "risk": "추가",
-    "reconSource": "ticker_csv(신규/미편입)"
+    "reconSource": "ticker_csv(신규/미편입)",
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "ticker": "APHD10",
@@ -392,11 +394,13 @@
     "bjdong": "11000",
     "stage": 4,
     "builder": "",
-    "eta": null,
+    "eta": 10,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2036,
     "risk": "추가",
-    "reconSource": "ticker_csv(신규/미편입)"
+    "reconSource": "ticker_csv(신규/미편입)",
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "ticker": "GP6-7",
@@ -501,11 +505,13 @@
     "bjdong": "10600",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 12,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2038,
     "risk": "변경, 추진위 전 단계",
-    "reconSource": "ticker_csv(신규/미편입)"
+    "reconSource": "ticker_csv(신규/미편입)",
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "ticker": "GPWS3",
@@ -522,11 +528,13 @@
     "bjdong": "10300",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 14,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2040,
     "risk": "추가, 경우현 통합 추진",
-    "reconSource": "ticker_csv(신규/미편입)"
+    "reconSource": "ticker_csv(신규/미편입)",
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "ticker": "GPHD1",
@@ -543,11 +551,13 @@
     "bjdong": "10300",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 14,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2040,
     "risk": "추가, 경우현 통합 추진",
-    "reconSource": "ticker_csv(신규/미편입)"
+    "reconSource": "ticker_csv(신규/미편입)",
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "ticker": "DGPHS",
@@ -631,11 +641,13 @@
     "bjdong": "10300",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 12,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2038,
     "risk": "추가, 추진위 전 단계",
-    "reconSource": "ticker_csv(신규/미편입)"
+    "reconSource": "ticker_csv(신규/미편입)",
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "ticker": "EM",
@@ -715,11 +727,13 @@
     "bjdong": "10600",
     "stage": 3,
     "builder": "",
-    "eta": null,
+    "eta": 12,
     "rdt": null,
-    "moveIn": null,
+    "moveIn": 2038,
     "risk": "변경, 추진위 전 단계",
-    "reconSource": "ticker_csv(신규/미편입)"
+    "reconSource": "ticker_csv(신규/미편입)",
+    "etaProvisional": true,
+    "etaSource": "정책 자동부여(단계기준)"
   },
   {
     "ticker": "DCSS1",
