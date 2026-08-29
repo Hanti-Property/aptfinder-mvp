@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { formatComplexLabel } from '@/lib/tickers'
 
 interface Listing {
   id: string
@@ -20,6 +21,7 @@ interface Listing {
   status: string
   created_at: string
   complexes?: { dong: string }
+  listing_images?: { image_url: string; is_primary: boolean }[]
 }
 
 function ListingsContent() {
@@ -166,7 +168,7 @@ function ListingsContent() {
               )}
               <div className="flex-1">
                 <div className="flex justify-between items-center">
-                  <strong style={{color:'#111827'}} className="text-base">{l.complex_name} {l.building_no}동</strong>
+                  <strong style={{color:'#111827'}} className="text-base">{formatComplexLabel(l.complex_name)} {l.building_no}동</strong>
                   <span className={`text-[10px] text-white px-1.5 py-0.5 rounded ${getBadgeColor(l.transaction_type)}`}>
                     {l.transaction_type}
                   </span>

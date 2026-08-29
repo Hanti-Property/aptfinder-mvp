@@ -241,8 +241,8 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
   <div class="section-title">🏆 강남구 RVI 랭킹 (39개 단지)</div>
   <div style="overflow-x:auto;margin-bottom:16px;">
     <table class="trade-table" id="rriRankTable">
-      <thead><tr><th>#</th><th>단지명</th><th>RVI</th><th>용적률</th><th>현재가</th><th>RRI</th><th>CAGR</th></tr></thead>
-      <tbody id="rriRankBody"><tr><td colspan="7" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
+      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th>RVI</th><th>용적률</th><th>현재가</th><th>입주</th><th>RRI</th><th>CAGR</th></tr></thead>
+      <tbody id="rriRankBody"><tr><td colspan="9" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
     </table>
   </div>
 
@@ -1135,7 +1135,7 @@ function loadRRIRanking(){
       const lpsScore=lps>=18?100:lps>=12?75:lps>=8?50:25;
       const nrtScore=50; // 배치에서는 기본값
       const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong});
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null});
     });
     // 미성1차·2차는 용적률이 다르므로 개별 랭킹 유지
     results.sort((a,b)=>b.rvi-a.rvi);
@@ -1146,7 +1146,10 @@ function loadRRIRanking(){
       const rviColor=r.rvi>=80?'#66BB6A':r.rvi>=60?'#42A5F5':r.rvi>=40?'#FFA726':'#EF5350';
       const rriColor=r.rri>=50?'#66BB6A':r.rri>=20?'#42A5F5':r.rri>=0?'#FFA726':'#EF5350';
       const bjdong=r.bjdong||'11000';
-      tbody.innerHTML+=`<tr><td>${i+1}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${r.name}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
+      const tickerCell=r.ticker?`<span style="font-family:monospace;font-weight:700;color:#FFD54F">${r.ticker}</span>`:'<span style="color:#666">—</span>';
+      const nameDisp=r.shortName||r.name;
+      const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
+      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td><td>${moveInCell}</td><td style="color:${rriColor};font-weight:700">${r.rri>=0?'+':''}${r.rri.toFixed(0)}%</td><td>${r.cagr>=0?'+':''}${r.cagr.toFixed(1)}%</td></tr>`;
     });
     _rriRankLoaded=true;
   }).catch(()=>{});

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { formatComplexLabel } from '@/lib/tickers'
 
 interface Listing {
   id: string
@@ -124,7 +125,7 @@ export default function ListingDetailPage() {
         <div className="mb-4">
           <p className="text-xs text-gray-500">{listing.transaction_type}</p>
           <p style={{color:'#e53935'}} className="text-xl font-bold">{formatPrice(listing)}</p>
-          <h1 style={{color:'#111827'}} className="text-lg font-bold mt-1">{listing.complex_name} {listing.building_no}동</h1>
+          <h1 style={{color:'#111827'}} className="text-lg font-bold mt-1">{formatComplexLabel(listing.complex_name)} {listing.building_no}동</h1>
           {listing.features && <p style={{color:'#374151'}} className="text-sm mt-1">{listing.features}</p>}
         </div>
 

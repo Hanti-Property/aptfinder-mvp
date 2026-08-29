@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { formatComplexLabel } from '@/lib/tickers'
 
 function SearchContent() {
   const searchParams = useSearchParams()
@@ -84,7 +85,7 @@ function SearchContent() {
                   </div>
                 )}
                 <div>
-                  <p style={{color:'#111827'}} className="text-sm font-bold">{l.complex_name} {l.building_no}동</p>
+                  <p style={{color:'#111827'}} className="text-sm font-bold">{formatComplexLabel(l.complex_name)} {l.building_no}동</p>
                   <p className="text-xs text-gray-500">전용 {l.exclusive_area}㎡</p>
                   <p className="text-sm font-bold text-red-600">{formatPrice(l)}</p>
                 </div>
