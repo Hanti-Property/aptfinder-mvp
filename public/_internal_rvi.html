@@ -97,7 +97,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 
 <!-- 빠른 선택 -->
 <div class="quick-section">
-  <h3 id="quickSelectTitle">빠른 선택 — 강남3구 재건축 후보 단지</h3>
+  <h3 id="quickSelectTitle">빠른 선택 — 강남구 재건축 대형단지 TOP 10 (티커)</h3>
   <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
     <select id="selGu" onchange="filterDong()" style="padding:8px 12px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:6px;color:#fff;font-size:13px;">
       <option value="">구 선택</option>
@@ -106,14 +106,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
       <option value="">동 선택</option>
     </select>
   </div>
-  <div class="quick-btns" id="complexBtns">
-    <button class="quick-btn" onclick="quickLoad('은마아파트','서울 강남구 대치동 316')">은마아파트</button>
-    <button class="quick-btn" onclick="quickLoad('잠실주공5단지','서울 송파구 잠실동 27')">잠실주공5단지</button>
-    <button class="quick-btn" onclick="quickLoad('개포주공6·7단지','서울 강남구 개포동 185')">개포주공6·7단지</button>
-    <button class="quick-btn" onclick="quickLoad('압구정현대','서울 강남구 압구정동 456')">압구정현대</button>
-    <button class="quick-btn" onclick="quickLoad('미도맨션아파트','서울 강남구 대치동 511')">미도아파트</button>
-    <button class="quick-btn" onclick="quickLoad('선경아파트','서울 강남구 대치동 506')">선경아파트</button>
-  </div>
+  <div class="quick-btns" id="complexBtns"></div>
 </div>
 
 <div class="dashboard" id="dashboard">
@@ -238,7 +231,7 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
   <tbody id="tradeBody"><tr><td colspan="5" style="text-align:center;color:#666">단지를 선택하세요</td></tr></tbody></table>
 
   <!-- RVI 랭킹 테이블 -->
-  <div class="section-title">🏆 강남구 RVI 랭킹 (39개 단지)</div>
+  <div class="section-title">🏆 강남구 RVI 랭킹 (티커 단지 38개)</div>
   <div style="overflow-x:auto;margin-bottom:16px;">
     <table class="trade-table" id="rriRankTable">
       <thead><tr><th>#</th><th>티커</th><th>단지명</th><th>RVI</th><th>용적률</th><th>현재가</th><th>입주</th><th>RRI</th><th>CAGR</th></tr></thead>
@@ -1097,7 +1090,7 @@ let _rriRankLoaded=false;
 function loadRRIRanking(){
   if(_rriRankLoaded)return;
   fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
-    const gangnam=data.filter(d=>d.gu==='강남구'&&d.far>0&&d.avgPPP>0);
+    const gangnam=data.filter(d=>d.gu==='강남구'&&d.ticker&&d.far>0&&d.avgPPP>0);
     const NVP_BY_DONG={'압구정동':23000,'청담동':23000,'대치동':18000,'개포동':15000,'도곡동':15000,'일원동':15000,'논현동':15000,'삼성동':15000};
     const RATE=0.03;
     // LOC 등급
@@ -1159,124 +1152,46 @@ setTimeout(loadRRIRanking,2000);
 
 // 빠른선택 — 143개 단지 데이터 (구/동/단지명/지번)
 // 강남3구 재건축 후보 단지 전체 (143개)
+// 빠른선택/지도/드롭다운 데이터 — 강남구 티커 마스터 38개 (gangnam_ticker_master.json 기준, 오늘부터 SoT)
 const ALL_COMPLEXES=[
-{gu:'강남구',dong:'대치동',name:'은마아파트',jibun:'316',h:4424,bjdong:'10600',far:204},
-{gu:'강남구',dong:'개포동',name:'대치,대청 아파트',jibun:'12',h:4199,bjdong:'10300',far:175},
-{gu:'강남구',dong:'대치동',name:'미도맨션아파트',jibun:'511',h:2435,bjdong:'10600'},
-{gu:'강남구',dong:'개포동',name:'개포주공6·7단지',jibun:'185',h:1960,bjdong:'10300'},
-{gu:'강남구',dong:'대치동',name:'선경아파트',jibun:'506',h:1033,bjdong:'10600'},
-{gu:'강남구',dong:'개포동',name:'개포주공5단지',jibun:'187',h:940,bjdong:'10300'},
-{gu:'강남구',dong:'대치동',name:'개포1차우성아파트',jibun:'503',h:690,bjdong:'10600'},
-{gu:'강남구',dong:'개포동',name:'경남아파트',jibun:'649',h:675,bjdong:'10300'},
-{gu:'강남구',dong:'대치동',name:'쌍용대치아파트',jibun:'66',h:630,bjdong:'10600'},
-{gu:'강남구',dong:'개포동',name:'현대아파트',jibun:'654',h:557,bjdong:'10300'},
-{gu:'강남구',dong:'논현동',name:'동현아파트',jibun:'105',h:548,bjdong:'10800'},
-{gu:'강남구',dong:'대치동',name:'대치우성아파트',jibun:'63',h:476,bjdong:'10600'},
-{gu:'강남구',dong:'대치동',name:'개포2차우성아파트',jibun:'500',h:450,bjdong:'10600'},
-{gu:'강남구',dong:'개포동',name:'현대아파트',jibun:'653',h:416,bjdong:'10300'},
-{gu:'강남구',dong:'개포동',name:'우성아파트',jibun:'652',h:405,bjdong:'10300'},
-{gu:'강남구',dong:'압구정동',name:'미성1차',jibun:'397',h:910,bjdong:'11000',far:153},
-{gu:'강남구',dong:'압구정동',name:'미성2차',jibun:'414',h:322,bjdong:'11000',far:233},
-{gu:'강남구',dong:'압구정동',name:'현대아파트(신현대)',jibun:'426',h:600,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'현대1·2차',jibun:'369-1',h:960,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'현대3차',jibun:'443',h:432,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'현대5차',jibun:'455',h:224,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'현대6·7차',jibun:'456',h:1340,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'현대8차',jibun:'481',h:516,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'현대13차',jibun:'448',h:234,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'현대14차',jibun:'447',h:388,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'한양1차',jibun:'490',h:936,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'한양2차',jibun:'493',h:296,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'한양3차',jibun:'489',h:312,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'한양4차',jibun:'486',h:286,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'한양5차',jibun:'513',h:343,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'한양6차',jibun:'484',h:228,bjdong:'11000'},
-{gu:'강남구',dong:'압구정동',name:'한양7차',jibun:'528',h:239,bjdong:'11000'},
-{gu:'강남구',dong:'대치동',name:'쌍용대치아파트',jibun:'65',h:364,bjdong:'10600'},
-{gu:'강남구',dong:'개포동',name:'개포6차우성아파트',jibun:'658-1',h:270,bjdong:'10300'},
-{gu:'강남구',dong:'도곡동',name:'한신(개포)',jibun:'464',h:900,bjdong:'10500'},
-{gu:'강남구',dong:'개포동',name:'개포8차 우성아파트',jibun:'179',h:261,bjdong:'10300'},
-{gu:'강남구',dong:'일원동',name:'일원동우성7차아파트',jibun:'615',h:802,bjdong:'11400'},
-{gu:'강남구',dong:'일원동',name:'개포한신아파트',jibun:'615-1',h:364,bjdong:'11400'},
-{gu:'강남구',dong:'청담동',name:'청담현대3차',jibun:'23',h:214,bjdong:'10400'},
-{gu:'서초구',dong:'내곡동',name:'신반포아파트',jibun:'73',h:1572,bjdong:'10600'},
-{gu:'서초구',dong:'내곡동',name:'신반포아파트',jibun:'70',h:1212,bjdong:'10600'},
-{gu:'서초구',dong:'반포동',name:'우면주공영구임대아파트',jibun:'63',h:984,bjdong:'10300'},
-{gu:'서초구',dong:'잠원동',name:'잠원동 154-2번지',jibun:'154-2',h:794,bjdong:'10200'},
-{gu:'서초구',dong:'내곡동',name:'잠원한신아파트',jibun:'56-3',h:540,bjdong:'10600'},
-{gu:'서초구',dong:'서초동',name:'방배삼호아파트',jibun:'725',h:481,bjdong:'10100'},
-{gu:'서초구',dong:'서초동',name:'방배우성아파트',jibun:'2525',h:468,bjdong:'10100'},
-{gu:'서초구',dong:'내곡동',name:'한강아파트',jibun:'49-8',h:450,bjdong:'10600'},
-{gu:'서초구',dong:'서초동',name:'삼호아파트',jibun:'770-1',h:420,bjdong:'10100'},
-{gu:'서초구',dong:'서초동',name:'임광아파트',jibun:'1015',h:418,bjdong:'10100'},
-{gu:'서초구',dong:'반포동',name:'대림아파트',jibun:'57',h:412,bjdong:'10300'},
-{gu:'서초구',dong:'내곡동',name:'신반포아파트',jibun:'55-12',h:396,bjdong:'10600'},
-{gu:'서초구',dong:'내곡동',name:'강변아파트',jibun:'53-15',h:360,bjdong:'10600'},
-{gu:'서초구',dong:'내곡동',name:'신반포청구아파트',jibun:'63-2',h:347,bjdong:'10600'},
-{gu:'서초구',dong:'반포동',name:'동고아파트',jibun:'59',h:330,bjdong:'10300'},
-{gu:'서초구',dong:'내곡동',name:'신반포아파트',jibun:'50-5',h:324,bjdong:'10600'},
-{gu:'서초구',dong:'내곡동',name:'신반포아파트',jibun:'65-32',h:320,bjdong:'10600'},
-{gu:'서초구',dong:'반포동',name:'코오롱아파트',jibun:'70',h:300,bjdong:'10300'},
-{gu:'서초구',dong:'내곡동',name:'내곡동 51번지',jibun:'51',h:288,bjdong:'10600'},
-{gu:'서초구',dong:'반포동',name:'우면한라아파트',jibun:'67',h:252,bjdong:'10300'},
-{gu:'서초구',dong:'내곡동',name:'반포한신타워아파트',jibun:'71-11',h:250,bjdong:'10600'},
-{gu:'서초구',dong:'내곡동',name:'신반포아파트',jibun:'61-2',h:242,bjdong:'10600'},
-{gu:'서초구',dong:'내곡동',name:'잠원현대아파트',jibun:'53',h:238,bjdong:'10600'},
-{gu:'서초구',dong:'서초동',name:'쌍용예가클래식',jibun:'776-3',h:216,bjdong:'10100'},
-{gu:'서초구',dong:'내곡동',name:'내곡동 63-34번지',jibun:'63-34',h:208,bjdong:'10600'},
-{gu:'서초구',dong:'내곡동',name:'신반포아파트',jibun:'61-1',h:169,bjdong:'10600'},
-{gu:'서초구',dong:'서초동',name:'방배임광아파트',jibun:'1010-1',h:158,bjdong:'10100'},
-{gu:'서초구',dong:'서초동',name:'임광아파트',jibun:'1011-1',h:158,bjdong:'10100'},
-{gu:'서초구',dong:'서초동',name:'삼호아파트',jibun:'758-4',h:144,bjdong:'10100'},
-{gu:'서초구',dong:'서초동',name:'삼호아파트',jibun:'759-2',h:120,bjdong:'10100'},
-{gu:'송파구',dong:'방이동',name:'올림픽선수기자촌',jibun:'89',h:5540,bjdong:'11100'},
-{gu:'송파구',dong:'문정동',name:'문정동 150번지',jibun:'150',h:4524,bjdong:'10800'},
-{gu:'송파구',dong:'잠실동',name:'잠실동 27번지',jibun:'27',h:3930,bjdong:'10100',far:152},
-{gu:'송파구',dong:'잠실동',name:'우성아파트',jibun:'101-1',h:1512,bjdong:'10100'},
-{gu:'송파구',dong:'신천동',name:'신천동 11번지',jibun:'11',h:1422,bjdong:'10200'},
-{gu:'송파구',dong:'잠실동',name:'잠실동 86번지',jibun:'86',h:1356,bjdong:'10100'},
-{gu:'송파구',dong:'문정동',name:'문정동 145번지',jibun:'145',h:1316,bjdong:'10800'},
-{gu:'송파구',dong:'오금동',name:'현대아파트(2-4차)',jibun:'43',h:1316,bjdong:'11100'},
-{gu:'송파구',dong:'풍납동',name:'한강극동아파트',jibun:'508',h:944,bjdong:'10300'},
-{gu:'송파구',dong:'송파동',name:'가락삼익맨숀',jibun:'166',h:936,bjdong:'10400'},
-{gu:'송파구',dong:'가락동',name:'가락동 96-1번지',jibun:'96-1',h:935,bjdong:'10700'},
-{gu:'송파구',dong:'풍납동',name:'동아한가람아파트',jibun:'506',h:782,bjdong:'10300'},
-{gu:'송파구',dong:'오금동',name:'코오롱아파트 상가A동,B동',jibun:'212-8',h:758,bjdong:'11100'},
-{gu:'송파구',dong:'거여동',name:'거여동 165번지',jibun:'165',h:750,bjdong:'11200'},
-{gu:'송파구',dong:'송파동',name:'2차한양아파트',jibun:'151',h:744,bjdong:'10400'},
-{gu:'송파구',dong:'풍납동',name:'풍납동 413-1번지',jibun:'413-1',h:730,bjdong:'10300'},
-{gu:'송파구',dong:'가락동',name:'가락동 199번지',jibun:'199',h:727,bjdong:'10700'},
-{gu:'송파구',dong:'가락동',name:'가락동 176번지',jibun:'176',h:648,bjdong:'10700'},
-{gu:'송파구',dong:'잠실동',name:'잠실동 320번지',jibun:'320',h:606,bjdong:'10100'},
-{gu:'송파구',dong:'송파동',name:'한양아파트',jibun:'119',h:576,bjdong:'10400'},
-{gu:'송파구',dong:'가락동',name:'가락동 192번지',jibun:'192',h:555,bjdong:'10700'},
-{gu:'송파구',dong:'문정동',name:'건영아파트',jibun:'72-3',h:545,bjdong:'10800'},
-{gu:'송파구',dong:'문정동',name:'문정동 3번지',jibun:'3',h:514,bjdong:'10800'},
-{gu:'송파구',dong:'방이동',name:'대림아파트',jibun:'217',h:497,bjdong:'11100'},
-{gu:'송파구',dong:'오금동',name:'대림아파트',jibun:'2',h:480,bjdong:'11100'},
-{gu:'송파구',dong:'가락동',name:'가락동 70-19번지',jibun:'70-19',h:443,bjdong:'10700'},
-{gu:'송파구',dong:'가락동',name:'가락동 138번지',jibun:'138',h:435,bjdong:'10700'},
-{gu:'송파구',dong:'풍납동',name:'쌍용아파트',jibun:'401-1',h:417,bjdong:'10300'},
-{gu:'송파구',dong:'송파동',name:'송파동 161번지',jibun:'161',h:378,bjdong:'10400'},
-{gu:'송파구',dong:'잠실동',name:'잠실동 331번지',jibun:'331',h:338,bjdong:'10100'},
-{gu:'송파구',dong:'잠실동',name:'잠실동 101-2번지',jibun:'101-2',h:330,bjdong:'10100'},
-{gu:'송파구',dong:'송파동',name:'잠실더샵루벤',jibun:'171',h:327,bjdong:'10400'},
-{gu:'송파구',dong:'풍납동',name:'극동아파트',jibun:'391',h:307,bjdong:'10300'},
-{gu:'송파구',dong:'거여동',name:'거여동 164번지',jibun:'164',h:293,bjdong:'11200'},
-{gu:'송파구',dong:'풍납동',name:'미성맨션',jibun:'219',h:275,bjdong:'10300'},
-{gu:'송파구',dong:'방이동',name:'한양3아파트',jibun:'225',h:273,bjdong:'11100'},
-{gu:'송파구',dong:'거여동',name:'거여동 19번지',jibun:'19',h:269,bjdong:'11200'},
-{gu:'송파구',dong:'가락동',name:'가락동 102번지',jibun:'102',h:256,bjdong:'10700'},
-{gu:'송파구',dong:'거여동',name:'거여동 160번지',jibun:'160',h:237,bjdong:'11200'},
-{gu:'송파구',dong:'송파동',name:'호수 임광 아파트',jibun:'33',h:227,bjdong:'10400'},
-{gu:'송파구',dong:'거여동',name:'거여동 166번지',jibun:'166',h:226,bjdong:'11200'},
-{gu:'송파구',dong:'가락동',name:'가락동 55번지',jibun:'55',h:160,bjdong:'10700'},
-{gu:'송파구',dong:'오금동',name:'오금동 171번지',jibun:'171',h:140,bjdong:'11100'},
-{gu:'송파구',dong:'풍납동',name:'신동아아파트',jibun:'220-2',h:135,bjdong:'10300'},
-{gu:'송파구',dong:'삼전동',name:'삼전동 39번지',jibun:'39',h:120,bjdong:'10600'},
-{gu:'송파구',dong:'문정동',name:'문정동 58번지',jibun:'58',h:108,bjdong:'10800'},
-{gu:'송파구',dong:'가락동',name:'가락동 142번지',jibun:'142',h:105,bjdong:'10700'},
-{gu:'송파구',dong:'풍납동',name:'현대아파트',jibun:'299-1',h:104,bjdong:'10300'},
+{gu:'강남구',dong:'대치동',name:'은마아파트',shortName:'은마',ticker:'EM',jibun:'316',h:4424,bjdong:'10600',far:204.2},
+{gu:'강남구',dong:'대치동',name:'미도맨션아파트',shortName:'미도',ticker:'MIDO',jibun:'511',h:2435,bjdong:'10600',far:177.5},
+{gu:'강남구',dong:'개포동',name:'개포주공6·7단지',shortName:'개포6-7',ticker:'GP6-7',jibun:'185',h:1960,bjdong:'10300',far:146.1},
+{gu:'강남구',dong:'압구정동',name:'현대6·7차',shortName:'압구정현대6-7',ticker:'APHD6-7',jibun:'456',h:1340,bjdong:'11000',far:369.2},
+{gu:'강남구',dong:'대치동',name:'선경아파트',shortName:'선경',ticker:'SK',jibun:'506',h:1033,bjdong:'10600',far:179.3},
+{gu:'강남구',dong:'압구정동',name:'현대1·2차',shortName:'압구정현대1-2',ticker:'APHD1-2',jibun:'369-1',h:960,bjdong:'11000',far:224.8},
+{gu:'강남구',dong:'개포동',name:'개포주공5단지',shortName:'개포5',ticker:'GP5',jibun:'187',h:940,bjdong:'10300',far:151.0},
+{gu:'강남구',dong:'압구정동',name:'한양1차',shortName:'압구정한양1',ticker:'APHY1',jibun:'490',h:936,bjdong:'11000',far:211.2},
+{gu:'강남구',dong:'압구정동',name:'미성1차',shortName:'압구정미성1',ticker:'APMS1',jibun:'397',h:910,bjdong:'11000',far:153},
+{gu:'강남구',dong:'일원동',name:'일원동우성7차',shortName:'일원우성7',ticker:'ILWS7',jibun:'615',h:802,bjdong:'11400',far:157.7},
+{gu:'강남구',dong:'대치동',name:'대치개포1차우성',shortName:'대치개포우성1',ticker:'DCGPWS1',jibun:'503',h:690,bjdong:'10600',far:179.9},
+{gu:'강남구',dong:'개포동',name:'경남아파트',shortName:'경남',ticker:'GPKNM',jibun:'649',h:675,bjdong:'10300',far:175.7},
+{gu:'강남구',dong:'대치동',name:'대치쌍용1차',shortName:'대치쌍용1',ticker:'DCSS1',jibun:'66',h:630,bjdong:'10600',far:170},
+{gu:'강남구',dong:'도곡동',name:'도곡개포한신',shortName:'도곡개포한신',ticker:'DGPHS',jibun:'464',h:620,bjdong:'10500',far:145.0},
+{gu:'강남구',dong:'압구정동',name:'신현대',shortName:'압구정신현대',ticker:'APNHD',jibun:'426',h:600,bjdong:'11000',far:174.4},
+{gu:'강남구',dong:'압구정동',name:'현대8차',shortName:'압구정현대8',ticker:'APHD8',jibun:'481',h:516,bjdong:'11000',far:298.5},
+{gu:'강남구',dong:'대치동',name:'대치우성1차',shortName:'대치우성1',ticker:'DCWS1',jibun:'63',h:476,bjdong:'10600',far:179.9},
+{gu:'강남구',dong:'대치동',name:'대치개포우성2차',shortName:'대치개포우성2',ticker:'DCGPWS2',jibun:'500',h:450,bjdong:'10600',far:158.6},
+{gu:'강남구',dong:'압구정동',name:'현대3차',shortName:'압구정현대3',ticker:'APHD3',jibun:'443',h:432,bjdong:'11000',far:225},
+{gu:'강남구',dong:'개포동',name:'개포현대1차',shortName:'개포현대1',ticker:'GPHD1',jibun:'653',h:416,bjdong:'10300',far:179.4},
+{gu:'강남구',dong:'개포동',name:'개포우성3차',shortName:'개포우성3',ticker:'GPWS3',jibun:'652',h:405,bjdong:'10300',far:178.8},
+{gu:'강남구',dong:'압구정동',name:'현대14차',shortName:'압구정현대14',ticker:'APHD14',jibun:'447',h:388,bjdong:'11000',far:194.2},
+{gu:'강남구',dong:'일원동',name:'개포한신',shortName:'개포한신',ticker:'GPHS',jibun:'615-1',h:364,bjdong:'11400',far:179.0},
+{gu:'강남구',dong:'대치동',name:'대치쌍용2차',shortName:'대치쌍용2',ticker:'DCSS2',jibun:'65',h:364,bjdong:'10600',far:170},
+{gu:'강남구',dong:'압구정동',name:'한양5차',shortName:'압구정한양5',ticker:'APHY5',jibun:'513',h:343,bjdong:'11000',far:192.1},
+{gu:'강남구',dong:'압구정동',name:'미성2차',shortName:'압구정미성2',ticker:'APMS2',jibun:'414',h:322,bjdong:'11000',far:233},
+{gu:'강남구',dong:'압구정동',name:'한양3차',shortName:'압구정한양3',ticker:'APHY3',jibun:'489',h:312,bjdong:'11000',far:198.0},
+{gu:'강남구',dong:'압구정동',name:'한양2차',shortName:'압구정한양2',ticker:'APHY2',jibun:'493',h:296,bjdong:'11000',far:143.4},
+{gu:'강남구',dong:'압구정동',name:'한양4차',shortName:'압구정한양4',ticker:'APHY4',jibun:'486',h:286,bjdong:'11000',far:187.2},
+{gu:'강남구',dong:'개포동',name:'개포우성6차',shortName:'개포우성6',ticker:'GPWS6',jibun:'658-1',h:270,bjdong:'10300',far:106.8},
+{gu:'강남구',dong:'개포동',name:'개포우성8차',shortName:'개포우성8',ticker:'GPWS8',jibun:'179',h:261,bjdong:'10300',far:192.7},
+{gu:'강남구',dong:'압구정동',name:'한양7차',shortName:'압구정한양7',ticker:'APHY7',jibun:'528',h:239,bjdong:'11000',far:320.2},
+{gu:'강남구',dong:'압구정동',name:'현대13차',shortName:'압구정현대13',ticker:'APHD13',jibun:'448',h:234,bjdong:'11000',far:150},
+{gu:'강남구',dong:'압구정동',name:'한양6차',shortName:'압구정한양6',ticker:'APHY6',jibun:'484',h:228,bjdong:'11000',far:316.5},
+{gu:'강남구',dong:'압구정동',name:'현대5차',shortName:'압구정현대5',ticker:'APHD5',jibun:'455',h:224,bjdong:'11000',far:170.7},
+{gu:'강남구',dong:'개포동',name:'개포현대3차',shortName:'개포현대3',ticker:'GPHD3',jibun:'177',h:198,bjdong:'10300',far:147.6},
+{gu:'강남구',dong:'압구정동',name:'현대4차',shortName:'압구정현대4',ticker:'APHD4',jibun:'462',h:170,bjdong:'11000',far:125.0},
+{gu:'강남구',dong:'압구정동',name:'현대10차',shortName:'압구정현대10',ticker:'APHD10',jibun:'436',h:144,bjdong:'11000',far:228.0}
 ];
 const LAWD_MAP={'강남구':'11680','서초구':'11650','송파구':'11710'};
 const BJDONG_MAP2={'대치동':'10600','압구정동':'11000','개포동':'10300','논현동':'10800','청담동':'10400','삼성동':'10500','일원동':'11400','수서동':'11500','반포동':'10300','서초동':'10100','잠실동':'10100','신천동':'10200','오금동':'11100','문정동':'10800','송파동':'10400','풍납동':'10300','가락동':'10700','거여동':'11200','방이동':'11100','내곡동':'10600'};
@@ -1294,16 +1209,24 @@ function filterComplex(){
   const gu=document.getElementById('selGu').value;
   const dong=document.getElementById('selDong').value;
   const box=document.getElementById('complexBtns');
-  let list=ALL_COMPLEXES;
+  const title=document.getElementById('quickSelectTitle');
+  let list=ALL_COMPLEXES.slice();
   if(gu)list=list.filter(c=>c.gu===gu);
   if(dong)list=list.filter(c=>c.dong===dong);
   list.sort((a,b)=>b.h-a.h);
+  // 동 미선택(기본): 세대수 상위 10개 대형단지를 '티커'로만 표시
+  const tickerOnly=!dong;
+  if(tickerOnly)list=list.slice(0,10);
+  if(title)title.textContent = dong
+    ? `빠른 선택 — ${dong} 재건축 단지 (약칭·티커)`
+    : '빠른 선택 — 강남구 재건축 대형단지 TOP 10 (티커)';
   box.innerHTML='';
   list.forEach(c=>{
     const lawd=LAWD_MAP[c.gu]||'11680';
     const bjdong=BJDONG_MAP2[c.dong]||'10600';
     const addr=`서울 ${c.gu} ${c.dong} ${c.jibun}`;
-    box.innerHTML+=`<button class="quick-btn" onclick="quickLoad2('${c.name}','${addr}','${lawd}','${bjdong}','${c.jibun}')">${c.name} (${c.h})</button>`;
+    const label=tickerOnly?c.ticker:`${c.shortName||c.name} (${c.ticker})`;
+    box.innerHTML+=`<button class="quick-btn" onclick="quickLoad2('${c.name}','${addr}','${lawd}','${bjdong}','${c.jibun}')" title="${(c.shortName||c.name)} (${c.ticker})">${label}</button>`;
   });
 }
 function quickLoad(name,address){
@@ -1349,11 +1272,12 @@ function loadReconMarkers(){
       if(status===kakao.maps.services.Status.OK&&data.length>0){
         const p=data[0];
         const pos=new kakao.maps.LatLng(p.y,p.x);
-        const shortName=c.name.replace(/아파트|단지|맨션/g,'').substring(0,6);
+        const shortName=c.shortName||c.name.replace(/아파트|단지|맨션/g,'').substring(0,6);
+        const markerLabel=shortName+' ('+c.ticker+')';
         const lawd=LAWD_MAP[c.gu]||'11680';
         const bjdong=c.bjdong||BJDONG_MAP2[c.dong]||'10600';
         const addr='서울 '+c.gu+' '+c.dong+' '+c.jibun;
-        const content='<div style="background:#2E7D32;color:#fff;padding:3px 8px;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.3);" onclick="event.stopPropagation();quickLoad2(\''+c.name.replace(/'/g,"\\'")+'\',\''+addr.replace(/'/g,"\\'")+'\',\''+lawd+'\',\''+bjdong+'\',\''+c.jibun+'\')">'+shortName+'</div>';
+        const content='<div style="background:#2E7D32;color:#fff;padding:3px 8px;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.3);" onclick="event.stopPropagation();quickLoad2(\''+c.name.replace(/'/g,"\\'")+'\',\''+addr.replace(/'/g,"\\'")+'\',\''+lawd+'\',\''+bjdong+'\',\''+c.jibun+'\')">'+markerLabel+'</div>';
         const ov=new kakao.maps.CustomOverlay({position:pos,content:content,yAnchor:1.5,clickable:true});
         ov.setMap(map);reconOverlays.push(ov);
       }
@@ -1411,8 +1335,9 @@ function clickMarker(name,address,lat,lng){
     const cnt=ALL_COMPLEXES.filter(c=>c.gu===gu).length;
     sel.innerHTML+=`<option value="${gu}">${gu} (${cnt})</option>`;
   });
-  document.getElementById('quickSelectTitle').textContent='빠른 선택 — 강남3구 재건축 후보 단지 ('+ALL_COMPLEXES.length+'개)';
+  document.getElementById('quickSelectTitle').textContent='빠른 선택 — 강남구 재건축 대형단지 TOP 10 (티커)';
 })();
+filterComplex(); // 초기 로드 시 대형단지 TOP 10(티커) 표시
 loadReconMarkers();
 
 kakao.maps.event.addListener(map,'click',function(e){
