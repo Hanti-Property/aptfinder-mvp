@@ -362,7 +362,13 @@ function getComplexFeatures(name, units){
 }
 
 function getETA(jibun, name){
-  // 1) 지번으로 매칭
+  // 0) 마스터 데이터(complexes_master.json) 우선 — 상세/랭킹 ETA 일원화
+  //    ETA_FROM_MASTER는 preloadMasterEta에서 채워짐 (지번키: bjdong-jibun)
+  if(typeof selectedBjdongCd!=='undefined' && selectedBjdongCd){
+    const mk=selectedBjdongCd+'-'+(jibun||'');
+    if(ETA_FROM_MASTER[mk]!=null) return ETA_FROM_MASTER[mk];
+  }
+  // 1) 지번으로 매칭 (하드코딩 폴백)
   const bun=(jibun||'').replace(/^0+/,'').padStart(4,'0');
   if(ETA_BY_JIBUN[bun]) return ETA_BY_JIBUN[bun];
   // 2) 단지명 부분 매칭
@@ -1088,6 +1094,14 @@ function openIndexDashboard(){
 
 // === RVI 랭킹 테이블 로드 (complexes_master.json) ===
 let _rriRankLoaded=false;
+// 마스터 ETA 맵 (지번키 → eta). getETA가 우선 참조 → 상세/랭킹 ETA 일원화
+const ETA_FROM_MASTER={};
+(function preloadMasterEta(){
+  fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
+    data.forEach(d=>{ if(d.gu==='강남구'&&d.ticker&&d.eta!=null){ ETA_FROM_MASTER[d.bjdong+'-'+d.jibun]=d.eta; } });
+  }).catch(()=>{});
+})();
+
 function loadRRIRanking(){
   if(_rriRankLoaded)return;
   fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
@@ -1254,14 +1268,24 @@ function quickLoad2(name,address,lawd,bjdong,jibun){
   const complexInfo=ALL_COMPLEXES.find(c=>c.jibun===jibun&&c.bjdong===bjdong&&LAWD_MAP[c.gu]===lawd);
   const knownHouseholds=complexInfo?complexInfo.h:0;
   const knownFar=complexInfo&&complexInfo.far?complexInfo.far:0;
-  // [P1 FIX] 카카오 검색 결과가 아닌 name 파라미터 직접 사용
-  ps.keywordSearch(name+' '+address.split(' ').slice(2,3),function(data,status){
-    let lat=37.5,lng=127.05;
-    if(status===kakao.maps.services.Status.OK&&data.length){lat=parseFloat(data[0].y);lng=parseFloat(data[0].x);}
+  function focusTo(lat,lng){
     map.setCenter(new kakao.maps.LatLng(lat,lng));map.setLevel(4);
     marker.setPosition(new kakao.maps.LatLng(lat,lng));
     loadRVI(name,address,lat,lng,lawd,bjdong,jibun,knownHouseholds,knownFar);
-  },{size:1});
+  }
+  // [FIX] 지번 주소로 정확 지오코딩 우선 → 실패 시 키워드검색 폴백
+  geocoder.addressSearch(address,function(res,st){
+    if(st===kakao.maps.services.Status.OK&&res.length){
+      focusTo(parseFloat(res[0].y),parseFloat(res[0].x));
+    } else {
+      // 폴백: 단지명 키워드 검색
+      ps.keywordSearch(name,function(data,status){
+        let lat=37.5,lng=127.05;
+        if(status===kakao.maps.services.Status.OK&&data.length){lat=parseFloat(data[0].y);lng=parseFloat(data[0].x);}
+        focusTo(lat,lng);
+      },{size:1});
+    }
+  });
 }
 
 // 카카오맵
@@ -1279,22 +1303,29 @@ function loadReconMarkers(){
   function searchNext(){
     if(idx>=targets.length)return;
     const c=targets[idx];idx++;
-    const searchKw=c.name+' '+c.dong;
-    ps.keywordSearch(searchKw,function(data,status){
-      if(status===kakao.maps.services.Status.OK&&data.length>0){
-        const p=data[0];
-        const pos=new kakao.maps.LatLng(p.y,p.x);
-        const shortName=c.shortName||c.name.replace(/아파트|단지|맨션/g,'').substring(0,6);
-        const markerLabel=shortName+' ('+c.ticker+')';
-        const lawd=LAWD_MAP[c.gu]||'11680';
-        const bjdong=c.bjdong||BJDONG_MAP2[c.dong]||'10600';
-        const addr='서울 '+c.gu+' '+c.dong+' '+c.jibun;
-        const content='<div style="background:#2E7D32;color:#fff;padding:3px 8px;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.3);" onclick="event.stopPropagation();quickLoad2(\''+c.name.replace(/'/g,"\\'")+'\',\''+addr.replace(/'/g,"\\'")+'\',\''+lawd+'\',\''+bjdong+'\',\''+c.jibun+'\')">'+markerLabel+'</div>';
-        const ov=new kakao.maps.CustomOverlay({position:pos,content:content,yAnchor:1.5,clickable:true});
-        ov.setMap(map);reconOverlays.push(ov);
+    const shortName=c.shortName||c.name.replace(/아파트|단지|맨션/g,'').substring(0,6);
+    const markerLabel=shortName+' ('+c.ticker+')';
+    const lawd=LAWD_MAP[c.gu]||'11680';
+    const bjdong=c.bjdong||BJDONG_MAP2[c.dong]||'10600';
+    const addr='서울 '+c.gu+' '+c.dong+' '+c.jibun;
+    function place(lat,lng){
+      const pos=new kakao.maps.LatLng(lat,lng);
+      const content='<div style="background:#2E7D32;color:#fff;padding:3px 8px;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.3);" onclick="event.stopPropagation();quickLoad2(\''+c.name.replace(/'/g,"\\'")+'\',\''+addr.replace(/'/g,"\\'")+'\',\''+lawd+'\',\''+bjdong+'\',\''+c.jibun+'\')">'+markerLabel+'</div>';
+      const ov=new kakao.maps.CustomOverlay({position:pos,content:content,yAnchor:1.5,clickable:true});
+      ov.setMap(map);reconOverlays.push(ov);
+    }
+    // [FIX] 지번 주소로 정확 지오코딩 → 실패 시 키워드검색 폴백
+    geocoder.addressSearch(addr,function(res,st){
+      if(st===kakao.maps.services.Status.OK&&res.length){
+        place(parseFloat(res[0].y),parseFloat(res[0].x));
+        setTimeout(searchNext,120);
+      } else {
+        ps.keywordSearch(c.name+' '+c.dong,function(data,status){
+          if(status===kakao.maps.services.Status.OK&&data.length>0){place(parseFloat(data[0].y),parseFloat(data[0].x));}
+          setTimeout(searchNext,120);
+        },{size:1,page:1});
       }
-      setTimeout(searchNext,150);
-    },{size:1,page:1});
+    });
   }
   searchNext();
 }
