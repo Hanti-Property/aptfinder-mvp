@@ -33,7 +33,9 @@
     "reconSource": "recon_master_db_260823",
     "platArea": 239213.0,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -93,7 +95,9 @@
     "reconSource": "recon_master_db_260823",
     "platArea": 195129.7,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -129,7 +133,9 @@
     "reconSource": "recon_master_db_260823",
     "platArea": 113943.9,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -165,7 +171,9 @@
     "reconSource": "recon_master_db_260823",
     "platArea": 78653.1,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -192,7 +200,7 @@
     "latestExcluPy": 25.2,
     "ticker": "GP5",
     "shortName": "개포5",
-    "stage": 6,
+    "stage": 7,
     "builder": "대우건설",
     "eta": 6.0,
     "rdt": 0,
@@ -201,7 +209,9 @@
     "reconSource": "recon_master_db_260823",
     "platArea": 55873.1,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -237,7 +247,9 @@
     "reconSource": "recon_master_db_260823",
     "platArea": 47490.3,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -266,7 +278,7 @@
     "shortName": "대치개포우성1",
     "stage": 3,
     "builder": "",
-    "eta": 12,
+    "eta": 12.0,
     "rdt": null,
     "moveIn": 2038,
     "risk": "변경, 추진위 전 단계",
@@ -274,8 +286,8 @@
     "platArea": 51759.0,
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -304,14 +316,16 @@
     "shortName": "경남",
     "stage": 3,
     "builder": "",
-    "eta": 15.0,
+    "eta": 14.0,
     "rdt": 3.0,
-    "moveIn": 2041,
+    "moveIn": 2040,
     "risk": "경우현 통합갈등",
     "reconSource": "recon_master_db_260823",
     "platArea": 55040.8,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -340,14 +354,16 @@
     "shortName": "대치쌍용1",
     "stage": 5,
     "builder": "",
-    "eta": 9.5,
+    "eta": 10.0,
     "rdt": 1.5,
     "moveIn": 2036,
     "risk": "단독추진. 상가분쟁",
     "reconSource": "recon_master_db_260823",
     "platArea": 47219.6,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -424,14 +440,16 @@
     "shortName": "대치우성1",
     "stage": 5,
     "builder": "삼성물산",
-    "eta": 8.0,
+    "eta": 10.0,
     "rdt": 1.0,
-    "moveIn": 2034,
+    "moveIn": 2036,
     "risk": "사업지연",
     "reconSource": "recon_master_db_260823",
     "platArea": 29877.4,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -460,7 +478,7 @@
     "shortName": "대치개포우성2",
     "stage": 3,
     "builder": "",
-    "eta": 12,
+    "eta": 12.0,
     "rdt": null,
     "moveIn": 2038,
     "risk": "변경, 추진위 전 단계",
@@ -468,8 +486,8 @@
     "platArea": 36952.6,
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -498,7 +516,7 @@
     "shortName": "개포현대1",
     "stage": 3,
     "builder": "",
-    "eta": 14,
+    "eta": 14.0,
     "rdt": null,
     "moveIn": 2040,
     "risk": "추가, 경우현 통합 추진",
@@ -506,8 +524,8 @@
     "platArea": 35680.2,
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -536,7 +554,7 @@
     "shortName": "개포우성3",
     "stage": 3,
     "builder": "",
-    "eta": 14,
+    "eta": 14.0,
     "rdt": null,
     "moveIn": 2040,
     "risk": "추가, 경우현 통합 추진",
@@ -544,8 +562,8 @@
     "platArea": 32100.2,
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -574,14 +592,16 @@
     "shortName": "대치쌍용2",
     "stage": 5,
     "builder": "삼성물산",
-    "eta": 9.0,
+    "eta": 10.0,
     "rdt": 1.0,
-    "moveIn": 2035,
+    "moveIn": 2036,
     "risk": "상가분쟁+사업지연",
     "reconSource": "recon_master_db_260823",
     "platArea": 25303.3,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -617,7 +637,9 @@
     "reconSource": "recon_master_db_260823",
     "platArea": 36473.0,
     "platAreaSource": "대표 제공(11,033평 환산, 토지대장 API 미조회)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -654,7 +676,9 @@
     "latestExcluPy": 24.2,
     "latestFloor": 3,
     "latestSupplyPy": 32.7,
-    "priceWindow": "24m"
+    "priceWindow": "24m",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -690,7 +714,9 @@
     "reconSource": "recon_master_db_260823",
     "platArea": 12467.6,
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -1920,7 +1946,9 @@
     "risk": "이주완료, 분양전",
     "reconSource": "recon_master_db_260823",
     "platAreaEstimated": false,
-    "platAreaSource": "토지대장 실측(일원동 615-1, 2022)"
+    "platAreaSource": "토지대장 실측(일원동 615-1, 2022)",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -1956,7 +1984,9 @@
     "risk": "갈등",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -1992,7 +2022,9 @@
     "risk": "갈등",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2028,7 +2060,9 @@
     "risk": "압구정 최속",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2064,7 +2098,9 @@
     "risk": "토지소송",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2100,7 +2136,9 @@
     "risk": "토지분쟁",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2136,7 +2174,9 @@
     "risk": "토지분쟁",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2172,7 +2212,9 @@
     "risk": "토지소송",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2208,7 +2250,9 @@
     "risk": "",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2244,7 +2288,9 @@
     "risk": "토지분쟁",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2280,7 +2326,9 @@
     "risk": "토지분쟁",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2316,7 +2364,9 @@
     "risk": "리스크 적음",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2352,7 +2402,9 @@
     "risk": "",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2388,7 +2440,9 @@
     "risk": "",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2424,7 +2478,9 @@
     "risk": "",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2460,7 +2516,9 @@
     "risk": "",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2496,7 +2554,9 @@
     "risk": "",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2526,13 +2586,15 @@
     "shortName": "압구정한양7",
     "stage": 3,
     "builder": "",
-    "eta": 15.0,
+    "eta": 14.0,
     "rdt": 3.0,
-    "moveIn": 2041,
+    "moveIn": 2040,
     "risk": "장기정체+통합",
     "reconSource": "recon_master_db_260823",
     "platAreaSource": "역산복원(far×vlRatEstm)",
-    "platAreaEstimated": true
+    "platAreaEstimated": true,
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2561,7 +2623,7 @@
     "shortName": "압구정현대4",
     "stage": 4,
     "builder": "",
-    "eta": 10,
+    "eta": 10.0,
     "rdt": null,
     "moveIn": 2036,
     "risk": "추가",
@@ -2569,8 +2631,8 @@
     "platArea": 18494.7,
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2593,7 +2655,7 @@
     "shortName": "압구정현대10",
     "stage": 4,
     "builder": "",
-    "eta": 10,
+    "eta": 10.0,
     "rdt": null,
     "moveIn": 2036,
     "risk": "추가",
@@ -2608,8 +2670,8 @@
     "latestSupplyPy": 44.2,
     "priceUpdated": "2026-08-29",
     "priceWindow": "24m",
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "gu": "강남구",
@@ -2638,7 +2700,7 @@
     "shortName": "개포현대3",
     "stage": 3,
     "builder": "",
-    "eta": 12,
+    "eta": 12.0,
     "rdt": null,
     "moveIn": 2038,
     "risk": "추가, 추진위 전 단계",
@@ -2646,7 +2708,7 @@
     "platArea": 19960.3,
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   }
 ]

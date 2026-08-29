@@ -18,7 +18,9 @@
     "rdt": 1.0,
     "moveIn": 2037,
     "risk": "토지소송",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHD1-2",
@@ -39,7 +41,9 @@
     "rdt": 1.0,
     "moveIn": 2037,
     "risk": "토지소송",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHY1",
@@ -60,7 +64,9 @@
     "rdt": 0,
     "moveIn": 2036,
     "risk": "리스크 적음",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APMS1",
@@ -81,7 +87,9 @@
     "rdt": 2.0,
     "moveIn": 2040,
     "risk": "갈등",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APNHD",
@@ -102,7 +110,9 @@
     "rdt": 0,
     "moveIn": 2036,
     "risk": "압구정 최속",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHD8",
@@ -123,7 +133,9 @@
     "rdt": 0,
     "moveIn": 2036,
     "risk": "",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHD3",
@@ -144,7 +156,9 @@
     "rdt": 1.0,
     "moveIn": 2037,
     "risk": "토지분쟁",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHD14",
@@ -165,7 +179,9 @@
     "rdt": 1.0,
     "moveIn": 2037,
     "risk": "토지분쟁",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHY5",
@@ -186,7 +202,9 @@
     "rdt": 0,
     "moveIn": 2038,
     "risk": "",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APMS2",
@@ -207,7 +225,9 @@
     "rdt": 2.0,
     "moveIn": 2040,
     "risk": "갈등",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHY3",
@@ -228,7 +248,9 @@
     "rdt": 0,
     "moveIn": 2036,
     "risk": "",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHY2",
@@ -249,7 +271,9 @@
     "rdt": 0,
     "moveIn": 2036,
     "risk": "",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHY4",
@@ -270,7 +294,9 @@
     "rdt": 0,
     "moveIn": 2036,
     "risk": "",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHY7",
@@ -287,11 +313,13 @@
     "bjdong": "11000",
     "stage": 3,
     "builder": "",
-    "eta": 15.0,
+    "eta": 14.0,
     "rdt": 3.0,
-    "moveIn": 2041,
+    "moveIn": 2040,
     "risk": "장기정체+통합",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHD13",
@@ -312,7 +340,9 @@
     "rdt": 1.0,
     "moveIn": 2037,
     "risk": "토지분쟁",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHY6",
@@ -333,7 +363,9 @@
     "rdt": 0,
     "moveIn": 2036,
     "risk": "",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHD5",
@@ -354,7 +386,9 @@
     "rdt": 1.0,
     "moveIn": 2037,
     "risk": "토지분쟁",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHD4",
@@ -371,13 +405,13 @@
     "bjdong": "11000",
     "stage": 4,
     "builder": "",
-    "eta": 10,
+    "eta": 10.0,
     "rdt": null,
     "moveIn": 2036,
     "risk": "추가",
     "reconSource": "ticker_csv(신규/미편입)",
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "APHD10",
@@ -394,13 +428,13 @@
     "bjdong": "11000",
     "stage": 4,
     "builder": "",
-    "eta": 10,
+    "eta": 10.0,
     "rdt": null,
     "moveIn": 2036,
     "risk": "추가",
     "reconSource": "ticker_csv(신규/미편입)",
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "GP6-7",
@@ -421,7 +455,9 @@
     "rdt": 1.5,
     "moveIn": 2033,
     "risk": "상가분쟁+사업성",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "GP5",
@@ -436,13 +472,15 @@
     "lawd": "11680",
     "jibun": "187",
     "bjdong": "10300",
-    "stage": 6,
+    "stage": 7,
     "builder": "대우건설",
     "eta": 6.0,
     "rdt": 0,
     "moveIn": 2032,
     "risk": "이주중. 리스크 없음",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "GPHS",
@@ -467,7 +505,9 @@
     "far": 179.0,
     "platArea": 20876.0,
     "platAreaEstimated": false,
-    "platAreaSource": "토지대장 실측(일원동 615-1, 2022)"
+    "platAreaSource": "토지대장 실측(일원동 615-1, 2022)",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "GPKNM",
@@ -484,11 +524,13 @@
     "bjdong": "10300",
     "stage": 3,
     "builder": "",
-    "eta": 15.0,
+    "eta": 14.0,
     "rdt": 3.0,
-    "moveIn": 2041,
+    "moveIn": 2040,
     "risk": "경우현 통합갈등",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "DCGPWS2",
@@ -505,13 +547,13 @@
     "bjdong": "10600",
     "stage": 3,
     "builder": "",
-    "eta": 12,
+    "eta": 12.0,
     "rdt": null,
     "moveIn": 2038,
     "risk": "변경, 추진위 전 단계",
     "reconSource": "ticker_csv(신규/미편입)",
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "GPWS3",
@@ -528,13 +570,13 @@
     "bjdong": "10300",
     "stage": 3,
     "builder": "",
-    "eta": 14,
+    "eta": 14.0,
     "rdt": null,
     "moveIn": 2040,
     "risk": "추가, 경우현 통합 추진",
     "reconSource": "ticker_csv(신규/미편입)",
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "GPHD1",
@@ -551,13 +593,13 @@
     "bjdong": "10300",
     "stage": 3,
     "builder": "",
-    "eta": 14,
+    "eta": 14.0,
     "rdt": null,
     "moveIn": 2040,
     "risk": "추가, 경우현 통합 추진",
     "reconSource": "ticker_csv(신규/미편입)",
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "DGPHS",
@@ -582,7 +624,9 @@
     "far": 145.0,
     "platArea": 36473.0,
     "platAreaEstimated": true,
-    "platAreaSource": "대표 제공(11,033평 환산, 토지대장 API 미조회)"
+    "platAreaSource": "대표 제공(11,033평 환산, 토지대장 API 미조회)",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "GPWS6",
@@ -603,7 +647,9 @@
     "rdt": 0,
     "moveIn": 2036,
     "risk": "사업시행계획 추진",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "GPWS8",
@@ -624,7 +670,9 @@
     "rdt": 1.0,
     "moveIn": 2038,
     "risk": "통합 조율",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "GPHD3",
@@ -641,13 +689,13 @@
     "bjdong": "10300",
     "stage": 3,
     "builder": "",
-    "eta": 12,
+    "eta": 12.0,
     "rdt": null,
     "moveIn": 2038,
     "risk": "추가, 추진위 전 단계",
     "reconSource": "ticker_csv(신규/미편입)",
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "EM",
@@ -668,7 +716,9 @@
     "rdt": 0,
     "moveIn": 2034,
     "risk": "대치동 대장주. 관리처분 준비중",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "MIDO",
@@ -689,7 +739,9 @@
     "rdt": 1.0,
     "moveIn": 2038,
     "risk": "대형평형 갈등",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "SK",
@@ -710,7 +762,9 @@
     "rdt": 0,
     "moveIn": 2038,
     "risk": "",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "DCGPWS1",
@@ -727,13 +781,13 @@
     "bjdong": "10600",
     "stage": 3,
     "builder": "",
-    "eta": 12,
+    "eta": 12.0,
     "rdt": null,
     "moveIn": 2038,
     "risk": "변경, 추진위 전 단계",
     "reconSource": "ticker_csv(신규/미편입)",
-    "etaProvisional": true,
-    "etaSource": "정책 자동부여(단계기준)"
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "DCSS1",
@@ -750,11 +804,13 @@
     "bjdong": "10600",
     "stage": 5,
     "builder": "",
-    "eta": 9.5,
+    "eta": 10.0,
     "rdt": 1.5,
     "moveIn": 2036,
     "risk": "단독추진. 상가분쟁",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "DCWS1",
@@ -771,11 +827,13 @@
     "bjdong": "10600",
     "stage": 5,
     "builder": "삼성물산",
-    "eta": 8.0,
+    "eta": 10.0,
     "rdt": 1.0,
-    "moveIn": 2034,
+    "moveIn": 2036,
     "risk": "사업지연",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "DCSS2",
@@ -792,11 +850,13 @@
     "bjdong": "10600",
     "stage": 5,
     "builder": "삼성물산",
-    "eta": 9.0,
+    "eta": 10.0,
     "rdt": 1.0,
-    "moveIn": 2035,
+    "moveIn": 2036,
     "risk": "상가분쟁+사업지연",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   },
   {
     "ticker": "ILWS7",
@@ -817,6 +877,8 @@
     "rdt": 0,
     "moveIn": 2036,
     "risk": "순항",
-    "reconSource": "recon_master_db_260823"
+    "reconSource": "recon_master_db_260823",
+    "etaProvisional": false,
+    "etaSource": "대표 입력(v3)"
   }
 ]
