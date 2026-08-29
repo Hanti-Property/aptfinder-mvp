@@ -35,7 +35,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 14.78,
+    "landPppMarket": 20420,
+    "capGrade": "Mega Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -97,7 +101,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 9.84,
+    "landPppMarket": 16666,
+    "capGrade": "Large Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -135,7 +143,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 7.51,
+    "landPppMarket": 21779,
+    "capGrade": "Large Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -173,7 +185,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 3.82,
+    "landPppMarket": 16064,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -211,7 +227,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 3.89,
+    "landPppMarket": 23025,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -249,7 +269,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 2.43,
+    "landPppMarket": 16916,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -287,7 +311,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 2.69,
+    "landPppMarket": 17187,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -325,7 +353,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 2.38,
+    "landPppMarket": 14311,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -363,7 +395,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 2.03,
+    "landPppMarket": 14246,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -449,7 +485,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.57,
+    "landPppMarket": 17380,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -487,7 +527,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.75,
+    "landPppMarket": 15700,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -525,7 +569,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.27,
+    "landPppMarket": 11794,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -563,7 +611,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.21,
+    "landPppMarket": 12471,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -601,7 +653,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.27,
+    "landPppMarket": 16573,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -639,7 +695,11 @@
     "platAreaSource": "대표 제공(11,033평 환산, 토지대장 API 미조회)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.8,
+    "landPppMarket": 16297,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -678,7 +738,11 @@
     "latestSupplyPy": 32.7,
     "priceWindow": "24m",
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 0.62,
+    "landPppMarket": 9904,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -716,7 +780,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 0.69,
+    "landPppMarket": 18270,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -1948,7 +2016,11 @@
     "platAreaEstimated": false,
     "platAreaSource": "토지대장 실측(일원동 615-1, 2022)",
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.32,
+    "landPppMarket": 20981,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -1986,7 +2058,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 3.82,
+    "landPppMarket": 17421,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2024,7 +2100,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.52,
+    "landPppMarket": 25657,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2062,7 +2142,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 3.9,
+    "landPppMarket": 29891,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2100,7 +2184,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 6.34,
+    "landPppMarket": 28826,
+    "capGrade": "Large Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2138,7 +2226,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 2.1,
+    "landPppMarket": 38777,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2176,7 +2268,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.23,
+    "landPppMarket": 25399,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2214,7 +2310,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 9.98,
+    "landPppMarket": 52116,
+    "capGrade": "Large Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2252,7 +2352,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 2.94,
+    "landPppMarket": 43999,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2290,7 +2394,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.43,
+    "landPppMarket": 28244,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2328,7 +2436,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 2.27,
+    "landPppMarket": 38765,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2366,7 +2478,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 4.67,
+    "landPppMarket": 40284,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2404,7 +2520,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 2.22,
+    "landPppMarket": 27334,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2442,7 +2562,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.83,
+    "landPppMarket": 28723,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2480,7 +2604,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 2.49,
+    "landPppMarket": 38065,
+    "capGrade": "Mid Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2518,7 +2646,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.82,
+    "landPppMarket": 28392,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2556,7 +2688,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.2,
+    "landPppMarket": 45134,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2594,7 +2730,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.17,
+    "landPppMarket": 44661,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2632,7 +2772,11 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 1.16,
+    "landPppMarket": 20663,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2671,7 +2815,11 @@
     "priceUpdated": "2026-08-29",
     "priceWindow": "24m",
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 0.64,
+    "landPppMarket": 27449,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   },
   {
     "gu": "강남구",
@@ -2709,6 +2857,10 @@
     "platAreaSource": "역산복원(far×vlRatEstm)",
     "platAreaEstimated": true,
     "etaProvisional": false,
-    "etaSource": "대표 입력(v3)"
+    "etaSource": "대표 입력(v3)",
+    "cmc": 0.79,
+    "landPppMarket": 13150,
+    "capGrade": "Small Cap",
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
   }
 ]
