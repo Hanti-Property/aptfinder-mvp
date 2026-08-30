@@ -123,6 +123,26 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
     <div class="info-card"><div class="label">세대당 대지지분</div><div class="value" id="v-station">—</div></div>
   </div>
 
+  <!-- 자산 시가총액 (CMC) 카드 -->
+  <div class="section-title">🏦 자산 시가총액 (CMC)</div>
+  <div class="grid-3" id="cmcCard">
+    <div class="info-card" style="background:linear-gradient(135deg,#1a2a4a,#1e1e3f);border-color:#3a5a8a;">
+      <div class="label">자산 시가총액 (CMC)</div>
+      <div class="value" id="v-cmc" style="color:#FFD54F;">—</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;" id="v-capgrade">—</div>
+    </div>
+    <div class="info-card">
+      <div class="label">대지 실거래 평당가</div>
+      <div class="value" id="v-landppp">—</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;">시세 ÷ 세대 대지지분</div>
+    </div>
+    <div class="info-card">
+      <div class="label">티커 / 자산번호</div>
+      <div class="value" id="v-ticker" style="font-family:monospace;">—</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;font-family:monospace;" id="v-assetid">—</div>
+    </div>
+  </div>
+
   <!-- RVI 총점 -->
   <div class="rvi-hero" id="rviHero">
     <div class="rvi-label">RVI RECONSTRUCTION VALUE INDEX</div>
@@ -234,8 +254,8 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
   <div class="section-title">⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순 (티커 단지 38개)</div>
   <div style="overflow-x:auto;margin-bottom:16px;">
     <table class="trade-table" id="rriRankTable">
-      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th>단계</th><th>ETA</th><th>입주</th><th>RVI</th><th>용적률</th><th>현재가</th></tr></thead>
-      <tbody id="rriRankBody"><tr><td colspan="9" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
+      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th>CMC</th><th>등급</th><th>단계</th><th>ETA</th><th>입주</th><th>RVI</th><th>용적률</th><th>현재가</th></tr></thead>
+      <tbody id="rriRankBody"><tr><td colspan="11" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
     </table>
     <p style="font-size:11px;color:#888;margin-top:6px;">* ETA는 단계 기준 잠정 자동부여값 (추진위 12년·리스크시 최대 14년 / 조합설립 10년·리스크시 11년). 확정 시 대체됩니다.</p>
   </div>
@@ -725,6 +745,22 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   document.getElementById('v-far').textContent=far>0?far.toFixed(0)+'%':'—';
   document.getElementById('v-station').textContent=lps>0?(lps/3.3058).toFixed(1)+'평':'—';
 
+  // 자산 시가총액(CMC) 카드 — 마스터 데이터(지번키) 조회
+  (function fillCmcCard(){
+    const a=ASSET_FROM_MASTER[(bjdongCd||selectedBjdongCd)+'-'+(jibun||selectedJibun)];
+    const setTxt=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+    if(a){
+      setTxt('v-cmc', a.cmc!=null?`₩${a.cmc.toFixed(1)}조`:'—');
+      setTxt('v-capgrade', a.capGrade||'');
+      setTxt('v-landppp', a.landPppMarket?a.landPppMarket.toLocaleString()+'만원/평':'—');
+      setTxt('v-ticker', a.ticker||'—');
+      setTxt('v-assetid', a.assetId||'');
+    } else {
+      ['v-cmc','v-landppp','v-ticker'].forEach(id=>setTxt(id,'—'));
+      ['v-capgrade','v-assetid'].forEach(id=>setTxt(id,''));
+    }
+  })();
+
   // 평당가
   let myPPPs=myTrades.map(t=>{const a=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return ar>0?a/(ar/3.3058):0;}).filter(v=>v>0);
   myPPPs=removeOutliers(myPPPs);
@@ -1094,11 +1130,18 @@ function openIndexDashboard(){
 
 // === RVI 랭킹 테이블 로드 (complexes_master.json) ===
 let _rriRankLoaded=false;
-// 마스터 ETA 맵 (지번키 → eta). getETA가 우선 참조 → 상세/랭킹 ETA 일원화
+// 마스터 맵 (지번키 → eta / 자산정보). getETA·CMC카드가 참조 → 상세/랭킹 일원화
 const ETA_FROM_MASTER={};
-(function preloadMasterEta(){
+const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, ticker, shortName, assetId}
+(function preloadMasterData(){
   fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
-    data.forEach(d=>{ if(d.gu==='강남구'&&d.ticker&&d.eta!=null){ ETA_FROM_MASTER[d.bjdong+'-'+d.jibun]=d.eta; } });
+    data.forEach(d=>{
+      if(d.gu==='강남구'&&d.ticker){
+        const k=d.bjdong+'-'+d.jibun;
+        if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId};
+      }
+    });
   }).catch(()=>{});
 })();
 
@@ -1143,7 +1186,7 @@ function loadRRIRanking(){
       const lpsScore=lps>=18?100:lps>=12?75:lps>=8?50:25;
       const nrtScore=50; // 배치에서는 기본값
       const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional});
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||''});
     });
     // ETA 랭킹: 입주까지 남은 기간(ETA) 짧은 순 → 사업 진행 빠른 단지 먼저
     // ETA 없는 단지는 맨 뒤로
@@ -1168,7 +1211,12 @@ function loadRRIRanking(){
       const etaColor=r.eta==null?'#666':r.eta<=7?'#66BB6A':r.eta<=10?'#42A5F5':r.eta<=12?'#FFA726':'#EF5350';
       const etaCell=r.eta!=null?`<span style="color:${etaColor};font-weight:700" title="${r.etaProvisional?'잠정(단계기준 자동부여)':'확정'}">${r.eta}년${r.etaProvisional?'*':''}</span>`:'<span style="color:#666">—</span>';
       const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
-      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td></tr>`;
+      // CMC + 자산 규모 등급
+      const cmcCell=r.cmc!=null?`<span style="color:#FFD54F;font-weight:700">${r.cmc.toFixed(1)}조</span>`:'<span style="color:#666">—</span>';
+      const GRADE_COLOR={'Mega Cap':'#FFD54F','Large Cap':'#66BB6A','Mid Cap':'#42A5F5','Small Cap':'#888'};
+      const gradeShort={'Mega Cap':'Mega','Large Cap':'Large','Mid Cap':'Mid','Small Cap':'Small'};
+      const gradeCell=r.capGrade?`<span style="color:${GRADE_COLOR[r.capGrade]||'#bbb'};font-size:12px;font-weight:700">${gradeShort[r.capGrade]||r.capGrade}</span>`:'—';
+      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td></tr>`;
     });
     _rriRankLoaded=true;
   }).catch(()=>{});
