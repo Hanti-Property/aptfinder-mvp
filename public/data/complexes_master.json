@@ -39,7 +39,8 @@
     "cmc": 14.78,
     "landPppMarket": 20420,
     "capGrade": "Mega Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00001"
   },
   {
     "gu": "강남구",
@@ -105,7 +106,8 @@
     "cmc": 9.84,
     "landPppMarket": 16666,
     "capGrade": "Large Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00002"
   },
   {
     "gu": "강남구",
@@ -147,7 +149,8 @@
     "cmc": 7.51,
     "landPppMarket": 21779,
     "capGrade": "Large Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00003"
   },
   {
     "gu": "강남구",
@@ -189,7 +192,8 @@
     "cmc": 3.82,
     "landPppMarket": 16064,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00005"
   },
   {
     "gu": "강남구",
@@ -231,7 +235,8 @@
     "cmc": 3.89,
     "landPppMarket": 23025,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00007"
   },
   {
     "gu": "강남구",
@@ -273,7 +278,8 @@
     "cmc": 2.43,
     "landPppMarket": 16916,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00010"
   },
   {
     "gu": "강남구",
@@ -315,7 +321,8 @@
     "cmc": 2.69,
     "landPppMarket": 17187,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00011"
   },
   {
     "gu": "강남구",
@@ -357,7 +364,8 @@
     "cmc": 2.38,
     "landPppMarket": 14311,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00012"
   },
   {
     "gu": "강남구",
@@ -399,7 +407,8 @@
     "cmc": 2.03,
     "landPppMarket": 14246,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00013"
   },
   {
     "gu": "강남구",
@@ -489,7 +498,8 @@
     "cmc": 1.57,
     "landPppMarket": 17380,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00017"
   },
   {
     "gu": "강남구",
@@ -531,7 +541,8 @@
     "cmc": 1.75,
     "landPppMarket": 15700,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00018"
   },
   {
     "gu": "강남구",
@@ -573,7 +584,8 @@
     "cmc": 1.27,
     "landPppMarket": 11794,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00020"
   },
   {
     "gu": "강남구",
@@ -615,7 +627,8 @@
     "cmc": 1.21,
     "landPppMarket": 12471,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00021"
   },
   {
     "gu": "강남구",
@@ -657,7 +670,8 @@
     "cmc": 1.27,
     "landPppMarket": 16573,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00024"
   },
   {
     "gu": "강남구",
@@ -699,7 +713,8 @@
     "cmc": 1.8,
     "landPppMarket": 16297,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00014"
   },
   {
     "gu": "강남구",
@@ -742,7 +757,8 @@
     "cmc": 0.62,
     "landPppMarket": 9904,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00030"
   },
   {
     "gu": "강남구",
@@ -784,7 +800,8 @@
     "cmc": 0.69,
     "landPppMarket": 18270,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00031"
   },
   {
     "gu": "강남구",
@@ -2020,7 +2037,8 @@
     "cmc": 1.32,
     "landPppMarket": 20981,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00023"
   },
   {
     "gu": "강남구",
@@ -2062,7 +2080,8 @@
     "cmc": 3.82,
     "landPppMarket": 17421,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00009"
   },
   {
     "gu": "강남구",
@@ -2104,7 +2123,8 @@
     "cmc": 1.52,
     "landPppMarket": 25657,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00026"
   },
   {
     "gu": "강남구",
@@ -2146,7 +2166,8 @@
     "cmc": 3.9,
     "landPppMarket": 29891,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00015"
   },
   {
     "gu": "강남구",
@@ -2188,7 +2209,8 @@
     "cmc": 6.34,
     "landPppMarket": 28826,
     "capGrade": "Large Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00006"
   },
   {
     "gu": "강남구",
@@ -2230,7 +2252,8 @@
     "cmc": 2.1,
     "landPppMarket": 38777,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00019"
   },
   {
     "gu": "강남구",
@@ -2272,7 +2295,8 @@
     "cmc": 1.23,
     "landPppMarket": 25399,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00035"
   },
   {
     "gu": "강남구",
@@ -2314,7 +2338,8 @@
     "cmc": 9.98,
     "landPppMarket": 52116,
     "capGrade": "Large Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00004"
   },
   {
     "gu": "강남구",
@@ -2356,7 +2381,8 @@
     "cmc": 2.94,
     "landPppMarket": 43999,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00016"
   },
   {
     "gu": "강남구",
@@ -2398,7 +2424,8 @@
     "cmc": 1.43,
     "landPppMarket": 28244,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00033"
   },
   {
     "gu": "강남구",
@@ -2440,7 +2467,8 @@
     "cmc": 2.27,
     "landPppMarket": 38765,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00022"
   },
   {
     "gu": "강남구",
@@ -2482,7 +2510,8 @@
     "cmc": 4.67,
     "landPppMarket": 40284,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00008"
   },
   {
     "gu": "강남구",
@@ -2524,7 +2553,8 @@
     "cmc": 2.22,
     "landPppMarket": 27334,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00028"
   },
   {
     "gu": "강남구",
@@ -2566,7 +2596,8 @@
     "cmc": 1.83,
     "landPppMarket": 28723,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00027"
   },
   {
     "gu": "강남구",
@@ -2608,7 +2639,8 @@
     "cmc": 2.49,
     "landPppMarket": 38065,
     "capGrade": "Mid Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00029"
   },
   {
     "gu": "강남구",
@@ -2650,7 +2682,8 @@
     "cmc": 1.82,
     "landPppMarket": 28392,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00025"
   },
   {
     "gu": "강남구",
@@ -2692,7 +2725,8 @@
     "cmc": 1.2,
     "landPppMarket": 45134,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00034"
   },
   {
     "gu": "강남구",
@@ -2734,7 +2768,8 @@
     "cmc": 1.17,
     "landPppMarket": 44661,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00032"
   },
   {
     "gu": "강남구",
@@ -2776,7 +2811,8 @@
     "cmc": 1.16,
     "landPppMarket": 20663,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00037"
   },
   {
     "gu": "강남구",
@@ -2819,7 +2855,8 @@
     "cmc": 0.64,
     "landPppMarket": 27449,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00038"
   },
   {
     "gu": "강남구",
@@ -2861,6 +2898,7 @@
     "cmc": 0.79,
     "landPppMarket": 13150,
     "capGrade": "Small Cap",
-    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)"
+    "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
+    "assetId": "A00036"
   }
 ]
