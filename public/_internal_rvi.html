@@ -642,6 +642,15 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   // fallback: ALL_COMPLEXES에서 전달된 용적률
   if(!far&&knownFar>0) far=knownFar;
 
+  // [마스터 폴백] 토지대장 API 실패 등으로 대지면적/세대수/용적률이 비면 complexes_master 값 사용
+  // (예: 도곡동 464 도곡개포한신 — 토지대장 API 무응답)
+  const _mA=ASSET_FROM_MASTER[bjdongCd+'-'+jibun];
+  if(_mA){
+    if(!platArea && _mA.platArea) platArea=parseFloat(_mA.platArea);
+    if(!households && _mA.h) households=_mA.h;
+    if(!far && _mA.far) far=_mA.far;
+  }
+
   // [다필지 보정] LPS가 6평 미만이면 V-World가 일부 필지만 반환한 것으로 판단
   // vlRatEstmTotArea / 추정용적률(250%)로 실제 대지면적 역산
   let lps=(households>0&&platArea>0)?(platArea/households):0;
@@ -1084,7 +1093,7 @@ const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, tick
       if(d.gu==='강남구'&&d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far};
       }
     });
   }).catch(()=>{});
