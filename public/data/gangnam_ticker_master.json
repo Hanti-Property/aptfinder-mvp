@@ -129,8 +129,8 @@
     "reconSource": "recon_master_db_260823",
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
-    "cmc": 3.9,
-    "landPppMarket": 29891,
+    "cmc": 3.99,
+    "landPppMarket": 30581,
     "capGrade": "Mid Cap",
     "assetId": "SEL-GN-APG-005"
   },
@@ -318,8 +318,8 @@
     "reconSource": "recon_master_db_260823",
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
-    "cmc": 2.22,
-    "landPppMarket": 27334,
+    "cmc": 2.43,
+    "landPppMarket": 29885,
     "capGrade": "Mid Cap",
     "assetId": "SEL-GN-APG-012"
   },
@@ -592,8 +592,8 @@
     "platAreaSource": "토지대장 실측(일원동 615-1, 2022)",
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
-    "cmc": 1.32,
-    "landPppMarket": 20981,
+    "cmc": 1.06,
+    "landPppMarket": 16716,
     "capGrade": "Small Cap",
     "assetId": "SEL-GN-ILW-002"
   },
@@ -731,9 +731,9 @@
     "platAreaSource": "대표 제공(11,033평 환산, 토지대장 API 미조회)",
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
-    "cmc": 1.8,
-    "landPppMarket": 16297,
-    "capGrade": "Small Cap",
+    "cmc": 2.26,
+    "landPppMarket": 20455,
+    "capGrade": "Mid Cap",
     "assetId": "SEL-GN-DGK-001"
   },
   {
@@ -839,8 +839,8 @@
     "reconSource": "recon_master_db_260823",
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
-    "cmc": 14.78,
-    "landPppMarket": 20420,
+    "cmc": 15.22,
+    "landPppMarket": 21031,
     "capGrade": "Mega Cap",
     "assetId": "SEL-GN-DCH-001"
   },
