@@ -103,9 +103,10 @@
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
     "cmc": 3.82,
-    "landPppMarket": 17421,
+    "landPppMarket": 50734,
     "capGrade": "Mid Cap",
-    "assetId": "SEL-GN-APG-004"
+    "assetId": "SEL-GN-APG-004",
+    "platArea": 24904.0
   },
   {
     "ticker": "APNHD",
@@ -186,7 +187,8 @@
     "cmc": 2.1,
     "landPppMarket": 38777,
     "capGrade": "Mid Cap",
-    "assetId": "SEL-GN-APG-007"
+    "assetId": "SEL-GN-APG-007",
+    "platArea": 17862.0
   },
   {
     "ticker": "APHD14",
@@ -265,9 +267,10 @@
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
     "cmc": 1.52,
-    "landPppMarket": 25657,
+    "landPppMarket": 19468,
     "capGrade": "Small Cap",
-    "assetId": "SEL-GN-APG-010"
+    "assetId": "SEL-GN-APG-010",
+    "platArea": 25862.0
   },
   {
     "ticker": "APHY3",
@@ -402,7 +405,8 @@
     "cmc": 1.43,
     "landPppMarket": 28244,
     "capGrade": "Small Cap",
-    "assetId": "SEL-GN-APG-015"
+    "assetId": "SEL-GN-APG-015",
+    "platArea": 16707.0
   },
   {
     "ticker": "APHY6",
@@ -481,9 +485,10 @@
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
     "cmc": 1.16,
-    "landPppMarket": 20663,
+    "landPppMarket": 20659,
     "capGrade": "Small Cap",
-    "assetId": "SEL-GN-APG-018"
+    "assetId": "SEL-GN-APG-018",
+    "platArea": 18498.0
   },
   {
     "ticker": "APHD10",
@@ -508,9 +513,10 @@
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
     "cmc": 0.64,
-    "landPppMarket": 27449,
+    "landPppMarket": 44694,
     "capGrade": "Small Cap",
-    "assetId": "SEL-GN-APG-019"
+    "assetId": "SEL-GN-APG-019",
+    "platArea": 4761.0
   },
   {
     "ticker": "GP6-7",
@@ -535,9 +541,10 @@
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
     "cmc": 7.51,
-    "landPppMarket": 21779,
+    "landPppMarket": 21621,
     "capGrade": "Large Cap",
-    "assetId": "SEL-GN-GPO-001"
+    "assetId": "SEL-GN-GPO-001",
+    "platArea": 114776.1
   },
   {
     "ticker": "GP5",
@@ -759,9 +766,10 @@
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
     "cmc": 0.62,
-    "landPppMarket": 9904,
+    "landPppMarket": 9905,
     "capGrade": "Small Cap",
-    "assetId": "SEL-GN-GPO-006"
+    "assetId": "SEL-GN-GPO-006",
+    "platArea": 20726.0
   },
   {
     "ticker": "GPWS8",
@@ -1029,8 +1037,9 @@
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
     "cmc": 2.43,
-    "landPppMarket": 16916,
+    "landPppMarket": 16400,
     "capGrade": "Mid Cap",
-    "assetId": "SEL-GN-ILW-001"
+    "assetId": "SEL-GN-ILW-001",
+    "platArea": 48984.0
   }
 ]
