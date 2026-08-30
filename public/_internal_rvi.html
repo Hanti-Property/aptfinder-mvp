@@ -278,62 +278,10 @@ const LAND_LAMBDA='https://3b77wfcneqfnywtzw3z333kw6a0gtrzt.lambda-url.ap-northe
 const BLD_KEY='Q5ESFBIwOv0jBJFO74hayYGsfDZH6Xvz70FGVRXojNTmCuxoXtrvBbXpmwBuAMc2mjbjLFjW7llkX3liqloF4A%3D%3D';
 const NVP_PREMIUM=1.20;
 
-// === ETA (입주예상기간) 마스터 데이터 — 2026-08-23 기준 ===
-// key: 지번(bun) 또는 단지명, value: ETA(년)
-const ETA_BY_JIBUN={
-  // 개포동
-  '0185':7.0,  // 개포주공6·7단지
-  '0187':6.0,  // 개포주공5단지 (개포써밋187)
-  '0012':6.0,  // 한신(개포)=개포한신 (개포동12)
-  '0649':14.0, // 경남아파트 (경우현)
-  '0652':10.0, // 개포6차우아파트 → 확인필요
-  '0654':7.0,  // 도곡개포한신
-  '0179':12.0, // 개포8차우성
-  // 대치동
-  '0316':8.0,  // 은마아파트
-  '0511':12.0, // 미도맨션아파트
-  '0506':12.0, // 선경아파트
-  '0063':8.0,  // 대치우성아파트 (대치우성1차)
-  '0066':9.5,  // 대치쌍용1차
-  '0065':9.0,  // 대치쌍용2차
-  '0548':12.0, // 동현아파트
-  // 압구정동
-  '0369':11.0, // 현대1·2차 (압구정3구역)
-  '0456':11.0, // 현대6·7차 (압구정3구역)
-  '0443':11.0, // 현대3차 (압구정3구역)
-  '0433':11.0, // 현대(3구역) (압구정3구역)
-  '0462':11.0, // 현대14차 추정 (압구정3구역)
-  '0455':11.0, // 현대5차 (압구정3구역)
-  '0448':11.0, // 현대13차 (압구정3구역)
-  '0426':10.0, // 현대(신현대) (압구정2구역)
-  '0481':10.0, // 현대8차 (압구정4구역)
-  '0486':10.0, // 한양4차 (압구정4구역)
-  '0489':10.0, // 한양3차 (압구정4구역)
-  '0484':10.0, // 한양6차 (압구정4구역)
-  '0490':10.0, // 한양1차 (압구정5구역)
-  '0513':10.0, // 한양2차 (압구정5구역)
-  '0493':12.0, // 한양5차 (압구정6구역)
-  '0528':15.0, // 한양7차 (압구정6구역)
-  '0414':14.0, // 미성1차 (압구정1구역)
-  '0397':14.0, // 미성2차 (압구정1구역)
-  // 일원동
-  '0718':10.0, // 일원동우성7차
-  // 도곡동
-  '0175':7.0,  // 도곡개포한신
-};
-// 단지명 기반 fallback (지번 매칭 실패 시)
-const ETA_BY_NAME={
-  '은마아파트':8.0,'미도맨션아파트':12.0,'선경아파트':12.0,
-  '개포주공6':7.0,'개포주공5':6.0,'한신':6.0,
-  '대치우성':8.0,'대치쌍용1':9.5,'대치쌍용2':9.0,
-  '현대6':11.0,'현대1':11.0,'현대3차':11.0,'현대5차':11.0,
-  '현대13':11.0,'현대14':11.0,'현대8차':10.0,
-  '신현대':10.0,'한양1':10.0,'한양2':10.0,'한양3':10.0,
-  '한양4':10.0,'한양5':12.0,'한양6':10.0,'한양7':15.0,
-  '미성1':14.0,'미성2':14.0,'경남':14.0,'동현':12.0,
-  '도곡개포한신':7.0,'일원동우성':10.0,'개포6차':10.0,'개포8차':12.0,
-};
-const ETA_DEFAULT=10; // 매칭 안 될 때 기본값
+// === ETA (입주예상기간) — 단일 소스: complexes_master.json ===
+// 하드코딩 ETA 테이블 제거(2026-08-30). getETA()가 ETA_FROM_MASTER(지번키)만 참조하여
+// 상세 카드와 랭킹의 ETA를 완전히 일원화한다. 매칭 실패 시 ETA_DEFAULT.
+const ETA_DEFAULT=10; // master에 없을 때 기본값
 
 // === NVP v2: 동별 기준가 (대표님 입력 2026-08-23) ===
 const NVP_V2_BASE={
@@ -382,22 +330,13 @@ function getComplexFeatures(name, units){
 }
 
 function getETA(jibun, name){
-  // 0) 마스터 데이터(complexes_master.json) 우선 — 상세/랭킹 ETA 일원화
-  //    ETA_FROM_MASTER는 preloadMasterEta에서 채워짐 (지번키: bjdong-jibun)
+  // 단일 소스: complexes_master.json (ETA_FROM_MASTER, 지번키 bjdong-jibun)
+  // 상세 카드·랭킹·미래가치 계산이 모두 동일한 master eta를 사용한다.
   if(typeof selectedBjdongCd!=='undefined' && selectedBjdongCd){
     const mk=selectedBjdongCd+'-'+(jibun||'');
     if(ETA_FROM_MASTER[mk]!=null) return ETA_FROM_MASTER[mk];
   }
-  // 1) 지번으로 매칭 (하드코딩 폴백)
-  const bun=(jibun||'').replace(/^0+/,'').padStart(4,'0');
-  if(ETA_BY_JIBUN[bun]) return ETA_BY_JIBUN[bun];
-  // 2) 단지명 부분 매칭
-  if(name){
-    for(const [key,val] of Object.entries(ETA_BY_NAME)){
-      if(name.includes(key)) return val;
-    }
-  }
-  return ETA_DEFAULT;
+  return ETA_DEFAULT; // master에 없을 때만 기본값
 }
 const NEW_COMPLEXES=[
   // 개포/대치 신축
