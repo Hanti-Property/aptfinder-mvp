@@ -86,7 +86,7 @@
     "name": "미성1차",
     "gu": "강남구",
     "dong": "압구정동",
-    "household": 910,
+    "household": 322,
     "reconStage": "3 추진위",
     "status": "유효",
     "note": "",
@@ -102,11 +102,12 @@
     "reconSource": "recon_master_db_260823",
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
-    "cmc": 3.82,
-    "landPppMarket": 50734,
-    "capGrade": "Mid Cap",
+    "cmc": 1.35,
+    "landPppMarket": 17952,
+    "capGrade": "Small Cap",
     "assetId": "SEL-GN-APG-004",
-    "platArea": 24904.0
+    "platArea": 24904.0,
+    "farTBD": true
   },
   {
     "ticker": "APNHD",
@@ -250,7 +251,7 @@
     "name": "미성2차",
     "gu": "강남구",
     "dong": "압구정동",
-    "household": 322,
+    "household": 910,
     "reconStage": "3 추진위",
     "status": "유효",
     "note": "",
@@ -266,11 +267,12 @@
     "reconSource": "recon_master_db_260823",
     "etaProvisional": false,
     "etaSource": "대표 입력(v3)",
-    "cmc": 1.52,
-    "landPppMarket": 19468,
-    "capGrade": "Small Cap",
+    "cmc": 4.3,
+    "landPppMarket": 34262,
+    "capGrade": "Mid Cap",
     "assetId": "SEL-GN-APG-010",
-    "platArea": 25862.0
+    "platArea": 41530.0,
+    "farTBD": true
   },
   {
     "ticker": "APHY3",

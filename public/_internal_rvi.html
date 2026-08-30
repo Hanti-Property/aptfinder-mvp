@@ -694,6 +694,8 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
       setTxt('v-landppp', a.landPppMarket?a.landPppMarket.toLocaleString()+'만원/평':'—');
       setTxt('v-ticker', a.ticker||'—');
       setTxt('v-assetid', a.assetId||'');
+      // 용적률 TBD 표시 (상가·도로 포함 등으로 검증 필요)
+      if(a.farTBD){const fe=document.getElementById('v-far'); if(fe && !/TBD/.test(fe.textContent)) fe.textContent=fe.textContent+' (TBD)';}
     } else {
       ['v-cmc','v-landppp','v-ticker'].forEach(id=>setTxt(id,'—'));
       ['v-capgrade','v-assetid'].forEach(id=>setTxt(id,''));
@@ -1078,7 +1080,7 @@ const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, tick
       if(d.gu==='강남구'&&d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD};
       }
     });
   }).catch(()=>{});
@@ -1125,7 +1127,7 @@ function loadRRIRanking(){
       const lpsScore=lps>=18?100:lps>=12?75:lps>=8?50:25;
       const nrtScore=50; // 배치에서는 기본값
       const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||''});
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||'',farTBD:!!d.farTBD});
     });
     // ETA 랭킹: 입주까지 남은 기간(ETA) 짧은 순 → 사업 진행 빠른 단지 먼저
     // ETA 없는 단지는 맨 뒤로
@@ -1155,7 +1157,7 @@ function loadRRIRanking(){
       const GRADE_COLOR={'Mega Cap':'#FFD54F','Large Cap':'#66BB6A','Mid Cap':'#42A5F5','Small Cap':'#888'};
       const gradeShort={'Mega Cap':'Mega','Large Cap':'Large','Mid Cap':'Mid','Small Cap':'Small'};
       const gradeCell=r.capGrade?`<span style="color:${GRADE_COLOR[r.capGrade]||'#bbb'};font-size:12px;font-weight:700">${gradeShort[r.capGrade]||r.capGrade}</span>`:'—';
-      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%</td><td>${cur}</td></tr>`;
+      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
     });
     _rriRankLoaded=true;
   }).catch(()=>{});
