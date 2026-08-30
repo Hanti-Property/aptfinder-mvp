@@ -70,6 +70,9 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
 /* 거래내역 */
 .trade-table{width:100%;border-collapse:collapse;margin-bottom:16px}
 .trade-table th{background:#12122b;padding:10px 8px;font-size:14px;color:#bbb;text-align:left;font-weight:600}
+.trade-table th.sortable{cursor:pointer;user-select:none}
+.trade-table th.sortable:hover{color:#fff;background:#1a1a3a}
+.trade-table th .sort-ind{color:#FFD54F;font-size:12px}
 .trade-table td{padding:10px 8px;border-bottom:1px solid #1e1e3f;font-size:13px}
 .trade-table .price{color:#ff6b6b;font-weight:700}
 
@@ -251,10 +254,11 @@ header .badge{background:#1565C0;color:#fff;font-size:11px;padding:3px 8px;borde
   <tbody id="tradeBody"><tr><td colspan="5" style="text-align:center;color:#666">단지를 선택하세요</td></tr></tbody></table>
 
   <!-- RVI 랭킹 테이블 -->
-  <div class="section-title">⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순 (티커 단지 38개)</div>
+  <div class="section-title" id="rankTitle">⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순 (티커 단지 38개)</div>
+  <div style="font-size:11px;color:#888;margin:-6px 0 8px;">💡 컬럼 헤더(CMC·단계·ETA·RVI·용적률·현재가)를 클릭하면 그 기준으로 정렬됩니다. 티커/단지명 클릭 시 해당 단지 분석이 열립니다.</div>
   <div style="overflow-x:auto;margin-bottom:16px;">
     <table class="trade-table" id="rriRankTable">
-      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th>CMC</th><th>등급</th><th>단계</th><th>ETA</th><th>입주</th><th>RVI</th><th>용적률</th><th>현재가</th></tr></thead>
+      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th class="sortable" data-sort="cmc" onclick="sortRanking('cmc')">CMC</th><th>등급</th><th class="sortable" data-sort="stage" onclick="sortRanking('stage')">단계</th><th class="sortable" data-sort="eta" onclick="sortRanking('eta')">ETA</th><th class="sortable" data-sort="moveIn" onclick="sortRanking('moveIn')">입주</th><th class="sortable" data-sort="rvi" onclick="sortRanking('rvi')">RVI</th><th class="sortable" data-sort="far" onclick="sortRanking('far')">용적률</th><th class="sortable" data-sort="currentPrice" onclick="sortRanking('currentPrice')">현재가</th></tr></thead>
       <tbody id="rriRankBody"><tr><td colspan="11" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
     </table>
     <p style="font-size:11px;color:#888;margin-top:6px;">* ETA는 단계 기준 잠정 자동부여값 (추진위 12년·리스크시 최대 14년 / 조합설립 10년·리스크시 11년). 확정 시 대체됩니다.</p>
@@ -1129,38 +1133,67 @@ function loadRRIRanking(){
       const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
       results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||'',farTBD:!!d.farTBD});
     });
-    // ETA 랭킹: 입주까지 남은 기간(ETA) 짧은 순 → 사업 진행 빠른 단지 먼저
-    // ETA 없는 단지는 맨 뒤로
-    results.sort((a,b)=>{
-      const ea=a.eta!=null?a.eta:999, eb=b.eta!=null?b.eta:999;
-      if(ea!==eb)return ea-eb;
-      return b.rvi-a.rvi; // 동일 ETA면 RVI 높은 순
-    });
-    const tbody=document.getElementById('rriRankBody');
-    tbody.innerHTML='';
-    const STAGE_NAME={3:'추진위',4:'조합설립',5:'사업시행',6:'관리처분',7:'이주/철거',8:'착공',9:'입주'};
-    const STAGE_COLOR={3:'#EF5350',4:'#FFA726',5:'#FFD54F',6:'#42A5F5',7:'#66BB6A',8:'#66BB6A',9:'#66BB6A'};
-    results.forEach((r,i)=>{
-      const cur=r.currentPrice>=10000?(r.currentPrice/10000).toFixed(1)+'억':Math.round(r.currentPrice).toLocaleString()+'만';
-      const rviColor=r.rvi>=80?'#66BB6A':r.rvi>=60?'#42A5F5':r.rvi>=40?'#FFA726':'#EF5350';
-      const bjdong=r.bjdong||'11000';
-      const tickerCell=r.ticker?`<span style="font-family:monospace;font-weight:700;color:#FFD54F">${r.ticker}</span>`:'<span style="color:#666">—</span>';
-      const nameDisp=r.shortName||r.name;
-      // 단계 셀
-      const stageCell=r.stage?`<span style="color:${STAGE_COLOR[r.stage]||'#bbb'};font-weight:700">${r.stage} ${STAGE_NAME[r.stage]||''}</span>`:'<span style="color:#666">—</span>';
-      // ETA 셀 (짧을수록 초록)
-      const etaColor=r.eta==null?'#666':r.eta<=7?'#66BB6A':r.eta<=10?'#42A5F5':r.eta<=12?'#FFA726':'#EF5350';
-      const etaCell=r.eta!=null?`<span style="color:${etaColor};font-weight:700" title="${r.etaProvisional?'잠정(단계기준 자동부여)':'확정'}">${r.eta}년${r.etaProvisional?'*':''}</span>`:'<span style="color:#666">—</span>';
-      const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
-      // CMC + 자산 규모 등급
-      const cmcCell=r.cmc!=null?`<span style="color:#FFD54F;font-weight:700">${r.cmc.toFixed(1)}조</span>`:'<span style="color:#666">—</span>';
-      const GRADE_COLOR={'Mega Cap':'#FFD54F','Large Cap':'#66BB6A','Mid Cap':'#42A5F5','Small Cap':'#888'};
-      const gradeShort={'Mega Cap':'Mega','Large Cap':'Large','Mid Cap':'Mid','Small Cap':'Small'};
-      const gradeCell=r.capGrade?`<span style="color:${GRADE_COLOR[r.capGrade]||'#bbb'};font-size:12px;font-weight:700">${gradeShort[r.capGrade]||r.capGrade}</span>`:'—';
-      tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
-    });
+    _rankRows=results;
+    renderRanking(); // 기본: ETA 오름차순
     _rriRankLoaded=true;
   }).catch(()=>{});
+}
+
+// === 랭킹 정렬·렌더 (헤더 클릭 정렬 지원) ===
+let _rankRows=[];
+let _rankSort={key:'eta', dir:'asc'}; // 기본 ETA 오름차순
+const RANK_STAGE_NAME={3:'추진위',4:'조합설립',5:'사업시행',6:'관리처분',7:'이주/철거',8:'착공',9:'입주'};
+const RANK_STAGE_COLOR={3:'#EF5350',4:'#FFA726',5:'#FFD54F',6:'#42A5F5',7:'#66BB6A',8:'#66BB6A',9:'#66BB6A'};
+const RANK_TITLE={eta:'⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순',cmc:'🏦 강남구 CMC 랭킹 — 자산 시가총액 순',far:'📐 강남구 용적률 랭킹',rvi:'📊 강남구 RVI 랭킹',currentPrice:'💰 강남구 현재가 랭킹',stage:'🏗️ 강남구 재건축 단계 랭킹'};
+
+function sortRanking(key){
+  // 같은 컬럼 재클릭 시 방향 토글. 새 컬럼이면 기본 방향(값 큰 순, ETA만 오름차순)
+  if(_rankSort.key===key){ _rankSort.dir = _rankSort.dir==='asc'?'desc':'asc'; }
+  else { _rankSort = {key, dir: key==='eta'?'asc':'desc'}; }
+  renderRanking();
+}
+
+function renderRanking(){
+  const key=_rankSort.key, dir=_rankSort.dir;
+  const rows=_rankRows.slice();
+  const val=(r)=>{
+    let v = r[key];
+    if(v==null) return (dir==='asc')? Infinity : -Infinity; // 결측은 항상 뒤로
+    return v;
+  };
+  rows.sort((a,b)=>{
+    const va=val(a), vb=val(b);
+    if(va!==vb) return dir==='asc'? va-vb : vb-va;
+    return (b.rvi||0)-(a.rvi||0); // 동률이면 RVI 높은 순
+  });
+  // 제목 갱신
+  const titleEl=document.getElementById('rankTitle');
+  if(titleEl) titleEl.textContent=`${RANK_TITLE[key]||'강남구 랭킹'} (티커 단지 ${rows.length}개)`;
+  const tbody=document.getElementById('rriRankBody');
+  tbody.innerHTML='';
+  const GRADE_COLOR={'Mega Cap':'#FFD54F','Large Cap':'#66BB6A','Mid Cap':'#42A5F5','Small Cap':'#888'};
+  const gradeShort={'Mega Cap':'Mega','Large Cap':'Large','Mid Cap':'Mid','Small Cap':'Small'};
+  rows.forEach((r,i)=>{
+    const cur=r.currentPrice>=10000?(r.currentPrice/10000).toFixed(1)+'억':Math.round(r.currentPrice).toLocaleString()+'만';
+    const rviColor=r.rvi>=80?'#66BB6A':r.rvi>=60?'#42A5F5':r.rvi>=40?'#FFA726':'#EF5350';
+    const bjdong=r.bjdong||'11000';
+    const clickAttr=`onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="cursor:pointer;"`;
+    const tickerCell=r.ticker?`<span ${clickAttr} style="font-family:monospace;font-weight:700;color:#FFD54F;cursor:pointer;text-decoration:underline;text-decoration-color:#665;">${r.ticker}</span>`:'<span style="color:#666">—</span>';
+    const nameDisp=r.shortName||r.name;
+    const stageCell=r.stage?`<span style="color:${RANK_STAGE_COLOR[r.stage]||'#bbb'};font-weight:700">${r.stage} ${RANK_STAGE_NAME[r.stage]||''}</span>`:'<span style="color:#666">—</span>';
+    const etaColor=r.eta==null?'#666':r.eta<=7?'#66BB6A':r.eta<=10?'#42A5F5':r.eta<=12?'#FFA726':'#EF5350';
+    const etaCell=r.eta!=null?`<span style="color:${etaColor};font-weight:700" title="${r.etaProvisional?'잠정(단계기준 자동부여)':'확정'}">${r.eta}년${r.etaProvisional?'*':''}</span>`:'<span style="color:#666">—</span>';
+    const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
+    const cmcCell=r.cmc!=null?`<span style="color:#FFD54F;font-weight:700">${r.cmc.toFixed(1)}조</span>`:'<span style="color:#666">—</span>';
+    const gradeCell=r.capGrade?`<span style="color:${GRADE_COLOR[r.capGrade]||'#bbb'};font-size:12px;font-weight:700">${gradeShort[r.capGrade]||r.capGrade}</span>`:'—';
+    tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
+  });
+  // 정렬 표시(▲▼)를 헤더에 반영
+  document.querySelectorAll('#rriRankTable thead th[data-sort]').forEach(th=>{
+    const k=th.getAttribute('data-sort');
+    th.querySelector('.sort-ind')?.remove();
+    if(k===key){ const s=document.createElement('span'); s.className='sort-ind'; s.textContent = dir==='asc'?' ▲':' ▼'; th.appendChild(s); }
+  });
 }
 // 대시보드 표시 시 랭킹 로드
 setTimeout(loadRRIRanking,2000);
