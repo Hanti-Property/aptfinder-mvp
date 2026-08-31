@@ -88,8 +88,13 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 
 .quick-section{padding:16px 24px;border-top:1px solid #2a2a4a}
 .quick-section h3{font-size:14px;color:#bbb;margin-bottom:8px}
-.quick-btns{display:flex;flex-wrap:wrap;gap:6px}
+.quick-btns{display:flex;flex-wrap:wrap;gap:8px}
 .quick-btn{padding:7px 12px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:16px;font-size:12px;color:#ccc;cursor:pointer;transition:all .2s}
+/* CMC TOP 카드형 버튼 (일정 크기) */
+.qb-card{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:96px;height:52px;padding:0;border-radius:10px;background:linear-gradient(180deg,#20203f,#181832);border:1px solid #3a3a5a}
+.qb-card:hover{border-color:#FFD54F;background:linear-gradient(180deg,#2a2a52,#1d1d3a);transform:translateY(-1px)}
+.qb-card .qb-tk{font-family:monospace;font-weight:800;font-size:13px;color:#FFD54F;letter-spacing:.5px}
+.qb-card .qb-sub{font-size:11px;color:#9a9ab5;font-weight:600}
 .quick-btn:hover{background:#2a2a5a;border-color:#42A5F5;color:#fff}
 
 .loading{text-align:center;padding:30px;color:#888}
@@ -120,7 +125,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 
 <!-- 빠른 선택 -->
 <div class="quick-section">
-  <h3 id="quickSelectTitle">빠른 선택 — 강남구 재건축 대형단지 TOP 10 (티커)</h3>
+  <h3 id="quickSelectTitle">TOP 10 COMPLEXES — By Market Cap (CMC)</h3>
   <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
     <select id="selGu" onchange="filterDong()" style="padding:8px 12px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:6px;color:#fff;font-size:13px;">
       <option value="">구 선택</option>
@@ -1116,6 +1121,8 @@ const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, tick
         ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far};
       }
     });
+    // 마스터(CMC) 로드 완료 후 빠른선택을 CMC 순으로 재렌더
+    try{ if(typeof filterComplex==='function') filterComplex(); }catch(e){}
   }).catch(()=>{});
 })();
 
@@ -1290,20 +1297,25 @@ function filterComplex(){
   let list=ALL_COMPLEXES.slice();
   if(gu)list=list.filter(c=>c.gu===gu);
   if(dong)list=list.filter(c=>c.dong===dong);
-  list.sort((a,b)=>b.h-a.h);
-  // 동 미선택(기본): 세대수 상위 10개 대형단지를 '티커'로만 표시
+  // CMC(마스터) 기준 정렬. CMC 없으면 세대수로 폴백.
+  const cmcOf=(c)=>{const a=ASSET_FROM_MASTER[(c.bjdong)+'-'+(c.jibun)]; return a&&a.cmc!=null?a.cmc:-1;};
+  list.sort((a,b)=>{const ca=cmcOf(a),cb=cmcOf(b); if(cb!==ca)return cb-ca; return (b.h||0)-(a.h||0);});
+  // 동 미선택(기본): CMC 상위 10개(TOP 10)를 티커로 표시
   const tickerOnly=!dong;
   if(tickerOnly)list=list.slice(0,10);
   if(title)title.textContent = dong
-    ? `빠른 선택 — ${dong} 재건축 단지 (약칭·티커)`
-    : '빠른 선택 — 강남구 재건축 대형단지 TOP 10 (티커)';
+    ? `QUICK SELECT — ${dong} · By Market Cap`
+    : 'TOP 10 COMPLEXES — By Market Cap (CMC)';
   box.innerHTML='';
   list.forEach(c=>{
     const lawd=LAWD_MAP[c.gu]||'11680';
     const bjdong=BJDONG_MAP2[c.dong]||'10600';
     const addr=`서울 ${c.gu} ${c.dong} ${c.jibun}`;
-    const label=tickerOnly?c.ticker:`${c.shortName||c.name} (${c.ticker})`;
-    box.innerHTML+=`<button class="quick-btn" onclick="quickLoad2('${c.name}','${addr}','${lawd}','${bjdong}','${c.jibun}')" title="${(c.shortName||c.name)} (${c.ticker})">${label}</button>`;
+    const cmc=cmcOf(c);
+    // 티커(위) + CMC(아래) 2줄 버튼. 동 선택 시엔 약칭도 함께.
+    const sub = cmc>=0 ? `₩${cmc.toFixed(1)}T` : '—';
+    const label = `<span class="qb-tk">${c.ticker}</span><span class="qb-sub">${sub}</span>`;
+    box.innerHTML+=`<button class="quick-btn qb-card" onclick="quickLoad2('${c.name}','${addr}','${lawd}','${bjdong}','${c.jibun}')" title="${(c.shortName||c.name)} (${c.ticker})">${label}</button>`;
   });
 }
 function quickLoad(name,address){
@@ -1429,7 +1441,7 @@ function clickMarker(name,address,lat,lng){
     const cnt=ALL_COMPLEXES.filter(c=>c.gu===gu).length;
     sel.innerHTML+=`<option value="${gu}">${gu} (${cnt})</option>`;
   });
-  document.getElementById('quickSelectTitle').textContent='빠른 선택 — 강남구 재건축 대형단지 TOP 10 (티커)';
+  document.getElementById('quickSelectTitle').textContent='TOP 10 COMPLEXES — By Market Cap (CMC)';
 })();
 filterComplex(); // 초기 로드 시 대형단지 TOP 10(티커) 표시
 loadReconMarkers();
