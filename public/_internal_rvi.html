@@ -93,8 +93,8 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 /* CMC TOP 카드형 버튼 (일정 크기) */
 .qb-card{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:96px;height:52px;padding:0;border-radius:10px;background:linear-gradient(180deg,#0e2c4a,#0b3050);border:1px solid #1c466e}
 .qb-card:hover{border-color:#C79A5B;background:linear-gradient(180deg,#123a5e,#0c3253);transform:translateY(-1px)}
-.qb-card .qb-tk{font-family:monospace;font-weight:800;font-size:13px;color:#C79A5B;letter-spacing:.5px}
-.qb-card .qb-sub{font-size:11px;color:#9a9ab5;font-weight:600}
+.qb-card .qb-tk{font-family:Arial,'Helvetica Neue',sans-serif;font-weight:700;font-size:14px;color:#F2C879;letter-spacing:.5px}
+.qb-card .qb-sub{font-size:11px;color:#C7D2DE;font-weight:600}
 .quick-btn:hover{background:#123a5e;border-color:#42A5F5;color:#fff}
 
 .loading{text-align:center;padding:30px;color:#888}
@@ -1312,8 +1312,8 @@ function filterComplex(){
     const bjdong=BJDONG_MAP2[c.dong]||'10600';
     const addr=`서울 ${c.gu} ${c.dong} ${c.jibun}`;
     const cmc=cmcOf(c);
-    // 티커(위) + CMC(아래) 2줄 버튼. 동 선택 시엔 약칭도 함께.
-    const sub = cmc>=0 ? `₩${cmc.toFixed(1)}T` : '—';
+    // 티커(위) + CMC 숫자만(아래) 2줄 버튼.
+    const sub = cmc>=0 ? `${cmc.toFixed(1)}` : '—';
     const label = `<span class="qb-tk">${c.ticker}</span><span class="qb-sub">${sub}</span>`;
     box.innerHTML+=`<button class="quick-btn qb-card" onclick="quickLoad2('${c.name}','${addr}','${lawd}','${bjdong}','${c.jibun}')" title="${(c.shortName||c.name)} (${c.ticker})">${label}</button>`;
   });
