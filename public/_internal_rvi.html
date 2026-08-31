@@ -6,39 +6,39 @@
 <title>AptFinder - 재건축 RVI 대시보드</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#1a1a2e;color:#e0e0e0;font-size:14px}
+body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#083458;color:#e0e0e0;font-size:14px}
 .container{max-width:1100px;margin:0 auto;min-height:100vh}
-header{background:linear-gradient(180deg,#0d0d20,#0f0f23);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a4a;position:relative}
-header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,#FFD54F,transparent 60%)}
+header{background:linear-gradient(180deg,#061f38,#072741);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1c466e;position:relative}
+header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,#C79A5B,transparent 60%)}
 .brand{display:flex;align-items:center;gap:14px}
-.brand .accent{width:4px;height:40px;border-radius:2px;background:linear-gradient(180deg,#FFD54F,#C9972B);box-shadow:0 0 10px rgba(255,213,79,.4)}
+.brand .accent{width:4px;height:40px;border-radius:2px;background:linear-gradient(180deg,#C79A5B,#947044);box-shadow:0 0 10px rgba(255,213,79,.4)}
 .brand .wm{display:flex;flex-direction:column;line-height:1.15}
-.brand .wm .title{font-family:'Helvetica Neue',Arial,sans-serif;font-size:24px;font-weight:800;letter-spacing:3px;background:linear-gradient(90deg,#FFE9A6,#FFD54F 40%,#fff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.brand .wm .sub{font-size:10px;letter-spacing:2.5px;color:#8a8aa5;text-transform:uppercase;margin-top:3px}
+.brand .wm .title{font-family:'Helvetica Neue',Arial,sans-serif;font-size:24px;font-weight:800;letter-spacing:3px;background:linear-gradient(90deg,#E7CFA6,#C79A5B 40%,#fff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand .wm .sub{font-size:10px;letter-spacing:2.5px;color:#8CA3BC;text-transform:uppercase;margin-top:3px}
 header h1{font-size:20px;color:#fff;font-weight:700}
 header .sub{font-size:14px;color:#bbb;margin-top:2px}
 header .badge{background:rgba(102,187,106,.12);color:#66BB6A;font-size:10px;padding:4px 10px;border-radius:20px;font-weight:700;letter-spacing:1px;border:1px solid rgba(102,187,106,.4);display:inline-flex;align-items:center;gap:5px}
 header .badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#66BB6A;box-shadow:0 0 6px #66BB6A;animation:pulse 1.6s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.top-bar{padding:12px 24px;background:#12122b;display:flex;gap:10px;align-items:center;border-bottom:1px solid #2a2a4a}
-.top-bar input{flex:1;padding:11px 14px;background:#1a1a33;border:1px solid #3a3a5a;border-radius:8px;color:#fff;font-size:14px;transition:border-color .2s,box-shadow .2s}
-.top-bar input:focus{outline:none;border-color:#FFD54F;box-shadow:0 0 0 2px rgba(255,213,79,.15)}
+.top-bar{padding:12px 24px;background:#082e4d;display:flex;gap:10px;align-items:center;border-bottom:1px solid #1c466e}
+.top-bar input{flex:1;padding:11px 14px;background:#0b2c4a;border:1px solid #1c466e;border-radius:8px;color:#fff;font-size:14px;transition:border-color .2s,box-shadow .2s}
+.top-bar input:focus{outline:none;border-color:#C79A5B;box-shadow:0 0 0 2px rgba(255,213,79,.15)}
 .top-bar input::placeholder{color:#666}
-.top-bar button{padding:11px 20px;background:linear-gradient(180deg,#FFD54F,#E6B93E);color:#1a1a2e;border:none;border-radius:8px;font-size:12px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:filter .2s}
+.top-bar button{padding:11px 20px;background:linear-gradient(180deg,#C79A5B,#B0863F);color:#083458;border:none;border-radius:8px;font-size:12px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:filter .2s}
 .top-bar button:hover{filter:brightness(1.08)}
-#map{width:100%;height:300px;border-bottom:1px solid #2a2a4a}
+#map{width:100%;height:300px;border-bottom:1px solid #1c466e}
 .dashboard{display:none;padding:20px 24px}
 .dash-header{margin-bottom:16px}
 .dash-header h2{font-size:22px;color:#fff;margin-bottom:4px}
 .dash-header p{font-size:13px;color:#888}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
-.info-card{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:14px}
+.info-card{background:#0e2c4a;border:1px solid #1c466e;border-radius:10px;padding:14px}
 .info-card .label{font-size:14px;color:#bbb;margin-bottom:4px}
 .info-card .value{font-size:16px;font-weight:700;color:#fff}
 .info-card .sub{font-size:14px;color:#bbb;margin-top:2px}
 
 /* RVI 총점 영역 */
-.rvi-hero{text-align:center;padding:24px;background:linear-gradient(135deg,#0f0f23,#1e1e3f);border:1px solid #2a2a4a;border-radius:12px;margin-bottom:16px}
+.rvi-hero{text-align:center;padding:24px;background:linear-gradient(135deg,#072741,#0e2c4a);border:1px solid #1c466e;border-radius:12px;margin-bottom:16px}
 .rvi-hero .rvi-label{font-size:14px;color:#bbb;letter-spacing:1px}
 .rvi-hero .rvi-score{font-size:64px;font-weight:900;margin:8px 0}
 .rvi-hero .rvi-grade{font-size:22px;font-weight:700;margin-left:4px}
@@ -47,7 +47,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 /* 색상 클래스 */
 /* RVI 코멘트 박스 */
 .rvi-summary-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.rvi-comment-box{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;display:flex;flex-direction:column;justify-content:center}
+.rvi-comment-box{background:#0e2c4a;border:1px solid #1c466e;border-radius:10px;padding:16px;display:flex;flex-direction:column;justify-content:center}
 .rvi-comment-box .comment-label{font-size:14px;color:#bbb;font-weight:600;letter-spacing:0.5px;margin-bottom:10px}
 .rvi-comment-box .comment-text{font-size:13px;color:#ccc;line-height:1.8}
 @media(max-width:768px){.rvi-summary-row{grid-template-columns:1fr}}
@@ -59,46 +59,46 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 .bg-c{background:#B71C1C;border-color:#C62828}
 .bar-s{background:#42A5F5}.bar-a{background:#66BB6A}.bar-b{background:#FFA726}.bar-c{background:#EF5350}.bar-d{background:#9E9E9E}
 
-.section-title{font-size:16px;font-weight:700;color:#fff;margin:16px 0 12px;padding-bottom:8px;border-bottom:1px solid #2a2a4a}
+.section-title{font-size:16px;font-weight:700;color:#fff;margin:16px 0 12px;padding-bottom:8px;border-bottom:1px solid #1c466e}
 .index-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.index-card{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;position:relative;transition:border-color .3s}
+.index-card{background:#0e2c4a;border:1px solid #1c466e;border-radius:10px;padding:16px;position:relative;transition:border-color .3s}
 .index-card .idx-label{font-size:14px;color:#bbb;font-weight:600;letter-spacing:0.5px}
 .index-card .idx-name{font-size:13px;color:#ccc;margin:4px 0 8px}
 .index-card .idx-score{font-size:28px;font-weight:800}
 .index-card .idx-sub{font-size:14px;color:#bbb;margin-top:6px;line-height:1.4}
-.idx-bar{height:4px;background:#2a2a4a;border-radius:2px;margin-top:8px;overflow:hidden}
+.idx-bar{height:4px;background:#1c466e;border-radius:2px;margin-top:8px;overflow:hidden}
 .idx-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
 
 /* NVP 비교 단지 */
-.nvp-compare{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;margin-bottom:16px}
+.nvp-compare{background:#0e2c4a;border:1px solid #1c466e;border-radius:10px;padding:16px;margin-bottom:16px}
 .nvp-compare h4{font-size:14px;color:#bbb;margin-bottom:10px}
-.nvp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #252545}
+.nvp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #123a5e}
 .nvp-row:last-child{border-bottom:none}
 .nvp-row .left{font-size:12px;color:#ccc}
 .nvp-row .right{font-size:13px;font-weight:700;color:#42A5F5}
 
 /* 거래내역 */
 .trade-table{width:100%;border-collapse:collapse;margin-bottom:16px}
-.trade-table th{background:#12122b;padding:10px 8px;font-size:14px;color:#bbb;text-align:left;font-weight:600}
+.trade-table th{background:#082e4d;padding:10px 8px;font-size:14px;color:#bbb;text-align:left;font-weight:600}
 .trade-table th.sortable{cursor:pointer;user-select:none}
-.trade-table th.sortable:hover{color:#fff;background:#1a1a3a}
-.trade-table th .sort-ind{color:#FFD54F;font-size:12px}
-.trade-table td{padding:10px 8px;border-bottom:1px solid #1e1e3f;font-size:13px}
+.trade-table th.sortable:hover{color:#fff;background:#0b2c4a}
+.trade-table th .sort-ind{color:#C79A5B;font-size:12px}
+.trade-table td{padding:10px 8px;border-bottom:1px solid #0e2c4a;font-size:13px}
 .trade-table .price{color:#ff6b6b;font-weight:700}
 
-.quick-section{padding:16px 24px;border-top:1px solid #2a2a4a}
+.quick-section{padding:16px 24px;border-top:1px solid #1c466e}
 .quick-section h3{font-size:14px;color:#bbb;margin-bottom:8px}
 .quick-btns{display:flex;flex-wrap:wrap;gap:8px}
-.quick-btn{padding:7px 12px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:16px;font-size:12px;color:#ccc;cursor:pointer;transition:all .2s}
+.quick-btn{padding:7px 12px;background:#0e2c4a;border:1px solid #1c466e;border-radius:16px;font-size:12px;color:#ccc;cursor:pointer;transition:all .2s}
 /* CMC TOP 카드형 버튼 (일정 크기) */
-.qb-card{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:96px;height:52px;padding:0;border-radius:10px;background:linear-gradient(180deg,#20203f,#181832);border:1px solid #3a3a5a}
-.qb-card:hover{border-color:#FFD54F;background:linear-gradient(180deg,#2a2a52,#1d1d3a);transform:translateY(-1px)}
-.qb-card .qb-tk{font-family:monospace;font-weight:800;font-size:13px;color:#FFD54F;letter-spacing:.5px}
+.qb-card{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:96px;height:52px;padding:0;border-radius:10px;background:linear-gradient(180deg,#0e2c4a,#0b3050);border:1px solid #1c466e}
+.qb-card:hover{border-color:#C79A5B;background:linear-gradient(180deg,#123a5e,#0c3253);transform:translateY(-1px)}
+.qb-card .qb-tk{font-family:monospace;font-weight:800;font-size:13px;color:#C79A5B;letter-spacing:.5px}
 .qb-card .qb-sub{font-size:11px;color:#9a9ab5;font-weight:600}
-.quick-btn:hover{background:#2a2a5a;border-color:#42A5F5;color:#fff}
+.quick-btn:hover{background:#123a5e;border-color:#42A5F5;color:#fff}
 
 .loading{text-align:center;padding:30px;color:#888}
-.disclaimer{background:#1e1e3f;border:1px solid #2a2a4a;border-radius:8px;padding:12px 16px;margin-top:16px}
+.disclaimer{background:#0e2c4a;border:1px solid #1c466e;border-radius:8px;padding:12px 16px;margin-top:16px}
 .disclaimer p{font-size:14px;color:#bbb;line-height:1.5}
 @media(max-width:768px){.grid-3,.index-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:480px){.grid-3{grid-template-columns:1fr}.index-grid{grid-template-columns:1fr}}
@@ -117,7 +117,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   <span class="badge">LIVE</span>
 </header>
 <div class="top-bar">
-  <span style="color:#FFD54F;font-family:monospace;font-weight:700;font-size:15px;">&gt;</span>
+  <span style="color:#C79A5B;font-family:monospace;font-weight:700;font-size:15px;">&gt;</span>
   <input type="text" id="searchInput" placeholder="Search complex — e.g. Eunma(EM), Mido(MIDO), Gaepo5(GP5)"/>
   <button onclick="searchAddress()">SEARCH</button>
 </div>
@@ -127,10 +127,10 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 <div class="quick-section">
   <h3 id="quickSelectTitle">TOP 10 COMPLEXES — By Market Cap (CMC)</h3>
   <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-    <select id="selGu" onchange="filterDong()" style="padding:8px 12px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:6px;color:#fff;font-size:13px;">
+    <select id="selGu" onchange="filterDong()" style="padding:8px 12px;background:#0e2c4a;border:1px solid #1c466e;border-radius:6px;color:#fff;font-size:13px;">
       <option value="">구 선택</option>
     </select>
-    <select id="selDong" onchange="filterComplex()" style="padding:8px 12px;background:#1e1e3f;border:1px solid #3a3a5a;border-radius:6px;color:#fff;font-size:13px;">
+    <select id="selDong" onchange="filterComplex()" style="padding:8px 12px;background:#0e2c4a;border:1px solid #1c466e;border-radius:6px;color:#fff;font-size:13px;">
       <option value="">동 선택</option>
     </select>
   </div>
@@ -154,9 +154,9 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   <!-- 자산 시가총액 (CMC) 카드 -->
   <div class="section-title">🏦 자산 시가총액 (CMC)</div>
   <div class="grid-3" id="cmcCard">
-    <div class="info-card" style="background:linear-gradient(135deg,#1a2a4a,#1e1e3f);border-color:#3a5a8a;">
+    <div class="info-card" style="background:linear-gradient(135deg,#0e2c4a,#0e2c4a);border-color:#1c466e;">
       <div class="label">자산 시가총액 (CMC)</div>
-      <div class="value" id="v-cmc" style="color:#FFD54F;">—</div>
+      <div class="value" id="v-cmc" style="color:#C79A5B;">—</div>
       <div style="font-size:11px;color:#888;margin-top:2px;" id="v-capgrade">—</div>
     </div>
     <div class="info-card">
@@ -180,7 +180,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 
   <!-- RVI 요약 + 코멘트 (좌우 배치) -->
   <div class="rvi-summary-row" id="rviSummaryRow" style="display:none;">
-    <div id="rviSummary" style="background:#1e1e3f;border:1px solid #2a2a4a;border-radius:10px;padding:16px;">
+    <div id="rviSummary" style="background:#0e2c4a;border:1px solid #1c466e;border-radius:10px;padding:16px;">
       <div id="rviSummaryText" style="font-size:14px;color:#ccc;line-height:1.8;"></div>
     </div>
     <div class="rvi-comment-box" id="rviCommentBox">
@@ -195,7 +195,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 
   <!-- RRI 투자수익률 -->
   <!-- ETA 카드 -->
-  <div id="etaCard" style="background:#1e1e3f;border:1px solid #2a2a4a;border-radius:12px;padding:16px;margin-bottom:16px;display:none;">
+  <div id="etaCard" style="background:#0e2c4a;border:1px solid #1c466e;border-radius:12px;padding:16px;margin-bottom:16px;display:none;">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-size:13px;color:#bbb;">📅 예상 입주시기 (ETA)</div>
@@ -210,7 +210,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   </div>
 
   <div class="section-title">💰 재건축 투자수익률 (RRI)</div>
-  <div id="rriCard" style="background:#1e1e3f;border:1px solid #2a2a4a;border-radius:12px;padding:20px;margin-bottom:16px;">
+  <div id="rriCard" style="background:#0e2c4a;border:1px solid #1c466e;border-radius:12px;padding:20px;margin-bottom:16px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
       <div>
         <div style="font-size:14px;color:#bbb;">현재 매매가</div>
@@ -237,7 +237,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
         <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;" id="rri-total">—</div>
       </div>
     </div>
-    <div style="background:#12122b;border-radius:8px;padding:14px;text-align:center;">
+    <div style="background:#082e4d;border-radius:8px;padding:14px;text-align:center;">
       <div style="font-size:14px;color:#bbb;letter-spacing:1px;">예상 투자수익률 (RRI)</div>
       <div style="font-size:36px;font-weight:900;margin:6px 0;" id="rri-rate">—</div>
       <div style="font-size:14px;color:#bbb;" id="rri-cagr">—</div>
@@ -250,7 +250,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
     <div style="font-size:14px;color:#bbb;margin-top:10px;line-height:1.5;">
       ※ 동일 평형 재건축 가정 | 사업기간 = ETA(단지별) | 분담금 = 실데이터 보간 (잠실5·개포6·7·은마 기준)
     </div>
-    <div style="margin-top:12px;background:#12122b;border-radius:8px;padding:14px;">
+    <div style="margin-top:12px;background:#082e4d;border-radius:8px;padding:14px;">
       <div style="font-size:13px;color:#ccc;font-weight:600;margin-bottom:8px;">📐 RVI 평가지표 가중치</div>
       <div style="font-size:13px;color:#bbb;line-height:2;">
         TLA 대지면적 <span style="color:#42A5F5">30%</span> | LOC 지역등급 <span style="color:#42A5F5">20%</span> | NVP 상승여력 <span style="color:#42A5F5">15%</span> | FAR 용적률 <span style="color:#42A5F5">20%</span> | AGE 경과년수 <span style="color:#42A5F5">5%</span> | LPS 세대당지분 <span style="color:#42A5F5">5%</span> | NRT 신축전세 <span style="color:#42A5F5">5%</span>
@@ -268,7 +268,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   </div>
 
   <!-- NVP v2: 동별 기준 -->
-  <div class="nvp-compare" id="nvpV2Compare" style="margin-top:12px;border-top:1px dashed #2a2a4a;padding-top:12px;">
+  <div class="nvp-compare" id="nvpV2Compare" style="margin-top:12px;border-top:1px dashed #1c466e;padding-top:12px;">
     <h4>🏗️ NVP v2 (동별 기준가 × 프리미엄)</h4>
     <div id="nvpV2Rows" style="font-size:13px;color:#bbb;line-height:2;"></div>
   </div>
@@ -882,7 +882,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   if(!nvpWasCapped&&nvpDetails.length){
     // cap 미적용: 비교 단지 정상 표시
     nvpDetails.slice(0,5).forEach(d=>{nvpR.innerHTML+=`<div class="nvp-row"><span class="left">${d.name} (${d.dist.toFixed(1)}km, ${d.cnt}건)</span><span class="right">${Math.round(d.avgP).toLocaleString()}만/평</span></div>`;});
-    nvpR.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #3a3a5a;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×${NVP_PREMIUM})</span><span class="right" style="font-size:15px">${Math.round(nvp).toLocaleString()}만/평</span></div>`;
+    nvpR.innerHTML+=`<div class="nvp-row" style="border-top:1px solid #1c466e;padding-top:8px;margin-top:4px"><span class="left" style="color:#fff;font-weight:700">NVP (×${NVP_PREMIUM})</span><span class="right" style="font-size:15px">${Math.round(nvp).toLocaleString()}만/평</span></div>`;
     if(myAvgPPP>0)nvpR.innerHTML+=`<div class="nvp-row"><span class="left" style="color:#aaa">현재 평당가</span><span class="right" style="color:#FFA726">${Math.round(myAvgPPP).toLocaleString()}만/평</span></div><div class="nvp-row"><span class="left" style="color:#aaa">NVP Rate</span><span class="right" style="color:${nvpRate>=20?'#66BB6A':'#42A5F5'}">${nvpRate>=0?'+':''}${nvpRate.toFixed(1)}%</span></div>`;
   } else if(nvpWasCapped){
     // cap 적용됨: 동별 기준가 사용 안내
@@ -1053,22 +1053,22 @@ function updateRRI(){
     nvpV2El.innerHTML=`
       <div style="font-size:12px;color:#888;margin-bottom:8px;">동일 조건 비교: ×1.2 신축프리미엄, 연 ${(annualRate*100).toFixed(0)}% 상승률, ETA ${eta}년</div>
       <table style="width:100%;font-size:13px;border-collapse:collapse;">
-        <tr style="border-bottom:1px solid #2a2a4a;">
+        <tr style="border-bottom:1px solid #1c466e;">
           <th style="text-align:left;padding:6px 4px;color:#888;"></th>
           <th style="text-align:right;padding:6px 4px;color:#42A5F5;">v1 (API 기반)</th>
           <th style="text-align:right;padding:6px 4px;color:#FFA726;">v2 (동별 기준)</th>
         </tr>
-        <tr style="border-bottom:1px solid #1a1a3a;">
+        <tr style="border-bottom:1px solid #0b2c4a;">
           <td style="padding:5px 4px;color:#bbb;">NVP (×1.2)</td>
           <td style="text-align:right;padding:5px 4px;color:#42A5F5;">${v1NvpPPP?Math.round(v1NvpPPP).toLocaleString()+'만/평':'—'}</td>
           <td style="text-align:right;padding:5px 4px;color:#FFA726;">${Math.round(v2NvpWithPremium).toLocaleString()}만/평</td>
         </tr>
-        <tr style="border-bottom:1px solid #1a1a3a;">
+        <tr style="border-bottom:1px solid #0b2c4a;">
           <td style="padding:5px 4px;color:#bbb;">${eta}년 후 예상가</td>
           <td style="text-align:right;padding:5px 4px;color:#42A5F5;">${fmtP(futureValue)}</td>
           <td style="text-align:right;padding:5px 4px;color:#FFA726;">${fmtP(v2FutureValue)}</td>
         </tr>
-        <tr style="border-bottom:1px solid #1a1a3a;">
+        <tr style="border-bottom:1px solid #0b2c4a;">
           <td style="padding:5px 4px;color:#bbb;">RRI (수익률)</td>
           <td style="text-align:right;padding:5px 4px;color:#42A5F5;">${rri>=0?'+':''}${rri.toFixed(1)}%</td>
           <td style="text-align:right;padding:5px 4px;color:#FFA726;">${v2Rri>=0?'+':''}${v2Rri.toFixed(1)}%</td>
@@ -1179,7 +1179,7 @@ function loadRRIRanking(){
 let _rankRows=[];
 let _rankSort={key:'eta', dir:'asc'}; // 기본 ETA 오름차순
 const RANK_STAGE_NAME={3:'추진위',4:'조합설립',5:'사업시행',6:'관리처분',7:'이주/철거',8:'착공',9:'입주'};
-const RANK_STAGE_COLOR={3:'#EF5350',4:'#FFA726',5:'#FFD54F',6:'#42A5F5',7:'#66BB6A',8:'#66BB6A',9:'#66BB6A'};
+const RANK_STAGE_COLOR={3:'#EF5350',4:'#FFA726',5:'#C79A5B',6:'#42A5F5',7:'#66BB6A',8:'#66BB6A',9:'#66BB6A'};
 const RANK_TITLE={eta:'⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순',cmc:'🏦 강남구 CMC 랭킹 — 자산 시가총액 순',far:'📐 강남구 용적률 랭킹',rvi:'📊 강남구 RVI 랭킹',currentPrice:'💰 강남구 현재가 랭킹',stage:'🏗️ 강남구 재건축 단계 랭킹'};
 
 function sortRanking(key){
@@ -1207,20 +1207,20 @@ function renderRanking(){
   if(titleEl) titleEl.textContent=`${RANK_TITLE[key]||'강남구 랭킹'} (티커 단지 ${rows.length}개)`;
   const tbody=document.getElementById('rriRankBody');
   tbody.innerHTML='';
-  const GRADE_COLOR={'Mega Cap':'#FFD54F','Large Cap':'#66BB6A','Mid Cap':'#42A5F5','Small Cap':'#888'};
+  const GRADE_COLOR={'Mega Cap':'#C79A5B','Large Cap':'#66BB6A','Mid Cap':'#42A5F5','Small Cap':'#888'};
   const gradeShort={'Mega Cap':'Mega','Large Cap':'Large','Mid Cap':'Mid','Small Cap':'Small'};
   rows.forEach((r,i)=>{
     const cur=r.currentPrice>=10000?(r.currentPrice/10000).toFixed(1)+'억':Math.round(r.currentPrice).toLocaleString()+'만';
     const rviColor=r.rvi>=80?'#66BB6A':r.rvi>=60?'#42A5F5':r.rvi>=40?'#FFA726':'#EF5350';
     const bjdong=r.bjdong||'11000';
     const clickAttr=`onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="cursor:pointer;"`;
-    const tickerCell=r.ticker?`<span ${clickAttr} style="font-family:monospace;font-weight:700;color:#FFD54F;cursor:pointer;text-decoration:underline;text-decoration-color:#665;">${r.ticker}</span>`:'<span style="color:#666">—</span>';
+    const tickerCell=r.ticker?`<span ${clickAttr} style="font-family:monospace;font-weight:700;color:#C79A5B;cursor:pointer;text-decoration:underline;text-decoration-color:#665;">${r.ticker}</span>`:'<span style="color:#666">—</span>';
     const nameDisp=r.shortName||r.name;
     const stageCell=r.stage?`<span style="color:${RANK_STAGE_COLOR[r.stage]||'#bbb'};font-weight:700">${r.stage} ${RANK_STAGE_NAME[r.stage]||''}</span>`:'<span style="color:#666">—</span>';
     const etaColor=r.eta==null?'#666':r.eta<=7?'#66BB6A':r.eta<=10?'#42A5F5':r.eta<=12?'#FFA726':'#EF5350';
     const etaCell=r.eta!=null?`<span style="color:${etaColor};font-weight:700" title="${r.etaProvisional?'잠정(단계기준 자동부여)':'확정'}">${r.eta}년${r.etaProvisional?'*':''}</span>`:'<span style="color:#666">—</span>';
     const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
-    const cmcCell=r.cmc!=null?`<span style="color:#FFD54F;font-weight:700">${r.cmc.toFixed(1)}조</span>`:'<span style="color:#666">—</span>';
+    const cmcCell=r.cmc!=null?`<span style="color:#C79A5B;font-weight:700">${r.cmc.toFixed(1)}조</span>`:'<span style="color:#666">—</span>';
     const gradeCell=r.capGrade?`<span style="color:${GRADE_COLOR[r.capGrade]||'#bbb'};font-size:12px;font-weight:700">${gradeShort[r.capGrade]||r.capGrade}</span>`:'—';
     tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
   });
