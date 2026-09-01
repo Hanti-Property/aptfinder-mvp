@@ -184,8 +184,8 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
       <div style="font-size:11px;color:#888;margin-top:2px;">NCMC ÷ CMC (분담금 전)</div>
     </div>
     <div class="info-card">
-      <div class="label">재건축후 토지평당가</div>
-      <div class="value" id="v-landpppnew">—</div>
+      <div class="label">재건축후 전용평당가</div>
+      <div class="value" id="v-newppp">—</div>
       <div style="font-size:11px;color:#888;margin-top:2px;" id="v-targetfar">목표 용적률 —</div>
     </div>
   </div>
@@ -753,14 +753,14 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
       setTxt('v-assetid', a.assetId||'');
       // 재건축후 시총(NCMC) / 성장배수(RAR)
       setTxt('v-ncmc', a.ncmc!=null?`₩${a.ncmc.toFixed(1)}조`:'—');
-      setTxt('v-ncmc-sub', (a.cmc!=null&&a.ncmc!=null)?`현재 ₩${a.cmc.toFixed(1)}조 → 재건축후`:'재건축후 예상 (토지기반)');
+      setTxt('v-ncmc-sub', (a.cmc!=null&&a.ncmc!=null)?`현재 ₩${a.cmc.toFixed(1)}조 → 재건축후 (분담금 전, 가정 TBD)`:'재건축후 예상');
       setTxt('v-rar', a.rar!=null?`${a.rar.toFixed(2)}x`:'—');
-      setTxt('v-landpppnew', a.landPppNew?a.landPppNew.toLocaleString()+'만원/평':'—');
+      setTxt('v-newppp', a.ncmcNewPpp?a.ncmcNewPpp.toLocaleString()+'만원/평':'—');
       setTxt('v-targetfar', a.targetFar?`목표 용적률 ${a.targetFar}%`:'목표 용적률 —');
       // 용적률 TBD 표시 (상가·도로 포함 등으로 검증 필요)
       if(a.farTBD){const fe=document.getElementById('v-far'); if(fe && !/TBD/.test(fe.textContent)) fe.textContent=fe.textContent+' (TBD)';}
     } else {
-      ['v-cmc','v-landppp','v-ticker','v-ncmc','v-rar','v-landpppnew'].forEach(id=>setTxt(id,'—'));
+      ['v-cmc','v-landppp','v-ticker','v-ncmc','v-rar','v-newppp'].forEach(id=>setTxt(id,'—'));
       ['v-capgrade','v-assetid'].forEach(id=>setTxt(id,''));
       setTxt('v-ncmc-sub','재건축 티커 단지만 산출');
       setTxt('v-targetfar','목표 용적률 —');
@@ -1159,7 +1159,7 @@ const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, tick
       if(d.gu==='강남구'&&d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,landPppNew:d.landPppNew,targetFar:d.targetFar};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar};
       }
     });
     // 마스터(CMC) 로드 완료 후 빠른선택을 CMC 순으로 재렌더

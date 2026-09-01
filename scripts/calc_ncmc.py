@@ -3,29 +3,30 @@
 """
 NCMC (New Complex Market Cap) / RAR (Reconstruction Asset Ratio) 산출
 설계 확정 2026-09-01 (aptfinder_rvi_ncmc_redesign_260901.md)
-산식 개정 2026-09-01: 전용률·세대수 추정을 제거하고 "대지평당가 용적률 비례"로 단순화.
+산식 개정 v3 (2026-09-01): 재건축후 전용면적 × 입주시점(ETA) 신축 전용평당가.
 
-토지 기반 산식 (CMC와 완전 대칭):
-  재건축후 대지평당가(landPppNew) = 현재 대지평당가 × (목표용적률 / 현재용적률) × (1 + 프리미엄률)
-  NCMC = 재건축후 대지평당가 × 전체 토지평          (단위: 조원)
-  RAR  = NCMC / CMC = landPppNew / landPppMarket = (목표용적률/현재용적률) × (1+프리미엄률)
+산식:
+  재건축후 전용평당가 = 동별기준 NVP × 1.20(신축) × (1 + 상승률)^ETA
+  재건축후 전용면적(평) = 대지면적 × 목표용적률 / 3.3058 × 전용률 × (1 - 기부채납)
+  NCMC = 재건축후 전용면적 × 재건축후 전용평당가        (단위: 조원)
+  RAR  = NCMC / CMC
 
-핵심 아이디어:
-  재건축으로 같은 땅에 건물을 (목표용적률/현재용적률)배 더 올릴 수 있으므로
-  땅값(대지평당가)도 그 배수만큼 오른다. + 신축 프리미엄(헌집→새집).
-  → 전용률·세대수·NVP 추정 불필요. 이미 데이터에 있는 현재 대지평당가만 사용.
+설계 근거:
+  - 대표 방침: 우리가 이미 예측하는 "입주시점(ETA) 신축가"를 근거로 단지 전체 시총 산출.
+  - 늘어나는 면적 = 대지 × 목표용적률 (용적률 정의). 여기에 전용률·기부채납으로 실분양자산화.
+  - "8년 후"가 아니라 단지별 ETA 연수 시점 가격을 적용((1+상승률)^ETA).
+  - 특성 프리미엄(규모/학군/한강/대장)은 제거 → 보수적. 필요 단지만 향후 튜닝 버퍼로.
+
+가정 (TBD — 정비계획 확정 시 구역별 대체):
+  - 전용률 EXCLUSIVE_RATE = 0.75  (연면적 → 전용면적, 강남 신축 평균)
+  - 기부채납 DONATION_RATE = 0.20  (보수적. 실제 15~20%, 정비계획 확정 전 가정)
+  - 연상승률 ANNUAL_RATE = 0.03    (화면 RRI 기본 슬라이더값과 정합)
+  - 신축프리미엄 NVP_PREMIUM = 1.20 (헌집→새집, 코드 상수와 정합)
 
 목표용적률(targetFar) 결정 순서:
-  1) 단지별 override 값이 있으면 그 값.
-     - 은마 320% (관리처분 준비)
-     - 개포6차우성 250% (현재 용적률 107%로 너무 낮아 300% 목표 시 RAR 과대 → 보수적으로 하향)
-  2) 예외조항(고밀): 현재 용적률 >= 300% 이면 목표 = 현재용적률 × 1.20
-     (이미 목표 300%를 초과하는 초고밀 단지가 RAR<1(수축)로 나오는 것 방지).
-  3) 그 외에는 기본 300%.
-
-정책:
-  - 신축프리미엄(PREMIUM_RATE): 0.20 (전 단지 공통). 기존 NVP ×1.20과 개념 일치. 보수적.
-  - NCMC/RAR은 미래 명목 규모 지표 → 할인 미적용 (인플레도 미반영, 실질 기준).
+  1) 단지별 override (은마 320%, 개포6차우성 250%)
+  2) 고밀 예외: 현재 용적률 >= 300% → 목표 = 현재용적률 × 1.20
+  3) 그 외 → 기본 300%
 
 실행: python3 scripts/calc_ncmc.py
 """
@@ -34,21 +35,30 @@ import json, os
 MASTER = os.path.join(os.path.dirname(__file__), '..', 'public', 'data', 'complexes_master.json')
 PY = 3.3058
 
-# 목표용적률 override (정식 name 기준).
+# 동별 기준 NVP (만원/전용평) — 대표 입력값 (재건축_RVI_개발현황_260823_v2.md)
+NVP_V2_BASE = {
+    '압구정동': 20000, '청담동': 17000, '대치동': 15000, '삼성동': 14000,
+    '개포동': 13000, '도곡동': 13000, '일원동': 13000,
+}
+NVP_BASE_DEFAULT = 13000
+
+# --- 가정 상수 (TBD) ---
+NVP_PREMIUM = 1.20          # 신축 프리미엄 (헌집→새집)
+ANNUAL_RATE = 0.03          # 연 상승률
+EXCLUSIVE_RATE = 0.75       # 전용률 (연면적→전용)
+DONATION_RATE = 0.20        # 기부채납 비율 (보수적)
+
+# 목표용적률
 TARGET_FAR_OVERRIDE = {
     '은마아파트': 3.20,        # 관리처분 준비, 대치동 지구단위
-    '개포6차우성아파트': 2.50,  # 현재 용적률 107% 과소 → 목표 250%로 보수적 하향
+    '개포6차우성아파트': 2.50,  # 현재 용적률 107% 과소 → 목표 250% 하향
 }
-TARGET_FAR_BASE = 3.00           # 기본 목표용적률 (300%)
-HIGH_FAR_THRESHOLD = 3.00        # 현재 용적률이 이 값(배수) 이상이면 고밀 예외조항 적용
-HIGH_FAR_UPLIFT = 1.20           # 고밀 예외: 목표 = 현재용적률 × 1.20
-
-# 신축 프리미엄 (전 단지 공통). 헌집→새집 프리미엄. 기존 NVP ×1.20과 개념 일치.
-PREMIUM_RATE = 0.20
+TARGET_FAR_BASE = 3.00
+HIGH_FAR_THRESHOLD = 3.00    # 현재 용적률(배수) 이상이면 고밀 예외
+HIGH_FAR_UPLIFT = 1.20
 
 
 def target_far(name, cur_far):
-    """목표용적률(배수) 결정. cur_far: 현재 용적률 배수(예: 2.04). 반환: (배수, 규칙명)."""
     if name in TARGET_FAR_OVERRIDE:
         return TARGET_FAR_OVERRIDE[name], 'override'
     if cur_far >= HIGH_FAR_THRESHOLD:
@@ -61,57 +71,58 @@ def main():
     results = []
     for x in d:
         cmc = x.get('cmc')
-        land_ppp_now = x.get('landPppMarket')
         cur_far_pct = x.get('far') or 0
         plat = x.get('platArea') or 0
-        # 대상: CMC·현재 대지평당가·현재 용적률·대지면적이 있는 재건축 티커 단지
-        if not (x.get('ticker') and cmc and land_ppp_now and cur_far_pct and plat):
+        if not (x.get('ticker') and cmc and cur_far_pct and plat):
             for k in ('targetFar', 'landPppNew', 'ncmc', 'rar', 'ncmcPremiumRate',
-                      'targetFarRule', 'ncmcMethod', 'nvpNew', 'nvpPremiumRate'):
+                      'targetFarRule', 'ncmcMethod', 'nvpNew', 'nvpPremiumRate',
+                      'ncmcNvpBase', 'ncmcNewPpp'):
                 x.pop(k, None)
             continue
 
+        eta = x.get('eta') if x.get('eta') is not None else 10
         cur_far = cur_far_pct / 100.0
         ftar, rule = target_far(x['name'], cur_far)
-        far_ratio = ftar / cur_far                       # 용적률 상승 배수
-        rar = round(far_ratio * (1 + PREMIUM_RATE), 2)   # = landPppNew / landPppNow
 
-        land_ppp_new = round(land_ppp_now * rar)         # 재건축후 대지평당가(만원/평)
-        ncmc_jo = round(cmc * rar, 2)                    # NCMC = CMC × RAR (조)
+        base = NVP_V2_BASE.get(x['dong'], NVP_BASE_DEFAULT)
+        new_ppp = base * NVP_PREMIUM * ((1 + ANNUAL_RATE) ** eta)  # 재건축후 전용평당가(만원/평)
 
-        x['targetFar'] = round(ftar * 100)               # % (250, 300, 320, 443 ...)
+        gfa_py = plat * ftar / PY                                  # 재건축후 연면적(평)
+        exclu_py = gfa_py * EXCLUSIVE_RATE * (1 - DONATION_RATE)   # 실분양 전용면적(평)
+        ncmc_jo = round(exclu_py * new_ppp / 1e8, 2)               # 조
+        rar = round(ncmc_jo / cmc, 2)
+
+        x['targetFar'] = round(ftar * 100)
         x['targetFarRule'] = rule
-        x['ncmcPremiumRate'] = PREMIUM_RATE
-        x['landPppNew'] = land_ppp_new
+        x['ncmcNvpBase'] = base
+        x['ncmcNewPpp'] = round(new_ppp)                           # 재건축후 전용평당가
         x['ncmc'] = ncmc_jo
         x['rar'] = rar
-        x['ncmcMethod'] = '현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)'
+        x['ncmcMethod'] = ('재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) '
+                           '× 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]')
         # 구산식 잔여 필드 정리
-        x.pop('nvpNew', None); x.pop('nvpPremiumRate', None)
+        for k in ('landPppNew', 'ncmcPremiumRate', 'nvpNew', 'nvpPremiumRate'):
+            x.pop(k, None)
 
-        results.append((x['shortName'], x['dong'], cur_far_pct, x['targetFar'],
-                        land_ppp_now, land_ppp_new, cmc, ncmc_jo, rar, rule))
+        results.append((x['shortName'], x['dong'], eta, x['targetFar'],
+                        base, round(new_ppp), cmc, ncmc_jo, rar, rule))
 
     json.dump(d, open(MASTER, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
     results.sort(key=lambda r: -r[8])
-    print(f"대상 단지: {len(results)}개 (신축프리미엄 {PREMIUM_RATE:+.0%})\n")
-    hdr = (f"{'단지':11s}{'동':7s}{'현용적':>6}{'목표':>5}{'현대지평당':>9}"
-           f"{'후대지평당':>9}{'CMC':>6}{'NCMC':>7}{'RAR':>6}  규칙")
-    print(hdr)
-    print('-' * 82)
+    print(f"대상 {len(results)}개 | 전용률{EXCLUSIVE_RATE} 기부채납{DONATION_RATE} "
+          f"신축×{NVP_PREMIUM} 상승{ANNUAL_RATE:.0%} (TBD 가정)\n")
+    hdr = (f"{'단지':11s}{'동':7s}{'ETA':>4}{'목표':>5}{'기준NVP':>7}"
+           f"{'후전용평당':>9}{'CMC':>6}{'NCMC':>7}{'RAR':>6}  규칙")
+    print(hdr); print('-' * 82)
     for r in results:
         mark = ' ★' if r[9] != 'base(300%)' else ''
-        print(f'{r[0]:11s}{r[1]:7s}{r[2]:>6.0f}{r[3]:>5}{r[4]:>9}{r[5]:>9}'
+        print(f'{r[0]:11s}{r[1]:7s}{r[2]:>4}{r[3]:>5}{r[4]:>7}{r[5]:>9}'
               f'{r[6]:>6}{r[7]:>7}{r[8]:>6}  {r[9]}{mark}')
-    tot_cmc = sum(r[6] for r in results)
-    tot_ncmc = sum(r[7] for r in results)
-    n_high = sum(1 for r in results if r[9].startswith('high_far'))
-    n_ovr = sum(1 for r in results if r[9] == 'override')
+    tc = sum(r[6] for r in results); tn = sum(r[7] for r in results)
+    print(f"\n합계 CMC {round(tc,1)}조 → NCMC {round(tn,1)}조 (평균 RAR {round(tn/tc,2)}x)")
     n_low = sum(1 for r in results if r[8] < 1)
-    print(f"\n합계 CMC {round(tot_cmc,1)}조 → NCMC {round(tot_ncmc,1)}조 "
-          f"(전체평균 RAR {round(tot_ncmc/tot_cmc,2)}x)")
-    print(f"규칙: override {n_ovr}개 | 고밀예외(현재용적률≥300%) {n_high}개 | RAR<1 {n_low}개")
+    print(f"RAR<1: {n_low}개")
 
 
 if __name__ == '__main__':

@@ -42,12 +42,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-DCH-001",
     "targetFar": 320,
-    "landPppNew": 39538,
-    "ncmc": 28.61,
-    "rar": 1.88,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 31.68,
+    "rar": 2.08,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "override",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 15000,
+    "ncmcNewPpp": 22802
   },
   {
     "gu": "강남구",
@@ -116,12 +116,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-DCH-002",
     "targetFar": 300,
-    "landPppNew": 33832,
-    "ncmc": 19.98,
-    "rar": 2.03,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 27.27,
+    "rar": 2.77,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 15000,
+    "ncmcNewPpp": 25664
   },
   {
     "gu": "강남구",
@@ -166,12 +166,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-GPO-001",
     "targetFar": 300,
-    "landPppNew": 53620,
-    "ncmc": 18.62,
-    "rar": 2.48,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 11.99,
+    "rar": 1.6,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 19186
   },
   {
     "gu": "강남구",
@@ -216,12 +216,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-DCH-003",
     "targetFar": 300,
-    "landPppNew": 32289,
-    "ncmc": 7.68,
-    "rar": 2.01,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 10.99,
+    "rar": 2.88,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 15000,
+    "ncmcNewPpp": 25664
   },
   {
     "gu": "강남구",
@@ -266,12 +266,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-GPO-002",
     "targetFar": 300,
-    "landPppNew": 54800,
-    "ncmc": 9.26,
-    "rar": 2.38,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 5.67,
+    "rar": 1.46,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 18627
   },
   {
     "gu": "강남구",
@@ -316,12 +316,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-ILW-001",
     "targetFar": 300,
-    "landPppNew": 38540,
-    "ncmc": 5.71,
-    "rar": 2.35,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 5.59,
+    "rar": 2.3,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 20965
   },
   {
     "gu": "강남구",
@@ -366,12 +366,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-DCH-004",
     "targetFar": 300,
-    "landPppNew": 34374,
-    "ncmc": 5.38,
-    "rar": 2.0,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 7.23,
+    "rar": 2.69,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 15000,
+    "ncmcNewPpp": 25664
   },
   {
     "gu": "강남구",
@@ -416,12 +416,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-GPO-003",
     "targetFar": 300,
-    "landPppNew": 29338,
-    "ncmc": 4.88,
-    "rar": 2.05,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 7.07,
+    "rar": 2.97,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 23596
   },
   {
     "gu": "강남구",
@@ -466,12 +466,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-DCH-005",
     "targetFar": 300,
-    "landPppNew": 30202,
-    "ncmc": 4.3,
-    "rar": 2.12,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 6.22,
+    "rar": 3.06,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 15000,
+    "ncmcNewPpp": 24190
   },
   {
     "gu": "강남구",
@@ -564,12 +564,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-DCH-006",
     "targetFar": 300,
-    "landPppNew": 34760,
-    "ncmc": 3.14,
-    "rar": 2.0,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.94,
+    "rar": 2.51,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 15000,
+    "ncmcNewPpp": 24190
   },
   {
     "gu": "강남구",
@@ -614,12 +614,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-DCH-007",
     "targetFar": 300,
-    "landPppNew": 35639,
-    "ncmc": 3.97,
-    "rar": 2.27,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 5.16,
+    "rar": 2.95,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 15000,
+    "ncmcNewPpp": 25664
   },
   {
     "gu": "강남구",
@@ -664,12 +664,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-GPO-004",
     "targetFar": 300,
-    "landPppNew": 23706,
-    "ncmc": 2.55,
-    "rar": 2.01,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 4.58,
+    "rar": 3.61,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 23596
   },
   {
     "gu": "강남구",
@@ -714,12 +714,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-GPO-005",
     "targetFar": 300,
-    "landPppNew": 25067,
-    "ncmc": 2.43,
-    "rar": 2.01,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 4.12,
+    "rar": 3.4,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 23596
   },
   {
     "gu": "강남구",
@@ -764,12 +764,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-DCH-008",
     "targetFar": 300,
-    "landPppNew": 35135,
-    "ncmc": 2.69,
-    "rar": 2.12,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.33,
+    "rar": 2.62,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 15000,
+    "ncmcNewPpp": 24190
   },
   {
     "gu": "강남구",
@@ -814,12 +814,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-DGK-001",
     "targetFar": 300,
-    "landPppNew": 50728,
-    "ncmc": 5.6,
-    "rar": 2.48,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.81,
+    "rar": 1.69,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 19186
   },
   {
     "gu": "강남구",
@@ -865,12 +865,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-GPO-006",
     "targetFar": 250,
-    "landPppNew": 27833,
-    "ncmc": 1.74,
-    "rar": 2.81,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 1.97,
+    "rar": 3.18,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "override",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 20965
   },
   {
     "gu": "강남구",
@@ -915,12 +915,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-GPO-007",
     "targetFar": 300,
-    "landPppNew": 34165,
-    "ncmc": 1.29,
-    "rar": 1.87,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 1.51,
+    "rar": 2.19,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 22242
   },
   {
     "gu": "강남구",
@@ -2159,12 +2159,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-ILW-002",
     "targetFar": 300,
-    "landPppNew": 33599,
-    "ncmc": 2.13,
-    "rar": 2.01,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 2.12,
+    "rar": 2.0,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 18627
   },
   {
     "gu": "강남구",
@@ -2210,12 +2210,12 @@
     "assetId": "SEL-GN-APG-004",
     "farTBD": true,
     "targetFar": 300,
-    "landPppNew": 35186,
-    "ncmc": 2.65,
-    "rar": 1.96,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 4.92,
+    "rar": 3.64,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 36302
   },
   {
     "gu": "강남구",
@@ -2261,12 +2261,12 @@
     "assetId": "SEL-GN-APG-010",
     "farTBD": true,
     "targetFar": 300,
-    "landPppNew": 46254,
-    "ncmc": 5.8,
-    "rar": 1.35,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 8.21,
+    "rar": 1.91,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 36302
   },
   {
     "gu": "강남구",
@@ -2311,12 +2311,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-005",
     "targetFar": 300,
-    "landPppNew": 62997,
-    "ncmc": 8.22,
-    "rar": 2.06,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 7.57,
+    "rar": 1.9,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 32254
   },
   {
     "gu": "강남구",
@@ -2361,12 +2361,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-002",
     "targetFar": 300,
-    "landPppNew": 46122,
-    "ncmc": 10.14,
-    "rar": 1.6,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 13.14,
+    "rar": 2.07,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 33222
   },
   {
     "gu": "강남구",
@@ -2411,12 +2411,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-007",
     "targetFar": 300,
-    "landPppNew": 62043,
-    "ncmc": 3.36,
-    "rar": 1.6,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.23,
+    "rar": 1.54,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 33222
   },
   {
     "gu": "강남구",
@@ -2461,12 +2461,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-017",
     "targetFar": 300,
-    "landPppNew": 53592,
-    "ncmc": 2.6,
-    "rar": 2.11,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 2.9,
+    "rar": 2.36,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 33222
   },
   {
     "gu": "강남구",
@@ -2511,12 +2511,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-001",
     "targetFar": 443,
-    "landPppNew": 75047,
-    "ncmc": 14.37,
-    "rar": 1.44,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 16.92,
+    "rar": 1.7,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "high_far(현재×1.2)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 33222
   },
   {
     "gu": "강남구",
@@ -2561,12 +2561,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-006",
     "targetFar": 300,
-    "landPppNew": 53239,
-    "ncmc": 3.56,
-    "rar": 1.21,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.88,
+    "rar": 1.32,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 32254
   },
   {
     "gu": "강남구",
@@ -2611,12 +2611,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-015",
     "targetFar": 300,
-    "landPppNew": 67786,
-    "ncmc": 3.43,
-    "rar": 2.4,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.02,
+    "rar": 2.11,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 33222
   },
   {
     "gu": "강남구",
@@ -2661,12 +2661,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-008",
     "targetFar": 300,
-    "landPppNew": 71715,
-    "ncmc": 4.2,
-    "rar": 1.85,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.51,
+    "rar": 1.55,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 33222
   },
   {
     "gu": "강남구",
@@ -2711,12 +2711,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-003",
     "targetFar": 300,
-    "landPppNew": 68483,
-    "ncmc": 7.94,
-    "rar": 1.7,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 6.73,
+    "rar": 1.44,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 32254
   },
   {
     "gu": "강남구",
@@ -2761,12 +2761,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-012",
     "targetFar": 300,
-    "landPppNew": 75011,
-    "ncmc": 6.1,
-    "rar": 2.51,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 4.72,
+    "rar": 1.94,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 32254
   },
   {
     "gu": "강남구",
@@ -2811,12 +2811,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-011",
     "targetFar": 300,
-    "landPppNew": 52276,
-    "ncmc": 3.33,
-    "rar": 1.82,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.7,
+    "rar": 2.02,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 32254
   },
   {
     "gu": "강남구",
@@ -2861,12 +2861,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-013",
     "targetFar": 300,
-    "landPppNew": 73085,
-    "ncmc": 4.78,
-    "rar": 1.92,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.8,
+    "rar": 1.53,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 32254
   },
   {
     "gu": "강남구",
@@ -2911,12 +2911,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-009",
     "targetFar": 300,
-    "landPppNew": 53093,
-    "ncmc": 3.4,
-    "rar": 1.87,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.94,
+    "rar": 2.16,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 34218
   },
   {
     "gu": "강남구",
@@ -2961,12 +2961,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-016",
     "targetFar": 380,
-    "landPppNew": 64993,
-    "ncmc": 1.73,
-    "rar": 1.44,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 1.95,
+    "rar": 1.62,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "high_far(현재×1.2)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 32254
   },
   {
     "gu": "강남구",
@@ -3011,12 +3011,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-014",
     "targetFar": 384,
-    "landPppNew": 64312,
-    "ncmc": 1.68,
-    "rar": 1.44,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 2.19,
+    "rar": 1.87,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "high_far(현재×1.2)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 36302
   },
   {
     "gu": "강남구",
@@ -3061,12 +3061,12 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-018",
     "targetFar": 300,
-    "landPppNew": 59498,
-    "ncmc": 3.34,
-    "rar": 2.88,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 3.25,
+    "rar": 2.8,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 32254
   },
   {
     "gu": "강남구",
@@ -3113,12 +3113,12 @@
     "assetId": "SEL-GN-APG-019",
     "platAreaSource": "토지대장 실측(대표 확정)",
     "targetFar": 300,
-    "landPppNew": 70617,
-    "ncmc": 1.01,
-    "rar": 1.58,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 0.84,
+    "rar": 1.31,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 20000,
+    "ncmcNewPpp": 32254
   },
   {
     "gu": "강남구",
@@ -3163,11 +3163,11 @@
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-GPO-008",
     "targetFar": 300,
-    "landPppNew": 32086,
-    "ncmc": 1.93,
-    "rar": 2.44,
-    "ncmcMethod": "현재대지평당가×(목표용적률/현재용적률)×(1+프리미엄0.2) (2026-09-01 개정)",
+    "ncmc": 2.42,
+    "rar": 3.06,
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcPremiumRate": 0.2
+    "ncmcNvpBase": 13000,
+    "ncmcNewPpp": 22242
   }
 ]
