@@ -40,7 +40,14 @@
     "landPppMarket": 21031,
     "capGrade": "Mega Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-DCH-001"
+    "assetId": "SEL-GN-DCH-001",
+    "targetFar": 320,
+    "nvpNew": 21600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 69120,
+    "ncmc": 50.02,
+    "rar": 3.29,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -107,7 +114,14 @@
     "landPppMarket": 16666,
     "capGrade": "Large Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-DCH-002"
+    "assetId": "SEL-GN-DCH-002",
+    "targetFar": 300,
+    "nvpNew": 21600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 64800,
+    "ncmc": 38.25,
+    "rar": 3.89,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -150,7 +164,14 @@
     "landPppMarket": 21621,
     "capGrade": "Large Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-GPO-001"
+    "assetId": "SEL-GN-GPO-001",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 18.75,
+    "rar": 2.5,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -193,7 +214,14 @@
     "landPppMarket": 16064,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-DCH-003"
+    "assetId": "SEL-GN-DCH-003",
+    "targetFar": 300,
+    "nvpNew": 21600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 64800,
+    "ncmc": 15.42,
+    "rar": 4.03,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -236,7 +264,14 @@
     "landPppMarket": 23025,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-GPO-002"
+    "assetId": "SEL-GN-GPO-002",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 9.13,
+    "rar": 2.35,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -279,7 +314,14 @@
     "landPppMarket": 16400,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-ILW-001"
+    "assetId": "SEL-GN-ILW-001",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 8.0,
+    "rar": 3.29,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -322,7 +364,14 @@
     "landPppMarket": 17187,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-DCH-004"
+    "assetId": "SEL-GN-DCH-004",
+    "targetFar": 300,
+    "nvpNew": 21600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 64800,
+    "ncmc": 10.15,
+    "rar": 3.77,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -365,7 +414,14 @@
     "landPppMarket": 14311,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-GPO-003"
+    "assetId": "SEL-GN-GPO-003",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 8.99,
+    "rar": 3.77,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -408,7 +464,14 @@
     "landPppMarket": 14246,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-DCH-005"
+    "assetId": "SEL-GN-DCH-005",
+    "targetFar": 300,
+    "nvpNew": 21600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 64800,
+    "ncmc": 9.26,
+    "rar": 4.55,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -499,7 +562,14 @@
     "landPppMarket": 17380,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-DCH-006"
+    "assetId": "SEL-GN-DCH-006",
+    "targetFar": 300,
+    "nvpNew": 21600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 64800,
+    "ncmc": 5.86,
+    "rar": 3.73,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -542,7 +612,14 @@
     "landPppMarket": 15700,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-DCH-007"
+    "assetId": "SEL-GN-DCH-007",
+    "targetFar": 300,
+    "nvpNew": 21600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 64800,
+    "ncmc": 7.24,
+    "rar": 4.13,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -585,7 +662,14 @@
     "landPppMarket": 11794,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-GPO-004"
+    "assetId": "SEL-GN-GPO-004",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 5.83,
+    "rar": 4.58,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -628,7 +712,14 @@
     "landPppMarket": 12471,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-GPO-005"
+    "assetId": "SEL-GN-GPO-005",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 5.24,
+    "rar": 4.33,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -671,7 +762,14 @@
     "landPppMarket": 16573,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-DCH-008"
+    "assetId": "SEL-GN-DCH-008",
+    "targetFar": 300,
+    "nvpNew": 21600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 64800,
+    "ncmc": 4.96,
+    "rar": 3.91,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -714,7 +812,14 @@
     "landPppMarket": 20455,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-DGK-001"
+    "assetId": "SEL-GN-DGK-001",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 5.96,
+    "rar": 2.64,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -758,7 +863,14 @@
     "landPppMarket": 9905,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-GPO-006"
+    "assetId": "SEL-GN-GPO-006",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 3.39,
+    "rar": 5.45,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -801,7 +913,14 @@
     "landPppMarket": 18270,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-GPO-007"
+    "assetId": "SEL-GN-GPO-007",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 2.04,
+    "rar": 2.96,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2038,7 +2157,14 @@
     "landPppMarket": 16716,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-ILW-002"
+    "assetId": "SEL-GN-ILW-002",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 3.41,
+    "rar": 3.23,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2082,7 +2208,14 @@
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-004",
-    "farTBD": true
+    "farTBD": true,
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 6.24,
+    "rar": 4.61,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2126,7 +2259,14 @@
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-010",
-    "farTBD": true
+    "farTBD": true,
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 10.4,
+    "rar": 2.42,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2169,7 +2309,14 @@
     "landPppMarket": 30581,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-005"
+    "assetId": "SEL-GN-APG-005",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 10.8,
+    "rar": 2.71,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2212,7 +2359,14 @@
     "landPppMarket": 28826,
     "capGrade": "Large Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-002"
+    "assetId": "SEL-GN-APG-002",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 18.2,
+    "rar": 2.87,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2255,7 +2409,14 @@
     "landPppMarket": 38777,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-007"
+    "assetId": "SEL-GN-APG-007",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 4.47,
+    "rar": 2.14,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2298,7 +2459,14 @@
     "landPppMarket": 25399,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-017"
+    "assetId": "SEL-GN-APG-017",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 4.02,
+    "rar": 3.26,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2341,7 +2509,14 @@
     "landPppMarket": 52116,
     "capGrade": "Large Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-001"
+    "assetId": "SEL-GN-APG-001",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 15.86,
+    "rar": 1.59,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2384,7 +2559,14 @@
     "landPppMarket": 43999,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-006"
+    "assetId": "SEL-GN-APG-006",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 5.53,
+    "rar": 1.88,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2427,7 +2609,14 @@
     "landPppMarket": 28244,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-015"
+    "assetId": "SEL-GN-APG-015",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 4.18,
+    "rar": 2.93,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2470,7 +2659,14 @@
     "landPppMarket": 38765,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-008"
+    "assetId": "SEL-GN-APG-008",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 4.86,
+    "rar": 2.14,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2513,7 +2709,14 @@
     "landPppMarket": 40284,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-003"
+    "assetId": "SEL-GN-APG-003",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 9.6,
+    "rar": 2.06,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2556,7 +2759,14 @@
     "landPppMarket": 29885,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-012"
+    "assetId": "SEL-GN-APG-012",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 6.72,
+    "rar": 2.77,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2599,7 +2809,14 @@
     "landPppMarket": 28723,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-011"
+    "assetId": "SEL-GN-APG-011",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 5.28,
+    "rar": 2.88,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2642,7 +2859,14 @@
     "landPppMarket": 38065,
     "capGrade": "Mid Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-013"
+    "assetId": "SEL-GN-APG-013",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 5.41,
+    "rar": 2.18,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2685,7 +2909,14 @@
     "landPppMarket": 28392,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-009"
+    "assetId": "SEL-GN-APG-009",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 5.3,
+    "rar": 2.92,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2728,7 +2959,14 @@
     "landPppMarket": 45134,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-016"
+    "assetId": "SEL-GN-APG-016",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 2.2,
+    "rar": 1.83,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2771,7 +3009,14 @@
     "landPppMarket": 44661,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-014"
+    "assetId": "SEL-GN-APG-014",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 2.17,
+    "rar": 1.85,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2814,7 +3059,14 @@
     "landPppMarket": 20659,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-APG-018"
+    "assetId": "SEL-GN-APG-018",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 4.63,
+    "rar": 4.01,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2859,7 +3111,14 @@
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
     "assetId": "SEL-GN-APG-019",
-    "platAreaSource": "토지대장 실측(대표 확정)"
+    "platAreaSource": "토지대장 실측(대표 확정)",
+    "targetFar": 300,
+    "nvpNew": 27600,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 82800,
+    "ncmc": 1.19,
+    "rar": 1.85,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   },
   {
     "gu": "강남구",
@@ -2902,6 +3161,13 @@
     "landPppMarket": 13150,
     "capGrade": "Small Cap",
     "cmcMethod": "세대실거래가×세대수(=대지실거래평당가×토지평)",
-    "assetId": "SEL-GN-GPO-008"
+    "assetId": "SEL-GN-GPO-008",
+    "targetFar": 300,
+    "nvpNew": 18000,
+    "nvpPremiumRate": 0.0,
+    "landPppNew": 54000,
+    "ncmc": 3.26,
+    "rar": 4.11,
+    "ncmcMethod": "NVP×목표용적률×(1+프리미엄)×토지평 (토지기반, 2026-09-01)"
   }
 ]

@@ -171,9 +171,28 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
     </div>
   </div>
 
+  <!-- 재건축 후 자산 시가총액 (NCMC) / 성장배수 (RAR) 카드 -->
+  <div class="grid-3" id="ncmcCard" style="margin-top:12px;">
+    <div class="info-card" style="background:linear-gradient(135deg,#0e2c4a,#0e2c4a);border-color:#1c466e;">
+      <div class="label">재건축후 시총 (NCMC)</div>
+      <div class="value" id="v-ncmc" style="color:#66BB6A;">—</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;" id="v-ncmc-sub">—</div>
+    </div>
+    <div class="info-card">
+      <div class="label">성장배수 (RAR)</div>
+      <div class="value" id="v-rar" style="color:#FFA726;">—</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;">NCMC ÷ CMC (분담금 전)</div>
+    </div>
+    <div class="info-card">
+      <div class="label">재건축후 토지평당가</div>
+      <div class="value" id="v-landpppnew">—</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;" id="v-targetfar">목표 용적률 —</div>
+    </div>
+  </div>
+
   <!-- RVI 총점 -->
   <div class="rvi-hero" id="rviHero">
-    <div class="rvi-label">RVI RECONSTRUCTION VALUE INDEX</div>
+    <div class="rvi-label">RVI RECONSTRUCTION VALUE INDEX &nbsp;·&nbsp; <span style="color:#888;font-size:12px;">v1 물리 잠재력 · v2 종합(ETA 반영)</span></div>
     <div><span class="rvi-score" id="rviScore">—</span><span class="rvi-grade" id="rviGrade"></span></div>
     <div class="rvi-desc" id="rviDesc">산출 중...</div>
   </div>
@@ -283,8 +302,8 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   <div style="font-size:11px;color:#888;margin:-6px 0 8px;">💡 컬럼 헤더(CMC·단계·ETA·RVI·용적률·현재가)를 클릭하면 그 기준으로 정렬됩니다. 티커/단지명 클릭 시 해당 단지 분석이 열립니다.</div>
   <div style="overflow-x:auto;margin-bottom:16px;">
     <table class="trade-table" id="rriRankTable">
-      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th class="sortable" data-sort="cmc" onclick="sortRanking('cmc')">CMC</th><th>등급</th><th class="sortable" data-sort="stage" onclick="sortRanking('stage')">단계</th><th class="sortable" data-sort="eta" onclick="sortRanking('eta')">ETA</th><th class="sortable" data-sort="moveIn" onclick="sortRanking('moveIn')">입주</th><th class="sortable" data-sort="rvi" onclick="sortRanking('rvi')">RVI</th><th class="sortable" data-sort="far" onclick="sortRanking('far')">용적률</th><th class="sortable" data-sort="currentPrice" onclick="sortRanking('currentPrice')">현재가</th></tr></thead>
-      <tbody id="rriRankBody"><tr><td colspan="11" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
+      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th class="sortable" data-sort="cmc" onclick="sortRanking('cmc')">CMC</th><th>등급</th><th class="sortable" data-sort="stage" onclick="sortRanking('stage')">단계</th><th class="sortable" data-sort="eta" onclick="sortRanking('eta')">ETA</th><th class="sortable" data-sort="moveIn" onclick="sortRanking('moveIn')">입주</th><th class="sortable" data-sort="rvi" onclick="sortRanking('rvi')" style="white-space:nowrap;">RVI <select id="rviVerSel" onchange="setRviVer(this.value)" onclick="event.stopPropagation();" style="background:#0e2c4a;color:#fff;border:1px solid #1c466e;border-radius:4px;font-size:11px;padding:1px 3px;cursor:pointer;"><option value="v2">v2 종합</option><option value="v1">v1 물리</option></select></th><th class="sortable" data-sort="rar" onclick="sortRanking('rar')">RAR</th><th class="sortable" data-sort="far" onclick="sortRanking('far')">용적률</th><th class="sortable" data-sort="currentPrice" onclick="sortRanking('currentPrice')">현재가</th></tr></thead>
+      <tbody id="rriRankBody"><tr><td colspan="12" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
     </table>
     <p style="font-size:11px;color:#888;margin-top:6px;">* ETA는 단계 기준 잠정 자동부여값 (추진위 12년·리스크시 최대 14년 / 조합설립 10년·리스크시 11년). 확정 시 대체됩니다.</p>
   </div>
@@ -732,11 +751,19 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
       setTxt('v-landppp', a.landPppMarket?a.landPppMarket.toLocaleString()+'만원/평':'—');
       setTxt('v-ticker', a.ticker||'—');
       setTxt('v-assetid', a.assetId||'');
+      // 재건축후 시총(NCMC) / 성장배수(RAR)
+      setTxt('v-ncmc', a.ncmc!=null?`₩${a.ncmc.toFixed(1)}조`:'—');
+      setTxt('v-ncmc-sub', (a.cmc!=null&&a.ncmc!=null)?`현재 ₩${a.cmc.toFixed(1)}조 → 재건축후`:'재건축후 예상 (토지기반)');
+      setTxt('v-rar', a.rar!=null?`${a.rar.toFixed(2)}x`:'—');
+      setTxt('v-landpppnew', a.landPppNew?a.landPppNew.toLocaleString()+'만원/평':'—');
+      setTxt('v-targetfar', a.targetFar?`목표 용적률 ${a.targetFar}%`:'목표 용적률 —');
       // 용적률 TBD 표시 (상가·도로 포함 등으로 검증 필요)
       if(a.farTBD){const fe=document.getElementById('v-far'); if(fe && !/TBD/.test(fe.textContent)) fe.textContent=fe.textContent+' (TBD)';}
     } else {
-      ['v-cmc','v-landppp','v-ticker'].forEach(id=>setTxt(id,'—'));
+      ['v-cmc','v-landppp','v-ticker','v-ncmc','v-rar','v-landpppnew'].forEach(id=>setTxt(id,'—'));
       ['v-capgrade','v-assetid'].forEach(id=>setTxt(id,''));
+      setTxt('v-ncmc-sub','재건축 티커 단지만 산출');
+      setTxt('v-targetfar','목표 용적률 —');
     }
   })();
 
@@ -815,25 +842,39 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     loc:{score:locScore,detail:`${umdForLoc||'미확인'} (${locScore>=100?'1등급':locScore>=80?'2등급':'3등급'})`}
   };
 
-  // RVI 산출: 산출불가(-1) 지표는 제외하고 나머지 가중치 재배분
+  // ── RVI 재정의 (2026-09-01): RVI = P(물리 잠재력) × F(ETA 실현계수) ──
+  // P: 기존 물리·입지 7지표 가중합 (0~100). 산출불가(-1) 지표는 제외 후 가중치 재배분.
   const weights={tla:0.30,loc:0.20,nvp_rate:0.15,far:0.20,age:0.05,nrt:0.05,lps:0.05};
   let totalWeight=0,weightedSum=0;
   for(const[k,w] of Object.entries(weights)){
     if(scores[k].score>=0){totalWeight+=w;weightedSum+=scores[k].score*w;}
   }
-  const rviNorm=totalWeight>0?Math.round(weightedSum/totalWeight):0;
+  const physScore=totalWeight>0?Math.round(weightedSum/totalWeight):0; // P = RVI v1 (물리 잠재력)
 
-  // 렌더링
+  // RVI v2 = P × (BASE + (1-BASE) × 시간점수)
+  //  - 시간점수 = 1 - ETA/ETA_MAX (ETA 짧을수록 1)
+  //  - BASE=0.70 → ETA 영향 최대 30%로 제한 (장기 투자자 배려, 물리 70% 보장)
+  const ETA_MAX=20, RVI_BASE=0.70;
+  const etaYears=getETA(jibun||selectedJibun, name);
+  const timeScore=Math.max(0, 1 - (etaYears/ETA_MAX));   // 0~1
+  const realizeF=RVI_BASE + (1-RVI_BASE)*timeScore;       // 0.70~1.00
+  const rviV1=physScore;                                  // RVI v1 (물리 잠재력)
+  const rviNorm=Math.round(physScore*realizeF);          // RVI v2 (종합, ETA 반영)
+
+  // 렌더링 — v1·v2 나란히 표시
   document.getElementById('loading').style.display='none';
   const cls=scoreColor(rviNorm);
-  document.getElementById('rviScore').textContent=rviNorm;
-  document.getElementById('rviScore').className='rvi-score c-'+cls;
+  const clsV1=scoreColor(rviV1);
+  document.getElementById('rviScore').innerHTML=`<span class="c-${clsV1}" style="font-size:38px;">${rviV1}</span><span style="font-size:20px;color:#888;font-weight:400;"> v1</span><span style="color:#666;font-weight:300;"> · </span><span class="c-${cls}">${rviNorm}</span><span style="font-size:20px;color:#888;font-weight:400;"> v2</span>`;
+  document.getElementById('rviScore').className='rvi-score';
   document.getElementById('rviGrade').textContent=grade(rviNorm);
   document.getElementById('rviGrade').className='rvi-grade c-'+cls;
-  document.getElementById('rviDesc').textContent=gradeDesc(rviNorm);
+  document.getElementById('rviDesc').textContent=`v1 물리 ${rviV1}(${grade(rviV1)}) · v2 종합 ${rviNorm}(${grade(rviNorm)}) — 실현계수 ${realizeF.toFixed(2)} (ETA ${etaYears}년, 영향 최대 30%)`;
 
   // === RVI 요약 카드 (규칙 기반) ===
   const summaryLines=[];
+  // RVI 산출 근거 (v1·v2 분해) — 맨 위
+  summaryLines.push(`🧮 RVI v1(물리) ${rviV1} → v2(종합) ${rviNorm} = ${rviV1} × ${realizeF.toFixed(2)} <span style="color:#888">(ETA ${etaYears}년, 시간영향 30%내)</span>`);
   // 지역
   const locLabel=locScore>=100?'1등급 프리미엄 입지':locScore>=80?'2등급 우수 입지':'3등급 입지';
   summaryLines.push(`📍 ${umdForLoc} ${locLabel}`);
@@ -1118,7 +1159,7 @@ const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, tick
       if(d.gu==='강남구'&&d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,landPppNew:d.landPppNew,targetFar:d.targetFar};
       }
     });
     // 마스터(CMC) 로드 완료 후 빠른선택을 CMC 순으로 재렌더
@@ -1166,8 +1207,15 @@ function loadRRIRanking(){
       const ageScore=sAGE(47);
       const lpsScore=lps>=18?100:lps>=12?75:lps>=8?50:25;
       const nrtScore=50; // 배치에서는 기본값
-      const rvi=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||'',farTBD:!!d.farTBD});
+      // P = RVI v1 (물리 잠재력) 가중합
+      const physScore=Math.round(tlaScore*0.30+locScore*0.20+nvpScore*0.15+farScore*0.20+ageScore*0.05+lpsScore*0.05+nrtScore*0.05);
+      // RVI v2 = P × (0.70 + 0.30 × 시간점수), ETA 영향 최대 30% (상세 화면과 동일)
+      const ETA_MAX=20, RVI_BASE=0.70;
+      const timeScore=Math.max(0, 1 - (YEARS/ETA_MAX));
+      const realizeF=RVI_BASE + (1-RVI_BASE)*timeScore;
+      const rviV1=physScore;
+      const rvi=Math.round(physScore*realizeF); // v2
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,rviV1,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||'',farTBD:!!d.farTBD,rar:(d.rar!=null?d.rar:null),ncmc:(d.ncmc!=null?d.ncmc:null)});
     });
     _rankRows=results;
     renderRanking(); // 기본: ETA 오름차순
@@ -1178,9 +1226,12 @@ function loadRRIRanking(){
 // === 랭킹 정렬·렌더 (헤더 클릭 정렬 지원) ===
 let _rankRows=[];
 let _rankSort={key:'eta', dir:'asc'}; // 기본 ETA 오름차순
+let _rankRviVer='v2'; // 랭킹 RVI 표시/정렬 버전: 'v2'(종합) | 'v1'(물리)
+function setRviVer(v){ _rankRviVer = (v==='v1')?'v1':'v2'; renderRanking(); }
+const rviOf=(r)=> _rankRviVer==='v1' ? (r.rviV1!=null?r.rviV1:r.rvi) : r.rvi;
 const RANK_STAGE_NAME={3:'추진위',4:'조합설립',5:'사업시행',6:'관리처분',7:'이주/철거',8:'착공',9:'입주'};
 const RANK_STAGE_COLOR={3:'#EF5350',4:'#FFA726',5:'#C79A5B',6:'#42A5F5',7:'#66BB6A',8:'#66BB6A',9:'#66BB6A'};
-const RANK_TITLE={eta:'⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순',cmc:'🏦 강남구 CMC 랭킹 — 자산 시가총액 순',far:'📐 강남구 용적률 랭킹',rvi:'📊 강남구 RVI 랭킹',currentPrice:'💰 강남구 현재가 랭킹',stage:'🏗️ 강남구 재건축 단계 랭킹'};
+const RANK_TITLE={eta:'⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순',cmc:'🏦 강남구 CMC 랭킹 — 자산 시가총액 순',far:'📐 강남구 용적률 랭킹',rvi:'📊 강남구 RVI 랭킹',rar:'🚀 강남구 RAR 랭킹 — 재건축 성장배수 순',currentPrice:'💰 강남구 현재가 랭킹',stage:'🏗️ 강남구 재건축 단계 랭킹'};
 
 function sortRanking(key){
   // 같은 컬럼 재클릭 시 방향 토글. 새 컬럼이면 기본 방향(값 큰 순, ETA만 오름차순)
@@ -1193,7 +1244,7 @@ function renderRanking(){
   const key=_rankSort.key, dir=_rankSort.dir;
   const rows=_rankRows.slice();
   const val=(r)=>{
-    let v = r[key];
+    let v = key==='rvi' ? rviOf(r) : r[key];
     if(v==null) return (dir==='asc')? Infinity : -Infinity; // 결측은 항상 뒤로
     return v;
   };
@@ -1211,7 +1262,10 @@ function renderRanking(){
   const gradeShort={'Mega Cap':'Mega','Large Cap':'Large','Mid Cap':'Mid','Small Cap':'Small'};
   rows.forEach((r,i)=>{
     const cur=r.currentPrice>=10000?(r.currentPrice/10000).toFixed(1)+'억':Math.round(r.currentPrice).toLocaleString()+'만';
-    const rviColor=r.rvi>=80?'#66BB6A':r.rvi>=60?'#42A5F5':r.rvi>=40?'#FFA726':'#EF5350';
+    const rviShown=rviOf(r);
+    const rviColor=rviShown>=80?'#66BB6A':rviShown>=60?'#42A5F5':rviShown>=40?'#FFA726':'#EF5350';
+    const rarColor=r.rar==null?'#666':r.rar>=3.5?'#66BB6A':r.rar>=2.5?'#42A5F5':r.rar>=2?'#FFA726':'#EF5350';
+    const rarCell=r.rar!=null?`<span style="color:${rarColor};font-weight:700" title="재건축후 시총 ÷ 현재 시총 (분담금 전)">${r.rar.toFixed(2)}x</span>`:'<span style="color:#666">—</span>';
     const bjdong=r.bjdong||'11000';
     const clickAttr=`onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="cursor:pointer;"`;
     const tickerCell=r.ticker?`<span ${clickAttr} style="font-family:monospace;font-weight:700;color:#C79A5B;cursor:pointer;text-decoration:underline;text-decoration-color:#665;">${r.ticker}</span>`:'<span style="color:#666">—</span>';
@@ -1222,7 +1276,7 @@ function renderRanking(){
     const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
     const cmcCell=r.cmc!=null?`<span style="color:#C79A5B;font-weight:700">${r.cmc.toFixed(1)}조</span>`:'<span style="color:#666">—</span>';
     const gradeCell=r.capGrade?`<span style="color:${GRADE_COLOR[r.capGrade]||'#bbb'};font-size:12px;font-weight:700">${gradeShort[r.capGrade]||r.capGrade}</span>`:'—';
-    tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700">${r.rvi}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
+    tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700" title="${_rankRviVer==='v1'?'RVI v1 물리 잠재력':'RVI v2 종합(ETA 반영)'}">${rviShown}<span style="font-size:9px;color:#666"> ${_rankRviVer}</span></td><td>${rarCell}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
   });
   // 정렬 표시(▲▼)를 헤더에 반영
   document.querySelectorAll('#rriRankTable thead th[data-sort]').forEach(th=>{
