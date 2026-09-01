@@ -717,12 +717,19 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   }
 
   // 실거래 매칭
-  // 실거래 매칭: 1) 지번 우선, 2) 키워드 + 동 필터
   const umdFromAddr=(function(){const parts=(address||'').split(' ');for(const p of parts){if(p.endsWith('동'))return p;}return '';})();
+  // [tradeName] 마스터에 등록된 실거래명(부분일치 키워드) 우선 사용 (지번/이름 표기 불일치 대응)
+  const _mTrade=ASSET_FROM_MASTER[(bjdongCd||selectedBjdongCd)+'-'+(jibun||selectedJibun)];
+  const tradeNames=(_mTrade&&Array.isArray(_mTrade.tradeName))?_mTrade.tradeName:null;
   const kw=name.replace(/아파트|단지|맨션|[0-9·]/g,'').substring(0,4);
-  // 1차: 지번 매칭 (가장 정확)
-  let myTrades=allTrades.filter(t=>(t.jibun||'').trim()===jibun&&(t.umdNm||'').trim()===umdFromAddr);
-  // 2차: 키워드 + 동 매칭
+  let myTrades=[];
+  // 0차: tradeName 키워드 부분일치 + 동 (가장 정확·견고)
+  if(tradeNames){
+    myTrades=allTrades.filter(t=>(t.umdNm||'').trim()===umdFromAddr && tradeNames.some(kwd=>(t.aptNm||'').includes(kwd)));
+  }
+  // 1차: 지번 매칭
+  if(!myTrades.length) myTrades=allTrades.filter(t=>(t.jibun||'').trim()===jibun&&(t.umdNm||'').trim()===umdFromAddr);
+  // 2차: 키워드(추측) + 동 매칭 (tradeName 없을 때 폴백)
   if(!myTrades.length&&umdFromAddr){
     myTrades=allTrades.filter(t=>(t.umdNm||'').trim()===umdFromAddr&&((t.aptNm||'').includes(kw)||(t.aptNm||'').includes(name.substring(0,3))));
   }
@@ -1167,7 +1174,7 @@ const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, tick
       if(d.gu==='강남구'&&d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName};
       }
     });
     // 마스터(CMC) 로드 완료 후 빠른선택을 CMC 순으로 재렌더
