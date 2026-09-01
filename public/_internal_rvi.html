@@ -336,6 +336,10 @@ const NVP_V2_BASE={
   '압구정동':20000, '대치동':15000, '개포동':13000,
   '도곡동':13000, '일원동':13000, '삼성동':14000, '청담동':17000
 };
+// [특성 프리미엄 스위치] 기본 off = 보수적 예측 (RRI·NCMC 통일).
+// 나중에 한강변/학원가/대장주 등 특성을 살리려면 true로 바꾸면 됨.
+// (특성 정의 COMPLEX_FEATURES와 가산 로직은 아래에 그대로 보존)
+const NVP_USE_FEATURE_PREMIUM=false;
 // 동 이름 매핑 (법정동코드 → 동명)
 const BJDONG_TO_DONG={'10600':'대치동','10300':'개포동','11000':'압구정동','10400':'청담동','10500':'삼성동','11400':'일원동','10800':'논현동','10100':'역삼동'};
 // 도곡동은 별도 처리 필요 (개포동 bjdongCd 사용하는 경우 있음)
@@ -343,6 +347,10 @@ const BJDONG_TO_DONG={'10600':'대치동','10300':'개포동','11000':'압구정
 function calcNvpV2(dongName, units, features){
   // features: {station, school, river, leader}
   const base = NVP_V2_BASE[dongName] || 13000;
+  // 특성 스위치 off면 프리미엄 0 (보수적). on이면 아래 규모/위치/브랜드 가산 적용.
+  if(!NVP_USE_FEATURE_PREMIUM){
+    return {base, premium:0, nvpV2: base};
+  }
   let premium = 0;
   // 규모
   if(units>=4000) premium+=0.15;
@@ -350,8 +358,8 @@ function calcNvpV2(dongName, units, features){
   else if(units>=1000) premium+=0.05;
   // 위치
   if(features.station) premium+=0.05;
-  if(features.school) premium+=0.05;
-  if(features.river) premium+=0.10;
+  if(features.school) premium+=0.05;   // 학원가 특성
+  if(features.river) premium+=0.10;    // 한강변 특성
   // 브랜드
   if(features.leader) premium+=0.10;
   return {base, premium, nvpV2: Math.round(base*(1+premium))};
