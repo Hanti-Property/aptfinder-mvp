@@ -190,6 +190,10 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
     </div>
   </div>
 
+  <!-- 데이터 신뢰도 플래그 (규모·거래신뢰도·NVP괴리율) -->
+  <div id="flagRow" style="display:none;margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;"></div>
+  <div id="warnBox" style="display:none;margin-top:8px;padding:8px 12px;background:#3a2a1a;border:1px solid #7a5a2a;border-radius:8px;font-size:12px;color:#FFCC80;line-height:1.6;"></div>
+
   <!-- RVI 총점 -->
   <div class="rvi-hero" id="rviHero">
     <div class="rvi-label">RVI RECONSTRUCTION VALUE INDEX &nbsp;·&nbsp; <span style="color:#888;font-size:12px;">v1 물리 잠재력 · v2 종합(ETA 반영)</span></div>
@@ -506,6 +510,39 @@ function generateRVIComment(data){
 }
 
 function haversine(lat1,lng1,lat2,lng2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.asin(Math.sqrt(a));}
+// === 데이터 신뢰도 플래그 배지 렌더 ===
+function renderDataFlags(a){
+  const fr=document.getElementById('flagRow'), wb=document.getElementById('warnBox');
+  if(!fr) return;
+  const badge=(txt,bg,fg)=>`<span style="display:inline-block;padding:2px 9px;border-radius:11px;font-size:11px;font-weight:700;background:${bg};color:${fg};">${txt}</span>`;
+  const items=[];
+  // 규모 등급
+  const SZ={xs:['초소형 (~300세대)','#4a1f1f','#FF8A80'],s:['소형 (301~600)','#4a331a','#FFB74D'],
+            m:['중소형 (601~900)','#3f3a1a','#FFD54F'],l:['준대형 (901~1000)','#2a3340','#90CAF9'],
+            xl:['대단지 (1000+)','#1f3a28','#81C784']};
+  if(a.sizeGrade&&SZ[a.sizeGrade]){const s=SZ[a.sizeGrade];items.push(badge('🏢 '+s[0],s[1],s[2]));}
+  // 거래 신뢰도
+  const RL={low:['거래신뢰 낮음','#4a1f1f','#FF8A80'],mid:['거래신뢰 보통','#4a331a','#FFB74D'],high:['거래신뢰 양호','#1f3a28','#81C784']};
+  if(a.tradeReliability&&RL[a.tradeReliability]){const s=RL[a.tradeReliability];
+    const mo=(a.latestMonthsAgo!=null)?` (${a.latestMonthsAgo}개월전)`:'';
+    items.push(badge('📊 '+s[0]+mo,s[1],s[2]));}
+  // NVP 괴리율
+  if(a.nvpGapRate!=null){
+    const g=a.nvpGapRate; const wide=g<=-25;
+    const col=wide?['#4a1f1f','#FF8A80']:(g<=-15?['#4a331a','#FFB74D']:['#2a3340','#90CAF9']);
+    items.push(badge('📉 NVP괴리 '+(g>=0?'+':'')+g.toFixed(0)+'%',col[0],col[1]));
+  }
+  fr.innerHTML=items.join('');
+  fr.style.display=items.length?'flex':'none';
+  // 종합 왜곡주의
+  if(a.warnDistortion){
+    const reasons=[];
+    if(a.tradeReliability==='low') reasons.push(`최근 실거래가 ${a.latestMonthsAgo}개월 전이거나 거래가 매우 적어 현재가 신뢰도가 낮습니다`);
+    if(a.nvpGapRate!=null&&a.nvpGapRate<=-25) reasons.push(`현재가가 동 평균 대비 ${a.nvpGapRate.toFixed(0)}%로 크게 낮아 성장배수(RAR)가 과대평가됐을 수 있습니다`);
+    wb.innerHTML='⚠️ <b>정보 왜곡 주의</b> — '+reasons.join(' · ')+'. NCMC·RAR은 참고용으로만 활용하세요.';
+    wb.style.display='block';
+  } else { wb.style.display='none'; }
+}
 function scoreColor(s){return s>=85?'s':s>=70?'a':s>=55?'b':s>=40?'c':'d';}
 function grade(s){return s>=85?'S':s>=70?'A':s>=55?'B':s>=40?'C':'D';}
 function gradeDesc(s){return s>=85?'최상위 투자 매력':s>=70?'우수 · 투자 매력 높음':s>=55?'양호':s>=40?'보통':'매력 낮음';}
@@ -774,11 +811,15 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
       setTxt('v-targetfar', a.targetFar?`목표 용적률 ${a.targetFar}%`:'목표 용적률 —');
       // 용적률 TBD 표시 (상가·도로 포함 등으로 검증 필요)
       if(a.farTBD){const fe=document.getElementById('v-far'); if(fe && !/TBD/.test(fe.textContent)) fe.textContent=fe.textContent+' (TBD)';}
+      // === 데이터 신뢰도 플래그 배지 ===
+      renderDataFlags(a);
     } else {
       ['v-cmc','v-landppp','v-ticker','v-ncmc','v-rar','v-newppp'].forEach(id=>setTxt(id,'—'));
       ['v-capgrade','v-assetid'].forEach(id=>setTxt(id,''));
       setTxt('v-ncmc-sub','재건축 티커 단지만 산출');
       setTxt('v-targetfar','목표 용적률 —');
+      const fr=document.getElementById('flagRow'); if(fr) fr.style.display='none';
+      const wb=document.getElementById('warnBox'); if(wb) wb.style.display='none';
     }
   })();
 
@@ -1174,7 +1215,7 @@ const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, tick
       if(d.gu==='강남구'&&d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion};
       }
     });
     // 마스터(CMC) 로드 완료 후 빠른선택을 CMC 순으로 재렌더

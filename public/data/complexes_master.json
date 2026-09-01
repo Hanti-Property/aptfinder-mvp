@@ -50,7 +50,12 @@
     "ncmcNewPpp": 22802,
     "tradeName": [
       "은마"
-    ]
+    ],
+    "sizeGrade": "xl",
+    "latestMonthsAgo": 1,
+    "tradeReliability": "high",
+    "nvpGapRate": 24.8,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -127,7 +132,12 @@
     "ncmcNewPpp": 25664,
     "tradeName": [
       "한보미도맨션"
-    ]
+    ],
+    "sizeGrade": "xl",
+    "latestMonthsAgo": 3,
+    "tradeReliability": "high",
+    "nvpGapRate": -1.1,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -181,7 +191,12 @@
     "tradeName": [
       "개포주공6단지",
       "개포주공7단지"
-    ]
+    ],
+    "sizeGrade": "xl",
+    "latestMonthsAgo": 2,
+    "tradeReliability": "high",
+    "nvpGapRate": 38.9,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -235,7 +250,12 @@
     "tradeName": [
       "선경1차",
       "선경2차"
-    ]
+    ],
+    "sizeGrade": "xl",
+    "latestMonthsAgo": 5,
+    "tradeReliability": "high",
+    "nvpGapRate": -4.7,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -288,7 +308,12 @@
     "ncmcNewPpp": 18627,
     "tradeName": [
       "개포주공5단지"
-    ]
+    ],
+    "sizeGrade": "l",
+    "latestMonthsAgo": 7,
+    "tradeReliability": "mid",
+    "nvpGapRate": 47.9,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -341,7 +366,12 @@
     "ncmcNewPpp": 20965,
     "tradeName": [
       "우성7"
-    ]
+    ],
+    "sizeGrade": "m",
+    "latestMonthsAgo": 2,
+    "tradeReliability": "high",
+    "nvpGapRate": -1.0,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -394,7 +424,12 @@
     "ncmcNewPpp": 25664,
     "tradeName": [
       "개포우성1"
-    ]
+    ],
+    "sizeGrade": "m",
+    "latestMonthsAgo": 5,
+    "tradeReliability": "high",
+    "nvpGapRate": 2.0,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -448,7 +483,12 @@
     "tradeName": [
       "경남1",
       "경남2"
-    ]
+    ],
+    "sizeGrade": "m",
+    "latestMonthsAgo": 8,
+    "tradeReliability": "mid",
+    "nvpGapRate": -8.1,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -501,7 +541,12 @@
     "ncmcNewPpp": 24190,
     "tradeName": [
       "쌍용대치아파트1"
-    ]
+    ],
+    "sizeGrade": "m",
+    "latestMonthsAgo": 5,
+    "tradeReliability": "high",
+    "nvpGapRate": -15.5,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -602,7 +647,12 @@
     "ncmcNewPpp": 24190,
     "tradeName": [
       "대치우성아파트"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 5,
+    "tradeReliability": "high",
+    "nvpGapRate": 3.1,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -655,7 +705,12 @@
     "ncmcNewPpp": 25664,
     "tradeName": [
       "개포우성2"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 4,
+    "tradeReliability": "mid",
+    "nvpGapRate": -6.9,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -708,7 +763,12 @@
     "ncmcNewPpp": 23596,
     "tradeName": [
       "현대1차101동"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 3,
+    "tradeReliability": "high",
+    "nvpGapRate": -24.2,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -761,7 +821,12 @@
     "ncmcNewPpp": 23596,
     "tradeName": [
       "개포우성3차"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 5,
+    "tradeReliability": "low",
+    "nvpGapRate": -19.9,
+    "warnDistortion": true
   },
   {
     "gu": "강남구",
@@ -814,7 +879,12 @@
     "ncmcNewPpp": 24190,
     "tradeName": [
       "쌍용대치2"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 2,
+    "tradeReliability": "high",
+    "nvpGapRate": -1.7,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -867,7 +937,12 @@
     "ncmcNewPpp": 19186,
     "tradeName": [
       "한신(개포)"
-    ]
+    ],
+    "sizeGrade": "m",
+    "latestMonthsAgo": 3,
+    "tradeReliability": "mid",
+    "nvpGapRate": 0.0,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -922,7 +997,12 @@
     "tradeName": [
       "개포우성6",
       "우성6"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 18,
+    "tradeReliability": "low",
+    "nvpGapRate": -36.4,
+    "warnDistortion": true
   },
   {
     "gu": "강남구",
@@ -975,7 +1055,12 @@
     "ncmcNewPpp": 22242,
     "tradeName": [
       "우성8"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 5,
+    "tradeReliability": "high",
+    "nvpGapRate": 17.4,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2222,7 +2307,12 @@
     "ncmcNewPpp": 18627,
     "tradeName": [
       "개포한신"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 3,
+    "tradeReliability": "high",
+    "nvpGapRate": 1.0,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2276,7 +2366,12 @@
     "ncmcNewPpp": 36302,
     "tradeName": [
       "미성1차"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 4,
+    "tradeReliability": "high",
+    "nvpGapRate": -48.3,
+    "warnDistortion": true
   },
   {
     "gu": "강남구",
@@ -2330,7 +2425,12 @@
     "ncmcNewPpp": 36302,
     "tradeName": [
       "미성2차"
-    ]
+    ],
+    "sizeGrade": "l",
+    "latestMonthsAgo": 4,
+    "tradeReliability": "mid",
+    "nvpGapRate": -1.3,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2383,7 +2483,12 @@
     "ncmcNewPpp": 32254,
     "tradeName": [
       "신현대9차"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 1,
+    "tradeReliability": "high",
+    "nvpGapRate": -11.9,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2437,7 +2542,12 @@
     "tradeName": [
       "현대1차(",
       "현대2차("
-    ]
+    ],
+    "sizeGrade": "l",
+    "latestMonthsAgo": 2,
+    "tradeReliability": "high",
+    "nvpGapRate": -16.9,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2490,7 +2600,12 @@
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대3차("
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 4,
+    "tradeReliability": "high",
+    "nvpGapRate": 11.7,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2543,7 +2658,12 @@
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대5차("
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 3,
+    "tradeReliability": "high",
+    "nvpGapRate": -26.8,
+    "warnDistortion": true
   },
   {
     "gu": "강남구",
@@ -2597,7 +2717,12 @@
     "tradeName": [
       "현대6차",
       "현대7차"
-    ]
+    ],
+    "sizeGrade": "xl",
+    "latestMonthsAgo": 2,
+    "tradeReliability": "high",
+    "nvpGapRate": 50.2,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2650,7 +2775,12 @@
     "ncmcNewPpp": 32254,
     "tradeName": [
       "현대8차"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 2,
+    "tradeReliability": "high",
+    "nvpGapRate": 26.8,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2703,7 +2833,12 @@
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대13차"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 1,
+    "tradeReliability": "high",
+    "nvpGapRate": -18.6,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2756,7 +2891,12 @@
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대14차"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 2,
+    "tradeReliability": "high",
+    "nvpGapRate": 11.7,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2809,7 +2949,12 @@
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양1차"
-    ]
+    ],
+    "sizeGrade": "l",
+    "latestMonthsAgo": 4,
+    "tradeReliability": "mid",
+    "nvpGapRate": 16.1,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2862,7 +3007,12 @@
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양2"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 2,
+    "tradeReliability": "high",
+    "nvpGapRate": -13.9,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2915,7 +3065,12 @@
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양3"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 1,
+    "tradeReliability": "high",
+    "nvpGapRate": -17.2,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -2968,7 +3123,12 @@
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양4"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 4,
+    "tradeReliability": "low",
+    "nvpGapRate": 9.7,
+    "warnDistortion": true
   },
   {
     "gu": "강남구",
@@ -3021,7 +3181,12 @@
     "ncmcNewPpp": 34218,
     "tradeName": [
       "한양5"
-    ]
+    ],
+    "sizeGrade": "s",
+    "latestMonthsAgo": 8,
+    "tradeReliability": "low",
+    "nvpGapRate": -18.2,
+    "warnDistortion": true
   },
   {
     "gu": "강남구",
@@ -3074,7 +3239,12 @@
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양6"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 5,
+    "tradeReliability": "mid",
+    "nvpGapRate": 30.0,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -3127,7 +3297,12 @@
     "ncmcNewPpp": 36302,
     "tradeName": [
       "한양7"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 4,
+    "tradeReliability": "mid",
+    "nvpGapRate": 28.7,
+    "warnDistortion": false
   },
   {
     "gu": "강남구",
@@ -3180,7 +3355,12 @@
     "ncmcNewPpp": 32254,
     "tradeName": [
       "현대4차"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 4,
+    "tradeReliability": "high",
+    "nvpGapRate": -40.5,
+    "warnDistortion": true
   },
   {
     "gu": "강남구",
@@ -3236,7 +3416,12 @@
     "tradeName": [
       "현대10",
       "현대10차"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 24,
+    "tradeReliability": "low",
+    "nvpGapRate": 28.8,
+    "warnDistortion": true
   },
   {
     "gu": "강남구",
@@ -3290,6 +3475,11 @@
     "tradeName": [
       "현대아파트3",
       "현대3"
-    ]
+    ],
+    "sizeGrade": "xs",
+    "latestMonthsAgo": 3,
+    "tradeReliability": "mid",
+    "nvpGapRate": -15.5,
+    "warnDistortion": false
   }
 ]
