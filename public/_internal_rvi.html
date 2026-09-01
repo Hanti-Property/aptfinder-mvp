@@ -1179,7 +1179,7 @@ function loadRRIRanking(){
   if(_rriRankLoaded)return;
   fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
     const gangnam=data.filter(d=>d.gu==='강남구'&&d.ticker&&d.far>0&&d.avgPPP>0);
-    const NVP_BY_DONG={'압구정동':23000,'청담동':23000,'대치동':18000,'개포동':15000,'도곡동':15000,'일원동':15000,'논현동':15000,'삼성동':15000};
+    // NVP 기준: 상세 카드/NCMC와 통일 (NVP_V2_BASE 사용, 특성 프리미엄 스위치도 동일 적용)
     const RATE=0.03;
     // LOC 등급
     const LOC_G={'압구정동':100,'대치동':100,'청담동':100,'개포동':80,'도곡동':80,'삼성동':80,'논현동':60,'일원동':60};
@@ -1191,8 +1191,10 @@ function loadRRIRanking(){
     const results=[];
     gangnam.forEach(d=>{
       const YEARS=getETA(d.jibun, d.name);
-      const NVP_PPP=NVP_BY_DONG[d.dong]||15000;
-      const futurePPP=NVP_PPP*Math.pow(1+RATE,YEARS);
+      // 상세 카드와 동일: calcNvpV2(동별기준×특성스위치) → ×1.2(신축) → (1+상승)^ETA
+      const _hhldR=d.hhldCnt||d.h||0;
+      const NVP_PPP=calcNvpV2(d.dong, _hhldR, getComplexFeatures(d.name, _hhldR)).nvpV2;
+      const futurePPP=NVP_PPP*NVP_PREMIUM*Math.pow(1+RATE,YEARS);
       const area=d.latestArea||76;
       const excluPy=area/3.3058;
       const currentPrice=d.latestPrice||d.avgPPP*excluPy;
