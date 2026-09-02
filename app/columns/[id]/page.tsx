@@ -3,17 +3,18 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { sanitizeHtml } from '@/lib/noteHtml'
 
 interface Column {
   id: string
   series: string
-  episode: number
   title: string
   content: string
   bottom_line: string
   author: string
   author_field: string
   created_at: string
+  thumbnail?: string | null
 }
 
 export default function ColumnDetailPage() {
@@ -46,7 +47,6 @@ export default function ColumnDetailPage() {
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-sm bg-[#C49A3C] text-white px-2 py-0.5 rounded">{col.series}</span>
-          <span className="text-sm text-gray-500">#{col.episode}</span>
           <span className="text-sm text-gray-400">
             {new Date(col.created_at).toLocaleDateString('ko-KR', {year:'numeric', month:'2-digit', day:'2-digit'})}
           </span>
@@ -64,14 +64,22 @@ export default function ColumnDetailPage() {
           </div>
         </div>
 
-        <div style={{color:'#374151'}} className="text-base leading-relaxed whitespace-pre-wrap mb-6">
-          {col.content}
-        </div>
+        {col.thumbnail && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={col.thumbnail} alt={col.title} className="w-full rounded-lg mb-4 object-cover max-h-80" />
+        )}
 
-        {col.bottom_line && (
+        <div
+          style={{color:'#374151'}}
+          className="note-content text-base leading-relaxed mb-6"
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(col.content) }}
+        />
+
+        {col.bottom_line && col.bottom_line.replace(/<[^>]+>/g, '').trim() && (
           <div className="bg-amber-50 border-l-4 border-[#C49A3C] p-4 rounded-r-lg mb-6">
             <p className="text-base text-[#C49A3C] font-bold mb-1">📌 Bottom Line</p>
-            <p style={{color:'#374151'}} className="text-base">{col.bottom_line}</p>
+            <div style={{color:'#374151'}} className="note-content text-base"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(col.bottom_line) }} />
           </div>
         )}
 
@@ -84,6 +92,17 @@ export default function ColumnDetailPage() {
           <a href="/inquiry" className="flex-1 p-3 bg-[#1B3A5C] text-white text-center rounded-lg text-sm font-semibold">상담 신청하기</a>
         </div>
       </div>
+
+      <style jsx global>{`
+        .note-content h3 { font-size: 1.15rem; font-weight: 700; margin: 0.8rem 0 0.4rem; color: #111827; }
+        .note-content ul { list-style: disc; padding-left: 1.4rem; margin: 0.5rem 0; }
+        .note-content ol { list-style: decimal; padding-left: 1.4rem; margin: 0.5rem 0; }
+        .note-content li { margin: 0.2rem 0; }
+        .note-content blockquote { border-left: 3px solid #1B3A5C; padding-left: 0.75rem; color: #555; margin: 0.6rem 0; }
+        .note-content a { color: #1d4ed8; text-decoration: underline; }
+        .note-content p { margin: 0.5rem 0; }
+        .note-content b, .note-content strong { font-weight: 700; }
+      `}</style>
     </div>
   )
 }

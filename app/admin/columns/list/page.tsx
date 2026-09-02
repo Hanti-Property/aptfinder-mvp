@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { stripHtml } from '@/lib/noteHtml'
 
 interface Column {
   id: string
   series: string
-  episode: number
   title: string
   content: string
   bottom_line: string
@@ -97,18 +97,15 @@ export default function ColumnListPage() {
             {filtered.map(col => (
               <div key={col.id} className="bg-white border border-gray-200 rounded-lg p-4 border-l-4 border-l-[#C49A3C]">
                 <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] bg-[#C49A3C] text-white px-2 py-0.5 rounded">{col.series}</span>
-                    <span className="text-[10px] text-gray-500">#{col.episode}</span>
-                  </div>
+                  <span className="text-[10px] bg-[#C49A3C] text-white px-2 py-0.5 rounded">{col.series}</span>
                   <span className="text-[10px] text-gray-400">{formatDate(col.created_at)}</span>
                 </div>
 
                 <p style={{ color: '#111827' }} className="text-sm font-bold mb-1">{col.title}</p>
-                <p style={{ color: '#374151' }} className="text-xs line-clamp-2 mb-2">{col.content}</p>
+                <p style={{ color: '#374151' }} className="text-xs line-clamp-2 mb-2">{stripHtml(col.content)}</p>
 
-                {col.bottom_line && (
-                  <p className="text-xs text-[#C49A3C] mb-2">📌 {col.bottom_line}</p>
+                {col.bottom_line && stripHtml(col.bottom_line) && (
+                  <p className="text-xs text-[#C49A3C] mb-2 line-clamp-1">📌 {stripHtml(col.bottom_line)}</p>
                 )}
 
                 <p className="text-[10px] text-gray-400 mb-3">{col.author} · {col.author_field}</p>

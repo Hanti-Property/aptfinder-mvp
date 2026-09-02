@@ -3,17 +3,18 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { stripHtml } from '@/lib/noteHtml'
 
 interface Column {
   id: string
   series: string
-  episode: number
   title: string
   content: string
   bottom_line: string
   author: string
   author_field: string
   created_at: string
+  thumbnail?: string | null
 }
 
 export default function ColumnsPage() {
@@ -95,20 +96,23 @@ export default function ColumnsPage() {
         ) : (
           filtered.map(col => (
             <div key={col.id} onClick={() => router.push(`/columns/${col.id}`)}
-              className="border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer hover:bg-gray-50 border-l-4 border-l-[#C49A3C]">
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs bg-[#C49A3C] text-white px-2 py-0.5 rounded">{col.series}</span>
-                  <span className="text-xs text-gray-500">#{col.episode}</span>
-                </div>
-                <span className="text-xs text-gray-400">{formatTime(col.created_at)}</span>
-              </div>
-              <p style={{color:'#111827'}} className="text-lg font-bold mb-1">{col.title}</p>
-              <p style={{color:'#374151'}} className="text-sm line-clamp-2">{col.content}</p>
-              {col.bottom_line && (
-                <p className="text-sm text-[#C49A3C] mt-2">📌 {col.bottom_line}</p>
+              className="border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer hover:bg-gray-50 border-l-4 border-l-[#C49A3C] flex gap-3">
+              {col.thumbnail && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={col.thumbnail} alt={col.title} className="w-24 h-24 object-cover rounded-lg flex-shrink-0" />
               )}
-              <p className="text-xs text-gray-400 mt-2">{col.author} · {col.author_field}</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs bg-[#C49A3C] text-white px-2 py-0.5 rounded">{col.series}</span>
+                  <span className="text-xs text-gray-400">{formatTime(col.created_at)}</span>
+                </div>
+                <p style={{color:'#111827'}} className="text-lg font-bold mb-1 line-clamp-1">{col.title}</p>
+                <p style={{color:'#374151'}} className="text-sm line-clamp-2">{stripHtml(col.content)}</p>
+                {col.bottom_line && stripHtml(col.bottom_line) && (
+                  <p className="text-sm text-[#C49A3C] mt-2 line-clamp-1">📌 {stripHtml(col.bottom_line)}</p>
+                )}
+                <p className="text-xs text-gray-400 mt-2">{col.author} · {col.author_field}</p>
+              </div>
             </div>
           ))
         )}
