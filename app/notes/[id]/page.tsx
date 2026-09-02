@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { sanitizeHtml } from '@/lib/noteHtml'
 
 interface Note {
   id: string
@@ -11,6 +12,7 @@ interface Note {
   content: string
   bottom_line: string
   created_at: string
+  thumbnail?: string | null
 }
 
 export default function NoteDetailPage() {
@@ -50,14 +52,25 @@ export default function NoteDetailPage() {
 
         <h1 style={{color:'#111827'}} className="text-lg font-bold mb-4">{note.title}</h1>
 
-        <div style={{color:'#374151'}} className="text-sm leading-relaxed whitespace-pre-wrap mb-4">
-          {note.content}
-        </div>
+        {note.thumbnail && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={note.thumbnail} alt={note.title} className="w-full rounded-lg mb-4 object-cover max-h-72" />
+        )}
 
-        {note.bottom_line && (
-          <div className="bg-amber-50 border-l-3 border-[#C49A3C] p-3 rounded-r-lg">
+        <div
+          style={{color:'#374151'}}
+          className="note-content text-sm leading-relaxed mb-4"
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(note.content) }}
+        />
+
+        {note.bottom_line && note.bottom_line.replace(/<[^>]+>/g, '').trim() && (
+          <div className="bg-amber-50 border-l-4 border-[#C49A3C] p-3 rounded-r-lg">
             <p className="text-sm text-[#C49A3C] font-semibold">📌 Bottom Line</p>
-            <p style={{color:'#374151'}} className="text-sm mt-1">{note.bottom_line}</p>
+            <div
+              style={{color:'#374151'}}
+              className="note-content text-sm mt-1"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(note.bottom_line) }}
+            />
           </div>
         )}
 
@@ -70,6 +83,17 @@ export default function NoteDetailPage() {
           <a href="/inquiry" className="flex-1 p-3 bg-[#1B3A5C] text-white text-center rounded-lg text-xs font-semibold">상담 신청하기</a>
         </div>
       </div>
+
+      <style jsx global>{`
+        .note-content h3 { font-size: 1.05rem; font-weight: 700; margin: 0.8rem 0 0.4rem; color: #111827; }
+        .note-content ul { list-style: disc; padding-left: 1.4rem; margin: 0.5rem 0; }
+        .note-content ol { list-style: decimal; padding-left: 1.4rem; margin: 0.5rem 0; }
+        .note-content li { margin: 0.2rem 0; }
+        .note-content blockquote { border-left: 3px solid #1B3A5C; padding-left: 0.75rem; color: #555; margin: 0.6rem 0; }
+        .note-content a { color: #1d4ed8; text-decoration: underline; }
+        .note-content p { margin: 0.5rem 0; }
+        .note-content b, .note-content strong { font-weight: 700; }
+      `}</style>
     </div>
   )
 }

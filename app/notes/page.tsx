@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { stripHtml } from '@/lib/noteHtml'
 
 interface Note {
   id: string
@@ -11,6 +12,7 @@ interface Note {
   content: string
   bottom_line: string
   created_at: string
+  thumbnail?: string | null
 }
 
 export default function NotesPage() {
@@ -114,18 +116,25 @@ export default function NotesPage() {
           filtered.map(note => (
             <div key={note.id}
               onClick={() => router.push(`/notes/${note.id}`)}
-              className="border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer hover:bg-gray-50">
-              <div className="flex justify-between items-center mb-2">
-                <span className={`text-xs text-white px-2 py-0.5 rounded ${getCategoryColor(note.category)}`}>
-                  {note.category}
-                </span>
-                <span className="text-sm text-gray-400">{formatTime(note.created_at)}</span>
-              </div>
-              <p style={{color:'#111827'}} className="text-lg font-semibold mb-1">{note.title}</p>
-              <p style={{color:'#374151'}} className="text-base line-clamp-2">{note.content}</p>
-              {note.bottom_line && (
-                <p className="text-sm text-[#C49A3C] mt-2">📌 {note.bottom_line}</p>
+              className="border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer hover:bg-gray-50 flex gap-3">
+              {note.thumbnail && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={note.thumbnail} alt={note.title}
+                  className="w-24 h-24 object-cover rounded-lg flex-shrink-0" />
               )}
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center mb-2">
+                  <span className={`text-xs text-white px-2 py-0.5 rounded ${getCategoryColor(note.category)}`}>
+                    {note.category}
+                  </span>
+                  <span className="text-sm text-gray-400">{formatTime(note.created_at)}</span>
+                </div>
+                <p style={{color:'#111827'}} className="text-lg font-semibold mb-1 line-clamp-1">{note.title}</p>
+                <p style={{color:'#374151'}} className="text-base line-clamp-2">{stripHtml(note.content)}</p>
+                {note.bottom_line && stripHtml(note.bottom_line) && (
+                  <p className="text-sm text-[#C49A3C] mt-2 line-clamp-1">📌 {stripHtml(note.bottom_line)}</p>
+                )}
+              </div>
             </div>
           ))
         )}
