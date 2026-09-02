@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { stripHtml } from '@/lib/noteHtml'
 
 interface Note {
   id: string
@@ -13,6 +14,7 @@ interface Note {
   view_count: number
   published_at: string | null
   created_at: string
+  thumbnail?: string | null
 }
 
 const CATEGORIES = ['시세', '정책', '매물', '금융', '분석', '학군', '재건축']
@@ -123,10 +125,10 @@ export default function NoteListPage() {
                 </div>
 
                 <p style={{ color: '#111827' }} className="text-sm font-bold mb-1">{note.title}</p>
-                <p style={{ color: '#374151' }} className="text-xs line-clamp-2 mb-2">{note.content}</p>
+                <p style={{ color: '#374151' }} className="text-xs line-clamp-2 mb-2">{stripHtml(note.content)}</p>
 
-                {note.bottom_line && (
-                  <p className="text-xs text-[#C49A3C] mb-2">📌 {note.bottom_line}</p>
+                {note.bottom_line && stripHtml(note.bottom_line) && (
+                  <p className="text-xs text-[#C49A3C] mb-2 line-clamp-1">📌 {stripHtml(note.bottom_line)}</p>
                 )}
 
                 {/* 액션 버튼 */}
