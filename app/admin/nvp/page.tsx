@@ -110,15 +110,19 @@ const COLS: { key: string; label: string; w: number; hi?: boolean }[] = [
   { key: 'gu', label: '구', w: 60 },
   { key: 'dong', label: '동', w: 70 },
   { key: 'jibun', label: '지번', w: 60 },
+  { key: 'lawd', label: '시군구코드', w: 75 },
+  { key: 'bjdong', label: '법정동코드', w: 75 },
   { key: 'built_year', label: '준공', w: 55 },
   { key: 'households', label: '세대', w: 60 },
   { key: 'trade_name', label: '실거래명', w: 150 },
+  { key: 'belt', label: '권역', w: 70 },
   { key: 'std_ppp_exclu', label: '전용평당가', w: 85, hi: true },
   { key: 'std_price_m2', label: '㎡당가', w: 75, hi: true },
   { key: 'trade_count', label: '건수', w: 45 },
   { key: 'latest_date', label: '최근', w: 60 },
   { key: 'ref_status', label: '상태', w: 60 },
-  { key: 'action', label: '작업', w: 130 },
+  { key: 'note', label: '메모', w: 140 },
+  { key: 'action', label: '작업', w: 120 },
 ]
 
 export default function NvpAdminPage() {
@@ -128,6 +132,7 @@ export default function NvpAdminPage() {
   const [msg, setMsg] = useState('')
   const [fontPx, setFontPx] = useState(12)
   const [widths, setWidths] = useState<Record<string, number>>(() => Object.fromEntries(COLS.map(c => [c.key, c.w])))
+  const [savedKey, setSavedKey] = useState('')  // 방금 저장된 셀 "id:field" → ✓ 표시
 
   const fetchRows = useCallback(async () => {
     setLoading(true)
@@ -139,10 +144,17 @@ export default function NvpAdminPage() {
 
   useEffect(() => { fetchRows() }, [fetchRows])
 
-  async function saveField(id: string, field: string, value: unknown) {
-    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
+  async function saveField(id: string, field: string, value: unknown, prev: unknown) {
+    // 값이 안 바뀌었으면 저장 스킵
+    const norm = (v: unknown) => Array.isArray(v) ? v.join(',') : (v ?? '')
+    if (norm(value) === norm(prev)) return
+    setRows(prevRows => prevRows.map(r => r.id === id ? { ...r, [field]: value } : r))
     const { error } = await supabase.from('nvp_reference').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', id)
-    if (error) setMsg(`저장 실패(${field}): ` + error.message)
+    if (error) { setMsg(`저장 실패(${field}): ` + error.message); return }
+    // 저장 성공 → ✓ 잠깐 표시
+    const key = `${id}:${field}`
+    setSavedKey(key)
+    setTimeout(() => setSavedKey(k => k === key ? '' : k), 1200)
   }
 
   async function refreshOne(row: NvpRef) {
@@ -210,8 +222,30 @@ export default function NvpAdminPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center">로딩 중...</div>
 
   const th = 'relative border border-gray-200 px-2 py-1 font-semibold text-gray-700 bg-gray-100 text-left select-none'
-  const td = 'border border-gray-200 px-1.5 py-0.5 align-middle'
-  const inp = 'w-full bg-transparent focus:bg-yellow-50 focus:outline-none px-1 rounded'
+  const td = 'border border-gray-200 px-1 py-0.5 align-middle'
+
+  // 편집 가능한 셀 (입력칸처럼 보이고, 저장되면 ✓)
+  function EditCell({ row, field, num = false, arr = false, w }: { row: NvpRef; field: string; num?: boolean; arr?: boolean; w: number }) {
+    const raw = (row as unknown as Record<string, unknown>)[field]
+    const shown = arr ? ((raw as string[] | null) || []).join(', ') : (raw ?? '')
+    const saved = savedKey === `${row.id}:${field}`
+    return (
+      <td className={td} style={{ width: w }}>
+        <div className="relative">
+          <input
+            className="w-full border border-gray-200 rounded px-1.5 py-0.5 bg-white hover:border-blue-300 focus:bg-yellow-50 focus:border-blue-500 focus:outline-none transition-colors"
+            defaultValue={String(shown)}
+            onBlur={e => {
+              const v = e.target.value
+              const nv = arr ? (v ? v.split(',').map(s => s.trim()) : null) : num ? (v ? Number(v) : null) : v
+              saveField(row.id, field, nv, raw)
+            }}
+          />
+          {saved && <span className="absolute -right-1 -top-1 text-green-600 text-xs bg-white rounded-full">✓</span>}
+        </div>
+      </td>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -237,7 +271,7 @@ export default function NvpAdminPage() {
       {msg && <div className="bg-blue-50 text-[#1B3A5C] text-sm px-6 py-2 border-b border-blue-100">{msg}</div>}
 
       <div className="p-3">
-        <p className="text-xs text-gray-500 mb-2">셀 클릭해 수정 · 헤더 경계 드래그로 너비 조절 · [실거래 조회]로 표준가 산출 · 총 {rows.length}개</p>
+        <p className="text-xs text-gray-500 mb-2">✏️ <b>흰 입력칸</b>은 클릭해 수정 → 다른 곳 클릭하면 <b>DB에 자동 저장</b>(✓ 표시) · 헤더 경계 드래그로 너비 조절 · [조회]로 표준가 산출 · 총 {rows.length}개</p>
         <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
           <table className="border-collapse" style={{ fontSize: fontPx, tableLayout: 'fixed' }}>
             <thead>
@@ -255,15 +289,18 @@ export default function NvpAdminPage() {
               {rows.map(r => (
                 <tr key={r.id} className={r.ref_status === 'active' ? 'hover:bg-blue-50/30' : 'bg-gray-50/40 hover:bg-blue-50/30'}>
                   <td className={td + ' font-mono text-[0.85em] whitespace-nowrap text-gray-500'} style={{ width: widths.ref_code }}>{r.ref_code}</td>
-                  <td className={td} style={{ width: widths.ticker }}><input className={inp} defaultValue={r.ticker || ''} onBlur={e => saveField(r.id, 'ticker', e.target.value)} /></td>
-                  <td className={td} style={{ width: widths.short_name }}><input className={inp} defaultValue={r.short_name || ''} onBlur={e => saveField(r.id, 'short_name', e.target.value)} /></td>
-                  <td className={td} style={{ width: widths.name }}><input className={inp} defaultValue={r.name} onBlur={e => saveField(r.id, 'name', e.target.value)} /></td>
-                  <td className={td} style={{ width: widths.gu }}><input className={inp} defaultValue={r.gu} onBlur={e => saveField(r.id, 'gu', e.target.value)} /></td>
-                  <td className={td} style={{ width: widths.dong }}><input className={inp} defaultValue={r.dong} onBlur={e => saveField(r.id, 'dong', e.target.value)} /></td>
-                  <td className={td} style={{ width: widths.jibun }}><input className={inp} defaultValue={r.jibun || ''} onBlur={e => saveField(r.id, 'jibun', e.target.value)} /></td>
-                  <td className={td} style={{ width: widths.built_year }}><input className={inp} defaultValue={r.built_year ?? ''} onBlur={e => saveField(r.id, 'built_year', e.target.value ? Number(e.target.value) : null)} /></td>
-                  <td className={td} style={{ width: widths.households }}><input className={inp} defaultValue={r.households ?? ''} onBlur={e => saveField(r.id, 'households', e.target.value ? Number(e.target.value) : null)} /></td>
-                  <td className={td} style={{ width: widths.trade_name }}><input className={inp} defaultValue={(r.trade_name || []).join(', ')} onBlur={e => saveField(r.id, 'trade_name', e.target.value ? e.target.value.split(',').map(s => s.trim()) : null)} /></td>
+                  <EditCell row={r} field="ticker" w={widths.ticker} />
+                  <EditCell row={r} field="short_name" w={widths.short_name} />
+                  <EditCell row={r} field="name" w={widths.name} />
+                  <EditCell row={r} field="gu" w={widths.gu} />
+                  <EditCell row={r} field="dong" w={widths.dong} />
+                  <EditCell row={r} field="jibun" w={widths.jibun} />
+                  <EditCell row={r} field="lawd" w={widths.lawd} />
+                  <EditCell row={r} field="bjdong" w={widths.bjdong} />
+                  <EditCell row={r} field="built_year" num w={widths.built_year} />
+                  <EditCell row={r} field="households" num w={widths.households} />
+                  <EditCell row={r} field="trade_name" arr w={widths.trade_name} />
+                  <EditCell row={r} field="belt" w={widths.belt} />
                   <td className={td + ' text-right font-semibold text-[#1B3A5C]'} style={{ width: widths.std_ppp_exclu }}>{r.std_ppp_exclu ? r.std_ppp_exclu.toLocaleString() : '—'}</td>
                   <td className={td + ' text-right'} style={{ width: widths.std_price_m2 }}>{r.std_price_m2 ? r.std_price_m2.toLocaleString() : '—'}</td>
                   <td className={td + ' text-center text-gray-500'} style={{ width: widths.trade_count }}>{r.trade_count ?? '—'}</td>
@@ -271,6 +308,7 @@ export default function NvpAdminPage() {
                   <td className={td + ' text-center'} style={{ width: widths.ref_status }}>
                     <span className={`px-1.5 py-0.5 rounded text-[0.85em] ${r.ref_status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>{r.ref_status}</span>
                   </td>
+                  <EditCell row={r} field="note" w={widths.note} />
                   <td className={td + ' whitespace-nowrap text-center'} style={{ width: widths.action }}>
                     <button onClick={() => refreshOne(r)} disabled={busy === r.id}
                       className="px-2 py-0.5 bg-[#1B3A5C] text-white rounded text-[0.9em] disabled:opacity-50">
