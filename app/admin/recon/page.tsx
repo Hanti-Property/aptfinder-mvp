@@ -10,10 +10,17 @@ interface Recon { id: string; [k: string]: unknown }
 
 const STAGE_NAME: Record<number, string> = { 3: '추진위', 4: '조합설립', 5: '사업시행', 6: '관리처분', 7: '이주/철거', 8: '착공', 9: '입주' }
 
-// 보기 그룹별 컬럼 (편집: edit=true, 계산·읽기: edit=false)
-type Col = { key: string; label: string; w: number; edit?: boolean; num?: boolean; bool?: boolean; arr?: boolean; ro?: boolean }
+// 보기 그룹별 컬럼
+//  edit: 편집 / ro: 읽기전용 / m2: 평당가→㎡당가 변환 표시 / calc: 파생계산(row→값)
+type Col = {
+  key: string; label: string; w: number
+  edit?: boolean; num?: boolean; bool?: boolean; arr?: boolean; ro?: boolean
+  m2?: boolean                       // 값을 ÷3.3058 하여 ㎡당가로 표시
+  calc?: (r: Recon) => number | null // 파생 계산 컬럼
+}
 const GROUPS: Record<string, Col[]> = {
   기본: [
+    { key: 'asset_id', label: '자산코드', w: 145, ro: true },
     { key: 'ticker', label: '티커', w: 70, edit: true },
     { key: 'short_name', label: '약칭', w: 90, edit: true },
     { key: 'name', label: '단지명', w: 150, edit: true },
@@ -21,7 +28,7 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'jibun', label: '지번', w: 60, edit: true },
     { key: 'households', label: '세대', w: 60, edit: true, num: true },
     { key: 'far', label: '현용적률', w: 70, edit: true, num: true },
-    { key: 'plat_area', label: '대지면적', w: 85, edit: true, num: true },
+    { key: 'plat_area', label: '대지면적㎡', w: 90, edit: true, num: true },
     { key: 'trade_name', label: '실거래명', w: 130, edit: true, arr: true },
   ],
   운영: [
@@ -34,14 +41,25 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'eta_provisional', label: '잠정ETA', w: 60, edit: true, bool: true },
     { key: 'risk', label: '리스크/비고', w: 220, edit: true },
   ],
+  // 평당가: 토지(대지) vs 건축(전용) 구분 + 각각 만원/평 · 만원/㎡ 나란히
+  평당가: [
+    { key: 'land_ppp_market', label: '[토지]현재 만원/평', w: 120, ro: true },
+    { key: 'land_ppp_market', label: '[토지]현재 만원/㎡', w: 120, ro: true, m2: true },
+    { key: '_land_ppp_new', label: '[토지]재건축후 만원/평', w: 130, ro: true, calc: r => (r.land_ppp_market && r.rar) ? Math.round(Number(r.land_ppp_market) * Number(r.rar)) : null },
+    { key: '_land_ppp_new_m2', label: '[토지]재건축후 만원/㎡', w: 130, ro: true, calc: r => (r.land_ppp_market && r.rar) ? Math.round(Number(r.land_ppp_market) * Number(r.rar) / PY) : null },
+    { key: 'avg_ppp', label: '[전용]현재 만원/평', w: 120, ro: true },
+    { key: 'avg_ppp', label: '[전용]현재 만원/㎡', w: 120, ro: true, m2: true },
+    { key: 'ncmc_new_ppp', label: '[전용]재건축후 만원/평', w: 130, ro: true },
+    { key: 'ncmc_new_ppp', label: '[전용]재건축후 만원/㎡', w: 130, ro: true, m2: true },
+  ],
   인덱스: [
     { key: 'cmc', label: 'CMC(조)', w: 75, ro: true },
     { key: 'cap_grade', label: '등급', w: 75, ro: true },
-    { key: 'land_ppp_market', label: '현재대지평당', w: 95, ro: true },
     { key: 'ncmc', label: 'NCMC(조)', w: 80, ro: true },
-    { key: 'ncmc_new_ppp', label: '재건축후평당', w: 95, ro: true },
     { key: 'rar', label: 'RAR', w: 60, ro: true },
+    { key: 'ncmc_nvp_base', label: 'NVP기준가', w: 80, ro: true },
     { key: 'nvp_gap_rate', label: 'NVP괴리%', w: 75, ro: true },
+    { key: 'target_far', label: '목표용적률', w: 75, ro: true },
     { key: 'size_grade', label: '규모', w: 50, ro: true },
     { key: 'trade_reliability', label: '거래신뢰', w: 70, ro: true },
     { key: 'warn_distortion', label: '왜곡주의', w: 65, ro: true },
@@ -51,7 +69,7 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'latest_date', label: '거래월', w: 65, ro: true },
     { key: 'latest_exclu_py', label: '전용평', w: 60, ro: true },
     { key: 'trade_count', label: '건수', w: 50, ro: true },
-    { key: 'avg_ppp', label: '평균평당가', w: 85, ro: true },
+    { key: 'avg_ppp', label: '[전용]평균 만원/평', w: 120, ro: true },
     { key: 'price_updated', label: '갱신일', w: 90, ro: true },
   ],
 }
@@ -99,6 +117,19 @@ export default function ReconAdminPage() {
   const [group, setGroup] = useState<keyof typeof GROUPS>('기본')
   const [fontPx, setFontPx] = useState(12)
   const [savedKey, setSavedKey] = useState('')
+  const [widths, setWidths] = useState<Record<string, number>>({})  // "그룹#인덱스" → 너비
+
+  // 컬럼 리사이즈 (헤더 경계 드래그)
+  function startResize(wkey: string, curW: number, e: React.MouseEvent) {
+    e.preventDefault()
+    const startX = e.clientX
+    const onMove = (ev: MouseEvent) => {
+      const nw = Math.max(40, curW + (ev.clientX - startX))
+      setWidths(prev => ({ ...prev, [wkey]: nw }))
+    }
+    const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
+    window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp)
+  }
 
   const fetchRows = useCallback(async () => {
     setLoading(true)
@@ -142,16 +173,16 @@ export default function ReconAdminPage() {
   const th = 'border border-gray-200 px-2 py-1 font-semibold text-gray-700 bg-gray-100 text-left whitespace-nowrap'
   const td = 'border border-gray-200 px-1 py-0.5 align-middle'
 
-  function EditCell({ row, col }: { row: Recon; col: Col }) {
+  function EditCell({ row, col, w }: { row: Recon; col: Col; w: number }) {
     const raw = row[col.key]
     const saved = savedKey === `${row.id}:${col.key}`
     if (col.bool) {
-      return <td className={td + ' text-center'} style={{ width: col.w }}>
+      return <td className={td + ' text-center'} style={{ width: w }}>
         <input type="checkbox" defaultChecked={!!raw} onChange={e => saveField(row.id, col.key, e.target.checked, raw)} />
       </td>
     }
     const shown = col.arr ? ((raw as string[] | null) || []).join(', ') : (raw ?? '')
-    return <td className={td} style={{ width: col.w }}>
+    return <td className={td} style={{ width: w }}>
       <div className="relative">
         <input className="w-full border border-gray-200 rounded px-1.5 py-0.5 bg-white hover:border-blue-300 focus:bg-yellow-50 focus:border-blue-500 focus:outline-none"
           defaultValue={String(shown)}
@@ -161,12 +192,26 @@ export default function ReconAdminPage() {
     </td>
   }
 
-  function RoCell({ row, col }: { row: Recon; col: Col }) {
-    let v = row[col.key]
-    if (col.key === 'warn_distortion') return <td className={td + ' text-center'} style={{ width: col.w }}>{v ? <span className="text-red-500">⚠️</span> : '—'}</td>
-    if (typeof v === 'number' && (col.key === 'cmc' || col.key === 'ncmc' || col.key === 'rar')) v = (v as number).toLocaleString()
-    else if (typeof v === 'number') v = (v as number).toLocaleString()
-    return <td className={td + ' text-right text-gray-600'} style={{ width: col.w }}>{v != null && v !== '' ? String(v) : '—'}</td>
+  // 컬럼 실제 너비 (리사이즈 반영). wkey = 그룹#인덱스 (중복 key 대응)
+  const wOf = (i: number, c: Col) => widths[`${group}#${i}`] ?? c.w
+
+  function RoCell({ row, col, w }: { row: Recon; col: Col; w: number }) {
+    if (col.key === 'warn_distortion') {
+      return <td className={td + ' text-center'} style={{ width: w }}>{row[col.key] ? <span className="text-red-500">⚠️</span> : '—'}</td>
+    }
+    // 파생 계산 컬럼
+    let num: number | null = null
+    if (col.calc) num = col.calc(row)
+    else {
+      const raw = row[col.key]
+      if (typeof raw === 'number') num = raw
+      else if (raw != null && raw !== '' && !isNaN(Number(raw))) num = Number(raw)
+      else return <td className={td + ' text-right text-gray-600'} style={{ width: w }}>{raw != null && raw !== '' ? String(raw) : '—'}</td>
+    }
+    if (num == null) return <td className={td + ' text-right text-gray-400'} style={{ width: w }}>—</td>
+    // ㎡당가 변환
+    const shown = col.m2 ? Math.round(num / PY) : num
+    return <td className={td + ' text-right text-gray-700'} style={{ width: w }}>{shown.toLocaleString()}</td>
   }
 
   return (
@@ -198,9 +243,18 @@ export default function ReconAdminPage() {
       <div className="p-3 overflow-x-auto">
         <table className="border-collapse" style={{ fontSize: fontPx }}>
           <thead><tr>
-            <th className={th} style={{ width: 60 }}>#</th>
-            <th className={th} style={{ width: 90 }}>단지</th>
-            {cols.map(c => <th key={c.key} className={th + (c.ro ? ' !bg-amber-50' : '')} style={{ width: c.w }}>{c.label}</th>)}
+            <th className={th} style={{ width: 44 }}>#</th>
+            <th className={th} style={{ width: 100 }}>단지</th>
+            {cols.map((c, i) => {
+              const w = wOf(i, c)
+              return (
+                <th key={`${group}#${i}`} className={'relative ' + th + (c.ro ? ' !bg-amber-50' : '')} style={{ width: w, minWidth: w }}>
+                  {c.label}
+                  <span onMouseDown={e => startResize(`${group}#${i}`, w, e)}
+                    className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize hover:bg-blue-400/40" />
+                </th>
+              )
+            })}
             {group === '실거래' && <th className={th} style={{ width: 80 }}>작업</th>}
           </tr></thead>
           <tbody>
@@ -211,7 +265,9 @@ export default function ReconAdminPage() {
                   {String(r.short_name || r.name)}
                   {typeof r.stage === 'number' && <span className="text-gray-400 text-[0.8em] ml-1">{STAGE_NAME[r.stage as number] || r.stage}</span>}
                 </td>
-                {cols.map(c => c.ro ? <RoCell key={c.key} row={r} col={c} /> : <EditCell key={c.key} row={r} col={c} />)}
+                {cols.map((c, i) => c.ro
+                  ? <RoCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
+                  : <EditCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />)}
                 {group === '실거래' && <td className={td + ' text-center'}>
                   <button onClick={() => refreshTrade(r)} disabled={busy === r.id}
                     className="px-2 py-0.5 bg-[#1B3A5C] text-white rounded text-[0.9em] disabled:opacity-50">{busy === r.id ? '...' : '조회'}</button>
