@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS nvp_reference (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- 식별 (정적)
-    ref_code        VARCHAR(30) UNIQUE NOT NULL,   -- NVP-{구}-{동}-{순번}, 영구불변
+    ref_code        VARCHAR(40) UNIQUE NOT NULL,   -- SEL-{구}-{동}-{순번}-NVP (자산번호 형식 + NVP 태그). 영구불변
     ticker          VARCHAR(20),                    -- 티커
     name            VARCHAR(100) NOT NULL,          -- 정식 단지명
     short_name      VARCHAR(50),                    -- 약칭
