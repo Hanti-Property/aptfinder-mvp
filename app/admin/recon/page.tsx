@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
+import { calcAll, type ReconRow, type CalcResult } from '@/lib/indexCalc'
 
 const LAMBDA_URL = 'https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/'
 const PY = 3.3058
@@ -48,11 +49,18 @@ type Col = {
   key: string; label: string; w: number
   edit?: boolean; num?: boolean; bool?: boolean; arr?: boolean; ro?: boolean
   m2?: boolean                       // 값을 ÷3.3058 하여 ㎡당가로 표시
-  calc?: (r: Recon) => number | null // 파생 계산 컬럼
+  calc?: (r: Recon) => number | null // 파생 계산 컬럼(숫자)
+  txt?: (r: Recon) => string         // 파생 텍스트 컬럼(규모·신뢰 라벨 등)
+  warn?: boolean                     // 왜곡주의 플래그(엔진 _calc.warnDistortion)
   refsel?: boolean                   // NVP ref 멀티선택 칩
   wsel?: boolean                     // 위치가중치 드롭다운
   nvpfinal?: boolean                 // 최종NVP(매핑 자동계산) 표시
 }
+
+// GROUPS의 calc/txt에서 엔진 결과를 읽기 위한 헬퍼 (렌더 시 row._calc에 CalcResult 부착)
+const cc = (r: Recon): CalcResult | undefined => (r as Recon & { _calc?: CalcResult })._calc
+const sizeLabel = (g?: string) => ({ xs: '초소형', s: '소형', m: '중소형', l: '준대형', xl: '대단지' }[g || ''] || '—')
+const relLabel = (g?: string) => ({ low: '낮음', mid: '보통', high: '양호' }[g || ''] || '—')
 const GROUPS: Record<string, Col[]> = {
   기본: [
     { key: 'asset_id', label: '자산코드', w: 145, ro: true },
@@ -78,29 +86,30 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'risk', label: '리스크·이벤트', w: 240, edit: true },
   ],
   // 평당가: 토지(대지) vs 건축(전용) 구분 + 각각 만원/평 · 만원/㎡ 나란히
+  // 파생값은 계산엔진(_calc)에서 실시간 산출 → 실거래·매핑 편집 즉시 반영
   평당가: [
-    { key: 'land_ppp_market', label: '[토지]현재 만원/평', w: 120, ro: true },
-    { key: 'land_ppp_market', label: '[토지]현재 만원/㎡', w: 120, ro: true, m2: true },
-    { key: '_land_ppp_new', label: '[토지]재건축후 만원/평', w: 130, ro: true, calc: r => (r.land_ppp_market && r.rar) ? Math.round(Number(r.land_ppp_market) * Number(r.rar)) : null },
-    { key: '_land_ppp_new_m2', label: '[토지]재건축후 만원/㎡', w: 130, ro: true, calc: r => (r.land_ppp_market && r.rar) ? Math.round(Number(r.land_ppp_market) * Number(r.rar) / PY) : null },
-    { key: 'avg_ppp', label: '[전용]현재 만원/평', w: 120, ro: true },
-    { key: 'avg_ppp', label: '[전용]현재 만원/㎡', w: 120, ro: true, m2: true },
-    { key: 'ncmc_new_ppp', label: '[전용]재건축후 만원/평', w: 130, ro: true },
-    { key: 'ncmc_new_ppp', label: '[전용]재건축후 만원/㎡', w: 130, ro: true, m2: true },
+    { key: '_land_now', label: '[토지]현재 만원/평', w: 120, ro: true, calc: r => cc(r)?.landPppMarket ?? null },
+    { key: '_land_now_m2', label: '[토지]현재 만원/㎡', w: 120, ro: true, m2: true, calc: r => cc(r)?.landPppMarket ?? null },
+    { key: '_land_new', label: '[토지]재건축후 만원/평', w: 130, ro: true, calc: r => { const c = cc(r); return (c?.landPppMarket && c?.rar) ? Math.round(c.landPppMarket * c.rar) : null } },
+    { key: '_land_new_m2', label: '[토지]재건축후 만원/㎡', w: 130, ro: true, m2: true, calc: r => { const c = cc(r); return (c?.landPppMarket && c?.rar) ? Math.round(c.landPppMarket * c.rar) : null } },
+    { key: '_exclu_now', label: '[전용]현재 만원/평', w: 120, ro: true, calc: r => (r.avg_ppp != null ? Number(r.avg_ppp) : null) },
+    { key: '_exclu_now_m2', label: '[전용]현재 만원/㎡', w: 120, ro: true, m2: true, calc: r => (r.avg_ppp != null ? Number(r.avg_ppp) : null) },
+    { key: '_exclu_new', label: '[전용]재건축후 만원/평', w: 130, ro: true, calc: r => cc(r)?.ncmcNewPpp ?? null },
+    { key: '_exclu_new_m2', label: '[전용]재건축후 만원/㎡', w: 130, ro: true, m2: true, calc: r => cc(r)?.ncmcNewPpp ?? null },
   ],
   인덱스: [
     { key: 'nvp_ref_codes', label: 'NVP ref (선택)', w: 300, refsel: true },
     { key: 'nvp_loc_weight', label: '가중치', w: 80, wsel: true },
     { key: '_nvp_final', label: '최종NVP', w: 110, nvpfinal: true },
-    { key: 'avg_ppp', label: '현재 만원/평', w: 90, ro: true },
-    { key: 'cmc', label: 'CMC(조)', w: 75, ro: true },
-    { key: 'ncmc', label: 'NCMC(조)', w: 80, ro: true },
-    { key: 'rar', label: 'RAR', w: 60, ro: true },
-    { key: 'nvp_gap_rate', label: 'NVP괴리%', w: 75, ro: true },
-    { key: 'target_far', label: '목표용적률', w: 75, ro: true },
-    { key: 'size_grade', label: '규모', w: 50, ro: true },
-    { key: 'trade_reliability', label: '거래신뢰', w: 70, ro: true },
-    { key: 'warn_distortion', label: '왜곡주의', w: 65, ro: true },
+    { key: '_exclu_now2', label: '현재 만원/평', w: 90, ro: true, calc: r => (r.avg_ppp != null ? Number(r.avg_ppp) : null) },
+    { key: '_cmc', label: 'CMC(조)', w: 75, ro: true, calc: r => cc(r)?.cmc ?? null },
+    { key: '_ncmc', label: 'NCMC(조)', w: 80, ro: true, calc: r => cc(r)?.ncmc ?? null },
+    { key: '_rar', label: 'RAR', w: 60, ro: true, calc: r => cc(r)?.rar ?? null },
+    { key: '_gap', label: 'NVP괴리%', w: 75, ro: true, calc: r => cc(r)?.nvpGapRate ?? null },
+    { key: '_tfar', label: '목표용적률', w: 75, ro: true, calc: r => cc(r)?.targetFar ?? null },
+    { key: '_size', label: '규모', w: 50, ro: true, txt: r => sizeLabel(cc(r)?.sizeGrade) },
+    { key: '_rel', label: '거래신뢰', w: 70, ro: true, txt: r => relLabel(cc(r)?.tradeReliability) },
+    { key: '_warn', label: '왜곡주의', w: 65, ro: true, warn: true },
   ],
   실거래: [
     { key: 'latest_price', label: '최근실거래', w: 90, ro: true },
@@ -185,6 +194,11 @@ export default function ReconAdminPage() {
       .order('dong').then(({ data }) => { if (data) setRefs(data as NvpRefLite[]) })
   }, [])
   const refMap: Record<string, NvpRefLite> = Object.fromEntries(refs.map(r => [r.ref_code, r]))
+
+  // 계산 엔진: recon_master 원천값 → CMC·NCMC·RAR·평당가·플래그 실시간 산출.
+  // 평당가/인덱스 탭이 DB의 낡은 값 대신 이 결과를 표시 → 실거래·매핑 편집 즉시 반영.
+  const calcMap = useMemo(() => calcAll(rows as unknown as ReconRow[]), [rows])
+  const calcOf = (r: Recon): CalcResult | undefined => calcMap.get(String(r.id))
 
   async function saveField(id: string, field: string, value: unknown, prev: unknown) {
     const norm = (v: unknown) => Array.isArray(v) ? v.join(',') : (v ?? '')
@@ -294,8 +308,13 @@ export default function ReconAdminPage() {
   const wOf = (i: number, c: Col) => widths[`${group}#${i}`] ?? c.w
 
   function RoCell({ row, col, w }: { row: Recon; col: Col; w: number }) {
-    if (col.key === 'warn_distortion') {
-      return <td className={td + ' text-center'} style={{ width: w }}>{row[col.key] ? <span className="text-red-500">⚠️</span> : '—'}</td>
+    // 왜곡주의 플래그 (엔진 _calc.warnDistortion)
+    if (col.warn) {
+      return <td className={td + ' text-center'} style={{ width: w }}>{cc(row)?.warnDistortion ? <span className="text-red-500">⚠️</span> : '—'}</td>
+    }
+    // 파생 텍스트 (규모·거래신뢰 라벨)
+    if (col.txt) {
+      return <td className={td + ' text-center text-gray-700'} style={{ width: w }}>{col.txt(row)}</td>
     }
     // 입주년: 연도라 천단위 콤마 없이 표시 (ETA에서 자동 계산됨)
     if (col.key === 'move_in') {
@@ -387,7 +406,7 @@ export default function ReconAdminPage() {
           <button key={g} onClick={() => setGroup(g)}
             className={`px-3 py-1.5 rounded-lg text-sm ${group === g ? 'bg-[#1B3A5C] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{g}</button>
         ))}
-        <span className="text-xs text-gray-400 self-center ml-2">{group === '인덱스' ? 'NVP ref·가중치는 편집 → DB 저장 · 나머지 지표는 스크립트 갱신' : group === '실거래' ? '읽기 전용 (스크립트/조회로 갱신)' : '흰 칸 클릭해 편집 → DB 자동저장(✓)'}</span>
+        <span className="text-xs text-gray-400 self-center ml-2">{group === '인덱스' ? 'NVP ref·가중치 편집 → 인덱스 실시간 재계산(엔진)' : group === '평당가' ? '실거래·매핑 기반 실시간 계산(엔진)' : group === '실거래' ? '읽기 전용 ([조회]로 갱신)' : '흰 칸 클릭해 편집 → DB 자동저장(✓)'}</span>
       </div>
 
       {msg && <div className="bg-blue-50 text-[#1B3A5C] text-sm px-6 py-2 border-b border-blue-100">{msg}</div>}
@@ -410,7 +429,9 @@ export default function ReconAdminPage() {
             {group === '실거래' && <th className={th} style={{ width: 80 }}>작업</th>}
           </tr></thead>
           <tbody>
-            {rows.map((r, i) => (
+            {rows.map((r0, i) => {
+              const r = { ...r0, _calc: calcOf(r0) } as Recon
+              return (
               <tr key={r.id} className="hover:bg-blue-50/30">
                 <td className={td + ' text-center text-gray-400'}>{i + 1}</td>
                 <td className={td + ' font-semibold whitespace-nowrap'}>
@@ -427,11 +448,12 @@ export default function ReconAdminPage() {
                     className="px-2 py-0.5 bg-[#1B3A5C] text-white rounded text-[0.9em] disabled:opacity-50">{busy === r.id ? '...' : '조회'}</button>
                 </td>}
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
       </div>
-      <p className="px-6 pb-4 text-xs text-gray-400">총 {rows.length}개 · CMC/NCMC/RAR·플래그는 배치 스크립트(calc_cmc·calc_ncmc·calc_flags)로 갱신 → 편집값 반영하려면 스크립트 재실행·JSON 내보내기 필요</p>
+      <p className="px-6 pb-4 text-xs text-gray-400">총 {rows.length}개 · 평당가·인덱스는 계산엔진(lib/indexCalc)으로 실시간 산출 → 실거래·매핑 편집 즉시 반영</p>
     </div>
   )
 
