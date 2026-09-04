@@ -11,6 +11,8 @@ interface Stats {
   totalAgencies: number
   totalComplexes: number
   totalInquiries: number
+  totalRecon: number
+  totalNvp: number
 }
 
 interface RecentItem {
@@ -22,7 +24,7 @@ interface RecentItem {
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats>({ totalListings: 0, todayListings: 0, totalNotes: 0, totalColumns: 0, totalAgencies: 0, totalComplexes: 0, totalInquiries: 0 })
+  const [stats, setStats] = useState<Stats>({ totalListings: 0, todayListings: 0, totalNotes: 0, totalColumns: 0, totalAgencies: 0, totalComplexes: 0, totalInquiries: 0, totalRecon: 0, totalNvp: 0 })
   const [recentItems, setRecentItems] = useState<RecentItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -30,7 +32,7 @@ export default function AdminDashboard() {
     async function fetchData() {
       const today = new Date().toISOString().split('T')[0]
 
-      const [listings, todayL, notes, agencies, complexes, inquiries, columns] = await Promise.all([
+      const [listings, todayL, notes, agencies, complexes, inquiries, columns, recon, nvp] = await Promise.all([
         supabase.from('listings').select('id', { count: 'exact', head: true }),
         supabase.from('listings').select('id', { count: 'exact', head: true }).gte('created_at', today),
         supabase.from('research_notes').select('id', { count: 'exact', head: true }),
@@ -38,6 +40,8 @@ export default function AdminDashboard() {
         supabase.from('complexes').select('id', { count: 'exact', head: true }),
         supabase.from('inquiries').select('id', { count: 'exact', head: true }),
         supabase.from('expert_columns').select('id', { count: 'exact', head: true }),
+        supabase.from('recon_master').select('id', { count: 'exact', head: true }),
+        supabase.from('nvp_reference').select('id', { count: 'exact', head: true }),
       ])
 
       setStats({
@@ -48,6 +52,8 @@ export default function AdminDashboard() {
         totalAgencies: agencies.count || 0,
         totalComplexes: complexes.count || 0,
         totalInquiries: inquiries.count || 0,
+        totalRecon: recon.count || 0,
+        totalNvp: nvp.count || 0,
       })
 
       const recent: RecentItem[] = []
@@ -116,7 +122,7 @@ export default function AdminDashboard() {
   )
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e] max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#1a1a2e] max-w-6xl mx-auto">
       {/* Header */}
       <header className="bg-[#0f0f23] border-b border-[#2a2a4a] px-5 py-4 flex items-center justify-between">
         <div>
@@ -135,10 +141,40 @@ export default function AdminDashboard() {
       </header>
 
       <div className="p-5 space-y-5">
+        {/* ★ 핵심 분석 모듈 — 최상단 배치 */}
+        <section>
+          <h2 className="text-[13px] font-semibold text-[#C49A3C] mb-3 uppercase tracking-wider flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-[#C49A3C] rounded-full animate-pulse"></span>Core Analytics
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <a href="/admin/rvi" className="relative overflow-hidden bg-gradient-to-br from-[#2a2416] via-[#1e1e3f] to-[#1e1e3f] border border-[#C49A3C]/50 rounded-2xl p-6 hover:border-[#C49A3C] hover:shadow-lg hover:shadow-[#C49A3C]/10 transition-all group">
+              <div className="absolute top-4 right-4 w-2.5 h-2.5 bg-[#C49A3C] rounded-full animate-pulse"></div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 rounded-xl bg-[#C49A3C]/15 flex items-center justify-center text-2xl">🏗️</div>
+                <div>
+                  <p className="text-lg font-bold text-white group-hover:text-[#C49A3C] transition-colors">재건축 RVI 터미널</p>
+                  <p className="text-[11px] text-[#C49A3C]">Reconstruction Value Index</p>
+                </div>
+              </div>
+              <p className="text-[12px] text-gray-400 leading-relaxed">CMC·NCMC·RAR·RVI v1/v2 종합 분석 · 강남 재건축 38개 티커 랭킹</p>
+            </a>
+            <a href="/admin_index_dashboard.html" target="_blank" className="relative overflow-hidden bg-gradient-to-br from-[#16292f] via-[#1e1e3f] to-[#1e1e3f] border border-cyan-500/50 rounded-2xl p-6 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-500/10 transition-all group">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 rounded-xl bg-cyan-500/15 flex items-center justify-center text-2xl">📊</div>
+                <div>
+                  <p className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">단지 인덱스 대시보드</p>
+                  <p className="text-[11px] text-cyan-400">Complex Valuation Index</p>
+                </div>
+              </div>
+              <p className="text-[12px] text-gray-400 leading-relaxed">단지별 9개 평가지수 · 건축물대장·실거래·토지 통합 분석 화면</p>
+            </a>
+          </div>
+        </section>
+
         {/* 통계 카드 */}
         <section>
           <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Overview</h2>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3">
             <a href="/listings" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
               <p className="text-3xl font-extrabold text-white group-hover:text-[#C49A3C] transition-colors">{stats.totalListings}</p>
               <p className="text-[11px] text-gray-500 mt-1">총 매물</p>
@@ -164,13 +200,52 @@ export default function AdminDashboard() {
               <p className="text-3xl font-extrabold text-blue-400">{stats.totalComplexes}</p>
               <p className="text-[11px] text-gray-500 mt-1">등록 단지</p>
             </a>
+            <a href="/admin/recon" className="bg-[#1e1e3f] border border-[#C49A3C]/30 rounded-xl p-4 text-center hover:border-[#C49A3C] transition-colors group">
+              <p className="text-3xl font-extrabold text-[#C49A3C]">{stats.totalRecon}</p>
+              <p className="text-[11px] text-gray-500 mt-1">재건축 마스터</p>
+            </a>
+            <a href="/admin/nvp" className="bg-[#1e1e3f] border border-teal-500/30 rounded-xl p-4 text-center hover:border-teal-400 transition-colors group">
+              <p className="text-3xl font-extrabold text-teal-400">{stats.totalNvp}</p>
+              <p className="text-[11px] text-gray-500 mt-1">NVP 레퍼런스</p>
+            </a>
+          </div>
+        </section>
+
+        {/* DB 관리 (데이터 자산) */}
+        <section>
+          <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Database Management</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <a href="/admin/recon" className="bg-gradient-to-br from-[#2a2416] to-[#1e1e3f] border border-[#C49A3C]/40 rounded-xl p-4 hover:border-[#C49A3C] transition-all group">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg">🏗️</span>
+                <span className="text-2xl font-extrabold text-[#C49A3C]">{stats.totalRecon}</span>
+              </div>
+              <p className="text-[13px] font-semibold text-white">재건축 단지 마스터</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">단계·ETA·시공사·리스크·인덱스 관리</p>
+            </a>
+            <a href="/admin/nvp" className="bg-gradient-to-br from-[#16292a] to-[#1e1e3f] border border-teal-500/40 rounded-xl p-4 hover:border-teal-400 transition-all group">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg">🏙️</span>
+                <span className="text-2xl font-extrabold text-teal-400">{stats.totalNvp}</span>
+              </div>
+              <p className="text-[13px] font-semibold text-white">NVP 레퍼런스</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">신축 벤치마크 · 실거래 표준가</p>
+            </a>
+            <a href="/admin/rvi" className="bg-gradient-to-br from-[#1a2436] to-[#1e1e3f] border border-blue-500/40 rounded-xl p-4 hover:border-blue-400 transition-all group">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg">📊</span>
+                <span className="text-2xl font-extrabold text-blue-400">RVI</span>
+              </div>
+              <p className="text-[13px] font-semibold text-white">RVI 분석 터미널</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">CMC·NCMC·RAR·RVI 종합 대시보드</p>
+            </a>
           </div>
         </section>
 
         {/* 서비스 모듈 */}
         <section>
           <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Service Modules</h2>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             <a href="/real_trade.html" target="_blank" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-blue-500/50 hover:bg-[#1e1e4f] transition-all group">
               <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <span className="text-lg">🗺️</span>
@@ -241,7 +316,7 @@ export default function AdminDashboard() {
         {/* 빠른 작업 */}
         <section>
           <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <a href="/admin/inquiries" className="bg-gradient-to-r from-[#C49A3C] to-[#d4aa4c] text-[#0f0f23] rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#C49A3C]/20 transition-all">
               상담 신청 목록
             </a>
@@ -287,15 +362,17 @@ export default function AdminDashboard() {
           <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Management</h2>
           <div className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl overflow-hidden">
             {[
+              { href: '/admin/recon', icon: '🏗️', label: '재건축 단지 마스터 (DB)' },
+              { href: '/admin/nvp', icon: '🏙️', label: 'NVP 레퍼런스 (DB)' },
               { href: '/admin/inquiries', icon: '💬', label: '상담 문의 관리' },
               { href: '/admin/register', icon: '🏠', label: '매물 등록' },
               { href: '/admin/notes', icon: '📝', label: '리서치 노트 작성' },
+              { href: '/admin/notes/list', icon: '📋', label: '노트 목록 (수정/삭제)' },
               { href: '/admin/columns', icon: '✍️', label: '전문가 칼럼 작성' },
               { href: '/admin/columns/list', icon: '📰', label: '칼럼 목록 (수정/삭제)' },
-              { href: '/notes', icon: '📋', label: '노트 목록' },
               { href: '/listings', icon: '📦', label: '매물 목록 관리' },
-            ].map((item, idx) => (
-              <a key={item.href + idx} href={item.href} className={`flex items-center gap-3 px-4 py-3 text-[12px] text-gray-300 hover:bg-[#12122b] hover:text-white transition-colors ${idx !== 6 ? 'border-b border-[#2a2a4a]' : ''}`}>
+            ].map((item, idx, arr) => (
+              <a key={item.href + idx} href={item.href} className={`flex items-center gap-3 px-4 py-3 text-[12px] text-gray-300 hover:bg-[#12122b] hover:text-white transition-colors ${idx !== arr.length - 1 ? 'border-b border-[#2a2a4a]' : ''}`}>
                 <span>{item.icon}</span>
                 <span>{item.label}</span>
               </a>
