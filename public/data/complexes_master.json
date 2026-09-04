@@ -44,9 +44,9 @@
     "targetFar": 320,
     "ncmc": 31.68,
     "rar": 2.08,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "override",
-    "ncmcNvpBase": 15000,
+    "ncmcNvpBase": 18000,
     "ncmcNewPpp": 22802,
     "tradeName": [
       "은마"
@@ -55,7 +55,8 @@
     "latestMonthsAgo": 1,
     "tradeReliability": "high",
     "nvpGapRate": 24.8,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -126,9 +127,9 @@
     "targetFar": 300,
     "ncmc": 27.27,
     "rar": 2.77,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 15000,
+    "ncmcNvpBase": 18000,
     "ncmcNewPpp": 25664,
     "tradeName": [
       "한보미도맨션"
@@ -137,7 +138,8 @@
     "latestMonthsAgo": 3,
     "tradeReliability": "high",
     "nvpGapRate": -1.1,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -184,9 +186,9 @@
     "targetFar": 300,
     "ncmc": 11.99,
     "rar": 1.6,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 19186,
     "tradeName": [
       "개포주공6단지",
@@ -196,7 +198,8 @@
     "latestMonthsAgo": 2,
     "tradeReliability": "high",
     "nvpGapRate": 38.9,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -243,9 +246,9 @@
     "targetFar": 300,
     "ncmc": 10.99,
     "rar": 2.88,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 15000,
+    "ncmcNvpBase": 18000,
     "ncmcNewPpp": 25664,
     "tradeName": [
       "선경1차",
@@ -255,7 +258,8 @@
     "latestMonthsAgo": 5,
     "tradeReliability": "high",
     "nvpGapRate": -4.7,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -302,9 +306,9 @@
     "targetFar": 300,
     "ncmc": 5.67,
     "rar": 1.46,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 18627,
     "tradeName": [
       "개포주공5단지"
@@ -313,7 +317,8 @@
     "latestMonthsAgo": 7,
     "tradeReliability": "mid",
     "nvpGapRate": 47.9,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -360,9 +365,9 @@
     "targetFar": 300,
     "ncmc": 5.59,
     "rar": 2.3,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 20965,
     "tradeName": [
       "우성7"
@@ -371,7 +376,8 @@
     "latestMonthsAgo": 2,
     "tradeReliability": "high",
     "nvpGapRate": -1.0,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -418,9 +424,9 @@
     "targetFar": 300,
     "ncmc": 7.23,
     "rar": 2.69,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 15000,
+    "ncmcNvpBase": 18000,
     "ncmcNewPpp": 25664,
     "tradeName": [
       "개포우성1"
@@ -429,7 +435,8 @@
     "latestMonthsAgo": 5,
     "tradeReliability": "high",
     "nvpGapRate": 2.0,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -476,9 +483,9 @@
     "targetFar": 300,
     "ncmc": 7.07,
     "rar": 2.97,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 23596,
     "tradeName": [
       "경남1",
@@ -488,7 +495,8 @@
     "latestMonthsAgo": 8,
     "tradeReliability": "mid",
     "nvpGapRate": -8.1,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -535,9 +543,9 @@
     "targetFar": 300,
     "ncmc": 6.22,
     "rar": 3.06,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 15000,
+    "ncmcNvpBase": 18000,
     "ncmcNewPpp": 24190,
     "tradeName": [
       "쌍용대치아파트1"
@@ -546,7 +554,8 @@
     "latestMonthsAgo": 5,
     "tradeReliability": "high",
     "nvpGapRate": -15.5,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -641,9 +650,9 @@
     "targetFar": 300,
     "ncmc": 3.94,
     "rar": 2.51,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 15000,
+    "ncmcNvpBase": 18000,
     "ncmcNewPpp": 24190,
     "tradeName": [
       "대치우성아파트"
@@ -652,7 +661,8 @@
     "latestMonthsAgo": 5,
     "tradeReliability": "high",
     "nvpGapRate": 3.1,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -699,9 +709,9 @@
     "targetFar": 300,
     "ncmc": 5.16,
     "rar": 2.95,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 15000,
+    "ncmcNvpBase": 18000,
     "ncmcNewPpp": 25664,
     "tradeName": [
       "개포우성2"
@@ -710,7 +720,8 @@
     "latestMonthsAgo": 4,
     "tradeReliability": "mid",
     "nvpGapRate": -6.9,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -757,9 +768,9 @@
     "targetFar": 300,
     "ncmc": 4.58,
     "rar": 3.61,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 23596,
     "tradeName": [
       "현대1차101동"
@@ -768,7 +779,8 @@
     "latestMonthsAgo": 3,
     "tradeReliability": "high",
     "nvpGapRate": -24.2,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -815,9 +827,9 @@
     "targetFar": 300,
     "ncmc": 4.12,
     "rar": 3.4,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 23596,
     "tradeName": [
       "개포우성3차"
@@ -826,7 +838,8 @@
     "latestMonthsAgo": 5,
     "tradeReliability": "low",
     "nvpGapRate": -19.9,
-    "warnDistortion": true
+    "warnDistortion": true,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -873,9 +886,9 @@
     "targetFar": 300,
     "ncmc": 3.33,
     "rar": 2.62,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 15000,
+    "ncmcNvpBase": 18000,
     "ncmcNewPpp": 24190,
     "tradeName": [
       "쌍용대치2"
@@ -884,7 +897,8 @@
     "latestMonthsAgo": 2,
     "tradeReliability": "high",
     "nvpGapRate": -1.7,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -931,9 +945,9 @@
     "targetFar": 300,
     "ncmc": 3.81,
     "rar": 1.69,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 19186,
     "tradeName": [
       "한신(개포)"
@@ -942,7 +956,8 @@
     "latestMonthsAgo": 3,
     "tradeReliability": "mid",
     "nvpGapRate": 0.0,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -990,9 +1005,9 @@
     "targetFar": 250,
     "ncmc": 1.97,
     "rar": 3.18,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "override",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 20965,
     "tradeName": [
       "개포우성6",
@@ -1002,7 +1017,8 @@
     "latestMonthsAgo": 18,
     "tradeReliability": "low",
     "nvpGapRate": -36.4,
-    "warnDistortion": true
+    "warnDistortion": true,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -1049,9 +1065,9 @@
     "targetFar": 300,
     "ncmc": 1.51,
     "rar": 2.19,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 22242,
     "tradeName": [
       "우성8"
@@ -1060,7 +1076,8 @@
     "latestMonthsAgo": 5,
     "tradeReliability": "high",
     "nvpGapRate": 17.4,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2301,9 +2318,9 @@
     "targetFar": 300,
     "ncmc": 2.12,
     "rar": 2.0,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 18627,
     "tradeName": [
       "개포한신"
@@ -2312,7 +2329,8 @@
     "latestMonthsAgo": 3,
     "tradeReliability": "high",
     "nvpGapRate": 1.0,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2360,9 +2378,9 @@
     "targetFar": 300,
     "ncmc": 4.92,
     "rar": 3.64,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 36302,
     "tradeName": [
       "미성1차"
@@ -2371,7 +2389,8 @@
     "latestMonthsAgo": 4,
     "tradeReliability": "high",
     "nvpGapRate": -48.3,
-    "warnDistortion": true
+    "warnDistortion": true,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2419,9 +2438,9 @@
     "targetFar": 300,
     "ncmc": 8.21,
     "rar": 1.91,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 36302,
     "tradeName": [
       "미성2차"
@@ -2430,7 +2449,8 @@
     "latestMonthsAgo": 4,
     "tradeReliability": "mid",
     "nvpGapRate": -1.3,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2477,9 +2497,9 @@
     "targetFar": 300,
     "ncmc": 7.57,
     "rar": 1.9,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 32254,
     "tradeName": [
       "신현대9차"
@@ -2488,7 +2508,8 @@
     "latestMonthsAgo": 1,
     "tradeReliability": "high",
     "nvpGapRate": -11.9,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2535,9 +2556,9 @@
     "targetFar": 300,
     "ncmc": 13.14,
     "rar": 2.07,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대1차(",
@@ -2547,7 +2568,8 @@
     "latestMonthsAgo": 2,
     "tradeReliability": "high",
     "nvpGapRate": -16.9,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2594,9 +2616,9 @@
     "targetFar": 300,
     "ncmc": 3.23,
     "rar": 1.54,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대3차("
@@ -2605,7 +2627,8 @@
     "latestMonthsAgo": 4,
     "tradeReliability": "high",
     "nvpGapRate": 11.7,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2652,9 +2675,9 @@
     "targetFar": 300,
     "ncmc": 2.9,
     "rar": 2.36,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대5차("
@@ -2663,7 +2686,8 @@
     "latestMonthsAgo": 3,
     "tradeReliability": "high",
     "nvpGapRate": -26.8,
-    "warnDistortion": true
+    "warnDistortion": true,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2710,9 +2734,9 @@
     "targetFar": 443,
     "ncmc": 16.92,
     "rar": 1.7,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "high_far(현재×1.2)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대6차",
@@ -2722,7 +2746,8 @@
     "latestMonthsAgo": 2,
     "tradeReliability": "high",
     "nvpGapRate": 50.2,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2769,9 +2794,9 @@
     "targetFar": 300,
     "ncmc": 3.88,
     "rar": 1.32,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 32254,
     "tradeName": [
       "현대8차"
@@ -2780,7 +2805,8 @@
     "latestMonthsAgo": 2,
     "tradeReliability": "high",
     "nvpGapRate": 26.8,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2827,9 +2853,9 @@
     "targetFar": 300,
     "ncmc": 3.02,
     "rar": 2.11,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대13차"
@@ -2838,7 +2864,8 @@
     "latestMonthsAgo": 1,
     "tradeReliability": "high",
     "nvpGapRate": -18.6,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2885,9 +2912,9 @@
     "targetFar": 300,
     "ncmc": 3.51,
     "rar": 1.55,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 33222,
     "tradeName": [
       "현대14차"
@@ -2896,7 +2923,8 @@
     "latestMonthsAgo": 2,
     "tradeReliability": "high",
     "nvpGapRate": 11.7,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -2943,9 +2971,9 @@
     "targetFar": 300,
     "ncmc": 6.73,
     "rar": 1.44,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양1차"
@@ -2954,7 +2982,8 @@
     "latestMonthsAgo": 4,
     "tradeReliability": "mid",
     "nvpGapRate": 16.1,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -3001,9 +3030,9 @@
     "targetFar": 300,
     "ncmc": 4.72,
     "rar": 1.94,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양2"
@@ -3012,7 +3041,8 @@
     "latestMonthsAgo": 2,
     "tradeReliability": "high",
     "nvpGapRate": -13.9,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -3059,9 +3089,9 @@
     "targetFar": 300,
     "ncmc": 3.7,
     "rar": 2.02,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양3"
@@ -3070,7 +3100,8 @@
     "latestMonthsAgo": 1,
     "tradeReliability": "high",
     "nvpGapRate": -17.2,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -3117,9 +3148,9 @@
     "targetFar": 300,
     "ncmc": 3.8,
     "rar": 1.53,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양4"
@@ -3128,7 +3159,8 @@
     "latestMonthsAgo": 4,
     "tradeReliability": "low",
     "nvpGapRate": 9.7,
-    "warnDistortion": true
+    "warnDistortion": true,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -3175,9 +3207,9 @@
     "targetFar": 300,
     "ncmc": 3.94,
     "rar": 2.16,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 34218,
     "tradeName": [
       "한양5"
@@ -3186,7 +3218,8 @@
     "latestMonthsAgo": 8,
     "tradeReliability": "low",
     "nvpGapRate": -18.2,
-    "warnDistortion": true
+    "warnDistortion": true,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -3233,9 +3266,9 @@
     "targetFar": 380,
     "ncmc": 1.95,
     "rar": 1.62,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "high_far(현재×1.2)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 32254,
     "tradeName": [
       "한양6"
@@ -3244,7 +3277,8 @@
     "latestMonthsAgo": 5,
     "tradeReliability": "mid",
     "nvpGapRate": 30.0,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -3291,9 +3325,9 @@
     "targetFar": 384,
     "ncmc": 2.19,
     "rar": 1.87,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "high_far(현재×1.2)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 36302,
     "tradeName": [
       "한양7"
@@ -3302,7 +3336,8 @@
     "latestMonthsAgo": 4,
     "tradeReliability": "mid",
     "nvpGapRate": 28.7,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -3349,9 +3384,9 @@
     "targetFar": 300,
     "ncmc": 3.25,
     "rar": 2.8,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 32254,
     "tradeName": [
       "현대4차"
@@ -3360,7 +3395,8 @@
     "latestMonthsAgo": 4,
     "tradeReliability": "high",
     "nvpGapRate": -40.5,
-    "warnDistortion": true
+    "warnDistortion": true,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -3409,9 +3445,9 @@
     "targetFar": 300,
     "ncmc": 0.84,
     "rar": 1.31,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 20000,
+    "ncmcNvpBase": 24000,
     "ncmcNewPpp": 32254,
     "tradeName": [
       "현대10",
@@ -3421,7 +3457,8 @@
     "latestMonthsAgo": 24,
     "tradeReliability": "low",
     "nvpGapRate": 28.8,
-    "warnDistortion": true
+    "warnDistortion": true,
+    "ncmcNvpSource": "dong_const"
   },
   {
     "gu": "강남구",
@@ -3468,9 +3505,9 @@
     "targetFar": 300,
     "ncmc": 2.42,
     "rar": 3.06,
-    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]",
+    "ncmcMethod": "재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) × 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, 매핑전 폴백, TBD가정]",
     "targetFarRule": "base(300%)",
-    "ncmcNvpBase": 13000,
+    "ncmcNvpBase": 15600,
     "ncmcNewPpp": 22242,
     "tradeName": [
       "현대아파트3",
@@ -3480,6 +3517,7 @@
     "latestMonthsAgo": 3,
     "tradeReliability": "mid",
     "nvpGapRate": -15.5,
-    "warnDistortion": false
+    "warnDistortion": false,
+    "ncmcNvpSource": "dong_const"
   }
 ]

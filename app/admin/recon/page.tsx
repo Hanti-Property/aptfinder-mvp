@@ -7,8 +7,39 @@ const LAMBDA_URL = 'https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-north
 const PY = 3.3058
 
 interface Recon { id: string; [k: string]: unknown }
+interface NvpRefLite { ref_code: string; short_name: string | null; name: string; dong: string; std_ppp_exclu: number | null; ref_status: string | null }
 
 const STAGE_NAME: Record<number, string> = { 3: '추진위', 4: '조합설립', 5: '사업시행', 6: '관리처분', 7: '이주/철거', 8: '착공', 9: '입주' }
+
+// 위치 가중치 옵션 (5% 단위, -20% ~ +20%)
+const WEIGHT_OPTS = [-0.20, -0.15, -0.10, -0.05, 0, 0.05, 0.10, 0.15, 0.20]
+const fmtPct = (w: number) => `${w > 0 ? '+' : ''}${Math.round(w * 100)}%`
+
+// 폴백 기준NVP (calc_ncmc.py NVP_V2_BASE × 신축프리미엄 1.2와 동일) — 매핑 전 표시용
+const NVP_V2_BASE: Record<string, number> = {
+  '압구정동': 20000, '청담동': 17000, '대치동': 15000, '삼성동': 14000,
+  '개포동': 13000, '도곡동': 13000, '일원동': 13000,
+}
+const NVP_PREMIUM = 1.20
+const fallbackNvp = (dong: string) => Math.round((NVP_V2_BASE[dong] ?? 13000) * NVP_PREMIUM)
+
+// 매핑 계산: 기초NVP=avg(ref 전용평당가), 조정NVP=기초×(1+가중치),
+// 현재가(avg_ppp) >= 조정NVP 이면 소진 → 최종NVP=현재가, valid=false
+function calcMapping(row: Recon, refMap: Record<string, NvpRefLite>) {
+  const codes = (row.nvp_ref_codes as string[] | null) || []
+  const weight = row.nvp_loc_weight != null ? Number(row.nvp_loc_weight) : 0
+  const cur = row.avg_ppp != null ? Number(row.avg_ppp) : null
+  const ppps = codes.map(c => refMap[c]?.std_ppp_exclu).filter((v): v is number => typeof v === 'number' && v > 0)
+  if (!ppps.length) return { base: null as number | null, adjusted: null as number | null, final: null as number | null, valid: null as boolean | null, weight, missing: codes.filter(c => !(refMap[c]?.std_ppp_exclu)) }
+  const base = Math.round(ppps.reduce((a, b) => a + b, 0) / ppps.length)
+  const adjusted = Math.round(base * (1 + weight))
+  let final = adjusted, valid: boolean | null = null
+  if (cur != null && cur > 0) {
+    valid = cur < adjusted
+    if (!valid) final = cur   // 현재가 >= 조정NVP → 상승여력 소진, 현재가로 대체
+  }
+  return { base, adjusted, final, valid, weight, missing: codes.filter(c => !(refMap[c]?.std_ppp_exclu)) }
+}
 
 // 보기 그룹별 컬럼
 //  edit: 편집 / ro: 읽기전용 / m2: 평당가→㎡당가 변환 표시 / calc: 파생계산(row→값)
@@ -17,6 +48,9 @@ type Col = {
   edit?: boolean; num?: boolean; bool?: boolean; arr?: boolean; ro?: boolean
   m2?: boolean                       // 값을 ÷3.3058 하여 ㎡당가로 표시
   calc?: (r: Recon) => number | null // 파생 계산 컬럼
+  refsel?: boolean                   // NVP ref 멀티선택 칩
+  wsel?: boolean                     // 위치가중치 드롭다운
+  nvpfinal?: boolean                 // 최종NVP(매핑 자동계산) 표시
 }
 const GROUPS: Record<string, Col[]> = {
   기본: [
@@ -53,11 +87,13 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'ncmc_new_ppp', label: '[전용]재건축후 만원/㎡', w: 130, ro: true, m2: true },
   ],
   인덱스: [
+    { key: 'nvp_ref_codes', label: 'NVP ref (선택)', w: 300, refsel: true },
+    { key: 'nvp_loc_weight', label: '가중치', w: 80, wsel: true },
+    { key: '_nvp_final', label: '최종NVP', w: 110, nvpfinal: true },
+    { key: 'avg_ppp', label: '현재 만원/평', w: 90, ro: true },
     { key: 'cmc', label: 'CMC(조)', w: 75, ro: true },
-    { key: 'cap_grade', label: '등급', w: 75, ro: true },
     { key: 'ncmc', label: 'NCMC(조)', w: 80, ro: true },
     { key: 'rar', label: 'RAR', w: 60, ro: true },
-    { key: 'ncmc_nvp_base', label: 'NVP기준가', w: 80, ro: true },
     { key: 'nvp_gap_rate', label: 'NVP괴리%', w: 75, ro: true },
     { key: 'target_far', label: '목표용적률', w: 75, ro: true },
     { key: 'size_grade', label: '규모', w: 50, ro: true },
@@ -118,6 +154,7 @@ export default function ReconAdminPage() {
   const [fontPx, setFontPx] = useState(12)
   const [savedKey, setSavedKey] = useState('')
   const [widths, setWidths] = useState<Record<string, number>>({})  // "그룹#인덱스" → 너비
+  const [refs, setRefs] = useState<NvpRefLite[]>([])                // NVP 레퍼런스 목록 (매핑용)
 
   // 컬럼 리사이즈 (헤더 경계 드래그)
   function startResize(wkey: string, curW: number, e: React.MouseEvent) {
@@ -140,6 +177,13 @@ export default function ReconAdminPage() {
   }, [])
   useEffect(() => { fetchRows() }, [fetchRows])
 
+  // NVP 레퍼런스 목록 (매핑 드롭다운용)
+  useEffect(() => {
+    supabase.from('nvp_reference').select('ref_code, short_name, name, dong, std_ppp_exclu, ref_status')
+      .order('dong').then(({ data }) => { if (data) setRefs(data as NvpRefLite[]) })
+  }, [])
+  const refMap: Record<string, NvpRefLite> = Object.fromEntries(refs.map(r => [r.ref_code, r]))
+
   async function saveField(id: string, field: string, value: unknown, prev: unknown) {
     const norm = (v: unknown) => Array.isArray(v) ? v.join(',') : (v ?? '')
     if (norm(value) === norm(prev)) return
@@ -147,6 +191,29 @@ export default function ReconAdminPage() {
     const { error } = await supabase.from('recon_master').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', id)
     if (error) { setMsg(`저장 실패(${field}): ` + error.message); return }
     const k = `${id}:${field}`; setSavedKey(k); setTimeout(() => setSavedKey(x => x === k ? '' : x), 1200)
+  }
+
+  // 매핑 저장: ref목록/가중치 변경 시 파생값(base/final/valid) 재계산해 함께 저장
+  async function saveMapping(id: string, patch: { nvp_ref_codes?: string[]; nvp_loc_weight?: number }) {
+    const cur = rows.find(r => r.id === id)
+    if (!cur) return
+    const next = { ...cur, ...patch }
+    const m = calcMapping(next, refMap)
+    const payload: Record<string, unknown> = {
+      ...patch,
+      nvp_base: m.base, nvp_final: m.final, nvp_valid: m.valid,
+      updated_at: new Date().toISOString(),
+    }
+    setRows(p => p.map(r => r.id === id ? { ...r, ...patch, nvp_base: m.base, nvp_final: m.final, nvp_valid: m.valid } : r))
+    const { error } = await supabase.from('recon_master').update(payload).eq('id', id)
+    if (error) { setMsg('매핑 저장 실패: ' + error.message); return }
+    const k = `${id}:nvp`; setSavedKey(k); setTimeout(() => setSavedKey(x => x === k ? '' : x), 1200)
+  }
+
+  function toggleRef(row: Recon, code: string) {
+    const codes = new Set((row.nvp_ref_codes as string[] | null) || [])
+    if (codes.has(code)) codes.delete(code); else codes.add(code)
+    saveMapping(row.id, { nvp_ref_codes: [...codes] })
   }
 
   async function refreshTrade(row: Recon) {
@@ -214,6 +281,53 @@ export default function ReconAdminPage() {
     return <td className={td + ' text-right text-gray-700'} style={{ width: w }}>{shown.toLocaleString()}</td>
   }
 
+  // NVP 매핑 셀: ref 칩 멀티선택 / 가중치 드롭다운 / 최종NVP+상태
+  function MapCell({ row, col, w }: { row: Recon; col: Col; w: number }) {
+    const activeRefs = refs.filter(r => r.std_ppp_exclu)
+    const codes = (row.nvp_ref_codes as string[] | null) || []
+    const m = calcMapping(row, refMap)
+    const saved = savedKey === `${row.id}:nvp`
+
+    if (col.refsel) {
+      return <td className={td} style={{ width: w }}>
+        {activeRefs.length === 0
+          ? <span className="text-amber-600 text-[0.9em]">표준가 없음 → /admin/nvp에서 [조회] 먼저</span>
+          : <div className="flex flex-wrap gap-1">
+              {activeRefs.map(ref => {
+                const on = codes.includes(ref.ref_code)
+                return <button key={ref.ref_code} onClick={() => toggleRef(row, ref.ref_code)}
+                  title={`${ref.name} · ${ref.std_ppp_exclu?.toLocaleString()}만/평`}
+                  className={`px-1.5 py-0.5 rounded border text-[0.9em] ${on ? 'bg-[#1B3A5C] text-white border-[#1B3A5C]' : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'}`}>
+                  {ref.short_name || ref.name}{on && <span className="ml-1 opacity-70">{ref.std_ppp_exclu?.toLocaleString()}</span>}
+                </button>
+              })}
+            </div>}
+      </td>
+    }
+    if (col.wsel) {
+      return <td className={td + ' text-center'} style={{ width: w }}>
+        <select value={m.weight} onChange={e => saveMapping(row.id, { nvp_loc_weight: Number(e.target.value) })}
+          className="border border-gray-300 rounded px-1 py-0.5 bg-white">
+          {WEIGHT_OPTS.map(wv => <option key={wv} value={wv}>{fmtPct(wv)}</option>)}
+        </select>
+      </td>
+    }
+    // nvpfinal: 매핑값 있으면 최종NVP+상태, 없으면 폴백(동별상수×1.2) 회색표시
+    return <td className={td + ' text-right'} style={{ width: w }}>
+      {m.final == null
+        ? <span className="text-gray-400" title="매핑 전 — 동별 기준가(NVP×1.2) 사용">
+            {fallbackNvp(String(row.dong || '')).toLocaleString()}
+            <span className="block text-[0.8em]">(기본값)</span>
+          </span>
+        : <span>
+            <span className="font-semibold text-[#1B3A5C]">{m.final.toLocaleString()}</span>
+            {saved && <span className="text-green-600 ml-0.5">✓</span>}
+            {m.valid === false && <span className="block text-red-500 text-[0.8em]">⚠️ 소진</span>}
+            {m.valid === true && <span className="block text-green-600 text-[0.8em]">저평가</span>}
+          </span>}
+    </td>
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-[#1B3A5C] text-white px-6 py-3 flex items-center justify-between flex-wrap gap-2">
@@ -225,6 +339,7 @@ export default function ReconAdminPage() {
             <span className="text-xs w-6 text-center">{fontPx}</span>
             <button onClick={() => setFontPx(f => Math.min(18, f + 1))} className="w-6 h-6 rounded bg-white/20 text-sm">＋</button>
           </div>
+          {group === '인덱스' && <button onClick={exportMapping} className="text-xs px-3 py-1.5 rounded-lg bg-white text-[#1B3A5C] font-semibold">매핑 내보내기(JSON)</button>}
           <a href="/admin" className="text-xs text-blue-200 underline">← 대시보드</a>
         </div>
       </header>
@@ -235,7 +350,7 @@ export default function ReconAdminPage() {
           <button key={g} onClick={() => setGroup(g)}
             className={`px-3 py-1.5 rounded-lg text-sm ${group === g ? 'bg-[#1B3A5C] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{g}</button>
         ))}
-        <span className="text-xs text-gray-400 self-center ml-2">{group === '인덱스' || group === '실거래' ? '읽기 전용 (스크립트/조회로 갱신)' : '흰 칸 클릭해 편집 → DB 자동저장(✓)'}</span>
+        <span className="text-xs text-gray-400 self-center ml-2">{group === '인덱스' ? 'NVP ref·가중치는 편집 → DB 저장 · 나머지 지표는 스크립트 갱신' : group === '실거래' ? '읽기 전용 (스크립트/조회로 갱신)' : '흰 칸 클릭해 편집 → DB 자동저장(✓)'}</span>
       </div>
 
       {msg && <div className="bg-blue-50 text-[#1B3A5C] text-sm px-6 py-2 border-b border-blue-100">{msg}</div>}
@@ -265,9 +380,11 @@ export default function ReconAdminPage() {
                   {String(r.short_name || r.name)}
                   {typeof r.stage === 'number' && <span className="text-gray-400 text-[0.8em] ml-1">{STAGE_NAME[r.stage as number] || r.stage}</span>}
                 </td>
-                {cols.map((c, i) => c.ro
-                  ? <RoCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
-                  : <EditCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />)}
+                {cols.map((c, i) => (c.refsel || c.wsel || c.nvpfinal)
+                  ? <MapCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
+                  : c.ro
+                    ? <RoCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
+                    : <EditCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />)}
                 {group === '실거래' && <td className={td + ' text-center'}>
                   <button onClick={() => refreshTrade(r)} disabled={busy === r.id}
                     className="px-2 py-0.5 bg-[#1B3A5C] text-white rounded text-[0.9em] disabled:opacity-50">{busy === r.id ? '...' : '조회'}</button>
@@ -280,4 +397,23 @@ export default function ReconAdminPage() {
       <p className="px-6 pb-4 text-xs text-gray-400">총 {rows.length}개 · CMC/NCMC/RAR·플래그는 배치 스크립트(calc_cmc·calc_ncmc·calc_flags)로 갱신 → 편집값 반영하려면 스크립트 재실행·JSON 내보내기 필요</p>
     </div>
   )
+
+  // 매핑 결과를 JSON으로 내보내기 → apply_nvp_mapping.py로 complexes_master.json 병합
+  function exportMapping() {
+    const out = rows.filter(r => r.ticker).map(r => {
+      const m = calcMapping(r, refMap)
+      return {
+        ticker: r.ticker, shortName: r.short_name,
+        nvpRefCodes: (r.nvp_ref_codes as string[] | null) || [],
+        nvpLocWeight: r.nvp_loc_weight != null ? Number(r.nvp_loc_weight) : 0,
+        nvpBase: m.base, nvpFinal: m.final, nvpValid: m.valid,
+      }
+    })
+    const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob); a.download = 'nvp_mapping_export.json'; a.click()
+    URL.revokeObjectURL(a.href)
+    setMsg(`매핑 ${out.length}개 내보냄 → scripts/apply_nvp_mapping.py 로 병합 후 calc_ncmc.py 재실행`)
+  }
+
 }

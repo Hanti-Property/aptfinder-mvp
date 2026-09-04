@@ -5,8 +5,14 @@ NCMC (New Complex Market Cap) / RAR (Reconstruction Asset Ratio) 산출
 설계 확정 2026-09-01 (aptfinder_rvi_ncmc_redesign_260901.md)
 산식 개정 v3 (2026-09-01): 재건축후 전용면적 × 입주시점(ETA) 신축 전용평당가.
 
+기준 NVP 결정 (2026-09-01 매핑 시스템 도입):
+  ┌ (우선) 매핑 NVP: nvpFinal 있으면 사용 = avg(매핑 ref 전용평당가)×(1+위치가중치),
+  │        단 현재가≥조정NVP면 현재가로 대체(nvpValid=false, 상승여력 소진).
+  │        ref가 이미 신축 실거래가 → 신축프리미엄 1.20 미적용(이중 방지).
+  └ (폴백) 동별 상수 NVP: nvpFinal 없으면 NVP_V2_BASE[dong] × 1.20 (기존 방식).
+
 산식:
-  재건축후 전용평당가 = 동별기준 NVP × 1.20(신축) × (1 + 상승률)^ETA
+  재건축후 전용평당가 = (매핑 nvpFinal | 동별NVP×1.20) × (1 + 상승률)^ETA
   재건축후 전용면적(평) = 대지면적 × 목표용적률 / 3.3058 × 전용률 × (1 - 기부채납)
   NCMC = 재건축후 전용면적 × 재건축후 전용평당가        (단위: 조원)
   RAR  = NCMC / CMC
@@ -84,8 +90,15 @@ def main():
         cur_far = cur_far_pct / 100.0
         ftar, rule = target_far(x['name'], cur_far)
 
-        base = NVP_V2_BASE.get(x['dong'], NVP_BASE_DEFAULT)
-        new_ppp = base * NVP_PREMIUM * ((1 + ANNUAL_RATE) ** eta)  # 재건축후 전용평당가(만원/평)
+        # 기준 NVP 결정: 매핑(nvpFinal) 우선, 없으면 동별상수×신축프리미엄
+        nvp_final = x.get('nvpFinal')
+        if nvp_final:
+            base = nvp_final                       # 이미 신축 실거래 기반 → 프리미엄 미적용
+            nvp_src = 'mapped'
+        else:
+            base = NVP_V2_BASE.get(x['dong'], NVP_BASE_DEFAULT) * NVP_PREMIUM  # 폴백: 동별상수×1.2
+            nvp_src = 'dong_const'
+        new_ppp = base * ((1 + ANNUAL_RATE) ** eta)  # 재건축후 전용평당가(만원/평)
 
         gfa_py = plat * ftar / PY                                  # 재건축후 연면적(평)
         exclu_py = gfa_py * EXCLUSIVE_RATE * (1 - DONATION_RATE)   # 실분양 전용면적(평)
@@ -94,18 +107,25 @@ def main():
 
         x['targetFar'] = round(ftar * 100)
         x['targetFarRule'] = rule
-        x['ncmcNvpBase'] = base
+        x['ncmcNvpBase'] = round(base)                             # 실제 사용한 기준 NVP (만원/전용평)
+        x['ncmcNvpSource'] = nvp_src                               # mapped | dong_const
         x['ncmcNewPpp'] = round(new_ppp)                           # 재건축후 전용평당가
         x['ncmc'] = ncmc_jo
         x['rar'] = rar
-        x['ncmcMethod'] = ('재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) '
-                           '× 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) [v3 2026-09-01, TBD가정]')
+        if nvp_src == 'mapped':
+            x['ncmcMethod'] = ('재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) '
+                               '× 입주시점전용평당가(매핑NVP×(1+3%)^ETA) '
+                               '[v4 2026-09-01 매핑NVP, 신축프리미엄 미적용]')
+        else:
+            x['ncmcMethod'] = ('재건축후전용면적(대지×목표용적률×전용률0.75×(1-기부채납0.2)) '
+                               '× 입주시점전용평당가(동별NVP×1.2×(1+3%)^ETA) '
+                               '[v3 2026-09-01, 매핑전 폴백, TBD가정]')
         # 구산식 잔여 필드 정리
         for k in ('landPppNew', 'ncmcPremiumRate', 'nvpNew', 'nvpPremiumRate'):
             x.pop(k, None)
 
         results.append((x['shortName'], x['dong'], eta, x['targetFar'],
-                        base, round(new_ppp), cmc, ncmc_jo, rar, rule))
+                        round(base), round(new_ppp), cmc, ncmc_jo, rar, rule, nvp_src))
 
     json.dump(d, open(MASTER, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
@@ -113,12 +133,15 @@ def main():
     print(f"대상 {len(results)}개 | 전용률{EXCLUSIVE_RATE} 기부채납{DONATION_RATE} "
           f"신축×{NVP_PREMIUM} 상승{ANNUAL_RATE:.0%} (TBD 가정)\n")
     hdr = (f"{'단지':11s}{'동':7s}{'ETA':>4}{'목표':>5}{'기준NVP':>7}"
-           f"{'후전용평당':>9}{'CMC':>6}{'NCMC':>7}{'RAR':>6}  규칙")
-    print(hdr); print('-' * 82)
+           f"{'후전용평당':>9}{'CMC':>6}{'NCMC':>7}{'RAR':>6} src  규칙")
+    print(hdr); print('-' * 90)
     for r in results:
         mark = ' ★' if r[9] != 'base(300%)' else ''
+        src = 'MAP' if r[10] == 'mapped' else '동상수'
         print(f'{r[0]:11s}{r[1]:7s}{r[2]:>4}{r[3]:>5}{r[4]:>7}{r[5]:>9}'
-              f'{r[6]:>6}{r[7]:>7}{r[8]:>6}  {r[9]}{mark}')
+              f'{r[6]:>6}{r[7]:>7}{r[8]:>6} {src:>4}  {r[9]}{mark}')
+    n_map = sum(1 for r in results if r[10] == 'mapped')
+    print(f"\n매핑NVP 적용: {n_map}개 / 동별상수 폴백: {len(results) - n_map}개")
     tc = sum(r[6] for r in results); tn = sum(r[7] for r in results)
     print(f"\n합계 CMC {round(tc,1)}조 → NCMC {round(tn,1)}조 (평균 RAR {round(tn/tc,2)}x)")
     n_low = sum(1 for r in results if r[8] < 1)
