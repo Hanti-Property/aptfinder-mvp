@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 
 const LAMBDA_URL = 'https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/'
 const PY = 3.3058
+const BASE_YEAR = 2026   // 입주년 = BASE_YEAR + ETA (lib/indexCalc.ts CONSTANTS.BASE_YEAR와 정합)
 
 interface Recon { id: string; [k: string]: unknown }
 interface NvpRefLite { ref_code: string; short_name: string | null; name: string; dong: string; std_ppp_exclu: number | null; ref_status: string | null }
@@ -70,10 +71,11 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'builder', label: '시공사', w: 130, edit: true },
     { key: 'eta', label: 'ETA', w: 55, edit: true, num: true },
     { key: 'rdt', label: '리스크시간', w: 70, edit: true, num: true },
-    { key: 'move_in', label: '입주년', w: 60, edit: true, num: true },
+    { key: 'move_in', label: '입주년(자동)', w: 80, ro: true },
+    { key: 'move_start_year', label: '이주개시(연도)', w: 100, edit: true, num: true },
     { key: 'target_far', label: '목표용적률', w: 80, edit: true, num: true },
     { key: 'eta_provisional', label: '잠정ETA', w: 60, edit: true, bool: true },
-    { key: 'risk', label: '리스크/비고', w: 220, edit: true },
+    { key: 'risk', label: '리스크·이벤트', w: 240, edit: true },
   ],
   // 평당가: 토지(대지) vs 건축(전용) 구분 + 각각 만원/평 · 만원/㎡ 나란히
   평당가: [
@@ -187,8 +189,16 @@ export default function ReconAdminPage() {
   async function saveField(id: string, field: string, value: unknown, prev: unknown) {
     const norm = (v: unknown) => Array.isArray(v) ? v.join(',') : (v ?? '')
     if (norm(value) === norm(prev)) return
-    setRows(p => p.map(r => r.id === id ? { ...r, [field]: value } : r))
-    const { error } = await supabase.from('recon_master').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', id)
+    // 저장 payload (기본 1개 필드). ETA 변경 시 입주년(move_in) 자동 동기화.
+    const payload: Record<string, unknown> = { [field]: value, updated_at: new Date().toISOString() }
+    const patch: Record<string, unknown> = { [field]: value }
+    if (field === 'eta') {
+      const etaNum = value == null || value === '' ? null : Number(value)
+      const moveIn = etaNum != null && !isNaN(etaNum) ? BASE_YEAR + Math.round(etaNum) : null
+      payload.move_in = moveIn; patch.move_in = moveIn
+    }
+    setRows(p => p.map(r => r.id === id ? { ...r, ...patch } : r))
+    const { error } = await supabase.from('recon_master').update(payload).eq('id', id)
     if (error) { setMsg(`저장 실패(${field}): ` + error.message); return }
     const k = `${id}:${field}`; setSavedKey(k); setTimeout(() => setSavedKey(x => x === k ? '' : x), 1200)
   }
@@ -286,6 +296,11 @@ export default function ReconAdminPage() {
   function RoCell({ row, col, w }: { row: Recon; col: Col; w: number }) {
     if (col.key === 'warn_distortion') {
       return <td className={td + ' text-center'} style={{ width: w }}>{row[col.key] ? <span className="text-red-500">⚠️</span> : '—'}</td>
+    }
+    // 입주년: 연도라 천단위 콤마 없이 표시 (ETA에서 자동 계산됨)
+    if (col.key === 'move_in') {
+      const y = row.move_in as number | null
+      return <td className={td + ' text-center text-gray-700'} style={{ width: w }}>{y ? String(y) : '—'}</td>
     }
     // 파생 계산 컬럼
     let num: number | null = null
