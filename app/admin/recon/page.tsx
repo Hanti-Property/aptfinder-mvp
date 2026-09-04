@@ -6,7 +6,6 @@ import { calcAll, type ReconRow, type CalcResult } from '@/lib/indexCalc'
 
 const LAMBDA_URL = 'https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/'
 const PY = 3.3058
-const BASE_YEAR = 2026   // 입주년 = BASE_YEAR + ETA (lib/indexCalc.ts CONSTANTS.BASE_YEAR와 정합)
 
 interface Recon { id: string; [k: string]: unknown }
 interface NvpRefLite { ref_code: string; short_name: string | null; name: string; dong: string; std_ppp_exclu: number | null; ref_status: string | null }
@@ -55,6 +54,8 @@ type Col = {
   refsel?: boolean                   // NVP ref 멀티선택 칩
   wsel?: boolean                     // 위치가중치 드롭다운
   nvpfinal?: boolean                 // 최종NVP(매핑 자동계산) 표시
+  step?: number                      // ▲▼ 스텝퍼 편집(숫자). step=증감 단위
+  moveStart?: boolean                // 이주개시(연도) — 기본값 입주년-6, 스텝퍼
 }
 
 // GROUPS의 calc/txt에서 엔진 결과를 읽기 위한 헬퍼 (렌더 시 row._calc에 CalcResult 부착)
@@ -75,13 +76,13 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'trade_name', label: '실거래명', w: 130, edit: true, arr: true },
   ],
   운영: [
-    { key: 'stage', label: '단계', w: 60, edit: true, num: true },
+    { key: 'stage', label: '단계', w: 90, step: 1 },
     { key: 'builder', label: '시공사', w: 130, edit: true },
-    { key: 'eta', label: 'ETA', w: 55, edit: true, num: true },
-    { key: 'rdt', label: '리스크시간', w: 70, edit: true, num: true },
-    { key: 'move_in', label: '입주년(자동)', w: 80, ro: true },
-    { key: 'move_start_year', label: '이주개시(연도)', w: 100, edit: true, num: true },
-    { key: 'target_far', label: '목표용적률', w: 80, edit: true, num: true },
+    { key: 'eta', label: 'ETA', w: 90, step: 0.5 },
+    { key: 'rdt', label: '리스크시간', w: 100, step: 0.5 },
+    { key: 'move_in', label: '입주년(자동)', w: 90, ro: true, calc: r => cc(r)?.moveIn ?? null },
+    { key: 'move_start_year', label: '이주개시(연도)', w: 120, moveStart: true },
+    { key: 'target_far', label: '목표용적률', w: 110, step: 10 },
     { key: 'eta_provisional', label: '잠정ETA', w: 60, edit: true, bool: true },
     { key: 'risk', label: '리스크·이벤트', w: 240, edit: true },
   ],
@@ -105,7 +106,7 @@ const GROUPS: Record<string, Col[]> = {
     { key: '_cmc', label: 'CMC(조)', w: 75, ro: true, calc: r => cc(r)?.cmc ?? null },
     { key: '_ncmc', label: 'NCMC(조)', w: 80, ro: true, calc: r => cc(r)?.ncmc ?? null },
     { key: '_rar', label: 'RAR', w: 60, ro: true, calc: r => cc(r)?.rar ?? null },
-    { key: '_gap', label: 'NVP괴리%', w: 75, ro: true, calc: r => cc(r)?.nvpGapRate ?? null },
+    { key: '_gap', label: 'NVP Gap %', w: 80, ro: true, calc: r => cc(r)?.nvpGapRate ?? null },
     { key: '_tfar', label: '목표용적률', w: 75, ro: true, calc: r => cc(r)?.targetFar ?? null },
     { key: '_size', label: '규모', w: 50, ro: true, txt: r => sizeLabel(cc(r)?.sizeGrade) },
     { key: '_rel', label: '거래신뢰', w: 70, ro: true, txt: r => relLabel(cc(r)?.tradeReliability) },
@@ -203,15 +204,9 @@ export default function ReconAdminPage() {
   async function saveField(id: string, field: string, value: unknown, prev: unknown) {
     const norm = (v: unknown) => Array.isArray(v) ? v.join(',') : (v ?? '')
     if (norm(value) === norm(prev)) return
-    // 저장 payload (기본 1개 필드). ETA 변경 시 입주년(move_in) 자동 동기화.
+    // 입주년(move_in)은 엔진이 ETA+RDT로 실시간 계산 → DB에 별도 저장 안 함.
     const payload: Record<string, unknown> = { [field]: value, updated_at: new Date().toISOString() }
-    const patch: Record<string, unknown> = { [field]: value }
-    if (field === 'eta') {
-      const etaNum = value == null || value === '' ? null : Number(value)
-      const moveIn = etaNum != null && !isNaN(etaNum) ? BASE_YEAR + Math.round(etaNum) : null
-      payload.move_in = moveIn; patch.move_in = moveIn
-    }
-    setRows(p => p.map(r => r.id === id ? { ...r, ...patch } : r))
+    setRows(p => p.map(r => r.id === id ? { ...r, [field]: value } : r))
     const { error } = await supabase.from('recon_master').update(payload).eq('id', id)
     if (error) { setMsg(`저장 실패(${field}): ` + error.message); return }
     const k = `${id}:${field}`; setSavedKey(k); setTimeout(() => setSavedKey(x => x === k ? '' : x), 1200)
@@ -282,7 +277,7 @@ export default function ReconAdminPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center">로딩 중...</div>
 
   const cols = GROUPS[group]
-  const th = 'border border-gray-200 px-2 py-1 font-semibold text-gray-700 bg-gray-100 text-left whitespace-nowrap'
+  const th = 'border border-gray-200 px-2 py-1 font-semibold text-gray-700 bg-gray-100 text-left whitespace-nowrap sticky top-0 z-10'
   const td = 'border border-gray-200 px-1 py-0.5 align-middle'
 
   function EditCell({ row, col, w }: { row: Recon; col: Col; w: number }) {
@@ -307,6 +302,57 @@ export default function ReconAdminPage() {
   // 컬럼 실제 너비 (리사이즈 반영). wkey = 그룹#인덱스 (중복 key 대응)
   const wOf = (i: number, c: Col) => widths[`${group}#${i}`] ?? c.w
 
+  // ▲▼ 스텝퍼 셀: 숫자 직접입력 + 화살표 증감. step=단위.
+  function StepCell({ row, col, w }: { row: Recon; col: Col; w: number }) {
+    const raw = row[col.key]
+    const cur = raw != null && raw !== '' ? Number(raw) : null
+    const step = col.step ?? 1
+    const saved = savedKey === `${row.id}:${col.key}`
+    const commit = (v: number | null) => saveField(row.id, col.key, v, raw)
+    const bump = (dir: number) => {
+      const base = cur ?? 0
+      const next = Math.round((base + dir * step) * 100) / 100
+      commit(next < 0 ? 0 : next)
+    }
+    return <td className={td} style={{ width: w }}>
+      <div className="relative flex items-center gap-0.5">
+        <input className="w-full border border-gray-200 rounded px-1 py-0.5 bg-white text-right hover:border-blue-300 focus:bg-yellow-50 focus:border-blue-500 focus:outline-none"
+          defaultValue={cur != null ? String(cur) : ''} key={String(cur)}
+          onBlur={e => { const v = e.target.value; commit(v === '' ? null : Number(v)) }} />
+        <div className="flex flex-col leading-none">
+          <button onClick={() => bump(1)} className="px-1 text-[0.7em] text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-t border border-gray-200">▲</button>
+          <button onClick={() => bump(-1)} className="px-1 text-[0.7em] text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-b border border-gray-200 border-t-0">▼</button>
+        </div>
+        {saved && <span className="absolute -right-1 -top-1 text-green-600 text-xs bg-white rounded-full">✓</span>}
+      </div>
+    </td>
+  }
+
+  // 이주개시(연도) 셀: 값 없으면 엔진 기본값(입주년-6)을 회색으로 표시, ▲▼로 조정.
+  function MoveStartCell({ row, w }: { row: Recon; col: Col; w: number }) {
+    const raw = row.move_start_year as number | null | undefined
+    const dflt = cc(row)?.moveStartYear ?? null   // 입주년-6
+    const shown = raw ?? dflt
+    const saved = savedKey === `${row.id}:move_start_year`
+    const bump = (dir: number) => {
+      const base = raw ?? dflt ?? 0
+      saveField(row.id, 'move_start_year', base + dir, raw)
+    }
+    return <td className={td} style={{ width: w }}>
+      <div className="relative flex items-center gap-0.5">
+        <input className={`w-full border border-gray-200 rounded px-1 py-0.5 text-right hover:border-blue-300 focus:bg-yellow-50 focus:border-blue-500 focus:outline-none ${raw == null ? 'bg-gray-50 text-gray-400' : 'bg-white'}`}
+          defaultValue={shown != null ? String(shown) : ''} key={String(shown) + String(raw)}
+          title={raw == null ? '기본값(입주년-6). 입력하면 확정' : ''}
+          onBlur={e => { const v = e.target.value; saveField(row.id, 'move_start_year', v === '' ? null : Number(v), raw) }} />
+        <div className="flex flex-col leading-none">
+          <button onClick={() => bump(1)} className="px-1 text-[0.7em] text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-t border border-gray-200">▲</button>
+          <button onClick={() => bump(-1)} className="px-1 text-[0.7em] text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-b border border-gray-200 border-t-0">▼</button>
+        </div>
+        {saved && <span className="absolute -right-1 -top-1 text-green-600 text-xs bg-white rounded-full">✓</span>}
+      </div>
+    </td>
+  }
+
   function RoCell({ row, col, w }: { row: Recon; col: Col; w: number }) {
     // 왜곡주의 플래그 (엔진 _calc.warnDistortion)
     if (col.warn) {
@@ -316,10 +362,10 @@ export default function ReconAdminPage() {
     if (col.txt) {
       return <td className={td + ' text-center text-gray-700'} style={{ width: w }}>{col.txt(row)}</td>
     }
-    // 입주년: 연도라 천단위 콤마 없이 표시 (ETA에서 자동 계산됨)
+    // 입주년: 자동계산(ETA+RDT). 연도라 콤마 없이 + 특별색(하늘색) 배경으로 "자동" 표시
     if (col.key === 'move_in') {
-      const y = row.move_in as number | null
-      return <td className={td + ' text-center text-gray-700'} style={{ width: w }}>{y ? String(y) : '—'}</td>
+      const y = cc(row)?.moveIn ?? null
+      return <td className={td + ' text-center font-semibold text-[#1B3A5C] bg-sky-50'} style={{ width: w }} title="ETA+리스크시간으로 자동 계산">{y ? String(y) : '—'}</td>
     }
     // 파생 계산 컬럼
     let num: number | null = null
@@ -440,9 +486,13 @@ export default function ReconAdminPage() {
                 </td>
                 {cols.map((c, i) => (c.refsel || c.wsel || c.nvpfinal)
                   ? <MapCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
-                  : c.ro
-                    ? <RoCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
-                    : <EditCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />)}
+                  : c.step
+                    ? <StepCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
+                    : c.moveStart
+                      ? <MoveStartCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
+                      : c.ro
+                        ? <RoCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
+                        : <EditCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />)}
                 {group === '실거래' && <td className={td + ' text-center'}>
                   <button onClick={() => refreshTrade(r)} disabled={!!busy}
                     className="px-2 py-0.5 bg-[#1B3A5C] text-white rounded text-[0.9em] disabled:opacity-50">{busy === r.id ? '...' : '조회'}</button>

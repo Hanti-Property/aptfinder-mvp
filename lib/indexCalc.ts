@@ -73,7 +73,7 @@ const COST_SAMPLES = [
 export interface ReconRow {
   name?: string; short_name?: string | null; dong?: string; ticker?: string | null
   jibun?: string | null; bjdong?: string | null; gu?: string
-  eta?: number | null; move_in?: number | null; move_start_year?: number | null
+  eta?: number | null; rdt?: number | null; move_in?: number | null; move_start_year?: number | null
   stage?: number | null; risk?: string | null; eta_provisional?: boolean | null
   far?: number | null            // 현재 용적률(%)
   plat_area?: number | null      // 대지면적(㎡)
@@ -212,7 +212,11 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
   let newPpp: number | null = null, ncmc: number | null = null, rar: number | null = null
   if (r.ticker && cmc && curFarPct && plat) {
     const curFar = curFarPct / 100
-    const { ftar, rule } = targetFar(r.name || '', curFar)
+    // 목표용적률: 수동입력(target_far) 우선, 없으면 자동규칙(override/고밀예외/기본300%)
+    let ftar: number, rule: string
+    const manualTf = r.target_far != null && Number(r.target_far) > 0 ? Number(r.target_far) : null
+    if (manualTf) { ftar = manualTf / 100; rule = 'manual(수동입력)' }
+    else { const a = targetFar(r.name || '', curFar); ftar = a.ftar; rule = a.rule }
     tfRule = rule
     targetFarPct = Math.round(ftar * 100)
     // 기준 NVP: 매핑(nvp_final) 우선, 없으면 동별상수×신축프리미엄
@@ -223,7 +227,7 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
       nvpBaseUsed = Math.round((NVP_V2_BASE[r.dong || ''] ?? NVP_BASE_DEFAULT) * CONSTANTS.NVP_PREMIUM)
       nvpSrc = 'dong_const'
     }
-    newPpp = nvpBaseUsed * Math.pow(1 + CONSTANTS.ANNUAL_RATE, eta)
+    newPpp = nvpBaseUsed * Math.pow(1 + CONSTANTS.ANNUAL_RATE, eta + (r.rdt != null ? Number(r.rdt) : 0))
     const gfaPy = plat * ftar / PY
     const excluPy = gfaPy * CONSTANTS.EXCLUSIVE_RATE * (1 - CONSTANTS.DONATION_RATE)
     ncmc = pyRound(excluPy * newPpp / 1e8, 2)
@@ -232,8 +236,11 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
   }
 
   // --- 시간 ---
-  const moveIn = r.eta != null ? CONSTANTS.BASE_YEAR + Math.round(eta) : (r.move_in ?? null)
-  const moveStartYear = r.move_start_year ?? null
+  // 입주년 = BASE_YEAR + ETA + RDT(리스크시간). ETA는 순수 진행기간, RDT는 리스크 지연.
+  const rdt = r.rdt != null ? Number(r.rdt) : 0
+  const moveIn = r.eta != null ? CONSTANTS.BASE_YEAR + Math.round(eta + rdt) : (r.move_in ?? null)
+  // 이주개시일: 수동입력 우선, 없으면 입주년 - 6 (기본값)
+  const moveStartYear = r.move_start_year ?? (moveIn != null ? moveIn - 6 : null)
 
   // --- 플래그 ---
   const ma = monthsAgo(r.latest_date)
@@ -244,13 +251,15 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
   const warn = rel === 'low' || gap <= CONSTANTS.GAP_WIDE_THRESHOLD
 
   // --- RVI v1/v2 · RRI · CAGR ---
+  // 보유기간 horizon = ETA + RDT (입주년 정의와 정합). 미래가·수익률·시간계수 모두 이 값 사용.
+  const horizon = eta + rdt
   let rviV1: number | null = null, rvi: number | null = null, rri: number | null = null, cagr: number | null = null
   if (r.ticker && curFarPct && avgPpp > 0) {
     // 기준 NVP(오늘): 매핑 nvp_final 우선(신축 프리미엄 미적용), 없으면 동별상수(프리미엄 미적용 — 원 HTML calcNvpV2와 동일)
     const nvpPppToday = r.nvp_final ?? (NVP_V2_BASE[r.dong || ''] ?? NVP_BASE_DEFAULT)
     const futurePpp = r.nvp_final
-      ? r.nvp_final * Math.pow(1 + CONSTANTS.ANNUAL_RATE, eta)                      // 매핑: 프리미엄 미적용
-      : nvpPppToday * CONSTANTS.NVP_PREMIUM * Math.pow(1 + CONSTANTS.ANNUAL_RATE, eta) // 폴백: ×1.2
+      ? r.nvp_final * Math.pow(1 + CONSTANTS.ANNUAL_RATE, horizon)                      // 매핑: 프리미엄 미적용
+      : nvpPppToday * CONSTANTS.NVP_PREMIUM * Math.pow(1 + CONSTANTS.ANNUAL_RATE, horizon) // 폴백: ×1.2
     const area = r.latest_area || 76
     const excluPy = area / PY
     const currentPrice = unitPrice || avgPpp * excluPy
@@ -259,7 +268,7 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
     const totalInvest = currentPrice + addCost
     const futureValue = futurePpp * excluPy
     rri = totalInvest > 0 ? Math.round((futureValue - totalInvest) / totalInvest * 100 * 10) / 10 : null
-    cagr = (totalInvest > 0 && eta > 0) ? Math.round((Math.pow(futureValue / totalInvest, 1 / eta) - 1) * 100 * 10) / 10 : null
+    cagr = (totalInvest > 0 && horizon > 0) ? Math.round((Math.pow(futureValue / totalInvest, 1 / horizon) - 1) * 100 * 10) / 10 : null
     // 점수
     const nvpRate = avgPpp > 0 ? (nvpPppToday - avgPpp) / avgPpp * 100 : 0
     const lps = h > 0 && plat > 0 ? (plat / h) / PY : 0
@@ -272,7 +281,7 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
     const nrtScore = 50
     const physScore = Math.round(tlaScore * 0.30 + locScore * 0.20 + nvpScore * 0.15 + farScore * 0.20 + ageScore * 0.05 + lpsScore * 0.05 + nrtScore * 0.05)
     const ETA_MAX = 20, RVI_BASE = 0.70
-    const timeScore = Math.max(0, 1 - (eta / ETA_MAX))
+    const timeScore = Math.max(0, 1 - (horizon / ETA_MAX))
     const realizeF = RVI_BASE + (1 - RVI_BASE) * timeScore
     rviV1 = physScore
     rvi = Math.round(physScore * realizeF)
