@@ -400,20 +400,30 @@ export default function ReconAdminPage() {
 
   // 매핑 결과를 JSON으로 내보내기 → apply_nvp_mapping.py로 complexes_master.json 병합
   function exportMapping() {
-    const out = rows.filter(r => r.ticker).map(r => {
-      const m = calcMapping(r, refMap)
-      return {
-        ticker: r.ticker, shortName: r.short_name,
-        nvpRefCodes: (r.nvp_ref_codes as string[] | null) || [],
-        nvpLocWeight: r.nvp_loc_weight != null ? Number(r.nvp_loc_weight) : 0,
-        nvpBase: m.base, nvpFinal: m.final, nvpValid: m.valid,
-      }
-    })
-    const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob); a.download = 'nvp_mapping_export.json'; a.click()
-    URL.revokeObjectURL(a.href)
-    setMsg(`매핑 ${out.length}개 내보냄 → scripts/apply_nvp_mapping.py 로 병합 후 calc_ncmc.py 재실행`)
+    try {
+      const out = rows.filter(r => r.ticker).map(r => {
+        const m = calcMapping(r, refMap)
+        return {
+          ticker: r.ticker, shortName: r.short_name,
+          nvpRefCodes: (r.nvp_ref_codes as string[] | null) || [],
+          nvpLocWeight: r.nvp_loc_weight != null ? Number(r.nvp_loc_weight) : 0,
+          nvpBase: m.base, nvpFinal: m.final, nvpValid: m.valid,
+        }
+      })
+      const mappedCnt = out.filter(o => o.nvpFinal != null).length
+      const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'nvp_mapping_export.json'
+      document.body.appendChild(a)   // 일부 브라우저는 DOM에 붙어야 다운로드됨
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(url), 2000)  // 즉시 revoke 시 다운로드 취소되는 문제 방지
+      setMsg(`매핑 내보냄: 총 ${out.length}개(매핑 ${mappedCnt}개) → nvp_mapping_export.json 다운로드됨. apply_nvp_mapping.py 로 병합.`)
+    } catch (e) {
+      setMsg('내보내기 실패: ' + (e instanceof Error ? e.message : String(e)))
+    }
   }
 
 }
