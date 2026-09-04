@@ -216,22 +216,43 @@ export default function ReconAdminPage() {
     saveMapping(row.id, { nvp_ref_codes: [...codes] })
   }
 
-  async function refreshTrade(row: Recon) {
+  // 단건 실거래 조회. silent=true면 개별 메시지·목록갱신 생략(배치용). 성공여부 반환.
+  async function refreshTrade(row: Recon, silent = false): Promise<boolean> {
     const lawd = row.lawd as string
-    if (!lawd) { setMsg(`${row.short_name}: lawd 없음`); return }
-    setBusy(row.id); setMsg('')
+    if (!lawd) { if (!silent) setMsg(`${row.short_name}: lawd 없음`); return false }
+    if (!silent) { setBusy(row.id); setMsg('') }
     try {
       const trades = await fetchTrades(lawd, 12)
       const r = calcCurrent(trades, row)
-      if (!r) { setMsg(`${row.short_name || row.name}: 실거래 없음`); return }
+      if (!r) { if (!silent) setMsg(`${row.short_name || row.name}: 실거래 없음`); return false }
       await supabase.from('recon_master').update({
         avg_ppp: r.avgPy, latest_price: r.price, latest_area: r.area, latest_floor: r.floor,
         trade_count: r.count, latest_date: r.latest, price_updated: new Date().toISOString().slice(0, 10),
       }).eq('id', row.id)
-      setMsg(`${row.short_name || row.name}: 최근 ${(r.price / 10000).toFixed(1)}억 · 평균 ${r.avgPy.toLocaleString()}만/평 (${r.count}건, ${r.latest})`)
-      await fetchRows()
-    } catch (e: unknown) { setMsg('조회 실패: ' + (e instanceof Error ? e.message : String(e))) }
-    finally { setBusy(null) }
+      if (!silent) {
+        setMsg(`${row.short_name || row.name}: 최근 ${(r.price / 10000).toFixed(1)}억 · 평균 ${r.avgPy.toLocaleString()}만/평 (${r.count}건, ${r.latest})`)
+        await fetchRows()
+      }
+      return true
+    } catch (e: unknown) { if (!silent) setMsg('조회 실패: ' + (e instanceof Error ? e.message : String(e))); return false }
+    finally { if (!silent) setBusy(null) }
+  }
+
+  // 전체 실거래 일괄 조회 (순차 실행, 진행상황 표시)
+  async function refreshAllTrades() {
+    if (!confirm(`재건축 ${rows.length}개 단지 실거래를 모두 조회합니다. 몇 분 걸릴 수 있어요. 진행할까요?`)) return
+    setBusy('__all__')
+    let ok = 0, fail = 0
+    const failed: string[] = []
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]
+      setMsg(`전체 갱신 중... ${i + 1}/${rows.length} · ${String(row.short_name || row.name)} (성공 ${ok} / 실패 ${fail})`)
+      const done = await refreshTrade(row, true)
+      if (done) ok++; else { fail++; failed.push(String(row.short_name || row.name)) }
+    }
+    setBusy(null)
+    await fetchRows()
+    setMsg(`전체 갱신 완료: 성공 ${ok} / 실패 ${fail}${failed.length ? ` (실패: ${failed.join(', ')})` : ''}`)
   }
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">로딩 중...</div>
@@ -340,6 +361,7 @@ export default function ReconAdminPage() {
             <button onClick={() => setFontPx(f => Math.min(18, f + 1))} className="w-6 h-6 rounded bg-white/20 text-sm">＋</button>
           </div>
           {group === '인덱스' && <button onClick={exportMapping} className="text-xs px-3 py-1.5 rounded-lg bg-white text-[#1B3A5C] font-semibold">매핑 내보내기(JSON)</button>}
+          {group === '실거래' && <button onClick={refreshAllTrades} disabled={busy === '__all__'} className="text-xs px-3 py-1.5 rounded-lg bg-white text-[#1B3A5C] font-semibold disabled:opacity-50">{busy === '__all__' ? '조회 중...' : '전체 갱신'}</button>}
           <a href="/admin" className="text-xs text-blue-200 underline">← 대시보드</a>
         </div>
       </header>
@@ -386,7 +408,7 @@ export default function ReconAdminPage() {
                     ? <RoCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
                     : <EditCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />)}
                 {group === '실거래' && <td className={td + ' text-center'}>
-                  <button onClick={() => refreshTrade(r)} disabled={busy === r.id}
+                  <button onClick={() => refreshTrade(r)} disabled={!!busy}
                     className="px-2 py-0.5 bg-[#1B3A5C] text-white rounded text-[0.9em] disabled:opacity-50">{busy === r.id ? '...' : '조회'}</button>
                 </td>}
               </tr>
