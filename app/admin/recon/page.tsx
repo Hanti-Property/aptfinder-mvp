@@ -457,7 +457,8 @@ export default function ReconAdminPage() {
 
       {msg && <div className="bg-blue-50 text-[#1B3A5C] text-sm px-6 py-2 border-b border-blue-100">{msg}</div>}
 
-      <div className="p-3 overflow-x-auto">
+      <div className="p-3">
+       <div className="overflow-auto border border-gray-200 rounded-lg" style={{ maxHeight: 'calc(100vh - 170px)' }}>
         <table className="border-collapse" style={{ fontSize: fontPx }}>
           <thead><tr>
             <th className={th} style={{ width: 44 }}>#</th>
@@ -465,7 +466,7 @@ export default function ReconAdminPage() {
             {cols.map((c, i) => {
               const w = wOf(i, c)
               return (
-                <th key={`${group}#${i}`} className={'relative ' + th + (c.ro ? ' !bg-amber-50' : '')} style={{ width: w, minWidth: w }}>
+                <th key={`${group}#${i}`} className={th + (c.ro ? ' !bg-amber-50' : '')} style={{ width: w, minWidth: w }}>
                   {c.label}
                   <span onMouseDown={e => startResize(`${group}#${i}`, w, e)}
                     className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize hover:bg-blue-400/40" />
@@ -502,6 +503,7 @@ export default function ReconAdminPage() {
             })}
           </tbody>
         </table>
+       </div>
       </div>
       <p className="px-6 pb-4 text-xs text-gray-400">총 {rows.length}개 · 평당가·인덱스는 계산엔진(lib/indexCalc)으로 실시간 산출 → 실거래·매핑 편집 즉시 반영</p>
     </div>
