@@ -3,12 +3,13 @@ import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
-  // _internal_ 접두어 파일 직접 접근 차단 (관리자 전용 콘텐츠)
-  if (request.nextUrl.pathname.startsWith('/_internal_')) {
-    // Referer가 같은 도메인의 /admin 경로면 허용 (iframe 로드)
+  // _internal_ 접두어 파일 및 /heatmap/ 직접 접근 차단 (관리자 전용 콘텐츠)
+  if (request.nextUrl.pathname.startsWith('/_internal_') ||
+      request.nextUrl.pathname.startsWith('/heatmap/')) {
+    // Referer가 /admin/(iframe 로드) 또는 /heatmap/(히트맵 내부 리소스 fetch)면 허용
     const referer = request.headers.get('referer') || ''
-    const isAdminReferer = referer.includes('/admin/')
-    if (!isAdminReferer) {
+    const allowed = referer.includes('/admin/') || referer.includes('/heatmap/')
+    if (!allowed) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
@@ -58,5 +59,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/_internal_:path*'],
+  matcher: ['/admin/:path*', '/_internal_:path*', '/heatmap/:path*'],
 }

@@ -141,6 +141,36 @@ export default function AdminDashboard() {
       </header>
 
       <div className="p-5 space-y-5">
+        {/* 학원 매물 (신규) */}
+        <section>
+          <h2 className="text-[13px] font-semibold text-emerald-400 mb-3 uppercase tracking-wider flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>학원 매물 (임대차) · BETA
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <a href="/admin/academy-heatmap" className="bg-gradient-to-br from-[#16321f] to-[#1e1e3f] border border-emerald-500/50 rounded-xl p-4 hover:border-emerald-400 transition-all group">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">🗺️</span>
+                <p className="text-[14px] font-bold text-white group-hover:text-emerald-300">학원 매물 히트맵</p>
+              </div>
+              <p className="text-[11px] text-gray-400">대치·역삼 학원 매물 지도 · 용도별 색상 · 커스텀 뷰</p>
+            </a>
+            <a href="/admin/academy-listings" className="bg-gradient-to-br from-[#1a2436] to-[#1e1e3f] border border-blue-500/50 rounded-xl p-4 hover:border-blue-400 transition-all group">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">📋</span>
+                <p className="text-[14px] font-bold text-white group-hover:text-blue-300">학원 매물 관리</p>
+              </div>
+              <p className="text-[11px] text-gray-400">매물 등록·수정·사진·강의실·좌표 자동 · 뷰 저장</p>
+            </a>
+            <a href="/admin/building-extractor" className="bg-gradient-to-br from-[#2a1e36] to-[#1e1e3f] border border-purple-500/50 rounded-xl p-4 hover:border-purple-400 transition-all group">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">📐</span>
+                <p className="text-[14px] font-bold text-white group-hover:text-purple-300">동별 좌표 추출기</p>
+              </div>
+              <p className="text-[11px] text-gray-400">V-World 건물 공간정보 · 단지 동별 좌표 자동 추출</p>
+            </a>
+          </div>
+        </section>
+
         {/* ★ 핵심 분석 모듈 — 최상단 배치 */}
         <section>
           <h2 className="text-[13px] font-semibold text-[#C49A3C] mb-3 uppercase tracking-wider flex items-center gap-2">
@@ -309,6 +339,30 @@ export default function AdminDashboard() {
               </div>
               <p className="text-[11px] font-semibold text-[#C49A3C]">재건축 RVI</p>
               <p className="text-[9px] text-gray-500 mt-0.5">143개 단지</p>
+            </a>
+            <a href="/admin/academy-heatmap" className="bg-[#1e1e3f] border border-emerald-500/30 rounded-xl p-4 text-center hover:border-emerald-400 hover:bg-[#1e1e4f] transition-all group relative">
+              <div className="absolute top-2 right-2 text-[8px] bg-emerald-500/30 text-emerald-300 px-1 rounded">NEW</div>
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <span className="text-lg">🗺️</span>
+              </div>
+              <p className="text-[11px] font-semibold text-emerald-300">학원 매물 히트맵</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">임대차 · 지도</p>
+            </a>
+            <a href="/admin/academy-listings" className="bg-[#1e1e3f] border border-blue-500/30 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-[#1e1e4f] transition-all group relative">
+              <div className="absolute top-2 right-2 text-[8px] bg-blue-500/30 text-blue-300 px-1 rounded">NEW</div>
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <span className="text-lg">📋</span>
+              </div>
+              <p className="text-[11px] font-semibold text-blue-300">학원 매물 관리</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">등록·수정·뷰</p>
+            </a>
+            <a href="/admin/building-extractor" className="bg-[#1e1e3f] border border-purple-500/30 rounded-xl p-4 text-center hover:border-purple-400 hover:bg-[#1e1e4f] transition-all group relative">
+              <div className="absolute top-2 right-2 text-[8px] bg-purple-500/30 text-purple-300 px-1 rounded">NEW</div>
+              <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <span className="text-lg">📐</span>
+              </div>
+              <p className="text-[11px] font-semibold text-purple-300">동별 좌표 추출</p>
+              <p className="text-[9px] text-gray-500 mt-0.5">V-World</p>
             </a>
           </div>
         </section>

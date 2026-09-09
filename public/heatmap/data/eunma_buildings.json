@@ -1,0 +1,191 @@
+{
+  "_schema": {
+    "description": "은마아파트 동(건물)별 좌표 마스터. V-World 건물 공간정보(WFS lt_c_bldginfo)에서 자동 추출한 건물 폴리곤 중심 좌표.",
+    "complex_name": "은마아파트",
+    "lot_address": "대치동 316",
+    "road_address": "서울 강남구 삼성로 212",
+    "total_buildings": 28,
+    "coordinate_source": "vworld_polygon_centroid",
+    "note": "은마아파트는 1~31동 중 4·14·24동이 결번(총 28개동). 좌표는 V-World 건물 폴리곤의 면적중심(centroid). 상가동 제외.",
+    "fields": {
+      "building": "동 번호/명",
+      "lat": "위도(폴리곤 중심)",
+      "lng": "경도(폴리곤 중심)",
+      "verified": "실측/공간정보 확정 여부"
+    }
+  },
+  "center": {
+    "lat": 37.497626,
+    "lng": 127.065419
+  },
+  "buildings": [
+    {
+      "building": "1동",
+      "lat": 37.49631,
+      "lng": 127.068182,
+      "verified": true
+    },
+    {
+      "building": "2동",
+      "lat": 37.495991,
+      "lng": 127.067182,
+      "verified": true
+    },
+    {
+      "building": "3동",
+      "lat": 37.496405,
+      "lng": 127.066648,
+      "verified": true
+    },
+    {
+      "building": "5동",
+      "lat": 37.496909,
+      "lng": 127.068276,
+      "verified": true
+    },
+    {
+      "building": "6동",
+      "lat": 37.497357,
+      "lng": 127.067824,
+      "verified": true
+    },
+    {
+      "building": "7동",
+      "lat": 37.497271,
+      "lng": 127.067593,
+      "verified": true
+    },
+    {
+      "building": "8동",
+      "lat": 37.497804,
+      "lng": 127.067468,
+      "verified": true
+    },
+    {
+      "building": "9동",
+      "lat": 37.49821,
+      "lng": 127.066899,
+      "verified": true
+    },
+    {
+      "building": "10동",
+      "lat": 37.498675,
+      "lng": 127.066589,
+      "verified": true
+    },
+    {
+      "building": "11동",
+      "lat": 37.499352,
+      "lng": 127.066574,
+      "verified": true
+    },
+    {
+      "building": "12동",
+      "lat": 37.499452,
+      "lng": 127.065359,
+      "verified": true
+    },
+    {
+      "building": "13동",
+      "lat": 37.49931,
+      "lng": 127.064947,
+      "verified": true
+    },
+    {
+      "building": "15동",
+      "lat": 37.498894,
+      "lng": 127.063698,
+      "verified": true
+    },
+    {
+      "building": "16동",
+      "lat": 37.498467,
+      "lng": 127.062352,
+      "verified": true
+    },
+    {
+      "building": "17동",
+      "lat": 37.497981,
+      "lng": 127.062476,
+      "verified": true
+    },
+    {
+      "building": "18동",
+      "lat": 37.497303,
+      "lng": 127.062421,
+      "verified": true
+    },
+    {
+      "building": "19동",
+      "lat": 37.496902,
+      "lng": 127.062988,
+      "verified": true
+    },
+    {
+      "building": "20동",
+      "lat": 37.496472,
+      "lng": 127.063467,
+      "verified": true
+    },
+    {
+      "building": "21동",
+      "lat": 37.496697,
+      "lng": 127.064666,
+      "verified": true
+    },
+    {
+      "building": "22동",
+      "lat": 37.49719,
+      "lng": 127.06489,
+      "verified": true
+    },
+    {
+      "building": "23동",
+      "lat": 37.497984,
+      "lng": 127.064557,
+      "verified": true
+    },
+    {
+      "building": "25동",
+      "lat": 37.498255,
+      "lng": 127.063801,
+      "verified": true
+    },
+    {
+      "building": "26동",
+      "lat": 37.498586,
+      "lng": 127.064572,
+      "verified": true
+    },
+    {
+      "building": "27동",
+      "lat": 37.498712,
+      "lng": 127.066182,
+      "verified": true
+    },
+    {
+      "building": "28동",
+      "lat": 37.497942,
+      "lng": 127.065576,
+      "verified": true
+    },
+    {
+      "building": "29동",
+      "lat": 37.497436,
+      "lng": 127.065988,
+      "verified": true
+    },
+    {
+      "building": "30동",
+      "lat": 37.496075,
+      "lng": 127.065151,
+      "verified": true
+    },
+    {
+      "building": "31동",
+      "lat": 37.49558,
+      "lng": 127.065411,
+      "verified": true
+    }
+  ]
+}

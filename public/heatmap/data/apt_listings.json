@@ -1,0 +1,40 @@
+{
+  "_schema": {
+    "description": "아파트 매물 (매매) — 은마아파트 동(건물)별 매핑용 데이터",
+    "deal_type": "매매(sale)",
+    "mapping_unit": "building_in_complex",
+    "coordinate_join": "building 값을 eunma_buildings.json의 building과 매칭하여 좌표 획득",
+    "fields": {
+      "id": "매물 고유 ID",
+      "complex": "단지명 (은마아파트)",
+      "building": "동 (eunma_buildings.json과 조인 키)",
+      "unit": "호 (선택, 비공개 가능)",
+      "floor": "층",
+      "area_type": "평형 타입 (예: 76A, 84B) - 은마는 76/84㎡ 두 타입",
+      "area_m2": "공급면적(㎡)",
+      "area_py": "평형",
+      "price_manwon": "매매 호가 (만원)",
+      "direction": "향",
+      "status": "매물 상태 (active/pending/closed)",
+      "memo": "비고",
+      "listed_date": "매물 등록일"
+    }
+  },
+  "listings": [
+    { "id": "APT-0001", "complex": "은마아파트", "building": "1동", "unit": null, "floor": "5층", "area_type": "76", "area_m2": 76.79, "area_py": 31, "price_manwon": 235000, "direction": "남향", "status": "active", "memo": "올수리, 남향 로얄층", "listed_date": "2026-08-20" },
+    { "id": "APT-0002", "complex": "은마아파트", "building": "3동", "unit": null, "floor": "2층", "area_type": "76", "area_m2": 76.79, "area_py": 31, "price_manwon": 228000, "direction": "남향", "status": "active", "memo": "저층 급매", "listed_date": "2026-08-25" },
+    { "id": "APT-0003", "complex": "은마아파트", "building": "5동", "unit": null, "floor": "9층", "area_type": "84", "area_m2": 84.43, "area_py": 34, "price_manwon": 268000, "direction": "동남향", "status": "active", "memo": "84타입 고층", "listed_date": "2026-08-28" },
+    { "id": "APT-0004", "complex": "은마아파트", "building": "7동", "unit": null, "floor": "11층", "area_type": "84", "area_m2": 84.43, "area_py": 34, "price_manwon": 275000, "direction": "남향", "status": "active", "memo": "최고층 조망", "listed_date": "2026-09-01" },
+    { "id": "APT-0005", "complex": "은마아파트", "building": "10동", "unit": null, "floor": "4층", "area_type": "76", "area_m2": 76.79, "area_py": 31, "price_manwon": 232000, "direction": "남향", "status": "active", "memo": "학군 중심동", "listed_date": "2026-08-30" },
+    { "id": "APT-0006", "complex": "은마아파트", "building": "12동", "unit": null, "floor": "7층", "area_type": "84", "area_m2": 84.43, "area_py": 34, "price_manwon": 271000, "direction": "남향", "status": "active", "memo": "", "listed_date": "2026-09-02" },
+    { "id": "APT-0007", "complex": "은마아파트", "building": "29동", "unit": null, "floor": "3층", "area_type": "76", "area_m2": 76.79, "area_py": 31, "price_manwon": 226000, "direction": "동향", "status": "pending", "memo": "가계약 진행중", "listed_date": "2026-08-15" },
+    { "id": "APT-0008", "complex": "은마아파트", "building": "17동", "unit": null, "floor": "8층", "area_type": "84", "area_m2": 84.43, "area_py": 34, "price_manwon": 279000, "direction": "남향", "status": "active", "memo": "삼성로 인접", "listed_date": "2026-09-03" },
+    { "id": "APT-0009", "complex": "은마아파트", "building": "19동", "unit": null, "floor": "6층", "area_type": "76", "area_m2": 76.79, "area_py": 31, "price_manwon": 234000, "direction": "남향", "status": "active", "memo": "", "listed_date": "2026-08-22" },
+    { "id": "APT-0010", "complex": "은마아파트", "building": "21동", "unit": null, "floor": "10층", "area_type": "84", "area_m2": 84.43, "area_py": 34, "price_manwon": 282000, "direction": "남서향", "status": "active", "memo": "코너동 고층", "listed_date": "2026-09-04" },
+    { "id": "APT-0011", "complex": "은마아파트", "building": "23동", "unit": null, "floor": "5층", "area_type": "76", "area_m2": 76.79, "area_py": 31, "price_manwon": 230000, "direction": "남향", "status": "active", "memo": "", "listed_date": "2026-08-27" },
+    { "id": "APT-0012", "complex": "은마아파트", "building": "25동", "unit": null, "floor": "2층", "area_type": "84", "area_m2": 84.43, "area_py": 34, "price_manwon": 262000, "direction": "북향", "status": "active", "memo": "저층 조정 가능", "listed_date": "2026-08-18" },
+    { "id": "APT-0013", "complex": "은마아파트", "building": "28동", "unit": null, "floor": "12층", "area_type": "84", "area_m2": 84.43, "area_py": 34, "price_manwon": 288000, "direction": "남향", "status": "active", "memo": "단지 남측 최고층", "listed_date": "2026-09-05" },
+    { "id": "APT-0014", "complex": "은마아파트", "building": "8동", "unit": null, "floor": "3층", "area_type": "76", "area_m2": 76.79, "area_py": 31, "price_manwon": 229000, "direction": "남향", "status": "active", "memo": "", "listed_date": "2026-08-29" },
+    { "id": "APT-0015", "complex": "은마아파트", "building": "1동", "unit": null, "floor": "12층", "area_type": "84", "area_m2": 84.43, "area_py": 34, "price_manwon": 285000, "direction": "남향", "status": "active", "memo": "같은 동 복수매물 테스트", "listed_date": "2026-09-01" }
+  ]
+}

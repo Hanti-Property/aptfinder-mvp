@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>단지 동별 좌표 자동 추출기 (V-World) — AptFinder</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,'Malgun Gothic',sans-serif; background:#f5f5f5; color:#222; }
+  header { background:#1B3A5C; color:#fff; padding:14px 20px; }
+  header h1 { font-size:18px; }
+  header p { font-size:12px; opacity:.85; margin-top:2px; }
+  .bar { background:#fff; border-bottom:1px solid #e5e5e5; padding:10px 20px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .bar input, .bar select { padding:8px 10px; border:1px solid #ccc; border-radius:6px; font-size:13px; }
+  .bar input.wide { flex:1; min-width:180px; }
+  .bar button { padding:8px 14px; border:none; border-radius:6px; background:#1B3A5C; color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
+  .bar button.go { background:#8e44ad; }
+  .bar button.save { background:#27ae60; }
+  .bar label { font-size:12px; color:#555; }
+  .bar small { color:#888; font-size:11px; }
+  #status { padding:8px 20px; font-size:12px; color:#1B3A5C; background:#fffbe6; border-bottom:1px solid #f0e6b0; min-height:20px; }
+  .layout { display:flex; height:calc(100vh - 150px); }
+  #map { flex:1; }
+  .side { width:360px; background:#fff; border-left:1px solid #e5e5e5; overflow-y:auto; }
+  .side h2 { font-size:13px; padding:12px 16px; background:#f0f3f7; color:#1B3A5C; position:sticky; top:0; border-bottom:1px solid #e5e5e5; }
+  .step { padding:10px 16px; font-size:12px; color:#555; border-bottom:1px solid #eee; line-height:1.6; }
+  .step b { color:#1B3A5C; }
+  .card { padding:8px 16px; border-bottom:1px solid #eee; font-size:12px; display:flex; justify-content:space-between; }
+  .card .n { font-weight:700; color:#1B3A5C; }
+  .card .c { color:#777; font-family:monospace; font-size:11px; }
+  #jsonOut { width:100%; height:180px; font-family:monospace; font-size:11px; border:1px solid #ddd; border-radius:6px; padding:8px; margin-top:8px; }
+  .iw { padding:8px; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>단지 동별 좌표 자동 추출기 <span style="font-weight:400;font-size:13px;">· V-World 건물 공간정보</span></h1>
+  <p>단지명으로 필터하고, 지도에서 단지 영역을 지정하면 동별 건물 좌표를 자동 추출합니다. (수동 클릭 불필요)</p>
+</header>
+
+<div class="bar">
+  <label>단지명 필터:</label>
+  <input id="complexName" class="wide" type="text" placeholder="예: 은마아파트 (건물명 앞부분과 매칭)" value="은마아파트">
+  <input id="searchAddr" type="text" placeholder="주소/단지 검색 후 지도이동" style="width:200px">
+  <button onclick="searchAndMove()">지도 이동</button>
+</div>
+<div class="bar">
+  <label>프록시 URL:</label>
+  <input id="proxyUrl" class="wide" type="text" placeholder="V-World WFS 프록시 엔드포인트" value="/api/vworld-wfs">
+  <label>상가 제외:</label>
+  <input type="checkbox" id="excludeShop" checked>
+  <button class="go" onclick="extract()">현재 지도영역에서 동별 좌표 추출</button>
+  <button class="save" onclick="downloadJson()">JSON 다운로드</button>
+</div>
+
+<div id="status">준비됨. ① 단지명 입력 → ② 주소검색 또는 지도 이동으로 단지가 화면에 꽉 차게 → ③ [추출] 클릭.</div>
+
+<div class="layout">
+  <div id="map"></div>
+  <div class="side">
+    <h2>사용법</h2>
+    <div class="step">
+      <b>1.</b> 상단에 <b>단지명</b> 입력 (건물명 앞부분과 매칭됨)<br>
+      <b>2.</b> 주소검색 또는 지도 드래그/줌으로 <b>단지 전체가 화면에 보이게</b> 맞춤<br>
+      <b>3.</b> <b>[현재 지도영역에서 동별 좌표 추출]</b> 클릭<br>
+      <b>4.</b> 결과 확인 후 <b>[JSON 다운로드]</b><br>
+      <small>* 지도 영역(BBOX)이 단지를 다 감싸야 모든 동이 잡힙니다. 너무 넓으면 옆 단지 건물이 섞일 수 있으니 단지명 필터로 걸러집니다.</small>
+    </div>
+    <h2>추출 결과 (<span id="count">0</span>개동)</h2>
+    <div id="list"></div>
+    <div style="padding:12px 16px;">
+      <h2 style="padding:0;background:none;border:none;margin-bottom:6px;">JSON</h2>
+      <textarea id="jsonOut" readonly placeholder="추출하면 여기에 buildings JSON이 표시됩니다."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- 카카오 지도 SDK (aptfinder 공통 앱키) -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services&autoload=false"></script>
+<script>
+let map, geocoder, ps, infowindow;
+let overlays = [];      // 지도에 그린 폴리곤/마커
+let extracted = [];     // 추출된 동 배열
+
+function setStatus(m){ document.getElementById('status').textContent = m; }
+
+window.addEventListener('load', () => {
+  if (typeof kakao==='undefined' || !kakao.maps) { setStatus('카카오맵 SDK 로드 실패. 도메인 등록 확인.'); return; }
+  kakao.maps.load(() => {
+    map = new kakao.maps.Map(document.getElementById('map'), {
+      center: new kakao.maps.LatLng(37.4976, 127.0654), // 은마 중심
+      level: 3
+    });
+    geocoder = new kakao.maps.services.Geocoder();
+    ps = new kakao.maps.services.Places();
+    infowindow = new kakao.maps.InfoWindow({ removable:true });
+    setStatus('지도 준비됨. 단지가 화면에 꽉 차게 맞춘 뒤 [추출]을 누르세요. (기본: 은마아파트)');
+  });
+});
+
+// 주소/장소 검색 → 지도 이동
+function searchAndMove() {
+  const q = document.getElementById('searchAddr').value.trim();
+  if (!q) { alert('검색어를 입력하세요'); return; }
+  // 우선 주소검색, 실패 시 키워드검색
+  geocoder.addressSearch(q, (res, st) => {
+    if (st === kakao.maps.services.Status.OK && res.length) {
+      moveTo(res[0].y, res[0].x);
+    } else {
+      ps.keywordSearch(q, (data, st2) => {
+        if (st2 === kakao.maps.services.Status.OK && data.length) moveTo(data[0].y, data[0].x);
+        else setStatus('검색 결과 없음: ' + q);
+      });
+    }
+  });
+}
+function moveTo(lat, lng) {
+  map.setCenter(new kakao.maps.LatLng(lat, lng));
+  map.setLevel(3);
+  setStatus('이동 완료. 단지 전체가 보이도록 줌/이동 후 [추출]을 누르세요.');
+}
+
+function clearOverlays(){ overlays.forEach(o=>o.setMap(null)); overlays=[]; }
+
+// 폴리곤 면적중심 (경위도 평면 근사)
+function polygonCentroid(ring) {
+  let A=0, cx=0, cy=0;
+  for (let i=0;i<ring.length-1;i++){
+    const [x0,y0]=ring[i], [x1,y1]=ring[i+1];
+    const cr = x0*y1 - x1*y0;
+    A+=cr; cx+=(x0+x1)*cr; cy+=(y0+y1)*cr;
+  }
+  if (Math.abs(A)<1e-12){
+    const xs=ring.map(p=>p[0]), ys=ring.map(p=>p[1]);
+    return [xs.reduce((a,b)=>a+b,0)/xs.length, ys.reduce((a,b)=>a+b,0)/ys.length];
+  }
+  A*=0.5;
+  return [cx/(6*A), cy/(6*A)];
+}
+
+// 동 번호 파싱: "은마아파트3동", "은마아파트(9동)", "은마아파트 7동"
+function parseDong(name) {
+  const m = name.match(/(\d+)\s*동/);
+  return m ? (m[1] + '동') : null;
+}
+
+async function extract() {
+  const complexName = document.getElementById('complexName').value.trim();
+  const proxy = document.getElementById('proxyUrl').value.trim();
+  const excludeShop = document.getElementById('excludeShop').checked;
+  if (!complexName) { alert('단지명을 입력하세요'); return; }
+  if (!proxy) { alert('프록시 URL을 입력하세요'); return; }
+
+  const b = map.getBounds();
+  const sw = b.getSouthWest(), ne = b.getNorthEast();
+  const bbox = `${sw.getLng()},${sw.getLat()},${ne.getLng()},${ne.getLat()}`;
+  setStatus(`V-World 호출 중... BBOX=${bbox}`);
+
+  // 프록시로 WFS 요청 (프록시가 KEY/DOMAIN 주입 + CORS 처리)
+  const url = `${proxy}?bbox=${encodeURIComponent(bbox)}&maxFeatures=500`;
+  let data;
+  try {
+    const res = await fetch(url, { cache:'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    data = await res.json();
+  } catch(e) {
+    setStatus('프록시 호출 실패: ' + e.message + ' — 프록시 서버가 켜져 있는지 확인하세요.');
+    return;
+  }
+
+  const feats = data.features || [];
+  const map2 = {};  // dong -> {lat,lng, pts:[]}
+  clearOverlays();
+
+  feats.forEach(f => {
+    const nm = (f.properties && f.properties.bld_nm) || '';
+    if (!nm.startsWith(complexName)) return;
+    if (excludeShop && nm.includes('상가')) return;
+    const dong = parseDong(nm);
+    if (!dong) return;
+    const geom = f.geometry;
+    if (!geom || geom.type !== 'MultiPolygon') return;
+    const ring = geom.coordinates[0][0];  // [lng,lat]
+    const [clng, clat] = polygonCentroid(ring);
+    map2[dong] = { lat:+clat.toFixed(6), lng:+clng.toFixed(6) };
+
+    // 지도에 폴리곤 그리기
+    const path = ring.map(([lng,lat]) => new kakao.maps.LatLng(lat,lng));
+    const poly = new kakao.maps.Polygon({ path, strokeWeight:2, strokeColor:'#8e44ad', strokeOpacity:0.8, fillColor:'#8e44ad', fillOpacity:0.25 });
+    poly.setMap(map); overlays.push(poly);
+    // 중심 마커 + 동번호
+    const mk = new kakao.maps.CustomOverlay({
+      position: new kakao.maps.LatLng(clat, clng),
+      content: `<div style="background:#1B3A5C;color:#fff;border-radius:10px;padding:1px 6px;font-size:11px;font-weight:700;border:1px solid #fff">${dong}</div>`,
+      yAnchor: 0.5
+    });
+    mk.setMap(map); overlays.push(mk);
+  });
+
+  const dongs = Object.keys(map2).sort((a,b)=>parseInt(a)-parseInt(b));
+  extracted = dongs.map(d => ({ building:d, lat:map2[d].lat, lng:map2[d].lng, verified:true }));
+
+  renderList();
+  const shopNote = excludeShop ? ' (상가 제외)' : '';
+  setStatus(`추출 완료: ${extracted.length}개 동${shopNote}. 지도에서 폴리곤/동번호를 확인하고 [JSON 다운로드]하세요.`);
+}
+
+function renderList() {
+  const el = document.getElementById('list');
+  el.innerHTML = '';
+  document.getElementById('count').textContent = extracted.length;
+  extracted.forEach(e => {
+    const d = document.createElement('div');
+    d.className = 'card';
+    d.innerHTML = `<span class="n">${e.building}</span><span class="c">${e.lat}, ${e.lng}</span>`;
+    el.appendChild(d);
+  });
+
+  const complexName = document.getElementById('complexName').value.trim();
+  const clat = extracted.length ? +(extracted.reduce((s,e)=>s+e.lat,0)/extracted.length).toFixed(6) : null;
+  const clng = extracted.length ? +(extracted.reduce((s,e)=>s+e.lng,0)/extracted.length).toFixed(6) : null;
+  const out = {
+    _schema: {
+      description: `${complexName} 동(건물)별 좌표 마스터. V-World 건물 공간정보(WFS lt_c_bldginfo) 폴리곤 중심 자동 추출.`,
+      complex_name: complexName,
+      total_buildings: extracted.length,
+      coordinate_source: 'vworld_polygon_centroid',
+      extracted_at: new Date().toISOString()
+    },
+    center: { lat: clat, lng: clng },
+    buildings: extracted
+  };
+  document.getElementById('jsonOut').value = JSON.stringify(out, null, 2);
+}
+
+function downloadJson() {
+  if (!extracted.length) { alert('먼저 추출하세요'); return; }
+  const txt = document.getElementById('jsonOut').value;
+  const complexName = document.getElementById('complexName').value.trim().replace(/\s+/g,'_');
+  const blob = new Blob([txt], { type:'application/json;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${complexName}_buildings.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+</script>
+</body>
+</html>
