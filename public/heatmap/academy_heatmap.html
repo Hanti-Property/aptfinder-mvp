@@ -92,6 +92,18 @@
   .acc .glcard .fl { font-weight:700; color:#1B3A5C; font-size:13px; }
   .acc .gl-detail { margin-top:8px; padding-top:8px; }
   .iw b { color:#1B3A5C; }
+  /* 같은 건물 캡슐 라벨 */
+  .bldg-label { background:#1B3A5C; color:#fff; font-size:11px; font-weight:700; padding:3px 9px;
+    border-radius:11px; white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,.25); border:1.5px solid #fff; }
+  /* 팝업 내 형제 매물 미니목록 */
+  .iw .sib-head { display:inline-block; background:#eef2f7; color:#1B3A5C; font-weight:700; font-size:11px;
+    padding:2px 8px; border-radius:10px; margin-bottom:6px; }
+  .iw .sib-list { margin-top:6px; border-top:1px solid #eee; padding-top:6px; }
+  .iw .sib { display:flex; justify-content:space-between; gap:8px; padding:3px 4px; border-radius:5px; cursor:pointer; font-size:11.5px; }
+  .iw .sib:hover { background:#f0f4f9; }
+  .iw .sib.cur { background:#eaf1fb; font-weight:700; }
+  .iw .sib .sib-fl { color:#1B3A5C; }
+  .iw .sib .sib-rent { color:#c0392b; font-weight:700; }
 </style>
 </head>
 <body>
@@ -150,6 +162,8 @@ const sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
 </script>
 <script>
 let map, geocoder, listings = [], markers = [], infowindow = null;
+let clusterOverlays = [];    // 같은 건물 캡슐 배경/라벨 오버레이
+let siblingsById = {};       // 매물 id → 같은 건물 형제 매물 배열(자신 포함)
 let heatmapDisplay = null;   // 전역 표시항목 설정 {mode, fields{}}
 let openAccId = null;        // 현재 펼쳐진 아코디언 id
 
@@ -354,6 +368,37 @@ function fanOffsets(lat, n) {
   }
   return out;
 }
+// 같은 건물 캡슐 배경(좌표 기반 사각형, 줌에 자동대응) + 건물 라벨 오버레이 추가
+// base(대표매물), offs(마커 오프셋 배열), count, name(건물명)
+function addClusterCapsule(base, offs, count, name) {
+  // offset 좌표들의 바운딩 박스 + 카드 크기만큼 위경도 여백
+  let minLat=1e9,maxLat=-1e9,minLng=1e9,maxLng=-1e9;
+  offs.forEach(o => {
+    minLat=Math.min(minLat,base.lat+o.dLat); maxLat=Math.max(maxLat,base.lat+o.dLat);
+    minLng=Math.min(minLng,base.lng+o.dLng); maxLng=Math.max(maxLng,base.lng+o.dLng);
+  });
+  // 카드(대략 폭 46px≈24m, 높이 37px) + 여백을 위경도로 환산
+  const mPerDegLat = 111320, mPerDegLng = 111320*Math.cos(base.lat*Math.PI/180);
+  const padLat = 24/mPerDegLat, padLng = 20/mPerDegLng;   // 상하/좌우 여백(m)
+  const sw = new kakao.maps.LatLng(minLat-padLat*1.4, minLng-padLng);
+  const ne = new kakao.maps.LatLng(maxLat+padLat, maxLng+padLng);
+  const rect = new kakao.maps.Rectangle({
+    bounds: new kakao.maps.LatLngBounds(sw, ne),
+    strokeWeight: 1.5, strokeColor: '#1B3A5C', strokeOpacity: 0.5, strokeStyle: 'shortdash',
+    fillColor: '#1B3A5C', fillOpacity: 0.07, zIndex: 1
+  });
+  rect.setMap(map);
+  clusterOverlays.push(rect);
+
+  // 건물 라벨 (캡슐 상단 중앙)
+  const labelPos = new kakao.maps.LatLng(ne.getLat(), (minLng+maxLng)/2);
+  const el = document.createElement('div');
+  el.className = 'bldg-label';
+  el.innerHTML = `🏢 ${esc0(name)} · ${count}건`;
+  const ov = new kakao.maps.CustomOverlay({ position: labelPos, content: el, zIndex: 2, yAnchor:1.35, xAnchor:0.5 });
+  ov.setMap(map);
+  clusterOverlays.push(ov);
+}
 // 여러 매물: 단일 카드와 "같은 크기"의 카드 + 뒤에 겹친 그림자 카드 + 큰 개수 배지
 function stackMarkerImage(colors, count, rentLabel) {
   // 단일 markerImage와 동일한 카드 크기(46x30) 사용
@@ -383,7 +428,11 @@ function stackMarkerImage(colors, count, rentLabel) {
 }
 
 // ---- 렌더 ----
-function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
+function clearMarkers() {
+  markers.forEach(m => m.setMap(null)); markers = [];
+  clusterOverlays.forEach(o => o.setMap(null)); clusterOverlays = [];
+  siblingsById = {};
+}
 
 function getFiltered() {
   const onlyActive = document.getElementById('fActive').checked;
@@ -426,6 +475,16 @@ function renderAll() {
     const sorted = [...entries].sort((a,b)=>(a.l.monthly_rent_manwon||0)-(b.l.monthly_rent_manwon||0));
     const base = sorted[0].l;
     const offs = fanOffsets(base.lat, sorted.length);
+    const isGroup = sorted.length >= 2;
+
+    // 같은 건물(2건 이상): 형제 목록 저장 + 캡슐 배경/라벨 오버레이
+    if (isGroup) {
+      const sibs = sorted.map(e => e.l);
+      sibs.forEach(l => { siblingsById[l.id] = sibs; });
+      const bName = base.building_name || (base.lot_address||'').replace(/^.*\s/, '') || '같은 건물';
+      addClusterCapsule(base, offs, sorted.length, bName);
+    }
+
     sorted.forEach(({l, key}, i) => {
       const p = new kakao.maps.LatLng(base.lat + offs[i].dLat, base.lng + offs[i].dLng);
       const marker = new kakao.maps.Marker({ position: p, map, image: markerImage(usageColor(l.usage), cardLabel(l)), zIndex: 5 + i });
@@ -587,13 +646,36 @@ function openInfo(marker, l) {
     photoHtml = `<div class="photos">${shown.map(p=>`<img src="${p.url||p.dataUrl}" alt="">`).join('')}</div>`;
   }
 
+  // 같은 건물 형제 매물 (2건 이상일 때)
+  const sibs = siblingsById[l.id];
+  let sibHead = '', sibList = '';
+  if (sibs && sibs.length >= 2) {
+    const bName = l.building_name || '같은 건물';
+    sibHead = `<div class="sib-head">🏢 ${esc0(bName)} · 이 건물 매물 ${sibs.length}건</div>`;
+    sibList = `<div class="sib-list">` + sibs.map(s => {
+      const cur = s.id === l.id ? ' cur' : '';
+      const fl = floorStr(s) || '-';
+      return `<div class="sib${cur}" onclick="focusById('${s.id}')">
+        <span class="sib-fl">${esc0(fl)}${(s.usage?' · '+esc0(s.usage):'')}</span>
+        <span class="sib-rent">월 ${fmt(s.monthly_rent_manwon)}만</span>
+      </div>`;
+    }).join('') + `</div>`;
+  }
+
   const html = `<div class="iw">
+    ${sibHead}
     <b>${l.title}</b> ${statusBadge(l.status)}
     ${photoHtml}
     <div>${rows.join('<br>')}</div>
+    ${sibList}
   </div>`;
   infowindow.setContent(html);
   infowindow.open(map, marker);
+}
+// 팝업 형제목록에서 특정 매물로 이동 (id 기준)
+function focusById(id) {
+  const l = listings.find(x => x.id === id);
+  if (l) focusListing(l);
 }
 
 function fmt(n) { return (n||0).toLocaleString('ko-KR'); }
