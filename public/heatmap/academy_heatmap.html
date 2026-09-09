@@ -412,29 +412,30 @@ function renderAll() {
     groups.get(key).push(l);
   });
 
+  // --- 마커: 그룹 표기와 무관하게, 초근접 좌표끼리 다시 묶어 펼친다 ---
+  // (지번 표기 흔들림으로 그룹이 갈려도, 같은 좌표면 겹치지 않게 펼치기 위함)
+  const posClusters = new Map();   // "lat6,lng6" → [{listing, key}]
+  data.forEach(l => {
+    if (!(l.lat && l.lng)) return;
+    const ck = `${Number(l.lat).toFixed(5)},${Number(l.lng).toFixed(5)}`;
+    if (!posClusters.has(ck)) posClusters.set(ck, []);
+    const key = `${l.dong||''} ${l.lot_address||''}`.trim() || l.id;
+    posClusters.get(ck).push({ l, key });
+  });
+  posClusters.forEach(entries => {
+    const sorted = [...entries].sort((a,b)=>(a.l.monthly_rent_manwon||0)-(b.l.monthly_rent_manwon||0));
+    const base = sorted[0].l;
+    const offs = fanOffsets(base.lat, sorted.length);
+    sorted.forEach(({l, key}, i) => {
+      const p = new kakao.maps.LatLng(base.lat + offs[i].dLat, base.lng + offs[i].dLng);
+      const marker = new kakao.maps.Marker({ position: p, map, image: markerImage(usageColor(l.usage), cardLabel(l)), zIndex: 5 + i });
+      marker.__lid = l.id;   // 매물 식별자 (offset 이동 후 좌표매칭 불가 → id로 찾기)
+      kakao.maps.event.addListener(marker, 'click', () => { openAccByKey(key); openInfo(marker, l); });
+      markers.push(marker);
+    });
+  });
+
   groups.forEach((items, key) => {
-    // 좌표 있는 대표 매물
-    const withCoord = items.filter(l => l.lat && l.lng);
-    if (withCoord.length) {
-      const base = withCoord[0];
-      const pos = new kakao.maps.LatLng(base.lat, base.lng);
-      if (items.length === 1) {
-        // 단일 매물: 카드형 마커 (색=용도, 라벨=월세)
-        const marker = new kakao.maps.Marker({ position: pos, map, image: markerImage(usageColor(base.usage), cardLabel(base)) });
-        kakao.maps.event.addListener(marker, 'click', () => { openAccByKey(key); openInfo(marker, base); });
-        markers.push(marker);
-      } else {
-        // 여러 매물: 겹치지 않게 각 매물을 개별 카드 마커로 펼침 (색=용도, 라벨=월세/전용평)
-        const sorted = [...items].sort((a,b)=>(a.monthly_rent_manwon||0)-(b.monthly_rent_manwon||0));
-        const offs = fanOffsets(base.lat, sorted.length);
-        sorted.forEach((l, i) => {
-          const p = new kakao.maps.LatLng(base.lat + offs[i].dLat, base.lng + offs[i].dLng);
-          const marker = new kakao.maps.Marker({ position: p, map, image: markerImage(usageColor(l.usage), cardLabel(l)), zIndex: 5 + i });
-          kakao.maps.event.addListener(marker, 'click', () => { openAccByKey(key); openInfo(marker, l); });
-          markers.push(marker);
-        });
-      }
-    }
     // 사이드 카드 (그룹 단위로 표시)
     if (items.length === 1) {
       const l = items[0];
@@ -469,8 +470,8 @@ function renderAll() {
 function esc0(s){ return String(s==null?'':s).replace(/</g,'&lt;'); }
 function focusListing(l) {
   if (!(l.lat && l.lng)) return;
-  map.setCenter(new kakao.maps.LatLng(l.lat, l.lng)); map.setLevel(3);
-  const mk = markers.find(m => m.getPosition().getLat() === l.lat);
+  const mk = markers.find(m => m.__lid === l.id);
+  map.setCenter(mk ? mk.getPosition() : new kakao.maps.LatLng(l.lat, l.lng)); map.setLevel(3);
   if (mk) openInfo(mk, l);
 }
 
