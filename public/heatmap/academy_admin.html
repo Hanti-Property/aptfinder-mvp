@@ -192,6 +192,13 @@
 
 <!-- 카카오 지도 SDK (aptfinder 공통 앱키) -->
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services&autoload=false"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// Supabase 클라이언트 (같은 origin이라 admin 로그인 세션 공유)
+const SUPA_URL = 'https://ocfrymsoxqhzzfytdsqr.supabase.co';
+const SUPA_KEY = 'sb_publishable_LZbZDOOyXMa6iX1Ufcl0wg_9XX94tSW';
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+</script>
 <script>
 // ====== 컬럼 정의 ======
 // frz: 좌측 고정, admin: 관리자 전용(지도/공개 미노출), auto: 자동계산, kind: 편집 위젯
@@ -249,18 +256,23 @@ const LS_KEY = 'aptfinder_academy_listings_v1';
 const LS_UI  = 'aptfinder_academy_ui_v1';
 const LS_VIEWS = 'aptfinder_academy_views_v1';
 
-// ====== 저장부 (나중에 Supabase로 교체할 지점) ======
+// ====== 저장부 (Supabase) ======
 async function loadListings() {
-  const cached = localStorage.getItem(LS_KEY);
-  if (cached) {
-    try { const j = JSON.parse(cached); heatmapDisplay = j.heatmap_display || null; return normalizeCoords(j.listings || j); } catch(e){}
+  try {
+    const { data, error } = await sb.from('academy_listings').select('*').order('id');
+    if (error) throw error;
+    // 전역 설정
+    const { data: st } = await sb.from('academy_settings').select('heatmap_display').eq('id',1).single();
+    heatmapDisplay = (st && st.heatmap_display) || null;
+    return normalizeCoords(data || []);
+  } catch (e) {
+    console.error('Supabase 로드 실패, 정적 파일로 폴백', e);
+    const res = await fetch('data/academy_listings.json?t=' + Date.now(), { cache:'no-store' });
+    const json = await res.json();
+    heatmapDisplay = json.heatmap_display || null;
+    return normalizeCoords(json.listings || []);
   }
-  const res = await fetch('data/academy_listings.json?t=' + Date.now(), { cache:'no-store' });
-  const json = await res.json();
-  heatmapDisplay = json.heatmap_display || null;
-  return normalizeCoords(json.listings || []);
 }
-// lat/lng를 숫자로 정규화 (문자열이면 LatLng 오작동)
 function normalizeCoords(arr) {
   arr.forEach(l => {
     if (l.lat!=null && l.lat!=='') l.lat = Number(l.lat); else l.lat = null;
@@ -268,14 +280,45 @@ function normalizeCoords(arr) {
   });
   return arr;
 }
-function persist() {
-  localStorage.setItem(LS_KEY, JSON.stringify({ listings, heatmap_display: heatmapDisplay }));
-  flashSaved();
+// 한 매물을 Supabase에 upsert (편집·복사·추가·좌표 변경 시)
+async function saveOne(l) {
+  if (!l) return;
+  const row = { ...l };
+  // 빈 문자열 날짜/숫자 정리
+  if (row.received_date==='') row.received_date=null;
+  if (row.expiry_date==='') row.expiry_date=null;
+  try {
+    const { error } = await sb.from('academy_listings').upsert(row);
+    if (error) throw error;
+    flashSaved();
+  } catch(e) { console.error('저장 실패', e); flashSaved('⚠️ 저장 실패: '+(e.message||e)); }
 }
-function flashSaved() {
+async function removeOne(id) {
+  try { await sb.from('academy_listings').delete().eq('id', id); } catch(e){ console.error(e); }
+}
+// persist(l): 특정 매물 하나 저장. persist() 인자 없으면 전체 upsert(안전).
+function persist(l) {
+  if (l && l.id) { saveOne(l); return; }
+  // 인자 없는 호출 → 전체 저장 (드묾: 대량 변경 등)
+  saveAll();
+}
+async function saveAll() {
+  try {
+    const rows = listings.map(x => {
+      const r = {...x};
+      if (r.received_date==='') r.received_date=null;
+      if (r.expiry_date==='') r.expiry_date=null;
+      return r;
+    });
+    const { error } = await sb.from('academy_listings').upsert(rows);
+    if (error) throw error;
+    flashSaved();
+  } catch(e){ console.error('전체 저장 실패', e); flashSaved('⚠️ 저장 실패'); }
+}
+function flashSaved(msg) {
   const el = document.getElementById('saveState');
-  el.textContent = '✓ 저장됨 ' + new Date().toLocaleTimeString('ko-KR');
-  clearTimeout(flashSaved._t); flashSaved._t = setTimeout(()=>{ el.textContent=''; }, 2000);
+  el.textContent = msg || ('✓ 저장됨 ' + new Date().toLocaleTimeString('ko-KR'));
+  clearTimeout(flashSaved._t); flashSaved._t = setTimeout(()=>{ el.textContent=''; }, 2500);
 }
 function saveUI() { localStorage.setItem(LS_UI, JSON.stringify({ colW, fs: getFs(), colOrder: COLS.map(c=>c.key) })); }
 function loadUI() {
@@ -316,7 +359,7 @@ function initMap() {
   if (listings.length) autoGeocode();
 }
 async function boot() {
-  listings = await loadListings(); loadViews(); render();
+  listings = await loadListings(); await loadViews(); render();
   // geocoder가 준비돼 있으면 지금, 아니면 initMap에서 호출됨
   if (geocoder) autoGeocode();
 }
@@ -340,7 +383,7 @@ async function regeocodeOne(id) {
   const c = await bestGeocode(l);
   if (c) {
     l.lat=c.lat; l.lng=c.lng; if(c.road) l.road_address=c.road;
-    persist(); renderDetail(l); render();
+    persist(l); renderDetail(l); render();
     alert(`좌표 재계산 완료\n조회: ${q}\n이전: ${before}\n현재: ${l.lat}, ${l.lng}`);
   } else {
     alert(`좌표를 찾지 못했습니다.\n조회 주소: ${q}\n\n지번주소 칸을 확인하세요 (예: "대치동 923-13").`);
@@ -350,7 +393,7 @@ async function regeocodeOne(id) {
 async function geocodeRow(l) {
   if (!geocoder || !l.lot_address) return;
   const c = await bestGeocode(l);
-  if (c) { l.lat=c.lat; l.lng=c.lng; if(c.road) l.road_address=c.road; persist();
+  if (c) { l.lat=c.lat; l.lng=c.lng; if(c.road) l.road_address=c.road; persist(l);
     if (l.id===selectedId) renderDetail(l);
     render();
   }
@@ -381,7 +424,7 @@ async function autoGeocode() {
     await new Promise(r=>setTimeout(r,120));
   }
   autoGeoRunning = false;
-  persist(); render();
+  saveAll(); render();
   if (el) el.textContent = '✓ 좌표 자동 확인 완료';
   setTimeout(()=>{ if(el && el.textContent.includes('좌표')) el.textContent=''; }, 2500);
 }
@@ -689,7 +732,7 @@ function commit(id, field, value, mode, inputEl) {
   l[field]=v;
   let addrChanged = false;
   if (field==='lot_address'||field==='dong') { l.lat=null; l.lng=null; addrChanged=true; }
-  persist(); showSavedTick(inputEl);
+  persist(l); showSavedTick(inputEl);
   // 자동계산에 영향 주는 필드는 표 다시 그림 (전용㎡→전용평→평단가, 월세→평단가)
   if (['monthly_rent_manwon','area_py','area_m2'].includes(field)) render();
   // 주소가 바뀌면 좌표 자동 재확인
@@ -704,7 +747,7 @@ function showSavedTick(inputEl) {
 function bump(id, field, step) {
   const l=listings.find(x=>x.id===id); if(!l) return;
   let next=Math.round(((Number(l[field])||0)+step)*100)/100; if(next<0)next=0;
-  l[field]=next; persist(); render();
+  l[field]=next; persist(l); render();
 }
 
 // ====== 행 추가/복사/삭제 ======
@@ -718,7 +761,7 @@ function addRow() {
     approval_year:'',tag:'',memo:'',status:'active',lat:null,lng:null,
     rooms:[],restrooms:{count:null,location:'',gender:''},facility_transfer:'',has_license:'',photos:[],
     public_fields:{title:true,dong:true,lot_address:true,road_address:true,floor:true,usage:true,area_m2:true,area_py:true,deposit_manwon:true,monthly_rent_manwon:true,maintenance_manwon:true,approval_year:true,received_date:false,expiry_date:false,rooms:true,restrooms:true,facility_transfer:true,has_license:true,photos:true}};
-  listings.unshift(l); persist(); render(); selectRow(l.id);
+  listings.unshift(l); persist(l); render(); selectRow(l.id);
 }
 function copySelected() {
   if (!selectedId) { alert('먼저 표에서 복사할 매물의 행(●)을 선택하세요.'); return; }
@@ -730,14 +773,14 @@ function copyRow(id) {
   // 복사본은 좌표를 비워 지번 기준으로 다시 잡는다 (위치 오류 방지)
   copy.lat=null; copy.lng=null;
   const idx=listings.findIndex(x=>x.id===id); listings.splice(idx+1,0,copy);
-  persist(); render(); selectRow(copy.id);
+  persist(copy); render(); selectRow(copy.id);
   geocodeRow(copy);   // 지번 기준 좌표 자동 채우기
 }
 function deleteRow(id) {
   const l=listings.find(x=>x.id===id); if(!l) return;
   if(!confirm(`삭제할까요?\n${l.title||l.id}`)) return;
   listings=listings.filter(x=>x.id!==id); if(selectedId===id)selectedId=null;
-  persist(); render();
+  removeOne(id); flashSaved(); render();
 }
 
 // ====== 행 선택 + 지도 ======
@@ -783,7 +826,7 @@ function togglePublic(id, field) {
   const l=listings.find(x=>x.id===id); if(!l) return;
   l.public_fields = l.public_fields||{};
   l.public_fields[field] = !l.public_fields[field];
-  persist(); renderDetail(l);
+  persist(l); renderDetail(l);
 }
 // 편집 필드 (라벨 + 입력 + 공개토글)
 function fld(l, label, field, type='text', opts=null) {
@@ -854,7 +897,7 @@ function detailBody(l) {
   if (detailTab==='photo') {
     const photos = l.photos||[];
     const grid = photos.map((p,i)=>`<div class="photo">
-      <img src="${p.dataUrl}" alt="">
+      <img src="${p.url||p.dataUrl}" alt="">
       <button class="x" onclick="delPhoto('${l.id}',${i})">✕</button>
       <span class="ord">${i+1}</span>
       <span class="mv"><button onclick="movePhoto('${l.id}',${i},-1)">◀</button><button onclick="movePhoto('${l.id}',${i},1)">▶</button></span>
@@ -888,32 +931,46 @@ function openDisplaySettings(){
   document.getElementById('dispModal').style.display='flex';
 }
 function closeDisplaySettings(){ document.getElementById('dispModal').style.display='none'; }
-function applyDisplaySettings(){
+async function applyDisplaySettings(){
   const f={};
   document.querySelectorAll('#dispFields input[data-dk]').forEach(cb=>{ f[cb.dataset.dk]=cb.checked; });
   heatmapDisplay = { mode:'global', fields:f };
-  persist(); closeDisplaySettings();
-  alert('히트맵 표시항목을 저장했습니다. [파일로 저장] 후 히트맵에 반영됩니다.');
+  try {
+    const { error } = await sb.from('academy_settings').upsert({ id:1, heatmap_display: heatmapDisplay });
+    if (error) throw error;
+    closeDisplaySettings();
+    alert('히트맵 표시항목을 저장했습니다. (전체 히트맵에 바로 반영됩니다)');
+  } catch(e){ alert('설정 저장 실패: '+(e.message||e)); }
 }
 
 // ====== 강의실 편집 ======
-function addRoom(id){ const l=listings.find(x=>x.id===id); if(!l)return; l.rooms=l.rooms||[]; l.rooms.push({name:'',capacity:null}); persist(); renderDetail(l); render(); }
-function editRoom(id,i,field,val){ const l=listings.find(x=>x.id===id); if(!l||!l.rooms[i])return; l.rooms[i][field]= field==='capacity'?(val===''?null:Math.round(Number(val))):val; persist(); if(field==='capacity'){renderDetail(l);render();} }
-function delRoom(id,i){ const l=listings.find(x=>x.id===id); if(!l)return; l.rooms.splice(i,1); persist(); renderDetail(l); render(); }
+function addRoom(id){ const l=listings.find(x=>x.id===id); if(!l)return; l.rooms=l.rooms||[]; l.rooms.push({name:'',capacity:null}); persist(l); renderDetail(l); render(); }
+function editRoom(id,i,field,val){ const l=listings.find(x=>x.id===id); if(!l||!l.rooms[i])return; l.rooms[i][field]= field==='capacity'?(val===''?null:Math.round(Number(val))):val; persist(l); if(field==='capacity'){renderDetail(l);render();} }
+function delRoom(id,i){ const l=listings.find(x=>x.id===id); if(!l)return; l.rooms.splice(i,1); persist(l); renderDetail(l); render(); }
 // ====== 화장실 편집 ======
-function editRestroom(id,field,val){ const l=listings.find(x=>x.id===id); if(!l)return; l.restrooms=l.restrooms||{}; l.restrooms[field]= field==='count'?(val===''?null:Math.round(Number(val))):val; persist(); }
+function editRestroom(id,field,val){ const l=listings.find(x=>x.id===id); if(!l)return; l.restrooms=l.restrooms||{}; l.restrooms[field]= field==='count'?(val===''?null:Math.round(Number(val))):val; persist(l); }
 // ====== 사진 편집 (canvas 압축) ======
 async function addPhotos(id, ev){
   const l=listings.find(x=>x.id===id); if(!l)return; l.photos=l.photos||[];
   const files=[...ev.target.files];
+  flashSaved('사진 업로드 중...');
   for(const f of files){
     if(l.photos.length>=10){ alert('최대 10장까지입니다.'); break; }
     if(!f.type.startsWith('image/')) continue;
-    try{ const p=await compressImage(f, 1280, 1024*1024); l.photos.push(p); }
-    catch(e){ console.warn('이미지 처리 실패', e); }
+    try{
+      const p=await compressImage(f, 1280, 1024*1024);   // {dataUrl,w,h}
+      // dataURL → Blob → Supabase Storage 업로드
+      const blob = await (await fetch(p.dataUrl)).blob();
+      const path = `${id}/${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;
+      const { error } = await sb.storage.from('academy-photos').upload(path, blob, { contentType:'image/jpeg', upsert:false });
+      if (error) throw error;
+      const { data } = sb.storage.from('academy-photos').getPublicUrl(path);
+      l.photos.push({ url: data.publicUrl, path, w:p.w, h:p.h });
+    }
+    catch(e){ console.warn('사진 업로드 실패', e); flashSaved('⚠️ 사진 업로드 실패: '+(e.message||e)); }
   }
   ev.target.value='';
-  persist(); renderDetail(l); render();
+  persist(l); renderDetail(l); render();
 }
 // 폭 maxW로 축소 + 품질 조정으로 maxBytes 이하 JPEG dataURL 생성
 function compressImage(file, maxW, maxBytes){
@@ -933,15 +990,18 @@ function compressImage(file, maxW, maxBytes){
     img.onerror=reject; img.src=url;
   });
 }
-function delPhoto(id,i){ const l=listings.find(x=>x.id===id); if(!l)return; l.photos.splice(i,1); persist(); renderDetail(l); render(); }
-function movePhoto(id,i,dir){ const l=listings.find(x=>x.id===id); if(!l)return; const j=i+dir; if(j<0||j>=l.photos.length)return; [l.photos[i],l.photos[j]]=[l.photos[j],l.photos[i]]; persist(); renderDetail(l); }
+function delPhoto(id,i){ const l=listings.find(x=>x.id===id); if(!l)return; const p=l.photos[i]; if(p&&p.path){ sb.storage.from('academy-photos').remove([p.path]).catch(()=>{}); } l.photos.splice(i,1); persist(l); renderDetail(l); render(); }
+function movePhoto(id,i,dir){ const l=listings.find(x=>x.id===id); if(!l)return; const j=i+dir; if(j<0||j>=l.photos.length)return; [l.photos[i],l.photos[j]]=[l.photos[j],l.photos[i]]; persist(l); renderDetail(l); }
 
-// ====== 커스텀 뷰 ======
-function loadViews() {
-  try { views = JSON.parse(localStorage.getItem(LS_VIEWS)||'{}'); } catch(e){ views={}; }
+// ====== 커스텀 뷰 (Supabase) ======
+async function loadViews() {
+  try {
+    const { data } = await sb.from('academy_views').select('*');
+    views = {};
+    (data||[]).forEach(v => { views[v.name] = v.ids || []; });
+  } catch(e){ console.error('뷰 로드 실패', e); views={}; }
   refreshViewSelect();
 }
-function saveViews() { localStorage.setItem(LS_VIEWS, JSON.stringify(views)); }
 function refreshViewSelect() {
   const sel = document.getElementById('viewSelect');
   const cur = sel.value;
@@ -960,14 +1020,18 @@ function checkAllVisible(on) {
   filtered().forEach(l => { if(on) checked.add(l.id); else checked.delete(l.id); });
   render();
 }
-function saveView() {
+async function saveView() {
   const name = (document.getElementById('viewName').value||'').trim();
   if (!name) { alert('뷰 이름을 입력하세요 (예: 김원장님용)'); return; }
   if (checked.size===0) { alert('먼저 매물을 체크(뷰 포함)하세요.'); return; }
-  views[name] = [...checked];
-  saveViews(); refreshViewSelect();
-  document.getElementById('viewSelect').value = name;
-  alert(`뷰 "${name}" 저장됨 (${checked.size}건)`);
+  const ids = [...checked];
+  try {
+    const { error } = await sb.from('academy_views').upsert({ name, ids });
+    if (error) throw error;
+    views[name] = ids; refreshViewSelect();
+    document.getElementById('viewSelect').value = name;
+    alert(`뷰 "${name}" 저장됨 (${ids.length}건)`);
+  } catch(e){ alert('뷰 저장 실패: '+(e.message||e)); }
 }
 function loadView(name) {
   if (!name || !views[name]) return;
@@ -975,11 +1039,12 @@ function loadView(name) {
   document.getElementById('viewName').value = name;
   render();
 }
-function deleteView() {
+async function deleteView() {
   const name = document.getElementById('viewSelect').value;
   if (!name) { alert('삭제할 뷰를 선택하세요.'); return; }
   if (!confirm(`뷰 "${name}"을(를) 삭제할까요?`)) return;
-  delete views[name]; saveViews(); refreshViewSelect();
+  try { await sb.from('academy_views').delete().eq('name', name); } catch(e){ console.error(e); }
+  delete views[name]; refreshViewSelect();
   document.getElementById('viewSelect').value = '';
 }
 // 선택 매물만 히트맵에 표시: 임시 뷰를 localStorage에 넣고 히트맵 URL 파라미터로 전달
@@ -1032,7 +1097,7 @@ async function geocodeMissing() {
     else fail.push(l.lot_address);
     await new Promise(r=>setTimeout(r,120));
   }
-  persist(); render();
+  saveAll(); render();
   if(el) el.textContent='✓ 좌표 재계산 완료';
   alert(`좌표 재계산 완료: ${ok}/${all.length}건 성공${fail.length?`\n실패(지번 확인 필요): ${fail.join(', ')}`:''}\n\n[파일로 저장]해야 일반 히트맵에 반영됩니다.`);
 }
@@ -1050,10 +1115,10 @@ function downloadJson() {
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='academy_listings.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
-function saveLocal(){ persist(); alert('브라우저에 저장했습니다. (JSON 내보내기로 data/ 폴더에 반영)'); }
+function saveLocal(){ saveAll(); alert('DB에 저장했습니다.'); }
 function importJson(ev) {
   const f=ev.target.files[0]; if(!f) return; const rd=new FileReader();
-  rd.onload=()=>{ try{ const j=JSON.parse(rd.result); listings=j.listings||j; if(j.heatmap_display) heatmapDisplay=j.heatmap_display; persist(); render(); autoGeocode(); alert(`불러오기 완료: ${listings.length}건`);}catch(e){alert('JSON 파싱 실패: '+e.message);} };
+  rd.onload=()=>{ try{ const j=JSON.parse(rd.result); listings=j.listings||j; if(j.heatmap_display) heatmapDisplay=j.heatmap_display; saveAll(); render(); autoGeocode(); alert(`불러오기 완료: ${listings.length}건`);}catch(e){alert('JSON 파싱 실패: '+e.message);} };
   rd.readAsText(f);
 }
 </script>

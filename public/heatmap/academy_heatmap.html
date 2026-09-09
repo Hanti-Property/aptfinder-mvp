@@ -142,6 +142,12 @@
 
 <!-- 카카오 지도 SDK (aptfinder 공통 앱키) -->
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services&autoload=false"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPA_URL='https://ocfrymsoxqhzzfytdsqr.supabase.co';
+const SUPA_KEY='sb_publishable_LZbZDOOyXMa6iX1Ufcl0wg_9XX94tSW';
+const sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+</script>
 <script>
 let map, geocoder, listings = [], markers = [], infowindow = null;
 let heatmapDisplay = null;   // 전역 표시항목 설정 {mode, fields{}}
@@ -224,13 +230,18 @@ async function loadData() {
   }
   setStatus('매물 데이터 로딩 중...');
   try {
-    const res = await fetch('data/academy_listings.json?t=' + Date.now(), { cache: 'no-store' });
-    const json = await res.json();
-    listings = json.listings;
-    heatmapDisplay = json.heatmap_display || null;
+    const { data, error } = await sb.from('academy_listings').select('*').order('id');
+    if (error) throw error;
+    listings = data || [];
+    const { data: st } = await sb.from('academy_settings').select('heatmap_display').eq('id',1).single();
+    heatmapDisplay = (st && st.heatmap_display) || null;
   } catch (e) {
-    setStatus('data/academy_listings.json 로드 실패. 로컬 서버(http://localhost)에서 열어야 합니다.');
-    return;
+    console.error('Supabase 로드 실패, 정적 폴백', e);
+    try {
+      const res = await fetch('data/academy_listings.json?t=' + Date.now(), { cache: 'no-store' });
+      const json = await res.json();
+      listings = json.listings; heatmapDisplay = json.heatmap_display || null;
+    } catch(e2){ setStatus('매물 데이터 로드 실패'); return; }
   }
   await geocodeAll();
   renderAll();
@@ -550,7 +561,7 @@ function openInfo(marker, l) {
   let photoHtml = '';
   if (isPublic(l,'photos') && l.photos && l.photos.length) {
     const shown = l.photos.slice(0, 2);   // 히트맵엔 최대 2장
-    photoHtml = `<div class="photos">${shown.map(p=>`<img src="${p.dataUrl}" alt="">`).join('')}</div>`;
+    photoHtml = `<div class="photos">${shown.map(p=>`<img src="${p.url||p.dataUrl}" alt="">`).join('')}</div>`;
   }
 
   const html = `<div class="iw">
@@ -574,7 +585,7 @@ function detailHtml(l) {
   let photos = '';
   if (isPublic(l,'photos')) {
     if (l.photos && l.photos.length) {
-      photos = `<div class="dv-photos">${l.photos.map(p=>`<img src="${p.dataUrl}" onclick="window.open('${p.dataUrl}')">`).join('')}</div>`;
+      photos = `<div class="dv-photos">${l.photos.map(p=>`<img src="${p.url||p.dataUrl}" onclick="window.open('${p.url||p.dataUrl}')">`).join('')}</div>`;
     } else {
       photos = `<div class="dv-nophoto">📷 등록된 사진 없음</div>`;
     }
