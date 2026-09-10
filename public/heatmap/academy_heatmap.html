@@ -238,7 +238,11 @@ function initMap() {
   geocoder = new kakao.maps.services.Geocoder();
   infowindow = new kakao.maps.InfoWindow({ removable: true });
   // 지도 빈 곳 클릭 시 드래그 팝업 닫기
-  kakao.maps.event.addListener(map, 'click', () => closeDragPopup());
+  kakao.maps.event.addListener(map, 'click', () => {
+    // 팝업을 막 열었으면(형제 클릭 등으로 재생성 직후) 지도 click 오탐으로 닫지 않음
+    if (window.__popupOpenedAt && (Date.now() - window.__popupOpenedAt) < 400) return;
+    closeDragPopup();
+  });
   loadData();
 }
 
@@ -612,6 +616,7 @@ function showDraggablePopup(position, title, innerHtml) {
     position, content: el, xAnchor: 0.5, yAnchor: 1.0, zIndex: 100
   });
   dragPopup.setMap(map);
+  window.__popupOpenedAt = Date.now();   // 지도 click 오탐 닫기 방지용
 
   // 닫기
   el.querySelector('.dpop-close').addEventListener('click', (e)=>{ e.stopPropagation(); closeDragPopup(); });
