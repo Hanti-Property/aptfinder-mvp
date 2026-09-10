@@ -734,7 +734,8 @@ function cardHtml(l) {
     <div class="meta">${l.dong} · ${floorStr(l)} · ${areaStr(l)}${l._geoFailed?' · ⚠️주소확인필요':''}</div>`;
 }
 
-function openInfo(marker, l) {
+function openInfo(marker, l) { openInfoAt(marker.getPosition(), l); }
+function openInfoAt(position, l) {
   const rows = [];
   rows.push(`보증금 <b>${fmt(l.deposit_manwon)}</b>만 / 월세 <b style="color:#c0392b">${fmt(l.monthly_rent_manwon)}</b>만`);
   if (isPublic(l,'maintenance_manwon') && l.maintenance_manwon) rows.push(`관리비 ${fmt(l.maintenance_manwon)}만`);
@@ -777,7 +778,7 @@ function openInfo(marker, l) {
     sibList = `<div class="sib-list">` + sibs.map(s => {
       const cur = s.id === l.id ? ' cur' : '';
       const fl = floorStr(s) || '-';
-      return `<div class="sib${cur}" onclick="focusById('${s.id}')">
+      return `<div class="sib${cur}" onclick="focusById('${s.id}', event)">
         <span class="sib-fl">${esc0(fl)}${(s.usage?' · '+esc0(s.usage):'')}</span>
         <span class="sib-rent">월 ${fmt(s.monthly_rent_manwon)}만</span>
       </div>`;
@@ -791,12 +792,19 @@ function openInfo(marker, l) {
     <div>${rows.join('<br>')}</div>
     ${sibList}
   </div>`;
-  showDraggablePopup(marker.getPosition(), l.title, html);
+  showDraggablePopup(position, l.title, html);
 }
 // 팝업 형제목록에서 특정 매물로 이동 (id 기준)
-function focusById(id) {
+// 형제는 자기 마커가 없을 수 있음(대표 1개만 표시) → 현재 팝업 위치에서 그대로 전환
+function focusById(id, ev) {
+  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
   const l = listings.find(x => x.id === id);
-  if (l) focusListing(l);
+  if (!l) return;
+  // 현재 팝업 위치(있으면) 유지, 없으면 매물 좌표
+  let pos = null;
+  if (dragPopup) pos = dragPopup.getPosition();
+  if (!pos && l.lat && l.lng) pos = new kakao.maps.LatLng(l.lat, l.lng);
+  openInfoAt(pos, l);
 }
 
 function fmt(n) { return (n||0).toLocaleString('ko-KR'); }
