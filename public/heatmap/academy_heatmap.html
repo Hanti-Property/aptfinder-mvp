@@ -17,13 +17,14 @@
   .layout { display:flex; height:calc(100vh - 106px); }
   #mapWrap { flex:1; min-width:200px; position:relative; }
   #map { width:100%; height:100%; }
-  #labelToggle { position:absolute; top:10px; left:10px; z-index:10; background:#fff; border-radius:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,.2); padding:6px 8px 7px; display:flex; flex-direction:column; gap:4px; }
-  #labelToggle .seg-label { font-size:10px; color:#888; font-weight:600; padding-left:2px; }
-  #labelToggle .seg { display:flex; background:#eef0f3; border-radius:8px; padding:2px; gap:2px; }
-  #labelToggle .seg-btn { border:none; background:transparent; color:#888; font-size:13px; font-weight:700;
-    padding:6px 12px; border-radius:6px; cursor:pointer; transition:all .15s; }
-  #labelToggle .seg-btn:hover { color:#1B3A5C; }
+  /* 마커 표시값 토글: 우측 상단, 작게, 클릭 아무데나 = 전환 */
+  #labelToggle { position:absolute; top:9px; right:9px; z-index:10; background:#fff; border-radius:9px;
+    box-shadow:0 2px 8px rgba(0,0,0,.2); padding:3px; display:flex; align-items:center; gap:3px;
+    cursor:pointer; user-select:none; transition:box-shadow .15s; }
+  #labelToggle:hover { box-shadow:0 3px 12px rgba(0,0,0,.28); }
+  #labelToggle .seg { display:flex; background:#eef0f3; border-radius:6px; padding:2px; gap:2px; pointer-events:none; }
+  #labelToggle .seg-btn { border:none; background:transparent; color:#9aa3ad; font-size:11px; font-weight:700;
+    padding:4px 8px; border-radius:5px; transition:all .15s; white-space:nowrap; }
   #labelToggle .seg-btn.on { background:#1B3A5C; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); }
   #splitter { width:6px; flex-shrink:0; cursor:col-resize; background:#e5e5e5; position:relative; }
   #splitter:hover, #splitter.dragging { background:#1B3A5C; }
@@ -133,11 +134,10 @@
 <div class="layout">
   <div id="mapWrap">
     <div id="map"></div>
-    <div id="labelToggle" title="마커에 표시할 값 선택">
-      <span class="seg-label">마커 표시</span>
+    <div id="labelToggle" title="클릭하면 월세 / 전용평 전환" onclick="toggleCardLabel()">
       <div class="seg">
-        <button class="seg-btn on" data-mode="rent" onclick="setCardLabel('rent')">💰 월세</button>
-        <button class="seg-btn" data-mode="area" onclick="setCardLabel('area')">📐 전용평</button>
+        <button class="seg-btn on" data-mode="rent">💰 월세</button>
+        <button class="seg-btn" data-mode="area">📐 전용평</button>
       </div>
     </div>
   </div>
@@ -336,6 +336,8 @@ function setCardLabel(mode){
   });
   renderAll();
 }
+// 컨테이너 아무 곳 클릭 → 월세/전용평 전환
+function toggleCardLabel(){ setCardLabel(labelMode === 'rent' ? 'area' : 'rent'); }
 // 전용평: area_m2를 진실의 원천으로. 있으면 항상 여기서 평 계산 (area_py 입력오류 방어), 없으면 area_py
 function areaPyVal(l){
   if (l.area_m2!=null && l.area_m2!=='') return Math.round(Number(l.area_m2)/3.3058);
