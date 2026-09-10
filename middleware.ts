@@ -7,6 +7,7 @@ import { createServerClient } from '@supabase/ssr'
 const PUBLIC_PREFIXES = [
   '/share/',        // 고객 공유 링크 (핵심 공개 대상)
   '/login',         // 로그인 페이지
+  '/logout',        // 로그아웃 페이지 (세션 없어도 접근 가능해야 함)
 ]
 // 공유 페이지 등 공개 페이지가 사용하는 정적 자산 확장자 (렌더에 필요 → 허용)
 const PUBLIC_ASSET_EXT = /\.(svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?|ttf|map)$/i
