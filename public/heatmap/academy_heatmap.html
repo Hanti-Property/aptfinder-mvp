@@ -237,12 +237,8 @@ function initMap() {
   });
   geocoder = new kakao.maps.services.Geocoder();
   infowindow = new kakao.maps.InfoWindow({ removable: true });
-  // 지도 빈 곳 클릭 시 드래그 팝업 닫기
-  kakao.maps.event.addListener(map, 'click', () => {
-    // 팝업을 막 열었으면(형제 클릭 등으로 재생성 직후) 지도 click 오탐으로 닫지 않음
-    if (window.__popupOpenedAt && (Date.now() - window.__popupOpenedAt) < 400) return;
-    closeDragPopup();
-  });
+  // (지도 빈 곳 클릭 닫기는 제거함 — 형제 클릭이 지도로 통과해 팝업이 닫히던 문제 방지)
+  // 팝업은 X 버튼, 또는 다른 마커 클릭(새 팝업으로 교체)으로 닫는다.
   loadData();
 }
 
@@ -613,10 +609,11 @@ function showDraggablePopup(position, title, innerHtml) {
      <div class="dpop-body">${innerHtml}</div>`;
 
   dragPopup = new kakao.maps.CustomOverlay({
-    position, content: el, xAnchor: 0.5, yAnchor: 1.0, zIndex: 100
+    position, content: el, xAnchor: 0.5, yAnchor: 1.0, zIndex: 100,
+    clickable: true   // 오버레이가 클릭 이벤트를 소비 → 지도로 통과(=map click 닫힘) 방지
   });
   dragPopup.setMap(map);
-  window.__popupOpenedAt = Date.now();   // 지도 click 오탐 닫기 방지용
+  window.__popupOpenedAt = Date.now();   // 지도 click 오탐 닫기 방지용(보조)
 
   // 형제 매물 항목 클릭 → 해당 매물로 전환 (직접 바인딩: 드래그/전파와 무관하게 확실히 동작)
   el.querySelectorAll('.sib[data-sibid]').forEach(node => {
