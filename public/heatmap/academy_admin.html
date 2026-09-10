@@ -772,6 +772,10 @@ function copyRow(id) {
   const copy=JSON.parse(JSON.stringify(src)); copy.id=nextId(); copy.title=(src.title||'')+' (사본)';
   // 복사본은 좌표를 비워 지번 기준으로 다시 잡는다 (위치 오류 방지)
   copy.lat=null; copy.lng=null;
+  // 사진은 복사하지 않는다 — 원본과 같은 Storage 파일을 가리키면,
+  // 사본/원본 어느 쪽에서 삭제해도 실제 파일이 지워져 양쪽 다 깨지기 때문.
+  // 사본에 사진이 필요하면 새로 업로드하세요.
+  copy.photos=[];
   const idx=listings.findIndex(x=>x.id===id); listings.splice(idx+1,0,copy);
   persist(copy); render(); selectRow(copy.id);
   geocodeRow(copy);   // 지번 기준 좌표 자동 채우기
