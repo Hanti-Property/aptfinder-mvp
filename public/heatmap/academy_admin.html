@@ -1168,7 +1168,9 @@ async function createShareLink() {
     });
     if (error) throw error;
     views[name] = ids; refreshViewSelect();
-    const url = `${location.origin}/share/academy.html?token=${token}`;
+    // 고객 공유 링크는 항상 고객용 도메인으로 (관리자가 aptfinder.net에서 만들어도 hanti-property.com으로 노출)
+    const SHARE_ORIGIN = 'https://hanti-property.com';
+    const url = `${SHARE_ORIGIN}/share/academy.html?token=${token}`;
     const expText = expires ? `${days}일 후 만료 (${expires.slice(0,10)})` : '무기한';
     try {
       await navigator.clipboard.writeText(url);
