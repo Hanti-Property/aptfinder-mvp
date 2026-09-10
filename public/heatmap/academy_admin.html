@@ -171,6 +171,16 @@
   <button class="btn-load" onclick="deleteView()">뷰 삭제</button>
   <span style="width:1px;height:20px;background:#ddd;margin:0 4px"></span>
   <button class="btn-add" style="background:#8e44ad" onclick="openViewInHeatmap()">▶ 선택 매물 히트맵으로 보기</button>
+  <span style="width:1px;height:20px;background:#ddd;margin:0 4px"></span>
+  <label style="font-size:calc(var(--fs) - 2px);color:#555">유효기간
+    <select id="shareExpiry" style="padding:5px 6px;border:1px solid #ccc;border-radius:6px;font-size:calc(var(--fs) - 2px)">
+      <option value="7">7일</option>
+      <option value="30" selected>30일</option>
+      <option value="90">90일</option>
+      <option value="0">무기한</option>
+    </select>
+  </label>
+  <button class="btn-primary" style="background:#0b8457" onclick="createShareLink()">🔗 고객 공유 링크 만들기</button>
 </div>
 
 <div class="layout">
@@ -1137,6 +1147,36 @@ async function deleteView() {
   try { await sb.from('academy_views').delete().eq('name', name); } catch(e){ console.error(e); }
   delete views[name]; refreshViewSelect();
   document.getElementById('viewSelect').value = '';
+}
+// 고객 공유 링크 생성: 토큰 발급 → academy_views 저장 → 공개 URL 복사
+async function createShareLink() {
+  if (checked.size===0) { alert('먼저 매물을 체크(뷰 포함)하세요.'); return; }
+  let name = (document.getElementById('viewName').value||'').trim();
+  if (!name) { name = '공유_' + new Date().toISOString().slice(0,10) + '_' + Math.random().toString(36).slice(2,5); }
+  const ids = [...checked];
+  // 토큰: 추측 불가능한 랜덤 문자열
+  const token = (crypto.randomUUID ? crypto.randomUUID().replace(/-/g,'') : (Date.now().toString(36)+Math.random().toString(36).slice(2))).slice(0,24);
+  const days = parseInt(document.getElementById('shareExpiry').value, 10);
+  const now = new Date();
+  const expires = days>0 ? new Date(now.getTime() + days*86400000).toISOString() : null;
+  try {
+    const { error } = await sb.from('academy_views').upsert({
+      name, ids,
+      share_token: token,
+      share_created_at: now.toISOString(),
+      share_expires_at: expires
+    });
+    if (error) throw error;
+    views[name] = ids; refreshViewSelect();
+    const url = `${location.origin}/share/academy.html?token=${token}`;
+    const expText = expires ? `${days}일 후 만료 (${expires.slice(0,10)})` : '무기한';
+    try {
+      await navigator.clipboard.writeText(url);
+      prompt(`✅ 공유 링크가 복사되었습니다 · ${expText}\n고객에게 이 링크를 보내세요:`, url);
+    } catch(e){
+      prompt(`공유 링크 (${expText}) — 복사해서 고객에게 보내세요:`, url);
+    }
+  } catch(e){ alert('공유 링크 생성 실패: '+(e.message||e)); }
 }
 // 선택 매물만 히트맵에 표시: 임시 뷰를 localStorage에 넣고 히트맵 URL 파라미터로 전달
 function openViewInHeatmap() {

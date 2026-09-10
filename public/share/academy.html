@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학원 매물 히트맵 (임대차) — AptFinder</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,'Malgun Gothic',sans-serif; background:#f5f5f5; color:#222; }
+  header { background:#1B3A5C; color:#fff; padding:14px 20px; }
+  header h1 { font-size:18px; }
+  header p { font-size:12px; opacity:.85; margin-top:2px; }
+  .keybar { background:#fff; border-bottom:1px solid #e5e5e5; padding:10px 20px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .keybar input { flex:1; min-width:220px; padding:8px 10px; border:1px solid #ccc; border-radius:6px; font-size:13px; }
+  .keybar button { padding:8px 14px; border:none; border-radius:6px; background:#1B3A5C; color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
+  .keybar small { color:#888; font-size:11px; }
+  .layout { display:flex; height:calc(100vh - 106px); }
+  #mapWrap { flex:1; min-width:200px; position:relative; }
+  #map { width:100%; height:100%; }
+  /* 마커 표시값 토글: 우측 상단, 작게, 클릭 아무데나 = 전환 */
+  #labelToggle { position:absolute; top:9px; right:9px; z-index:10; background:#fff; border-radius:9px;
+    box-shadow:0 2px 8px rgba(0,0,0,.2); padding:3px; display:flex; align-items:center; gap:3px;
+    cursor:pointer; user-select:none; transition:box-shadow .15s; }
+  #labelToggle:hover { box-shadow:0 3px 12px rgba(0,0,0,.28); }
+  #labelToggle .seg { display:flex; background:#eef0f3; border-radius:6px; padding:2px; gap:2px; pointer-events:none; }
+  #labelToggle .seg-btn { border:none; background:transparent; color:#9aa3ad; font-size:11px; font-weight:700;
+    padding:4px 8px; border-radius:5px; transition:all .15s; white-space:nowrap; }
+  #labelToggle .seg-btn.on { background:#1B3A5C; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+  #splitter { width:6px; flex-shrink:0; cursor:col-resize; background:#e5e5e5; position:relative; }
+  #splitter:hover, #splitter.dragging { background:#1B3A5C; }
+  #splitter::after { content:'⋮'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#999; font-size:14px; }
+  .side { width:var(--side-w, 340px); flex-shrink:0; background:#fff; border-left:1px solid #e5e5e5; overflow-y:auto; }
+  .side h2 { font-size:13px; padding:12px 16px; background:#f0f3f7; color:#1B3A5C; position:sticky; top:0; border-bottom:1px solid #e5e5e5; }
+  .filters { padding:12px 16px; border-bottom:1px solid #eee; font-size:12px; }
+  .filters label { display:block; margin-bottom:6px; color:#555; }
+  .legend { padding:10px 16px; border-bottom:1px solid #eee; font-size:11px; }
+  .legend span.dot { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:5px; vertical-align:-2px; }
+  .card { padding:12px 16px; border-bottom:1px solid #eee; cursor:pointer; font-size:12px; }
+  .card:hover { background:#f7f9fc; }
+  .card .t { font-weight:700; color:#1B3A5C; font-size:13px; margin-bottom:4px; }
+  .card .rent { color:#c0392b; font-weight:700; }
+  .card .meta { color:#777; margin-top:3px; }
+  .badge { display:inline-block; padding:1px 6px; border-radius:3px; font-size:10px; color:#fff; margin-left:4px; }
+  .status-active { background:#27ae60; }
+  .status-pending { background:#f39c12; }
+  .status-closed { background:#95a5a6; }
+  #status { padding:8px 20px; font-size:12px; color:#1B3A5C; background:#fffbe6; border-bottom:1px solid #f0e6b0; }
+  .iw { padding:10px 12px; font-size:12px; line-height:1.55; width:240px; box-sizing:border-box; white-space:normal; word-break:keep-all; overflow-wrap:anywhere; }
+  .iw .photos { display:flex; gap:4px; overflow-x:auto; margin:6px 0; }
+  .iw .photos img { height:70px; border-radius:4px; flex-shrink:0; }
+  .iw .rooms { font-size:11px; color:#555; }
+  /* 우측 상세 뷰 */
+  #detailView { padding:0 0 30px; }
+  /* ===== 상세 뷰: 통일된 카드 디자인 ===== */
+  .dv { font-size:13px; color:#333; }
+  .dv-title { font-size:15px; font-weight:700; color:#1B3A5C; padding:2px 0 8px; display:flex; align-items:center; gap:6px; line-height:1.3; }
+  .dv-photos { display:flex; gap:6px; overflow-x:auto; padding:0; margin-bottom:10px; }
+  .dv-photos img { height:100px; border-radius:8px; flex-shrink:0; cursor:pointer; border:1px solid #eee; }
+  img.imgerr { width:100px; min-width:80px; background:#f5f5f5; border:1px dashed #ddd !important; object-fit:none;
+    font-size:10px; color:#bbb; text-align:center; }
+  .dv-nophoto { background:#f5f5f5; border:1px dashed #ddd; border-radius:8px; padding:16px; text-align:center; color:#bbb; font-size:12px; margin-bottom:10px; }
+  .dv-price { background:#fbeceb; border-radius:8px; padding:10px 12px; margin-bottom:12px; font-size:13px; color:#555; }
+  .dv-price .big { font-size:17px; font-weight:800; color:#c0392b; }
+  /* 정보 섹션: 라벨 고정폭 + 값 좌측정렬로 줄 맞춤 */
+  .dv-sec { margin-bottom:12px; }
+  .dv-sec > h4 { font-size:12px; font-weight:700; color:#1B3A5C; margin:0 0 6px; padding-bottom:4px; border-bottom:1px solid #eaeaea; }
+  .dv-row { display:grid; grid-template-columns:64px 1fr; gap:4px 8px; font-size:13px; line-height:1.9; }
+  .dv-row .k { color:#999; }
+  .dv-row .v { color:#222; }
+  .dv-chips { display:flex; flex-wrap:wrap; gap:5px; }
+  .dv-chip { background:#eef4fb; border:1px solid #cfe0f3; border-radius:12px; padding:3px 10px; font-size:12px; color:#1B3A5C; }
+  .dv-rooms { display:grid; grid-template-columns:1fr auto; gap:2px 12px; font-size:13px; }
+  .dv-rooms .rn { color:#444; }
+  .dv-rooms .rc { color:#c0392b; font-weight:600; text-align:right; }
+  /* 아코디언 펼침 영역 */
+  .acc { background:#f8fafc; overflow:hidden; }
+  .acc .acc-inner { padding:12px 16px; }
+  .acc > .dv { padding:14px 16px 14px 20px; }
+  /* ===== 선택된 카드 + 상세를 하나로 연결 ===== */
+  #list > div.sel { position:relative; background:#eef4fb; border-left:4px solid #1B3A5C; margin:0; box-shadow:0 1px 0 rgba(27,58,92,.15); }
+  #list > div.sel .card { background:#eef4fb; border-bottom:none; }
+  #list > div.sel .card .t { color:#12324a; }
+  #list > div.sel .card .t::before { content:'▸ '; color:#1B3A5C; }
+  #list > div.sel .acc.open { background:#f4f8fd; border-bottom:none; padding-bottom:2px; }
+  /* 카드→상세 연결 화살표 (패널 상단 중앙에 꼬리) */
+  #list > div.sel .acc.open .dv { position:relative; }
+  #list > div.sel .acc.open .dv::before {
+    content:''; position:absolute; top:-7px; left:24px; width:12px; height:12px;
+    background:#fff; border-left:1px solid #cdddf0; border-top:1px solid #cdddf0;
+    transform:rotate(45deg);
+  }
+
+  .acc .glcard .dv { padding:0; }
+  .acc .glcard { border:1px solid #e5e5e5; border-radius:8px; padding:10px 12px; margin-bottom:8px; background:#fff; }
+  .acc .glcard .fl { font-weight:700; color:#1B3A5C; font-size:13px; }
+  .acc .gl-detail { margin-top:8px; padding-top:8px; }
+  .iw b { color:#1B3A5C; }
+  /* 같은 건물 캡슐 라벨 */
+  .bldg-label { background:#1B3A5C; color:#fff; font-size:11px; font-weight:700; padding:3px 9px;
+    border-radius:11px; white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,.25); border:1.5px solid #fff; }
+  /* 팝업 내 형제 매물 미니목록 */
+  .iw .sib-head { display:inline-block; background:#eef2f7; color:#1B3A5C; font-weight:700; font-size:11px;
+    padding:2px 8px; border-radius:10px; margin-bottom:6px; }
+  .iw .sib-list { margin-top:6px; border-top:1px solid #eee; padding-top:6px; }
+  .iw .sib { display:flex; justify-content:space-between; gap:8px; padding:3px 4px; border-radius:5px; cursor:pointer; font-size:11.5px; }
+  .iw .sib:hover { background:#f0f4f9; }
+  .iw .sib.cur { background:#eaf1fb; font-weight:700; }
+  .iw .sib .sib-fl { color:#1B3A5C; }
+  .iw .sib .sib-rent { color:#c0392b; font-weight:700; }
+  /* 드래그 가능한 팝업 */
+  .dpop { background:#fff; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,.28); width:264px;
+    overflow:hidden; border:1px solid #d8dde3; cursor:grab; }
+  .dpop.dragging { cursor:grabbing; }
+  .dpop .dpop-bar { display:flex; align-items:center; justify-content:space-between; gap:6px;
+    background:#1B3A5C; color:#fff; padding:6px 8px 6px 10px; user-select:none; }
+  .dpop .dpop-bar .dpop-title { font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dpop .dpop-bar .dpop-grip { opacity:.7; font-size:12px; }
+  .dpop .dpop-close { cursor:pointer; font-size:15px; line-height:1; padding:0 4px; border:none; background:transparent; color:#fff; }
+  .dpop .dpop-close:hover { opacity:.7; }
+  .dpop .dpop-body { max-height:44vh; overflow-y:auto; }
+  .dpop .iw { width:auto; cursor:auto; }
+  /* 스크롤/클릭 상호작용 요소는 드래그와 분리 */
+  .dpop .dpop-body .sib, .dpop .dpop-body img { cursor:pointer; }
+</style>
+</head>
+<body>
+<header>
+  <h1>추천 학원 매물 <span style="font-weight:400;font-size:13px;">· 임대차</span></h1>
+  <p>담당자가 선별한 매물입니다. 지도의 카드를 클릭하면 상세 정보를 볼 수 있습니다.</p>
+</header>
+
+<div id="status">지도 초기화 중...</div>
+
+<div class="layout">
+  <div id="mapWrap">
+    <div id="map"></div>
+    <div id="labelToggle" title="클릭하면 월세 / 전용평 전환" onclick="toggleCardLabel()">
+      <div class="seg">
+        <button class="seg-btn on" data-mode="rent">💰 월세</button>
+        <button class="seg-btn" data-mode="area">📐 전용평</button>
+      </div>
+    </div>
+  </div>
+  <div id="splitter" title="드래그하여 지도/목록 넓이 조절"></div>
+  <div class="side">
+    <h2>필터</h2>
+    <div class="filters">
+      <label><input type="checkbox" id="fActive" checked onchange="renderAll()"> 거래가능(active)만 보기</label>
+      <label>동:
+        <select id="fDong" onchange="renderAll()">
+          <option value="">전체</option>
+          <option value="대치동">대치동</option>
+          <option value="역삼동">역삼동</option>
+        </select>
+      </label>
+    </div>
+    <div class="legend">
+      <b>용도별 색상</b><br>
+      <span class="dot" style="background:#1B6AC9"></span>학원 &nbsp;
+      <span class="dot" style="background:#27ae60"></span>교습소 &nbsp;<br>
+      <span class="dot" style="background:#e67e22"></span>스터디카페 &nbsp;
+      <span class="dot" style="background:#8e44ad"></span>기타 &nbsp;
+      <span class="dot" style="background:#7f8c8d"></span>미지정<br>
+      <span style="font-size:11px;color:#888;margin-top:4px;display:inline-block">카드 숫자: 지도 좌측 상단 <b>[💰 월세 / 📐 전용평]</b> 버튼으로 전환</span>
+    </div>
+    <h2>매물 목록 (<span id="count">0</span>)</h2>
+    <div id="list"></div>
+  </div>
+</div>
+
+<!-- 카카오 지도 SDK (aptfinder 공통 앱키) -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services&autoload=false"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPA_URL='https://ocfrymsoxqhzzfytdsqr.supabase.co';
+const SUPA_KEY='sb_publishable_LZbZDOOyXMa6iX1Ufcl0wg_9XX94tSW';
+const sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+</script>
+<script>
+let map, geocoder, listings = [], markers = [], infowindow = null;
+let dragPopup = null;        // 드래그 가능한 CustomOverlay 팝업
+let clusterOverlays = [];    // 같은 건물 캡슐 배경/라벨 오버레이
+let siblingsById = {};       // 매물 id → 같은 건물 형제 매물 배열(자신 포함)
+let heatmapDisplay = null;   // 전역 표시항목 설정 {mode, fields{}}
+let openAccId = null;        // 현재 펼쳐진 아코디언 id
+
+function setStatus(msg) { document.getElementById('status').textContent = msg; }
+
+// SDK 로드 후 자동 초기화
+window.addEventListener('load', () => {
+  if (typeof kakao === 'undefined' || !kakao.maps) {
+    setStatus('카카오맵 SDK 로드 실패. 네트워크 또는 도메인 등록(aptfinder.net)을 확인하세요.');
+    return;
+  }
+  kakao.maps.load(initMap);
+  setupSplitter();
+});
+
+// 지도/사이드 넓이 드래그 조절
+function setupSplitter() {
+  const sp = document.getElementById('splitter');
+  if (!sp) return;
+  // 저장된 폭 복원
+  const saved = localStorage.getItem('aptfinder_heatmap_side_w');
+  if (saved) document.documentElement.style.setProperty('--side-w', saved + 'px');
+  let dragging = false;
+  const layout = document.querySelector('.layout');
+  const onMove = (e) => {
+    if (!dragging) return;
+    const rect = layout.getBoundingClientRect();
+    // 사이드 폭 = 오른쪽 끝 - 마우스 위치
+    let w = rect.right - e.clientX;
+    w = Math.max(240, Math.min(w, rect.width - 260));  // 최소/최대 제한
+    document.documentElement.style.setProperty('--side-w', w + 'px');
+    if (map) map.relayout();   // 지도 타일 재배치
+  };
+  const onUp = () => {
+    if (!dragging) return;
+    dragging = false; sp.classList.remove('dragging');
+    document.body.style.userSelect = '';
+    const w = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--side-w'));
+    if (w) localStorage.setItem('aptfinder_heatmap_side_w', w);
+    if (map) setTimeout(()=>map.relayout(), 50);
+  };
+  sp.addEventListener('mousedown', (e) => {
+    e.preventDefault(); dragging = true; sp.classList.add('dragging');
+    document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+function initMap() {
+  map = new kakao.maps.Map(document.getElementById('map'), {
+    center: new kakao.maps.LatLng(37.4996, 127.0602), // 대치동 중심
+    level: 5
+  });
+  geocoder = new kakao.maps.services.Geocoder();
+  infowindow = new kakao.maps.InfoWindow({ removable: true });
+  // (지도 빈 곳 클릭 닫기는 제거함 — 형제 클릭이 지도로 통과해 팝업이 닫히던 문제 방지)
+  // 팝업은 X 버튼, 또는 다른 마커 클릭(새 팝업으로 교체)으로 닫는다.
+  loadData();
+}
+
+// ---- 매물 데이터 로드 ----
+// ==== 공개 공유 페이지: 토큰으로 뷰 + 해당 매물만 로드 (로그인 불필요) ====
+async function loadData() {
+  const token = new URLSearchParams(location.search).get('token');
+  if (!token) { showBlocked('유효하지 않은 링크입니다.', '공유 링크에 토큰이 없습니다.'); return; }
+  setStatus('매물 데이터 로딩 중...');
+  try {
+    // 1) 토큰으로 뷰 조회
+    const { data: view, error: ve } = await sb.from('academy_views')
+      .select('name, ids, share_expires_at').eq('share_token', token).single();
+    if (ve || !view) { showBlocked('링크를 찾을 수 없습니다.', '이미 삭제되었거나 잘못된 링크입니다.'); return; }
+    // 2) 만료 검증
+    if (view.share_expires_at && new Date(view.share_expires_at) < new Date()) {
+      showBlocked('링크가 만료되었습니다.', `이 공유 링크는 ${String(view.share_expires_at).slice(0,10)}에 만료되었습니다. 담당자에게 새 링크를 요청하세요.`);
+      return;
+    }
+    // 3) 뷰에 담긴 매물만 조회
+    const ids = Array.isArray(view.ids) ? view.ids : [];
+    if (!ids.length) { showBlocked('표시할 매물이 없습니다.', '이 링크에 포함된 매물이 없습니다.'); return; }
+    const { data, error } = await sb.from('academy_listings').select('*').in('id', ids);
+    if (error) throw error;
+    listings = data || [];
+    // 4) 전역 표시설정
+    const { data: st } = await sb.from('academy_settings').select('heatmap_display').eq('id',1).single();
+    heatmapDisplay = (st && st.heatmap_display) || null;
+    // 헤더 배지
+    const badge = document.querySelector('header p');
+    if (badge) badge.innerHTML = `🏫 <b>${esc0(view.name||'추천 매물')}</b> · ${listings.length}건`;
+  } catch (e) {
+    console.error(e);
+    showBlocked('불러오기에 실패했습니다.', '잠시 후 다시 시도해 주세요.');
+    return;
+  }
+  await geocodeAll();
+  renderAll();
+}
+// 접근 불가 화면
+function showBlocked(title, desc) {
+  setStatus('');
+  const wrap = document.querySelector('.layout') || document.body;
+  wrap.innerHTML = `<div style="margin:auto;text-align:center;padding:60px 24px;max-width:420px">
+    <div style="font-size:44px;margin-bottom:12px">🔒</div>
+    <h2 style="color:#1B3A5C;font-size:20px;margin-bottom:8px">${esc0(title)}</h2>
+    <p style="color:#666;font-size:14px;line-height:1.6">${esc0(desc)}</p>
+  </div>`;
+  wrap.style.display='flex'; wrap.style.alignItems='center'; wrap.style.justifyContent='center';
+}
+
+// ---- 주소 → 좌표 (건물 단위 매핑 핵심) ----
+function geocodeOne(query) {
+  return new Promise((resolve) => {
+    if (!query || !String(query).trim()) { resolve(null); return; }  // 빈 쿼리 방어
+    geocoder.addressSearch(query, (result, status) => {
+      if (status === kakao.maps.services.Status.OK && result.length) {
+        resolve({ lat: parseFloat(result[0].y), lng: parseFloat(result[0].x) });
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
+// 지번주소에서 "동 + 지번(숫자-숫자)"만 추출 (건물명 제거)
+function geoQuery(l) {
+  const dong = l.dong || '';
+  const m = (l.lot_address||'').replace(dong,'').match(/\d+(-\d+)?/);
+  const jibun = m ? m[0] : '';
+  return `서울 강남구 ${dong ? dong + ' ' + jibun : (jibun || l.lot_address || '')}`.trim();
+}
+async function geocodeAll() {
+  let done = 0;
+  for (const l of listings) {
+    if (l.lat && l.lng) { done++; continue; }
+    setStatus(`주소 좌표 변환 중... (${done+1}/${listings.length}) ${l.title}`);
+    // 지번(건물명 제거)으로 지오코딩
+    let coord = await geocodeOne(geoQuery(l));
+    if (coord) { l.lat = coord.lat; l.lng = coord.lng; }
+    else { l._geoFailed = true; }
+    done++;
+    await new Promise(r => setTimeout(r, 120));
+  }
+  const failed = listings.filter(l => l._geoFailed).length;
+  setStatus(`좌표 변환 완료. 총 ${listings.length}건${failed ? `, 실패 ${failed}건(주소 확인 필요)` : ''}.`);
+}
+
+// ---- 용도별 색상 ----
+const USAGE_COLORS = {
+  '학원':      '#1B6AC9',   // 파랑
+  '교습소':    '#27ae60',   // 초록
+  '스터디카페':'#e67e22',   // 주황
+  '기타':      '#8e44ad',   // 보라
+};
+const USAGE_DEFAULT = '#7f8c8d';   // 미지정 = 회색
+function usageColor(usage) { return USAGE_COLORS[usage] || USAGE_DEFAULT; }
+// 카드 라벨 모드: 'rent'(월세) 또는 'area'(전용평)
+let labelMode = 'rent';
+function cardLabelMode(){ return labelMode; }
+function setCardLabel(mode){
+  labelMode = mode;
+  document.querySelectorAll('#labelToggle .seg-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.mode === mode);
+  });
+  renderAll();
+}
+// 컨테이너 아무 곳 클릭 → 월세/전용평 전환
+function toggleCardLabel(){ setCardLabel(labelMode === 'rent' ? 'area' : 'rent'); }
+// 전용평: area_m2를 진실의 원천으로. 있으면 항상 여기서 평 계산 (area_py 입력오류 방어), 없으면 area_py
+function areaPyVal(l){
+  if (l.area_m2!=null && l.area_m2!=='') return Math.round(Number(l.area_m2)/3.3058);
+  if (l.area_py!=null && l.area_py!=='') return Math.round(Number(l.area_py));
+  return null;
+}
+function cardLabel(l) {
+  if (cardLabelMode()==='area') {
+    const py = areaPyVal(l);
+    return py!=null ? py+'평' : '-';
+  }
+  return fmtRent(l.monthly_rent_manwon);
+}
+
+// 단일 매물: 카드형 마커 (라운드 사각 + 라벨). 색=용도, 라벨=월세/전용평(선택)
+function markerImage(color, label) {
+  label = label || '';
+  const W = 46, H = 30;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H+7}" viewBox="0 0 ${W} ${H+7}">
+    <rect x="1" y="1" width="${W-2}" height="${H-2}" rx="6" fill="${color}" stroke="#fff" stroke-width="2"/>
+    <polygon points="${W/2-5},${H-2} ${W/2+5},${H-2} ${W/2},${H+6}" fill="${color}" stroke="#fff" stroke-width="1"/>
+    <text x="${W/2}" y="${H/2+4}" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">${label}</text>
+  </svg>`;
+  return new kakao.maps.MarkerImage(
+    'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))),
+    new kakao.maps.Size(W, H+7),
+    { offset: new kakao.maps.Point(W/2, H+6) }
+  );
+}
+// 월세를 짧게: 1825 → "1,825", 350 → "350"
+function fmtRent(n){ return (n||0).toLocaleString('ko-KR'); }
+// 같은 건물 여러 매물을 겹치지 않게 펼칠 위경도 오프셋 배열 반환
+// 카드(약 50px) 간격 확보. 4개 이하는 1줄, 초과는 2줄로 중앙정렬 배치.
+function fanOffsets(lat, n) {
+  if (n <= 1) return [{dLat:0,dLng:0}];
+  const STEP_M = 26;                          // 카드 간 거리(m) — 겹치지 않을 정도
+  const mPerDegLat = 111320;
+  const mPerDegLng = 111320 * Math.cos(lat * Math.PI/180);
+  const perRow = n <= 4 ? n : Math.ceil(n/2);
+  const rows = Math.ceil(n / perRow);
+  const out = [];
+  for (let i=0;i<n;i++){
+    const r = Math.floor(i/perRow);
+    const c = i % perRow;
+    const cntThisRow = (r === rows-1) ? (n - perRow*(rows-1)) : perRow;
+    const cx = (c - (cntThisRow-1)/2) * STEP_M;
+    const cy = (r - (rows-1)/2) * STEP_M;
+    out.push({ dLat: cy / mPerDegLat, dLng: cx / mPerDegLng });
+  }
+  return out;
+}
+// 대표 매물 선정: 지상층(층≥1) 중 전용면적 최대. 지상층 없으면 전체 중 면적 최대.
+function floorNum(l){
+  const s = String(l.floor==null?'':l.floor).trim();
+  const m = s.match(/-?\d+/);          // 첫 숫자 (408호 → 408, -1 → -1, 3~5 → 3)
+  return m ? parseInt(m[0],10) : null;
+}
+function areaForRank(l){ const v = areaPyVal(l); return v==null ? -1 : v; }
+function pickRepresentative(items){
+  // 지상층: 층/호수 숫자가 양수(지하 -N만 제외). 판정 불가(null)도 지상 후보로 포함
+  const ground = items.filter(l => { const f = floorNum(l); return f==null || f>=1; });
+  const pool = ground.length ? ground : items;
+  return [...pool].sort((a,b)=> areaForRank(b)-areaForRank(a))[0];
+}
+// 같은 건물 캡슐 배경(좌표 기반 사각형, 줌에 자동대응) + 건물 라벨 오버레이 추가
+// base(대표매물), offs(마커 오프셋 배열), count, name(건물명)
+function addClusterCapsule(base, offs, count, name) {
+  // offset 좌표들의 바운딩 박스 + 카드 크기만큼 위경도 여백
+  let minLat=1e9,maxLat=-1e9,minLng=1e9,maxLng=-1e9;
+  offs.forEach(o => {
+    minLat=Math.min(minLat,base.lat+o.dLat); maxLat=Math.max(maxLat,base.lat+o.dLat);
+    minLng=Math.min(minLng,base.lng+o.dLng); maxLng=Math.max(maxLng,base.lng+o.dLng);
+  });
+  // 카드(대략 폭 46px≈24m, 높이 37px) + 여백을 위경도로 환산
+  const mPerDegLat = 111320, mPerDegLng = 111320*Math.cos(base.lat*Math.PI/180);
+  const padLat = 24/mPerDegLat, padLng = 20/mPerDegLng;   // 상하/좌우 여백(m)
+  const sw = new kakao.maps.LatLng(minLat-padLat*1.4, minLng-padLng);
+  const ne = new kakao.maps.LatLng(maxLat+padLat, maxLng+padLng);
+  const rect = new kakao.maps.Rectangle({
+    bounds: new kakao.maps.LatLngBounds(sw, ne),
+    strokeWeight: 1.5, strokeColor: '#1B3A5C', strokeOpacity: 0.5, strokeStyle: 'shortdash',
+    fillColor: '#1B3A5C', fillOpacity: 0.07, zIndex: 1
+  });
+  rect.setMap(map);
+  clusterOverlays.push(rect);
+
+  // 건물 라벨 (캡슐 상단 중앙)
+  const labelPos = new kakao.maps.LatLng(ne.getLat(), (minLng+maxLng)/2);
+  const el = document.createElement('div');
+  el.className = 'bldg-label';
+  el.innerHTML = `🏢 ${esc0(name)} · ${count}건`;
+  const ov = new kakao.maps.CustomOverlay({ position: labelPos, content: el, zIndex: 2, yAnchor:1.35, xAnchor:0.5 });
+  ov.setMap(map);
+  clusterOverlays.push(ov);
+}
+// 여러 매물: 단일 카드와 "같은 크기"의 카드 + 뒤에 겹친 그림자 카드 + 큰 개수 배지
+function stackMarkerImage(colors, count, rentLabel) {
+  // 단일 markerImage와 동일한 카드 크기(46x30) 사용
+  const W = 46, H = 30, PAD = 8;   // PAD: 뒤 카드/배지 여유
+  const cardColor = colors[0] || '#888';   // 앞 카드 = 대표(최저 월세) 색
+  const back2 = colors[1] || cardColor;
+  const back3 = colors[2] || back2;
+  const ox = 4;  // 뒤 카드 어긋남
+  // 뒤쪽 겹친 카드(2겹까지 살짝 보이게)
+  let back = '';
+  if (count >= 3) back += `<rect x="${PAD+ox*2}" y="${1}" width="${W-2}" height="${H-2}" rx="6" fill="${back3}" opacity="0.55" stroke="#fff" stroke-width="1.5"/>`;
+  if (count >= 2) back += `<rect x="${PAD+ox}" y="${3}" width="${W-2}" height="${H-2}" rx="6" fill="${back2}" opacity="0.75" stroke="#fff" stroke-width="1.5"/>`;
+  const frontX = PAD;
+  const front = `<rect x="${frontX}" y="5" width="${W-2}" height="${H-2}" rx="6" fill="${cardColor}" stroke="#fff" stroke-width="2"/>
+    <polygon points="${frontX+W/2-5},${H+3} ${frontX+W/2+5},${H+3} ${frontX+W/2},${H+11}" fill="${cardColor}" stroke="#fff" stroke-width="1"/>
+    <text x="${frontX+W/2}" y="${5+H/2+4}" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">${rentLabel||''}</text>`;
+  // 큰 개수 배지 (좌상단)
+  const badge = `<circle cx="9" cy="10" r="9.5" fill="#1B3A5C" stroke="#fff" stroke-width="2"/>
+    <text x="9" y="14" font-size="12" font-weight="800" fill="#fff" text-anchor="middle" font-family="sans-serif">${count>9?'9+':count}</text>`;
+  const TW = W + PAD + ox*2, TH = H + 14;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${TW}" height="${TH}" viewBox="0 0 ${TW} ${TH}">${back}${front}${badge}</svg>`;
+  return new kakao.maps.MarkerImage(
+    'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))),
+    new kakao.maps.Size(TW, TH),
+    { offset: new kakao.maps.Point(frontX + W/2, H+10) }
+  );
+}
+
+// ---- 렌더 ----
+function clearMarkers() {
+  markers.forEach(m => m.setMap(null)); markers = [];
+  clusterOverlays.forEach(o => o.setMap(null)); clusterOverlays = [];
+  siblingsById = {};
+}
+
+function getFiltered() {
+  const onlyActive = document.getElementById('fActive').checked;
+  const dong = document.getElementById('fDong').value;
+  return listings.filter(l => {
+    if (onlyActive && l.status !== 'active') return false;
+    if (dong && l.dong !== dong) return false;
+    return true;
+  });
+}
+
+function renderAll() {
+  if (!map) return;
+  clearMarkers();
+  openAccId = null;  // 재렌더 시 아코디언 상태 초기화
+  const data = getFiltered();
+  const listEl = document.getElementById('list');
+  listEl.innerHTML = '';
+  document.getElementById('count').textContent = data.length;
+
+  // 그룹핑 — 같은 건물 판정: 좌표(5자리)가 같으면 같은 건물. 좌표 없으면 지번으로.
+  // (지번 표기 흔들림 "756-11" vs "756-11 스카" 로 갈리는 문제 방지 → 마커/우측목록 동일 그룹 사용)
+  const groups = new Map();
+  data.forEach(l => {
+    const key = (l.lat && l.lng)
+      ? `@${Number(l.lat).toFixed(5)},${Number(l.lng).toFixed(5)}`
+      : (`${l.dong||''} ${l.lot_address||''}`.trim() || l.id);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(l);
+  });
+
+  // --- 마커: 위 그룹(좌표 기준)을 그대로 사용 ---
+  groups.forEach((items, key) => {
+    if (items.length === 1) {
+      // 단일 매물: 카드형 마커
+      const l = items[0];
+      const pos = new kakao.maps.LatLng(l.lat, l.lng);
+      const marker = new kakao.maps.Marker({ position: pos, map, image: markerImage(usageColor(l.usage), cardLabel(l)), zIndex: 5 });
+      marker.__lid = l.id;
+      kakao.maps.event.addListener(marker, 'click', () => { openAccByKey(key); openInfo(marker, l); });
+      markers.push(marker);
+    } else {
+      // 같은 건물(2건 이상): 대표 매물(지상층 중 전용면적 최대) 1개만 표시 + 사선 겹침 + 개수 배지
+      const sibs = [...items].sort((a,b)=>(a.monthly_rent_manwon||0)-(b.monthly_rent_manwon||0));
+      sibs.forEach(l => { siblingsById[l.id] = sibs; });
+      const rep = pickRepresentative(items);
+      const pos = new kakao.maps.LatLng(rep.lat, rep.lng);
+      const colors = sibs.map(l => usageColor(l.usage));
+      const marker = new kakao.maps.Marker({
+        position: pos, map,
+        image: stackMarkerImage(colors, items.length, cardLabel(rep), usageColor(rep.usage)),
+        zIndex: 6
+      });
+      marker.__lid = rep.id;
+      kakao.maps.event.addListener(marker, 'click', () => { openAccByKey(key); openInfo(marker, rep); });
+      markers.push(marker);
+    }
+  });
+
+  groups.forEach((items, key) => {
+    // 사이드 카드 (그룹 단위로 표시)
+    if (items.length === 1) {
+      const l = items[0];
+      const wrap = document.createElement('div');
+      wrap.dataset.gkey = key;
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = cardHtml(l);
+      const panel = document.createElement('div');
+      panel.className = 'acc';   // 펼침 영역
+      card.onclick = () => toggleAccordion(l.id, wrap, panel, () => detailHtml(l), () => focusOn(l));
+      wrap.appendChild(card); wrap.appendChild(panel);
+      listEl.appendChild(wrap);
+    } else {
+      const wrap = document.createElement('div');
+      wrap.dataset.gkey = key;
+      const card = document.createElement('div');
+      card.className = 'card';
+      const rents = items.map(i=>i.monthly_rent_manwon).filter(Boolean);
+      const minR = rents.length?Math.min(...rents):0, maxR = rents.length?Math.max(...rents):0;
+      const rep0 = items[0];
+      const gLabel = groupLabel(items);   // 좌표 key 대신 건물명/지번 라벨
+      card.innerHTML = `<div class="t">${esc0(gLabel)} <span class="badge status-active">${items.length}건</span></div>
+        <div class="rent">월세 ${fmt(minR)}~${fmt(maxR)}만</div>
+        <div class="meta">${items.map(i=>floorStr(i)).filter(Boolean).join(', ')||'여러 층'}</div>`;
+      const panel = document.createElement('div');
+      panel.className = 'acc';
+      card.onclick = () => toggleAccordion(key, wrap, panel, () => groupAccHtml(key, items), () => { const b=items.find(i=>i.lat&&i.lng); if(b) focusOn(b); });
+      wrap.appendChild(card); wrap.appendChild(panel);
+      listEl.appendChild(wrap);
+    }
+  });
+}
+function esc0(s){ return String(s==null?'':s).replace(/</g,'&lt;'); }
+// 그룹(같은 건물) 표시 라벨: 건물명 우선, 없으면 동+지번
+function groupLabel(items){
+  const rep = items[0] || {};
+  const bn = (rep.building_name||'').trim();
+  const lot = `${rep.dong||''} ${rep.lot_address||''}`.trim();
+  if (bn && lot) return `${lot} ${bn}`;
+  return lot || bn || '같은 건물';
+}
+function focusListing(l) {
+  if (!(l.lat && l.lng)) return;
+  const mk = markers.find(m => m.__lid === l.id);
+  map.setCenter(mk ? mk.getPosition() : new kakao.maps.LatLng(l.lat, l.lng)); map.setLevel(3);
+  if (mk) openInfo(mk, l);
+}
+
+// 같은 건물(지번) 여러 매물 → 층별 목록 팝업
+function openGroupInfo(marker, key, items) {
+  const sorted = [...items].sort((a,b)=>(a.monthly_rent_manwon||0)-(b.monthly_rent_manwon||0));
+  const rows = sorted.map(l => {
+    const flo = floorStr(l);
+    const use = (isPublic(l,'usage') && l.usage) ? ` · ${l.usage}` : '';
+    return `<div style="padding:5px 0;border-bottom:1px solid #f0f0f0">
+      <b>${flo||'-'}</b>${use} ${statusBadge(l.status)}<br>
+      보 ${fmt(l.deposit_manwon)} / 월 <b style="color:#c0392b">${fmt(l.monthly_rent_manwon)}</b>만
+      ${(isPublic(l,'area_m2')||isPublic(l,'area_py'))?` · ${areaStr(l).replace(/^전용\s*/,'전용 ')}`:''}
+    </div>`;
+  }).join('');
+  const gl = groupLabel(items);
+  const html = `<div class="iw" style="width:250px">
+    <b>${esc0(gl)}</b> <span class="badge status-active">${items.length}건</span>
+    <div style="margin-top:4px">${rows}</div>
+  </div>`;
+  showDraggablePopup(marker.getPosition(), gl, html);
+}
+
+// ===== 드래그 가능한 팝업 (CustomOverlay 기반) =====
+// position(LatLng), title(헤더 텍스트), innerHtml(본문 HTML)
+function showDraggablePopup(position, title, innerHtml) {
+  closeDragPopup();
+  const el = document.createElement('div');
+  el.className = 'dpop';
+  el.innerHTML =
+    `<div class="dpop-bar">
+       <span class="dpop-grip">⠿</span>
+       <span class="dpop-title">${esc0(title||'')}</span>
+       <button class="dpop-close" title="닫기">✕</button>
+     </div>
+     <div class="dpop-body">${innerHtml}</div>`;
+
+  dragPopup = new kakao.maps.CustomOverlay({
+    position, content: el, xAnchor: 0.5, yAnchor: 1.0, zIndex: 100,
+    clickable: true   // 오버레이가 클릭 이벤트를 소비 → 지도로 통과(=map click 닫힘) 방지
+  });
+  dragPopup.setMap(map);
+  window.__popupOpenedAt = Date.now();   // 지도 click 오탐 닫기 방지용(보조)
+
+  // 형제 매물 항목 클릭 → 해당 매물로 전환 (직접 바인딩: 드래그/전파와 무관하게 확실히 동작)
+  el.querySelectorAll('.sib[data-sibid]').forEach(node => {
+    node.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const sid = node.getAttribute('data-sibid');
+      const nl = listings.find(x => x.id === sid);
+      if (!nl) return;
+      const keepPos = dragPopup ? dragPopup.getPosition() : (nl.lat&&nl.lng ? new kakao.maps.LatLng(nl.lat,nl.lng) : null);
+      openInfoAt(keepPos, nl);
+    });
+  });
+
+  // 닫기
+  el.querySelector('.dpop-close').addEventListener('click', (e)=>{ e.stopPropagation(); closeDragPopup(); });
+  // 팝업 내부 클릭이 지도로 전파되지 않도록
+  el.addEventListener('click', e => e.stopPropagation());
+  el.addEventListener('dblclick', e => e.stopPropagation());
+  el.addEventListener('wheel', e => e.stopPropagation());
+
+  // === 팝업 전체 영역 드래그 (헤더뿐 아니라 아무 곳이나) ===
+  // 클릭(형제목록/사진/닫기)과 구분: 이동거리 4px 미만이면 클릭으로 취급
+  let dragging = false, moved = false, startX=0, startY=0, startPt=null;
+  // 클릭이 필요한 인터랙티브 요소 위에서는 드래그를 시작하지 않음 (클릭 우선)
+  const NODRAG = ['.dpop-close', '.sib', 'img', 'a', 'button'];
+  el.addEventListener('mousedown', (e) => {
+    if (NODRAG.some(sel => e.target.closest(sel))) return;
+    dragging = true; moved = false;
+    startX = e.clientX; startY = e.clientY;
+    const proj = map.getProjection();
+    startPt = proj.pointFromCoords(dragPopup.getPosition());
+    el.classList.add('dragging');
+    document.body.style.userSelect = 'none';
+    e.stopPropagation();   // 지도로 전파 방지 (지도 pan 방지)
+  });
+  const onMove = (e) => {
+    if (!dragging || !dragPopup) return;
+    const dx = e.clientX-startX, dy = e.clientY-startY;
+    if (Math.abs(dx)+Math.abs(dy) > 4) moved = true;
+    const proj = map.getProjection();
+    const pt = new kakao.maps.Point(startPt.x + dx, startPt.y + dy);
+    dragPopup.setPosition(proj.coordsFromPoint(pt));
+  };
+  const onUp = () => { dragging = false; el.classList.remove('dragging'); document.body.style.userSelect=''; };
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+  dragPopup.__cleanup = () => {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  };
+
+  // === 팝업이 화면(지도 영역) 안에 다 보이도록 지도 이동 ===
+  requestAnimationFrame(() => ensurePopupVisible(el));
+}
+function closeDragPopup() {
+  if (dragPopup) {
+    if (dragPopup.__cleanup) dragPopup.__cleanup();
+    dragPopup.setMap(null);
+    dragPopup = null;
+  }
+}
+// 팝업이 지도 영역 밖으로 잘리면 지도를 밀어 다 보이게 함
+function ensurePopupVisible(el) {
+  const mapEl = document.getElementById('map');
+  if (!mapEl || !el) return;
+  const m = mapEl.getBoundingClientRect();
+  const p = el.getBoundingClientRect();
+  const M = 12;   // 여백
+  let dx = 0, dy = 0;   // 지도를 이 픽셀만큼 밀 것 (panBy는 반대 방향)
+  if (p.top    < m.top + M)    dy = (m.top + M) - p.top;         // 위 잘림 → 아래로
+  if (p.bottom > m.bottom - M) dy = (m.bottom - M) - p.bottom;   // 아래 잘림 → 위로
+  if (p.left   < m.left + M)   dx = (m.left + M) - p.left;
+  if (p.right  > m.right - M)  dx = (m.right - M) - p.right;
+  if (dx || dy) map.panBy(-dx, -dy);   // panBy: 지도가 이동 → 콘텐츠는 반대로
+}
+
+function statusBadge(s) {
+  const map = { active:['거래가능','status-active'], pending:['진행중','status-pending'], closed:['완료','status-closed'] };
+  const [t,c] = map[s] || [s,'status-closed'];
+  return `<span class="badge ${c}">${t}</span>`;
+}
+
+function areaStr(l) {
+  const pyv = areaPyVal(l);
+  const py = pyv!=null ? `전용 ${pyv}평` : '';
+  const m2 = l.area_m2 ? `(${trimNum(l.area_m2)}㎡)` : '';
+  return (py + (py&&m2?' ':'') + m2) || '-';
+}
+// 소수점 불필요한 0 제거 (2.0 → 2, 30.07 유지)
+function trimNum(n){ if(n==null||n==='') return ''; const x=Number(n); return Number.isFinite(x) ? String(x) : String(n); }
+// 층 표시 정규화: "408호"는 그대로 / -1 → 지하1층 / 3,4 → 3-4층 / 2.0 → 2층
+function floorStr(l){
+  const raw = l.floor;
+  if (raw==null || raw==='') return '';
+  const s = String(raw).trim();
+  if (s.includes('호')) return s;                 // 호수 표기는 그대로
+  if (/[,\-~]/.test(s) && !/^-?\d+(\.0+)?$/.test(s)) {  // 복수층 (3,4 / 3-4 / 3~4)
+    const parts = s.split(/[,\-~]/).map(p=>p.trim()).filter(Boolean);
+    return parts.join('-') + '층';
+  }
+  const num = Number(s);
+  if (Number.isFinite(num)) {
+    const n = Math.trunc(num);
+    if (n < 0) return `지하${Math.abs(n)}층`;
+    return `${n}층`;
+  }
+  return s;   // 숫자 아니면 원문
+}
+
+// ⚠️ 관리자 전용 필드(권리금·담당·평단가·메모)는 항상 차단.
+// 그 외 필드도 매물의 public_fields[field]가 false면 표시하지 않는다.
+const ADMIN_ONLY = ['premium_manwon','tag','memo','price_per_py'];
+// 전역 표시설정(heatmap_display)이 있으면 그걸 우선 적용. 없으면 매물별 public_fields.
+// area_m2/area_py는 전역에서 'area' 하나로 관리.
+function dispKey(field){ return (field==='area_m2'||field==='area_py') ? 'area' : field; }
+function isPublic(l, field) {
+  if (ADMIN_ONLY.includes(field)) return false;
+  if (heatmapDisplay && heatmapDisplay.fields) {
+    const k = dispKey(field);
+    if (k in heatmapDisplay.fields) return heatmapDisplay.fields[k] !== false;
+    return true;
+  }
+  const pf = l.public_fields;
+  if (!pf) return true;
+  return pf[field] !== false;
+}
+
+function cardHtml(l) {
+  // 보증금/월세는 목록의 핵심이라 공개 설정과 무관하게 표시(가격 자체를 숨기려면 매물 미노출/커스텀뷰 사용)
+  return `<div class="t">${l.title} ${statusBadge(l.status)}</div>
+    <div class="rent">보 ${fmt(l.deposit_manwon)} / 월 ${fmt(l.monthly_rent_manwon)}만</div>
+    <div class="meta">${l.dong} · ${floorStr(l)} · ${areaStr(l)}${l._geoFailed?' · ⚠️주소확인필요':''}</div>`;
+}
+
+function openInfo(marker, l) { openInfoAt(marker.getPosition(), l); }
+function openInfoAt(position, l) {
+  const rows = [];
+  rows.push(`보증금 <b>${fmt(l.deposit_manwon)}</b>만 / 월세 <b style="color:#c0392b">${fmt(l.monthly_rent_manwon)}</b>만`);
+  if (isPublic(l,'maintenance_manwon') && l.maintenance_manwon) rows.push(`관리비 ${fmt(l.maintenance_manwon)}만`);
+  const fa = [];
+  if (isPublic(l,'floor')) fa.push(floorStr(l));
+  if (isPublic(l,'usage') && l.usage) fa.push(l.usage);
+  if (isPublic(l,'area_m2')||isPublic(l,'area_py')) fa.push('전용 '+areaStr(l).replace(/^전용\s*/,''));
+  if (fa.filter(Boolean).length) rows.push(fa.filter(Boolean).join(' · '));
+  if (isPublic(l,'approval_year') && l.approval_year) rows.push(`준공 ${String(l.approval_year).replace('.0','')}`);
+  if (isPublic(l,'expiry_date') && l.expiry_date) rows.push(`만기 ${l.expiry_date}`);
+  // 강의실
+  if (isPublic(l,'rooms') && l.rooms && l.rooms.length) {
+    const cap = l.rooms.reduce((s,r)=>s+(Number(r.capacity)||0),0);
+    rows.push(`<span class="rooms">강의실 ${l.rooms.length}실 · 총 ${cap}명</span>`);
+  }
+  // 화장실
+  if (isPublic(l,'restrooms') && l.restrooms && (l.restrooms.count||l.restrooms.location)) {
+    const rt=l.restrooms; rows.push(`<span class="rooms">화장실 ${rt.count||''}${rt.location?' ('+rt.location+(rt.gender?', '+rt.gender:'')+')':''}</span>`);
+  }
+  if (isPublic(l,'elevator_count') && l.elevator_count) rows.push(`승강기 ${l.elevator_count}대`);
+  if (isPublic(l,'parking_count') && l.parking_count) rows.push(`주차 ${l.parking_count}대`);
+  if (isPublic(l,'facility_transfer') && l.facility_transfer) rows.push(`시설승계 ${l.facility_transfer}`);
+  if (isPublic(l,'has_license') && l.has_license) rows.push(`등록증 ${l.has_license}`);
+  if (isPublic(l,'road_address') && l.road_address) rows.push(`<span style="color:#888">${l.road_address}</span>`);
+  if (isPublic(l,'lot_address')) rows.push(`<span style="color:#888">지번: ${l.lot_address}</span>`);
+
+  // 사진 (공개 시)
+  let photoHtml = '';
+  if (isPublic(l,'photos') && l.photos && l.photos.length) {
+    const shown = l.photos.slice(0, 2);   // 히트맵엔 최대 2장
+    photoHtml = `<div class="photos">${shown.map(p=>`<img src="${p.url||p.dataUrl}" alt="" onerror="this.classList.add('imgerr'); this.alt='사진 로드 실패';">`).join('')}</div>`;
+  }
+
+  // 같은 건물 형제 매물 (2건 이상일 때)
+  const sibs = siblingsById[l.id];
+  let sibHead = '', sibList = '';
+  if (sibs && sibs.length >= 2) {
+    const bName = l.building_name || '같은 건물';
+    sibHead = `<div class="sib-head">🏢 ${esc0(bName)} · 이 건물 매물 ${sibs.length}건</div>`;
+    sibList = `<div class="sib-list">` + sibs.map(s => {
+      const cur = s.id === l.id ? ' cur' : '';
+      const fl = floorStr(s) || '-';
+      return `<div class="sib${cur}" data-sibid="${s.id}">
+        <span class="sib-fl">${esc0(fl)}${(s.usage?' · '+esc0(s.usage):'')}</span>
+        <span class="sib-rent">월 ${fmt(s.monthly_rent_manwon)}만</span>
+      </div>`;
+    }).join('') + `</div>`;
+  }
+
+  const html = `<div class="iw">
+    ${sibHead}
+    <b>${l.title}</b> ${statusBadge(l.status)}
+    ${photoHtml}
+    <div>${rows.join('<br>')}</div>
+    ${sibList}
+  </div>`;
+  showDraggablePopup(position, l.title, html);
+}
+// 팝업 형제목록에서 특정 매물로 이동 (id 기준)
+// 형제는 자기 마커가 없을 수 있음(대표 1개만 표시) → 현재 팝업 위치에서 그대로 전환
+function focusById(id, ev) {
+  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+  const l = listings.find(x => x.id === id);
+  if (!l) return;
+  // 현재 팝업 위치(있으면) 유지, 없으면 매물 좌표
+  let pos = null;
+  if (dragPopup) pos = dragPopup.getPosition();
+  if (!pos && l.lat && l.lng) pos = new kakao.maps.LatLng(l.lat, l.lng);
+  openInfoAt(pos, l);
+}
+
+function fmt(n) { return (n||0).toLocaleString('ko-KR'); }
+
+// ===== 우측 상세 뷰 (동적 상세 정보) =====
+function focusOn(l) {
+  if (!(l.lat && l.lng)) return;
+  map.setCenter(new kakao.maps.LatLng(l.lat, l.lng)); map.setLevel(3);
+}
+function detailHtml(l) {
+  // 사진 (공개 시)
+  let photos = '';
+  if (isPublic(l,'photos')) {
+    if (l.photos && l.photos.length) {
+      photos = `<div class="dv-photos">${l.photos.map(p=>`<img src="${p.url||p.dataUrl}" onerror="this.classList.add('imgerr'); this.alt='사진 로드 실패';" onclick="window.open('${p.url||p.dataUrl}')">`).join('')}</div>`;
+    } else {
+      photos = `<div class="dv-nophoto">📷 등록된 사진 없음</div>`;
+    }
+  }
+  // 기본 정보 행
+  const basics = [];
+  if (isPublic(l,'floor')) basics.push(['층', floorStr(l)]);
+  if (isPublic(l,'usage') && l.usage) basics.push(['용도', l.usage]);
+  if (isPublic(l,'area_m2')||isPublic(l,'area_py')) basics.push(['전용', areaStr(l).replace(/^전용\s*/,'')]);
+  if (isPublic(l,'approval_year') && l.approval_year) basics.push(['준공', String(l.approval_year).replace('.0','')]);
+  if (isPublic(l,'expiry_date') && l.expiry_date) basics.push(['만기', l.expiry_date]);
+  if (isPublic(l,'maintenance_manwon') && l.maintenance_manwon) basics.push(['관리비', fmt(l.maintenance_manwon)+'만']);
+  // 건물 시설 칩
+  const chips = [];
+  if (isPublic(l,'elevator_count') && l.elevator_count) chips.push(`승강기 ${l.elevator_count}대`);
+  if (isPublic(l,'parking_count') && l.parking_count) chips.push(`주차 ${l.parking_count}대`);
+  if (isPublic(l,'facility_transfer') && l.facility_transfer) chips.push(`시설승계 ${l.facility_transfer}`);
+  if (isPublic(l,'has_license') && l.has_license) chips.push(`등록증 ${l.has_license}`);
+  // 화장실 (기본정보에 합류)
+  if (isPublic(l,'restrooms') && l.restrooms && (l.restrooms.count||l.restrooms.location)) {
+    const rt=l.restrooms;
+    basics.push(['화장실', `${rt.count?rt.count+'개':''} ${rt.location||''} ${rt.gender||''}`.trim()]);
+  }
+  // 주소 (기본정보에 합류)
+  if (isPublic(l,'road_address') && l.road_address) basics.push(['도로명', l.road_address]);
+  if (isPublic(l,'lot_address')) basics.push(['지번', l.lot_address]);
+
+  // 강의실
+  let rooms = '';
+  if (isPublic(l,'rooms') && l.rooms && l.rooms.length) {
+    const cap = l.rooms.reduce((s,r)=>s+(Number(r.capacity)||0),0);
+    rooms = `<div class="dv-sec"><h4>강의실 · ${l.rooms.length}실 / 총 ${cap}명</h4><div class="dv-rooms">`
+      + l.rooms.map((r,idx)=>`<span class="rn">${esc0(r.name||('강의실'+(idx+1)))}</span><span class="rc">${r.capacity!=null?r.capacity+'명':'-'}</span>`).join('')
+      + `</div></div>`;
+  }
+  // 기본정보 그리드 (라벨·값 쌍을 2열로 자동 줄맞춤)
+  const basicGrid = basics.length
+    ? `<div class="dv-row">${basics.map(([k,v])=>`<span class="k">${k}</span><span class="v">${esc0(v)}</span>`).join('')}</div>`
+    : '';
+
+  return `<div class="dv">
+    ${photos}
+    <div class="dv-price">보증금 <span class="big">${fmt(l.deposit_manwon)}</span>만 · 월세 <span class="big">${fmt(l.monthly_rent_manwon)}</span>만</div>
+    ${basicGrid?`<div class="dv-sec"><h4>기본 정보</h4>${basicGrid}</div>`:''}
+    ${chips.length?`<div class="dv-sec"><h4>건물·시설</h4><div class="dv-chips">${chips.map(c=>`<span class="dv-chip">${c}</span>`).join('')}</div></div>`:''}
+    ${rooms}
+  </div>`;
+}
+
+// ===== 아코디언 (목록에서 클릭 시 바로 아래 펼침) =====
+function toggleAccordion(id, wrap, panel, htmlFn, focusFn) {
+  if (openAccId === id && panel.innerHTML) {
+    panel.innerHTML = ''; panel.classList.remove('open'); wrap.classList.remove('sel'); openAccId = null; return;
+  }
+  // 다른 열린 패널 닫기 + 선택 해제
+  document.querySelectorAll('.acc.open').forEach(p => { p.innerHTML=''; p.classList.remove('open'); });
+  document.querySelectorAll('#list > div.sel').forEach(w => w.classList.remove('sel'));
+  panel.innerHTML = htmlFn();
+  panel.classList.add('open');
+  wrap.classList.add('sel');   // 선택된 카드 강조
+  openAccId = id;
+  if (focusFn) focusFn();
+  // 선택한 매물을 목록 맨 위로 이동 → 우측 최상단에 상세가 보이게
+  const listEl = document.getElementById('list');
+  if (listEl && wrap.parentElement === listEl && listEl.firstChild !== wrap) {
+    listEl.insertBefore(wrap, listEl.firstChild);
+  }
+  // 선택한 매물 카드가 패널 최상단에 오도록 스크롤 (필터를 지나쳐 제목부터 보이게)
+  requestAnimationFrame(() => {
+    const side = document.querySelector('.side');
+    if (side) {
+      // wrap의 위치만큼 side를 스크롤 (헤더/필터를 지나 매물 제목이 맨 위로)
+      const top = wrap.offsetTop - side.offsetTop;
+      side.scrollTo({ top: Math.max(0, top), behavior:'smooth' });
+    }
+  });
+}
+// 마커 클릭 → 목록에서 해당 카드를 펼치고 그쪽으로 스크롤
+function openAccByKey(key) {
+  // querySelector는 key의 특수문자(공백·하이픈)로 실패할 수 있어 JS 순회로 탐색
+  const wraps = document.querySelectorAll('#list > div[data-gkey]');
+  let wrap = null;
+  wraps.forEach(w => { if (w.dataset.gkey === key) wrap = w; });
+  if (!wrap) return;
+  const card = wrap.querySelector('.card');
+  const panel = wrap.querySelector('.acc');
+  // card.click()이 toggleAccordion을 호출 → 맨 위로 이동 + 상단 스크롤 처리됨
+  if (card && panel && !panel.classList.contains('open')) card.click();
+}
+
+// 같은 건물: 층별 카드들을 펼침 영역에 (각 카드도 클릭하면 개별 상세 아코디언)
+function groupAccHtml(key, items) {
+  const sorted = [...items].sort((a,b)=>(a.monthly_rent_manwon||0)-(b.monthly_rent_manwon||0));
+  return `<div class="acc-inner"><div style="font-size:11px;color:#888;margin-bottom:5px">같은 건물 ${items.length}건 — 층별 매물</div>` +
+    sorted.map(l=>`<div class="glcard" onclick="event.stopPropagation()">
+      <div class="fl">${floorStr(l)||'-'} ${(isPublic(l,'usage')&&l.usage)?'· '+l.usage:''} ${statusBadge(l.status)}</div>
+      <div style="font-size:12px;margin:3px 0">보 ${fmt(l.deposit_manwon)} / 월 <b style="color:#c0392b">${fmt(l.monthly_rent_manwon)}</b>만
+        ${(isPublic(l,'area_m2')||isPublic(l,'area_py'))?'· '+areaStr(l).replace(/^전용\s*/,'전용 '):''}</div>
+      <div class="gl-detail">${detailHtml(l)}</div>
+    </div>`).join('') + `</div>`;
+}
+
+</script>
+</body>
+</html>

@@ -56,8 +56,13 @@ create trigger trg_academy_updated before update on academy_listings
 create table if not exists academy_views (
   name        text primary key,                    -- 뷰 이름 (예: 김원장님용)
   ids         jsonb default '[]'::jsonb,            -- 포함 매물 id 배열
-  created_at  timestamptz default now()
+  created_at  timestamptz default now(),
+  share_token      text,                            -- 공개 공유 링크 토큰 (추측 불가 랜덤)
+  share_created_at timestamptz,                     -- 공유 링크 생성 시각
+  share_expires_at timestamptz                      -- 공유 만료 시각 (null = 무기한)
 );
+create unique index if not exists academy_views_share_token_idx
+  on academy_views (share_token) where share_token is not null;
 
 -- 3) 전역 설정 (히트맵 표시항목 등) — 단일 행
 create table if not exists academy_settings (
