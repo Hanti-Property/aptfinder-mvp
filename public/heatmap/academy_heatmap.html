@@ -618,6 +618,18 @@ function showDraggablePopup(position, title, innerHtml) {
   dragPopup.setMap(map);
   window.__popupOpenedAt = Date.now();   // 지도 click 오탐 닫기 방지용
 
+  // 형제 매물 항목 클릭 → 해당 매물로 전환 (직접 바인딩: 드래그/전파와 무관하게 확실히 동작)
+  el.querySelectorAll('.sib[data-sibid]').forEach(node => {
+    node.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const sid = node.getAttribute('data-sibid');
+      const nl = listings.find(x => x.id === sid);
+      if (!nl) return;
+      const keepPos = dragPopup ? dragPopup.getPosition() : (nl.lat&&nl.lng ? new kakao.maps.LatLng(nl.lat,nl.lng) : null);
+      openInfoAt(keepPos, nl);
+    });
+  });
+
   // 닫기
   el.querySelector('.dpop-close').addEventListener('click', (e)=>{ e.stopPropagation(); closeDragPopup(); });
   // 팝업 내부 클릭이 지도로 전파되지 않도록
@@ -783,7 +795,7 @@ function openInfoAt(position, l) {
     sibList = `<div class="sib-list">` + sibs.map(s => {
       const cur = s.id === l.id ? ' cur' : '';
       const fl = floorStr(s) || '-';
-      return `<div class="sib${cur}" onclick="focusById('${s.id}', event)">
+      return `<div class="sib${cur}" data-sibid="${s.id}">
         <span class="sib-fl">${esc0(fl)}${(s.usage?' · '+esc0(s.usage):'')}</span>
         <span class="sib-rent">월 ${fmt(s.monthly_rent_manwon)}만</span>
       </div>`;
