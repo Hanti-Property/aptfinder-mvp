@@ -95,6 +95,12 @@
   /* 고정 영역 끝(지번주소) 오른쪽 경계: 뚜렷한 선 + 그림자로 "여기까지 고정" 표시 */
   .frz-shadow { box-shadow: 3px 0 6px rgba(0,0,0,0.18); border-right:2px solid #1B3A5C !important; }
   thead th.frz-shadow { border-right:2px solid #4a6b8a !important; }
+  /* 고정 경계 조절 핸들 (마지막 고정 헤더 우측) */
+  .freeze-handle { position:absolute; right:0; top:0; bottom:0; width:16px; display:flex; align-items:center; justify-content:center;
+    cursor:col-resize; background:#4a6b8a; color:#fff; font-size:10px; font-weight:700; z-index:31; }
+  .freeze-handle:hover { background:#e67e22; }
+  body.fz-dragging { cursor:col-resize !important; }
+  body.fz-dragging * { cursor:col-resize !important; }
 
   td.auto { background:#f3e9f9 !important; color:#8e44ad; text-align:right; font-weight:600; }
   td .cell { position:relative; }
@@ -249,6 +255,14 @@ const COLS_DEF = [
   { key:'__act',   label:'작업',    w:120, kind:'actions' },
 ];
 let COLS = [...COLS_DEF];  // 실제 사용 (순서 변경 반영)
+// 고정(freeze) 경계: 이 컬럼까지 좌측 고정. 사용자가 헤더 경계 핸들로 조절 가능.
+let freezeUpToKey = 'lot_address';
+// c가 고정 대상인지: COLS 순서상 freezeUpToKey 위치 이하이면 고정 (앞쪽 연속만)
+function isFrozen(c){
+  const upTo = COLS.findIndex(x=>x.key===freezeUpToKey);
+  if (upTo < 0) return false;
+  return COLS.findIndex(x=>x.key===c.key) <= upTo;
+}
 
 let listings = [];
 let map, geocoder, places, marker, infowindow;
@@ -334,12 +348,13 @@ function flashSaved(msg) {
   el.textContent = msg || ('✓ 저장됨 ' + new Date().toLocaleTimeString('ko-KR'));
   clearTimeout(flashSaved._t); flashSaved._t = setTimeout(()=>{ el.textContent=''; }, 2500);
 }
-function saveUI() { localStorage.setItem(LS_UI, JSON.stringify({ colW, fs: getFs(), colOrder: COLS.map(c=>c.key) })); }
+function saveUI() { localStorage.setItem(LS_UI, JSON.stringify({ colW, fs: getFs(), colOrder: COLS.map(c=>c.key), freezeUpToKey })); }
 function loadUI() {
   try {
     const u = JSON.parse(localStorage.getItem(LS_UI)||'{}');
     colW = u.colW||{}; if (u.fs) setFs(u.fs);
     if (Array.isArray(u.colOrder)) applyColOrder(u.colOrder);
+    if (u.freezeUpToKey && COLS_DEF.some(c=>c.key===u.freezeUpToKey)) freezeUpToKey = u.freezeUpToKey;
   } catch(e){}
 }
 function applyColOrder(order) {
@@ -360,6 +375,7 @@ function fontStep(d){ setFs(getFs()+d); saveUI(); }
 window.addEventListener('load', () => {
   loadUI();
   setupTablePan();
+  initFreezeDrag();
   if (typeof kakao==='undefined' || !kakao.maps) { alert('카카오맵 SDK 로드 실패. 도메인 등록 확인.'); }
   else kakao.maps.load(initMap);
   boot();
@@ -369,7 +385,7 @@ function setupTablePan(){
   const wrap = document.querySelector('.tablewrap');
   if (!wrap) return;
   // 편집/버튼 요소가 아닌 곳에서만 드래그 시작
-  const NODRAG = 'input,select,button,a,textarea,.resizer,[data-dragkey],th';
+  const NODRAG = 'input,select,button,a,textarea,.resizer,.freeze-handle,[data-dragkey],th';
   let dragging=false, moved=false, sx=0, sy=0, sl=0, st=0;
   wrap.addEventListener('mousedown', (e)=>{
     if (e.button!==0) return;
@@ -526,7 +542,7 @@ function areaStr(l){
 // 좌측 고정 컬럼의 left 오프셋 누적 계산
 function frzLefts() {
   let acc = 0; const map = {};
-  for (const c of COLS) { if (c.frz) { map[c.key]=acc; acc += wOf(c); } }
+  for (const c of COLS) { if (isFrozen(c)) { map[c.key]=acc; acc += wOf(c); } }
   return map;
 }
 
@@ -584,7 +600,7 @@ function render() {
   document.getElementById('dongInfo').textContent = Object.entries(dongs).map(([k,v])=>`${k} ${v}`).join(' · ');
 
   const lefts = frzLefts();
-  const lastFrz = [...COLS].filter(c=>c.frz).pop().key;
+  const lastFrz = freezeUpToKey;
 
   data.forEach((l, i) => {
     const tr = document.createElement('tr');
@@ -592,8 +608,9 @@ function render() {
     if (l.id===selectedId) tr.className='selected';
 
     tr.innerHTML = COLS.map(c => {
-      const style = `min-width:${wOf(c)}px;width:${wOf(c)}px` + (c.frz ? `;left:${lefts[c.key]}px` : '');
-      const cls = (c.frz?'frz':'') + (c.key===lastFrz?' frz-shadow':'') + (c.kind==='auto'?' auto':'');
+      const fz = isFrozen(c);
+      const style = `min-width:${wOf(c)}px;width:${wOf(c)}px` + (fz ? `;left:${lefts[c.key]}px` : '');
+      const cls = (fz?'frz':'') + (c.key===lastFrz?' frz-shadow':'') + (c.kind==='auto'?' auto':'');
       return `<td class="${cls}" style="${style}">${cellInner(l, c, i)}</td>`;
     }).join('');
     tbody.appendChild(tr);
@@ -607,20 +624,47 @@ function render() {
 
 function renderHead() {
   const lefts = frzLefts();
-  const lastFrz = [...COLS].filter(c=>c.frz).pop().key;
+  const lastFrz = freezeUpToKey;
   document.getElementById('theadRow').innerHTML = COLS.map(c => {
-    const style = `min-width:${wOf(c)}px;width:${wOf(c)}px` + (c.frz ? `;left:${lefts[c.key]}px` : '');
-    const cls = (c.frz?'frz':'') + (c.key===lastFrz?' frz-shadow':'');
+    const fz = isFrozen(c);
+    const style = `min-width:${wOf(c)}px;width:${wOf(c)}px` + (fz ? `;left:${lefts[c.key]}px` : '');
+    const cls = (fz?'frz':'') + (c.key===lastFrz?' frz-shadow':'');
     const tag = c.admin ? '<span class="adminTag">나만</span>' : '';
     const resizer = (c.kind!=='select'&&c.kind!=='no'&&c.kind!=='check') ? `<span class="resizer" data-key="${c.key}"></span>` : '';
+    // 마지막 고정 컬럼에는 '고정 경계 핸들'을 붙임 (잡아끌어 고정 범위 조절)
+    const freezeHandle = (c.key===lastFrz) ? `<span class="freeze-handle" data-fzkey="${c.key}" title="드래그하여 고정 범위 조절">⇹</span>` : '';
     const arrow = c.sortable ? (sortKey===c.key ? (sortDir>0?' ▲':' ▼') : ' ⇅') : '';
     const clickable = c.sortable ? `style="cursor:pointer" onclick="toggleSort('${c.key}')" title="클릭하여 정렬"` : '';
     const labelSpan = c.sortable ? `<span ${clickable}>${c.label}<span style="opacity:.6;font-size:.85em">${arrow}</span></span>` : c.label;
     const drag = (c.kind!=='check'&&c.kind!=='select'&&c.kind!=='no') ? `draggable="true" data-dragkey="${c.key}"` : '';
-    return `<th class="${cls}" style="${style}" ${drag} title="헤더를 드래그하면 컬럼 순서를 옮길 수 있습니다">${labelSpan}${tag}${resizer}</th>`;
+    return `<th class="${cls}" style="${style}" ${drag} title="헤더를 드래그하면 컬럼 순서를 옮길 수 있습니다">${labelSpan}${tag}${freezeHandle}${resizer}</th>`;
   }).join('');
   attachResizers();
   attachColDrag();
+  attachFreezeHandle();
+}
+// 고정 경계 핸들: 좌우로 끌어 놓은 위치의 컬럼까지 고정되도록 freezeUpToKey 갱신
+let __fzDragging = false;
+function attachFreezeHandle(){
+  const h = document.querySelector('.freeze-handle');
+  if (!h) return;
+  h.addEventListener('mousedown', (e)=>{ e.preventDefault(); e.stopPropagation(); __fzDragging=true; document.body.style.userSelect='none'; document.body.classList.add('fz-dragging'); });
+}
+// document 리스너는 최초 1회만 등록 (render마다 중복 방지)
+function initFreezeDrag(){
+  document.addEventListener('mousemove', (e)=>{
+    if(!__fzDragging) return;
+    const ths = [...document.querySelectorAll('#theadRow th')];
+    let idx = -1;
+    for (let k=0;k<ths.length;k++){ const r=ths[k].getBoundingClientRect(); if (e.clientX >= r.left && e.clientX < r.right){ idx=k; break; } }
+    if (idx<0) { if (e.clientX >= (ths[ths.length-1]?.getBoundingClientRect().right||0)) idx=ths.length-1; else return; }
+    const key = COLS[idx] && COLS[idx].key;
+    // 최소 3번째 컬럼(#) 이상은 고정 유지 (뷰/선택 핸들 영역 보호)
+    if (key && idx>=2 && key!==freezeUpToKey){ freezeUpToKey = key; render(); }
+  });
+  document.addEventListener('mouseup', ()=>{
+    if(__fzDragging){ __fzDragging=false; document.body.style.userSelect=''; document.body.classList.remove('fz-dragging'); saveUI(); }
+  });
 }
 
 function cellInner(l, c, i) {
