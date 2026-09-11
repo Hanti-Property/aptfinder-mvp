@@ -173,12 +173,19 @@
   <button class="btn-add" style="background:#8e44ad" onclick="openViewInHeatmap()">▶ 선택 매물 히트맵으로 보기</button>
   <span style="width:1px;height:20px;background:#ddd;margin:0 4px"></span>
   <label style="font-size:calc(var(--fs) - 2px);color:#555">유효기간
-    <select id="shareExpiry" style="padding:5px 6px;border:1px solid #ccc;border-radius:6px;font-size:calc(var(--fs) - 2px)">
-      <option value="7">7일</option>
-      <option value="30" selected>30일</option>
+    <select id="shareExpiry" onchange="onExpiryChange()" style="padding:5px 6px;border:1px solid #ccc;border-radius:6px;font-size:calc(var(--fs) - 2px)">
+      <option value="1">1일</option>
+      <option value="3">3일</option>
+      <option value="7" selected>7일</option>
+      <option value="14">14일</option>
+      <option value="30">30일</option>
       <option value="90">90일</option>
+      <option value="custom">직접입력…</option>
       <option value="0">무기한</option>
     </select>
+    <span id="shareExpiryCustomWrap" style="display:none">
+      <input type="number" id="shareExpiryDays" min="1" max="3650" value="10" style="width:64px;padding:5px 6px;border:1px solid #ccc;border-radius:6px;font-size:calc(var(--fs) - 2px)"> 일
+    </span>
   </label>
   <button class="btn-primary" style="background:#0b8457" onclick="createShareLink()">🔗 고객 공유 링크 만들기</button>
 </div>
@@ -1148,6 +1155,11 @@ async function deleteView() {
   delete views[name]; refreshViewSelect();
   document.getElementById('viewSelect').value = '';
 }
+// 유효기간 드롭다운에서 '직접입력' 선택 시 일수 입력칸 표시
+function onExpiryChange(){
+  const isCustom = document.getElementById('shareExpiry').value === 'custom';
+  document.getElementById('shareExpiryCustomWrap').style.display = isCustom ? 'inline' : 'none';
+}
 // 고객 공유 링크 생성: 토큰 발급 → academy_views 저장 → 공개 URL 복사
 async function createShareLink() {
   if (checked.size===0) { alert('먼저 매물을 체크(뷰 포함)하세요.'); return; }
@@ -1156,7 +1168,14 @@ async function createShareLink() {
   const ids = [...checked];
   // 토큰: 추측 불가능한 랜덤 문자열
   const token = (crypto.randomUUID ? crypto.randomUUID().replace(/-/g,'') : (Date.now().toString(36)+Math.random().toString(36).slice(2))).slice(0,24);
-  const days = parseInt(document.getElementById('shareExpiry').value, 10);
+  const sel = document.getElementById('shareExpiry').value;
+  let days;
+  if (sel === 'custom') {
+    days = parseInt(document.getElementById('shareExpiryDays').value, 10);
+    if (!(days >= 1)) { alert('유효기간(일)을 1 이상으로 입력하세요.'); return; }
+  } else {
+    days = parseInt(sel, 10);   // 0 = 무기한
+  }
   const now = new Date();
   const expires = days>0 ? new Date(now.getTime() + days*86400000).toISOString() : null;
   try {
