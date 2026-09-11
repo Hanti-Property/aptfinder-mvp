@@ -59,6 +59,10 @@ type Col = {
   moveStart?: boolean                // 이주개시(연도) — 기본값 입주년-6, 스텝퍼
 }
 
+// 연도·날짜 등 "천단위 콤마를 붙이면 안 되는" 컬럼 (예: 거래월 2026.01, 연도 2034)
+// 이 키들은 숫자로 보여도 문자열 그대로 표시 (toLocaleString 미적용).
+const PLAIN_KEYS = new Set(['latest_date', 'move_in', 'move_start_year', 'built_year', 'price_updated', 'far_source', 'plat_area_source'])
+
 // GROUPS의 calc/txt에서 엔진 결과를 읽기 위한 헬퍼 (렌더 시 row._calc에 CalcResult 부착)
 const cc = (r: Recon): CalcResult | undefined => (r as Recon & { _calc?: CalcResult })._calc
 const sizeLabel = (g?: string) => ({ xs: '초소형', s: '소형', m: '중소형', l: '준대형', xl: '대단지' }[g || ''] || '—')
@@ -393,6 +397,11 @@ export default function ReconAdminPage() {
     if (col.key === 'move_in') {
       const y = cc(row)?.moveIn ?? null
       return <td className={td + ' text-center font-semibold text-[#1B3A5C] bg-sky-50'} style={{ width: w }} title="ETA+리스크시간으로 자동 계산">{y ? String(y) : '—'}</td>
+    }
+    // 연도·날짜 필드: 콤마 없이 문자열 그대로 (거래월 2026.01 → 2,026.01 방지)
+    if (PLAIN_KEYS.has(col.key)) {
+      const raw = row[col.key]
+      return <td className={td + ' text-center text-gray-600'} style={{ width: w }}>{raw != null && raw !== '' ? String(raw) : '—'}</td>
     }
     // 파생 계산 컬럼
     let num: number | null = null
