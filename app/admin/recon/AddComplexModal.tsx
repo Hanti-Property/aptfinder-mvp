@@ -25,9 +25,15 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
   const [f, setF] = useState({
     name: '', short_name: '', ticker: '', gu: '강남구', dong: '', jibun: '', bjdong: '', lawd: '11680', trade_name: '',
   })
+  // 물리·시세 값 (자동조회로 채우거나 직접 입력) — 문자열로 관리 후 저장 시 숫자 변환
+  const [m, setM] = useState({
+    plat_area: '', far: '', households: '', tot_area: '',
+    avg_ppp: '', latest_price: '', latest_area: '', latest_date: '', trade_count: '',
+  })
   const [parcel, setParcel] = useState<ParcelResult | null>(null)
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
+  const setMv = (k: string, v: string) => setM(prev => ({ ...prev, [k]: v }))
 
   const set = (k: string, v: string) => {
     setF(prev => {
@@ -57,7 +63,19 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
       const tradeNames = f.trade_name ? f.trade_name.split(',').map(s => s.trim()) : (f.short_name ? [f.short_name] : [])
       const r = await fetchParcelData(f.lawd, f.bjdong, f.jibun, f.dong, tradeNames)
       setParcel(r)
-      setMsg(`조회 완료 · 대장${r.sources.recap ? '✓' : '✗'} 토지${r.sources.land ? '✓' : '✗'} 실거래${r.sources.trade ? '✓' : '✗'}`)
+      // 조회된 값을 입력칸에 자동 채움(없으면 빈칸 유지 → 수동 입력). 기존 입력값이 있으면 유지.
+      setM(prev => ({
+        plat_area: r.plat_area != null ? String(r.plat_area) : prev.plat_area,
+        far: r.far != null ? String(r.far) : prev.far,
+        households: r.households != null ? String(r.households) : prev.households,
+        tot_area: r.tot_area != null ? String(r.tot_area) : prev.tot_area,
+        avg_ppp: r.avg_ppp != null ? String(r.avg_ppp) : prev.avg_ppp,
+        latest_price: r.latest_price != null ? String(r.latest_price) : prev.latest_price,
+        latest_area: r.latest_area != null ? String(r.latest_area) : prev.latest_area,
+        latest_date: r.latest_date || prev.latest_date,
+        trade_count: r.trade_count != null ? String(r.trade_count) : prev.trade_count,
+      }))
+      setMsg(`조회 완료 · 대장${r.sources.recap ? '✓' : '✗'} 토지${r.sources.land ? '✓' : '✗'} 실거래${r.sources.trade ? '✓' : '✗'} · 빈 값은 직접 입력하세요`)
     } catch (e) { setMsg('조회 실패: ' + (e instanceof Error ? e.message : String(e))) }
     finally { setBusy(false) }
   }
@@ -75,11 +93,13 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
       trade_name: f.trade_name ? f.trade_name.split(',').map(s => s.trim()) : null,
       status: 'draft', type: 'reconstruction',
     }
-    if (parcel) Object.assign(row, {
-      plat_area: parcel.plat_area, far: parcel.far, households: parcel.households,
-      tot_area: parcel.tot_area, vlrat_estm_area: parcel.vlrat_estm_area,
-      avg_ppp: parcel.avg_ppp, latest_price: parcel.latest_price, latest_area: parcel.latest_area,
-      latest_date: parcel.latest_date, trade_count: parcel.trade_count,
+    // 물리·시세: 입력칸(m) 값 사용 (자동조회로 채웠거나 직접 입력). 빈칸은 null.
+    const numOrNull = (s: string) => { const t = s.trim(); return t === '' ? null : Number(t) }
+    Object.assign(row, {
+      plat_area: numOrNull(m.plat_area), far: numOrNull(m.far), households: numOrNull(m.households),
+      tot_area: numOrNull(m.tot_area), vlrat_estm_area: parcel?.vlrat_estm_area ?? null,
+      avg_ppp: numOrNull(m.avg_ppp), latest_price: numOrNull(m.latest_price), latest_area: numOrNull(m.latest_area),
+      latest_date: m.latest_date.trim() || null, trade_count: numOrNull(m.trade_count),
       price_updated: new Date().toISOString().slice(0, 10),
     })
     const { error } = await supabase.from('recon_master').insert(row)
@@ -90,7 +110,6 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
 
   const inp = 'w-full border border-gray-300 rounded px-2 py-1 text-sm focus:border-blue-500 focus:outline-none'
   const lbl = 'text-xs text-gray-500 mb-0.5 block'
-  const pv = (v: number | string | null) => v == null ? <span className="text-gray-300">—</span> : <b>{typeof v === 'number' ? v.toLocaleString() : v}</b>
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -118,23 +137,23 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
           <span className="text-xs text-gray-500 self-center">{msg}</span>
         </div>
 
-        {parcel && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3 text-sm">
-            <div className="grid grid-cols-3 gap-2">
-              <div>대지면적㎡: {pv(parcel.plat_area)}</div>
-              <div>용적률: {pv(parcel.far)}% <span className="text-[0.8em] text-gray-400">({parcel.farRule})</span></div>
-              <div>세대수: {pv(parcel.households)}</div>
-              <div>연면적㎡: {pv(parcel.tot_area)}</div>
-              <div>현재평당가: {pv(parcel.avg_ppp)}</div>
-              <div>최근실거래: {pv(parcel.latest_price)} ({parcel.latest_date || '—'})</div>
-            </div>
-            {parcel.warnings.length > 0 && (
-              <ul className="mt-2 text-xs text-amber-600 list-disc pl-4">
-                {parcel.warnings.map((w, i) => <li key={i}>{w}</li>)}
-              </ul>
-            )}
+        {/* 물리·시세 값: 자동조회로 채우거나 직접 입력 (편집 가능) */}
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
+          <div className="text-xs text-gray-500 mb-2">📐 물리·시세 값 <span className="text-gray-400">— 자동조회로 채워지며, 비거나 틀리면 직접 입력/수정하세요 {parcel && <span>({parcel.farRule && `용적률: ${parcel.farRule}`})</span>}</span></div>
+          <div className="grid grid-cols-3 gap-2">
+            <div><label className={lbl}>대지면적㎡</label><input className={inp} value={m.plat_area} onChange={e => setMv('plat_area', e.target.value)} placeholder="예: 20876" /></div>
+            <div><label className={lbl}>현재 용적률%</label><input className={inp} value={m.far} onChange={e => setMv('far', e.target.value)} placeholder="예: 179" /></div>
+            <div><label className={lbl}>세대수</label><input className={inp} value={m.households} onChange={e => setMv('households', e.target.value)} placeholder="예: 459" /></div>
+            <div><label className={lbl}>연면적㎡</label><input className={inp} value={m.tot_area} onChange={e => setMv('tot_area', e.target.value)} placeholder="선택" /></div>
+            <div><label className={lbl}>현재평당가(만/평)</label><input className={inp} value={m.avg_ppp} onChange={e => setMv('avg_ppp', e.target.value)} placeholder="자동/수동" /></div>
+            <div><label className={lbl}>최근실거래(만)</label><input className={inp} value={m.latest_price} onChange={e => setMv('latest_price', e.target.value)} placeholder="자동/수동" /></div>
           </div>
-        )}
+          {parcel && parcel.warnings.length > 0 && (
+            <ul className="mt-2 text-xs text-amber-600 list-disc pl-4">
+              {parcel.warnings.map((w, i) => <li key={i}>{w}</li>)}
+            </ul>
+          )}
+        </div>
 
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 text-sm">취소</button>
