@@ -1209,8 +1209,30 @@ let _rriRankLoaded=false;
 // 마스터 맵 (지번키 → eta / 자산정보). getETA·CMC카드가 참조 → 상세/랭킹 일원화
 const ETA_FROM_MASTER={};
 const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, ticker, shortName, assetId}
-(function preloadMasterData(){
-  fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
+
+// === 데이터 소스: 주입(window.__RECON_DATA__) 우선, 없으면 JSON fetch (폴백/안전) ===
+// /admin/rvi(React 래퍼)가 Supabase recon_master + calcAll(엔진) 결과를 postMessage로 주입.
+// 주입 데이터엔 rvi/rviV1(엔진 계산 RVI 점수)이 포함 → 랭킹이 옛 재계산 대신 엔진값 사용.
+function getMasterData(){
+  if(Array.isArray(window.__RECON_DATA__) && window.__RECON_DATA__.length){
+    return Promise.resolve(window.__RECON_DATA__);
+  }
+  return fetch('/data/complexes_master.json').then(r=>r.json());
+}
+
+// 래퍼로부터 데이터 주입 수신 → 전역 저장 후 로드 함수 재실행
+window.addEventListener('message', function(ev){
+  const msg = ev.data;
+  if(msg && msg.type==='RECON_DATA' && Array.isArray(msg.data)){
+    window.__RECON_DATA__ = msg.data;
+    _rriRankLoaded=false;               // 재로드 허용
+    try{ preloadMasterData(); }catch(e){}
+    try{ loadRRIRanking(); }catch(e){}
+  }
+});
+
+function preloadMasterData(){
+  getMasterData().then(data=>{
     data.forEach(d=>{
       if(d.gu==='강남구'&&d.ticker){
         const k=d.bjdong+'-'+d.jibun;
@@ -1221,11 +1243,12 @@ const ASSET_FROM_MASTER={}; // 지번키 → {cmc, landPppMarket, capGrade, tick
     // 마스터(CMC) 로드 완료 후 빠른선택을 CMC 순으로 재렌더
     try{ if(typeof filterComplex==='function') filterComplex(); }catch(e){}
   }).catch(()=>{});
-})();
+}
+preloadMasterData();  // 초기 로드 (주입 없으면 JSON 폴백)
 
 function loadRRIRanking(){
   if(_rriRankLoaded)return;
-  fetch('/data/complexes_master.json').then(r=>r.json()).then(data=>{
+  getMasterData().then(data=>{
     const gangnam=data.filter(d=>d.gu==='강남구'&&d.ticker&&d.far>0&&d.avgPPP>0);
     // NVP 기준: 상세 카드/NCMC와 통일 (NVP_V2_BASE 사용, 특성 프리미엄 스위치도 동일 적용)
     const RATE=0.03;
@@ -1271,9 +1294,10 @@ function loadRRIRanking(){
       const ETA_MAX=20, RVI_BASE=0.70;
       const timeScore=Math.max(0, 1 - (YEARS/ETA_MAX));
       const realizeF=RVI_BASE + (1-RVI_BASE)*timeScore;
-      const rviV1=physScore;
-      const rvi=Math.round(physScore*realizeF); // v2
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri,cagr,area,rvi,rviV1,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||'',farTBD:!!d.farTBD,rar:(d.rar!=null?d.rar:null),ncmc:(d.ncmc!=null?d.ncmc:null)});
+      // 엔진 주입값(d.rvi/d.rviV1) 우선. 없으면(JSON 폴백) 로컬 재계산.
+      const rviV1=(d.rviV1!=null)?d.rviV1:physScore;
+      const rvi=(d.rvi!=null)?d.rvi:Math.round(physScore*realizeF); // v2
+      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri:(d.rri!=null?d.rri:rri),cagr,area,rvi,rviV1,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||'',farTBD:!!d.farTBD,rar:(d.rar!=null?d.rar:null),ncmc:(d.ncmc!=null?d.ncmc:null)});
     });
     _rankRows=results;
     renderRanking(); // 기본: ETA 오름차순
