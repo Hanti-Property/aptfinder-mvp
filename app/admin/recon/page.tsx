@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { calcAll, type ReconRow, type CalcResult } from '@/lib/indexCalc'
+import AddComplexModal from './AddComplexModal'
 
 const LAMBDA_URL = 'https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/'
 const PY = 3.3058
@@ -167,6 +168,8 @@ export default function ReconAdminPage() {
   const [savedKey, setSavedKey] = useState('')
   const [widths, setWidths] = useState<Record<string, number>>({})  // "그룹#인덱스" → 너비
   const [refs, setRefs] = useState<NvpRefLite[]>([])                // NVP 레퍼런스 목록 (매핑용)
+  const [showAdd, setShowAdd] = useState(false)                     // 단지 추가 모달
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'hold' | 'draft'>('all')
 
   // 컬럼 리사이즈 (헤더 경계 드래그)
   function startResize(wkey: string, curW: number, e: React.MouseEvent) {
@@ -201,6 +204,11 @@ export default function ReconAdminPage() {
   const calcMap = useMemo(() => calcAll(rows as unknown as ReconRow[]), [rows])
   const calcOf = (r: Recon): CalcResult | undefined => calcMap.get(String(r.id))
 
+  // status 필터 (기본 all). status 미설정(구데이터)은 active로 간주.
+  const stOf = (r: Recon) => (r.status as string) || 'active'
+  const visibleRows = statusFilter === 'all' ? rows : rows.filter(r => stOf(r) === statusFilter)
+  const statusCounts = { active: rows.filter(r => stOf(r) === 'active').length, hold: rows.filter(r => stOf(r) === 'hold').length, draft: rows.filter(r => stOf(r) === 'draft').length }
+
   async function saveField(id: string, field: string, value: unknown, prev: unknown) {
     const norm = (v: unknown) => Array.isArray(v) ? v.join(',') : (v ?? '')
     if (norm(value) === norm(prev)) return
@@ -233,6 +241,25 @@ export default function ReconAdminPage() {
     const codes = new Set((row.nvp_ref_codes as string[] | null) || [])
     if (codes.has(code)) codes.delete(code); else codes.add(code)
     saveMapping(row.id, { nvp_ref_codes: [...codes] })
+  }
+
+  // 상태 변경 (active/hold/draft)
+  async function setStatus(row: Recon, status: string) {
+    setRows(p => p.map(r => r.id === row.id ? { ...r, status } : r))
+    const { error } = await supabase.from('recon_master').update({ status, updated_at: new Date().toISOString() }).eq('id', row.id)
+    if (error) { setMsg('상태 변경 실패: ' + error.message); return }
+    setMsg(`${row.short_name || row.name}: ${status === 'active' ? '운영' : status === 'hold' ? '보류' : '작성중'}로 변경`)
+  }
+
+  // 영구 삭제 (2단계 확인)
+  async function delComplex(row: Recon) {
+    const nm = String(row.short_name || row.name)
+    if (!confirm(`"${nm}" 단지를 영구 삭제합니다.\n매핑·실거래·운영값이 모두 사라지고 되돌릴 수 없어요.\n(잠깐 빼려면 '보류'를 쓰세요)\n\n계속할까요?`)) return
+    if (!confirm(`정말 삭제하시겠어요? "${nm}"`)) return
+    const { error } = await supabase.from('recon_master').delete().eq('id', row.id)
+    if (error) { setMsg('삭제 실패: ' + error.message); return }
+    setRows(p => p.filter(r => r.id !== row.id))
+    setMsg(`${nm} 삭제됨`)
   }
 
   // 단건 실거래 조회. silent=true면 개별 메시지·목록갱신 생략(배치용). 성공여부 반환.
@@ -442,6 +469,7 @@ export default function ReconAdminPage() {
           </div>
           {group === '인덱스' && <button onClick={exportMapping} className="text-xs px-3 py-1.5 rounded-lg bg-white text-[#1B3A5C] font-semibold">매핑 내보내기(JSON)</button>}
           {group === '실거래' && <button onClick={refreshAllTrades} disabled={busy === '__all__'} className="text-xs px-3 py-1.5 rounded-lg bg-white text-[#1B3A5C] font-semibold disabled:opacity-50">{busy === '__all__' ? '조회 중...' : '전체 갱신'}</button>}
+          <button onClick={() => setShowAdd(true)} className="text-xs px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold">+ 단지 추가</button>
           <a href="/admin" className="text-xs text-blue-200 underline">← 대시보드</a>
         </div>
       </header>
@@ -453,6 +481,13 @@ export default function ReconAdminPage() {
             className={`px-3 py-1.5 rounded-lg text-sm ${group === g ? 'bg-[#1B3A5C] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{g}</button>
         ))}
         <span className="text-xs text-gray-400 self-center ml-2">{group === '인덱스' ? 'NVP ref·가중치 편집 → 인덱스 실시간 재계산(엔진)' : group === '평당가' ? '실거래·매핑 기반 실시간 계산(엔진)' : group === '실거래' ? '읽기 전용 ([조회]로 갱신)' : '흰 칸 클릭해 편집 → DB 자동저장(✓)'}</span>
+        {/* status 필터 */}
+        <div className="ml-auto flex gap-1 items-center">
+          {([['all', `전체 ${rows.length}`], ['active', `운영 ${statusCounts.active}`], ['hold', `보류 ${statusCounts.hold}`], ['draft', `작성중 ${statusCounts.draft}`]] as const).map(([k, label]) => (
+            <button key={k} onClick={() => setStatusFilter(k)}
+              className={`px-2 py-1 rounded text-xs ${statusFilter === k ? 'bg-[#1B3A5C] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>{label}</button>
+          ))}
+        </div>
       </div>
 
       {msg && <div className="bg-blue-50 text-[#1B3A5C] text-sm px-6 py-2 border-b border-blue-100">{msg}</div>}
@@ -474,16 +509,19 @@ export default function ReconAdminPage() {
               )
             })}
             {group === '실거래' && <th className={th} style={{ width: 80 }}>작업</th>}
+            {group === '기본' && <th className={th} style={{ width: 110 }}>상태/삭제</th>}
           </tr></thead>
           <tbody>
-            {rows.map((r0, i) => {
+            {visibleRows.map((r0, i) => {
               const r = { ...r0, _calc: calcOf(r0) } as Recon
+              const st = stOf(r)
               return (
-              <tr key={r.id} className="hover:bg-blue-50/30">
+              <tr key={r.id} className={`hover:bg-blue-50/30 ${st === 'hold' ? 'opacity-50' : st === 'draft' ? 'bg-amber-50/40' : ''}`}>
                 <td className={td + ' text-center text-gray-400'}>{i + 1}</td>
                 <td className={td + ' font-semibold whitespace-nowrap'}>
                   {String(r.short_name || r.name)}
                   {typeof r.stage === 'number' && <span className="text-gray-400 text-[0.8em] ml-1">{STAGE_NAME[r.stage as number] || r.stage}</span>}
+                  {st !== 'active' && <span className={`ml-1 text-[0.7em] px-1 rounded ${st === 'hold' ? 'bg-gray-300 text-gray-700' : 'bg-amber-300 text-amber-900'}`}>{st === 'hold' ? '보류' : '작성중'}</span>}
                 </td>
                 {cols.map((c, i) => (c.refsel || c.wsel || c.nvpfinal)
                   ? <MapCell key={`${group}#${i}`} row={r} col={c} w={wOf(i, c)} />
@@ -498,6 +536,12 @@ export default function ReconAdminPage() {
                   <button onClick={() => refreshTrade(r)} disabled={!!busy}
                     className="px-2 py-0.5 bg-[#1B3A5C] text-white rounded text-[0.9em] disabled:opacity-50">{busy === r.id ? '...' : '조회'}</button>
                 </td>}
+                {group === '기본' && <td className={td + ' text-center whitespace-nowrap'}>
+                  {st === 'draft' && <button onClick={() => setStatus(r, 'active')} className="px-1.5 py-0.5 text-[0.85em] text-emerald-600 hover:bg-emerald-50 rounded" title="운영 시작">운영</button>}
+                  {st === 'active' && <button onClick={() => setStatus(r, 'hold')} className="px-1.5 py-0.5 text-[0.85em] text-gray-500 hover:bg-gray-100 rounded" title="RVI에서 숨김">보류</button>}
+                  {st === 'hold' && <button onClick={() => setStatus(r, 'active')} className="px-1.5 py-0.5 text-[0.85em] text-emerald-600 hover:bg-emerald-50 rounded" title="다시 운영">복구</button>}
+                  <button onClick={() => delComplex(r)} className="px-1.5 py-0.5 text-[0.85em] text-red-500 hover:bg-red-50 rounded ml-0.5" title="영구 삭제">삭제</button>
+                </td>}
               </tr>
               )
             })}
@@ -505,7 +549,8 @@ export default function ReconAdminPage() {
         </table>
        </div>
       </div>
-      <p className="px-6 pb-4 text-xs text-gray-400">총 {rows.length}개 · 평당가·인덱스는 계산엔진(lib/indexCalc)으로 실시간 산출 → 실거래·매핑 편집 즉시 반영</p>
+      <p className="px-6 pb-4 text-xs text-gray-400">총 {rows.length}개(운영 {statusCounts.active}·보류 {statusCounts.hold}·작성중 {statusCounts.draft}) · 평당가·인덱스는 계산엔진(lib/indexCalc)으로 실시간 산출 · active만 RVI 반영</p>
+      {showAdd && <AddComplexModal existing={rows as unknown as Record<string, unknown>[]} onClose={() => setShowAdd(false)} onSaved={fetchRows} />}
     </div>
   )
 

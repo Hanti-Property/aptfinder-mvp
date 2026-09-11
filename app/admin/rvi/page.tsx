@@ -9,7 +9,7 @@ import { calcAll, type ReconRow } from '@/lib/indexCalc'
 function toHtmlRecords(rows: Record<string, unknown>[]) {
   const calc = calcAll(rows as unknown as ReconRow[])
   return rows
-    .filter(r => (r.gu as string) === '강남구' && r.ticker)
+    .filter(r => (r.gu as string) === '강남구' && r.ticker && ((r.status as string) || 'active') === 'active')
     .map(r => {
       const id = String((r.id as string) ?? r.ticker)
       const c = calc.get(id)
