@@ -66,6 +66,21 @@ function removeOutliers(vals: number[]): number[] {
   return vals.filter(v => v >= q1 - 1.5 * iqr && v <= q3 + 1.5 * iqr)
 }
 
+// 면적-값 선형회귀로 84㎡ 값 추정 (84 실거래 없을 때). 소형↑·대형↓ 관계 반영.
+function regress84(pairs: { area: number; v: number }[], lo: number, hi: number): { v84: number; ok: boolean } {
+  const n = pairs.length
+  const areas = new Set(pairs.map(p => Math.round(p.area)))
+  if (n < 3 || areas.size < 2) return { v84: 0, ok: false }
+  const sx = pairs.reduce((s, p) => s + p.area, 0), sy = pairs.reduce((s, p) => s + p.v, 0)
+  const sxx = pairs.reduce((s, p) => s + p.area * p.area, 0), sxy = pairs.reduce((s, p) => s + p.area * p.v, 0)
+  const den = n * sxx - sx * sx
+  if (den === 0) return { v84: 0, ok: false }
+  const slope = (n * sxy - sx * sy) / den, intercept = (sy - slope * sx) / n
+  const v84 = Math.round(slope * 84 + intercept)
+  if (v84 < lo || v84 > hi) return { v84: 0, ok: false }
+  return { v84, ok: true }
+}
+
 function calcStdPrice(trades: Trade[], row: NvpRef) {
   const kws = (row.trade_name && row.trade_name.length) ? row.trade_name : [row.short_name || row.name]
   let mine = trades.filter(t =>
@@ -77,29 +92,36 @@ function calcStdPrice(trades: Trade[], row: NvpRef) {
     mine = trades.filter(t => (t.jibun || '').trim() === row.jibun && parseInt(t.floor || '0') > 1)
   }
   if (!mine.length) return null
-  let pool = mine.filter(t => { const a = parseFloat(t.excluUseAr || '0'); return a >= 76 && a <= 90 })
-  if (!pool.length) {
-    const sorted = [...mine].filter(t => parseFloat(t.excluUseAr || '0') > 0)
-      .sort((a, b) => Math.abs(parseFloat(a.excluUseAr) - 84) - Math.abs(parseFloat(b.excluUseAr) - 84))
-    if (!sorted.length) return null
-    const nearest = parseFloat(sorted[0].excluUseAr)
-    pool = mine.filter(t => Math.abs(parseFloat(t.excluUseAr || '0') - nearest) < 3)
+  const pool = mine.filter(t => { const a = parseFloat(t.excluUseAr || '0'); return a >= 76 && a <= 90 })
+  if (pool.length) {
+    // 84㎡ 실거래 있음 → 기존 방식
+    let ppps = pool.map(t => { const amt = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0'); return ar > 0 ? amt / (ar / PY) : 0 }).filter(v => v > 0)
+    let perM2 = pool.map(t => { const amt = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0'); return ar > 0 ? amt / ar : 0 }).filter(v => v > 0)
+    ppps = removeOutliers(ppps); perM2 = removeOutliers(perM2)
+    if (!ppps.length) return null
+    const avgPy = Math.round(ppps.reduce((a, b) => a + b, 0) / ppps.length)
+    const avgM2 = Math.round(perM2.reduce((a, b) => a + b, 0) / perM2.length)
+    const dates = pool.map(t => `${t.dealYear}.${String(t.dealMonth).padStart(2, '0')}`).sort()
+    const areaAvg = pool.reduce((s, t) => s + parseFloat(t.excluUseAr || '0'), 0) / pool.length
+    return { ppp: avgPy, m2: avgM2, count: pool.length, latest: dates[dates.length - 1], area: Math.round(areaAvg * 100) / 100, est84: false }
   }
-  let ppps = pool.map(t => {
-    const amt = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0')
-    return ar > 0 ? amt / (ar / PY) : 0
-  }).filter(v => v > 0)
-  let perM2 = pool.map(t => {
-    const amt = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0')
-    return ar > 0 ? amt / ar : 0
-  }).filter(v => v > 0)
-  ppps = removeOutliers(ppps); perM2 = removeOutliers(perM2)
-  if (!ppps.length) return null
+  // 84㎡ 없음 → 면적-평당가/㎡당가 회귀로 84㎡ 추정
+  const pyPairs = mine.map(t => { const amt = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0'); return { area: ar, v: ar > 0 ? amt / (ar / PY) : 0 } }).filter(p => p.area > 0 && p.v > 0)
+  const m2Pairs = mine.map(t => { const amt = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0'); return { area: ar, v: ar > 0 ? amt / ar : 0 } }).filter(p => p.area > 0 && p.v > 0)
+  const rPy = regress84(pyPairs, 2000, 30000), rM2 = regress84(m2Pairs, 600, 10000)
+  const dates = mine.map(t => `${t.dealYear}.${String(t.dealMonth).padStart(2, '0')}`).sort()
+  if (rPy.ok) {
+    return { ppp: rPy.v84, m2: rM2.ok ? rM2.v84 : Math.round(rPy.v84 / PY), count: mine.length, latest: dates[dates.length - 1], area: 84, est84: true }
+  }
+  // 회귀 불가 → 84 최근접 폴백
+  const sorted = [...mine].filter(t => parseFloat(t.excluUseAr || '0') > 0).sort((a, b) => Math.abs(parseFloat(a.excluUseAr) - 84) - Math.abs(parseFloat(b.excluUseAr) - 84))
+  if (!sorted.length) return null
+  const nearest = parseFloat(sorted[0].excluUseAr)
+  const np = mine.filter(t => Math.abs(parseFloat(t.excluUseAr || '0') - nearest) < 3)
+  let ppps = np.map(t => { const amt = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0'); return ar > 0 ? amt / (ar / PY) : 0 }).filter(v => v > 0)
+  ppps = removeOutliers(ppps); if (!ppps.length) return null
   const avgPy = Math.round(ppps.reduce((a, b) => a + b, 0) / ppps.length)
-  const avgM2 = Math.round(perM2.reduce((a, b) => a + b, 0) / perM2.length)
-  const dates = pool.map(t => `${t.dealYear}.${String(t.dealMonth).padStart(2, '0')}`).sort()
-  const areaAvg = pool.reduce((s, t) => s + parseFloat(t.excluUseAr || '0'), 0) / pool.length
-  return { ppp: avgPy, m2: avgM2, count: pool.length, latest: dates[dates.length - 1], area: Math.round(areaAvg * 100) / 100 }
+  return { ppp: avgPy, m2: Math.round(avgPy / PY), count: mine.length, latest: dates[dates.length - 1], area: 84, est84: true }
 }
 
 // 컬럼 정의 (리사이즈 가능)
@@ -175,7 +197,7 @@ export default function NvpAdminPage() {
           trade_count: r.count, latest_date: r.latest,
           price_updated: new Date().toISOString(), ref_status: 'active',
         }
-        setMsg(`${row.short_name || row.name}: ${r.ppp.toLocaleString()}만원/평 (${r.count}건, ${r.latest})`)
+        setMsg(`${row.short_name || row.name}: ${r.ppp.toLocaleString()}만원/평 (${r.count}건, ${r.latest})${r.est84 ? ' · 84㎡ 회귀추정' : ''}`)
       }
       await supabase.from('nvp_reference').update(upd).eq('id', row.id)
       // 전체 재조회 대신 해당 행만 로컬 갱신 → 화면 튐 방지

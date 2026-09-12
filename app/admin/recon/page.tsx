@@ -144,22 +144,59 @@ async function fetchTrades(lawd: string, months: number): Promise<Trade[]> {
 function removeOutliers(v: number[]): number[] { if (v.length < 4) return v; const s = [...v].sort((a, b) => a - b); const q1 = s[Math.floor(s.length * .25)], q3 = s[Math.floor(s.length * .75)], iqr = q3 - q1; return v.filter(x => x >= q1 - 1.5 * iqr && x <= q3 + 1.5 * iqr) }
 
 /** 재건축 단지 현재가 실거래 갱신 (전용면적 기준 평균, 84 우선 아님 — 전체 대표) */
+// 면적-평당가 선형회귀로 84㎡ 평당가 추정 (84 실거래 없을 때).
+// 송파 등 소형 평당가↑·대형 평당가↓ 관계를 반영. {ppp84, ok} 반환.
+function regress84Ppp(pairs: { area: number; ppp: number }[]): { ppp84: number; ok: boolean } {
+  const n = pairs.length
+  const areas = new Set(pairs.map(p => Math.round(p.area)))
+  if (n < 3 || areas.size < 2) return { ppp84: 0, ok: false }   // 최소 3건 + 면적종류 2개
+  const sx = pairs.reduce((s, p) => s + p.area, 0)
+  const sy = pairs.reduce((s, p) => s + p.ppp, 0)
+  const sxx = pairs.reduce((s, p) => s + p.area * p.area, 0)
+  const sxy = pairs.reduce((s, p) => s + p.area * p.ppp, 0)
+  const den = n * sxx - sx * sx
+  if (den === 0) return { ppp84: 0, ok: false }
+  const slope = (n * sxy - sx * sy) / den
+  const intercept = (sy - slope * sx) / n
+  const ppp84 = Math.round(slope * 84 + intercept)
+  // 비현실적 값 방어 (평당 2천~3만 만원 범위 밖이면 실패)
+  if (ppp84 < 2000 || ppp84 > 30000) return { ppp84: 0, ok: false }
+  return { ppp84, ok: true }
+}
+
 function calcCurrent(trades: Trade[], row: Recon) {
   const kws = (row.trade_name as string[] | null) || [row.short_name as string || row.name as string]
   const dong = row.dong as string, jibun = row.jibun as string
   let mine = trades.filter(t => (t.umdNm || '').trim() === dong && kws.some(k => (t.aptNm || '').includes(k)) && parseInt(t.floor || '0') > 1 && !(t.cdealType && t.cdealType.trim()))
   if (!mine.length && jibun) mine = trades.filter(t => (t.jibun || '').trim() === jibun && parseInt(t.floor || '0') > 1)
   if (!mine.length) return null
-  // 84 우선(76~90), 없으면 84 최근접
-  let pool = mine.filter(t => { const a = parseFloat(t.excluUseAr || '0'); return a >= 76 && a <= 90 })
-  if (!pool.length) { const s = [...mine].filter(t => parseFloat(t.excluUseAr || '0') > 0).sort((a, b) => Math.abs(parseFloat(a.excluUseAr) - 84) - Math.abs(parseFloat(b.excluUseAr) - 84)); if (!s.length) return null; const near = parseFloat(s[0].excluUseAr); pool = mine.filter(t => Math.abs(parseFloat(t.excluUseAr || '0') - near) < 3) }
-  let ppps = pool.map(t => { const a = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0'); return ar > 0 ? a / (ar / PY) : 0 }).filter(v => v > 0)
-  ppps = removeOutliers(ppps); if (!ppps.length) return null
-  const avgPy = Math.round(ppps.reduce((a, b) => a + b, 0) / ppps.length)
-  const last = pool.sort((a, b) => (`${b.dealYear}${b.dealMonth}`).localeCompare(`${a.dealYear}${a.dealMonth}`))[0]
-  const price = Math.round(parseInt((last.dealAmount || '0').replace(/,/g, '')))
-  const dates = pool.map(t => `${t.dealYear}.${String(t.dealMonth).padStart(2, '0')}`).sort()
-  return { avgPy, price, area: parseFloat(last.excluUseAr), floor: parseInt(last.floor || '0'), count: pool.length, latest: dates[dates.length - 1] }
+  const pool84 = mine.filter(t => { const a = parseFloat(t.excluUseAr || '0'); return a >= 76 && a <= 90 })
+  if (pool84.length) {
+    // 84㎡ 실거래 있음 → 기존 방식 (변화 없음)
+    let ppps = pool84.map(t => { const a = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0'); return ar > 0 ? a / (ar / PY) : 0 }).filter(v => v > 0)
+    ppps = removeOutliers(ppps); if (!ppps.length) return null
+    const avgPy = Math.round(ppps.reduce((a, b) => a + b, 0) / ppps.length)
+    const last = pool84.sort((a, b) => (`${b.dealYear}${b.dealMonth}`).localeCompare(`${a.dealYear}${a.dealMonth}`))[0]
+    const price = Math.round(parseInt((last.dealAmount || '0').replace(/,/g, '')))
+    const dates = pool84.map(t => `${t.dealYear}.${String(t.dealMonth).padStart(2, '0')}`).sort()
+    return { avgPy, price, area: parseFloat(last.excluUseAr), floor: parseInt(last.floor || '0'), count: pool84.length, latest: dates[dates.length - 1], est84: false }
+  }
+  // 84㎡ 없음 → 면적-평당가 회귀로 84㎡ 평당가 추정
+  const pairs = mine.map(t => { const amt = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0'); return { area: ar, ppp: ar > 0 ? amt / (ar / PY) : 0 } }).filter(p => p.area > 0 && p.ppp > 0)
+  const reg = regress84Ppp(pairs)
+  if (!reg.ok) {
+    // 회귀 불가(데이터 부족) → 84 최근접 폴백 (기존)
+    const s = [...mine].filter(t => parseFloat(t.excluUseAr || '0') > 0).sort((a, b) => Math.abs(parseFloat(a.excluUseAr) - 84) - Math.abs(parseFloat(b.excluUseAr) - 84)); if (!s.length) return null
+    const near = parseFloat(s[0].excluUseAr); const np = mine.filter(t => Math.abs(parseFloat(t.excluUseAr || '0') - near) < 3)
+    let ppps = np.map(t => { const a = parseInt((t.dealAmount || '0').replace(/,/g, '')), ar = parseFloat(t.excluUseAr || '0'); return ar > 0 ? a / (ar / PY) : 0 }).filter(v => v > 0)
+    ppps = removeOutliers(ppps); if (!ppps.length) return null
+    const avgPy = Math.round(ppps.reduce((a, b) => a + b, 0) / ppps.length)
+    const dates = mine.map(t => `${t.dealYear}.${String(t.dealMonth).padStart(2, '0')}`).sort()
+    return { avgPy, price: Math.round(avgPy * 84 / PY), area: 84, floor: 0, count: mine.length, latest: dates[dates.length - 1], est84: true }
+  }
+  // 회귀 성공 → 84㎡ 추정 평당가
+  const dates = mine.map(t => `${t.dealYear}.${String(t.dealMonth).padStart(2, '0')}`).sort()
+  return { avgPy: reg.ppp84, price: Math.round(reg.ppp84 * 84 / PY), area: 84, floor: 0, count: mine.length, latest: dates[dates.length - 1], est84: true }
 }
 
 export default function ReconAdminPage() {
@@ -332,7 +369,8 @@ export default function ReconAdminPage() {
       keepScroll()
       setRows(p => p.map(x => x.id === row.id ? { ...x, ...upd } : x))
       if (!silent) {
-        setMsg(`${row.short_name || row.name}: 최근 ${(r.price / 10000).toFixed(1)}억 · 평균 ${r.avgPy.toLocaleString()}만/평 (${r.count}건, ${r.latest})`)
+        const est = r.est84 ? ' · 84㎡ 회귀추정(직접거래 없음)' : ''
+        setMsg(`${row.short_name || row.name}: 최근 ${(r.price / 10000).toFixed(1)}억 · 평균 ${r.avgPy.toLocaleString()}만/평 (${r.count}건, ${r.latest})${est}`)
       }
       return true
     } catch (e: unknown) { if (!silent) setMsg('조회 실패: ' + (e instanceof Error ? e.message : String(e))); return false }
