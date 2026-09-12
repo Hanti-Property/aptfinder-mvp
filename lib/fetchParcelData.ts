@@ -150,6 +150,7 @@ export interface ParcelResult {
   sources: { recap: boolean; land: boolean; title: number; trade: boolean }
   farRule: string
   warnings: string[]
+  platPlc: string | null   // 대장이 반환한 지번주소 (예: "서울특별시 송파구 오금동 43") — 입력 동과 대조용
 }
 
 /**
@@ -191,6 +192,12 @@ export async function fetchParcelData(
   const tr = calcTrade(trades, dong, jibun, tradeNames.length ? tradeNames : [])
   if (!tr) warnings.push('실거래 미확보 — 실거래명(trade_name) 확인 필요')
 
+  // 대장 지번주소 (입력 동과 대조용). recap 우선, 없으면 title 첫 항목.
+  const platPlc = (recap?.platPlc || (title[0] && title[0].platPlc) || '').trim() || null
+  if (platPlc && dong && !platPlc.includes(dong)) {
+    warnings.push(`⚠️ 대장 주소(${platPlc})가 입력 동(${dong})과 다름 — 법정동코드(bjdong) 확인 필요`)
+  }
+
   return {
     plat_area: platArea ? Math.round(platArea * 100) / 100 : null,
     far: far ? Math.round(far * 100) / 100 : null,
@@ -205,5 +212,6 @@ export async function fetchParcelData(
     sources: { recap: !!recap, land: !!land, title: title.length, trade: !!tr },
     farRule,
     warnings,
+    platPlc,
   }
 }

@@ -19,13 +19,15 @@ const GU_META: Record<string, { lawd: string; guCode: string; dongs: Record<stri
   },
   송파구: {
     lawd: '11710', guCode: 'SP',
+    // 법정동코드 국토부 대장 검증(2026-09, platPlc로 확인). 미검증 동은 자동조회 시 주소검증으로 걸러짐.
     dongs: {
       잠실동: { code: 'JSL', bjdong: '10100' }, 신천동: { code: 'SCN', bjdong: '10200' },
       풍납동: { code: 'PNP', bjdong: '10300' }, 송파동: { code: 'SPD', bjdong: '10400' },
-      방이동: { code: 'BGI', bjdong: '10500' }, 오금동: { code: 'OGM', bjdong: '10600' },
+      석촌동: { code: 'SCH', bjdong: '10500' }, 삼전동: { code: 'SJN', bjdong: '10600' },
       가락동: { code: 'GRK', bjdong: '10700' }, 문정동: { code: 'MJD', bjdong: '10800' },
-      장지동: { code: 'JJD', bjdong: '10900' }, 거여동: { code: 'GYD', bjdong: '11000' },
-      마천동: { code: 'MCN', bjdong: '11100' },
+      장지동: { code: 'JJD', bjdong: '10900' }, 방이동: { code: 'BGI', bjdong: '11100' },
+      오금동: { code: 'OGM', bjdong: '11200' }, 거여동: { code: 'GYD', bjdong: '11300' },
+      마천동: { code: 'MCN', bjdong: '11400' },
     },
   },
   서초구: {
@@ -187,6 +189,11 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
         {/* 물리·시세 값: 자동조회로 채우거나 직접 입력 (편집 가능) */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
           <div className="text-xs text-gray-500 mb-2">📐 물리·시세 값 <span className="text-gray-400">— 자동조회로 채워지며, 비거나 틀리면 직접 입력/수정하세요 {parcel && <span>({parcel.farRule && `용적률: ${parcel.farRule}`})</span>}</span></div>
+          {parcel?.platPlc && (
+            <div className={`text-xs mb-2 px-2 py-1 rounded ${parcel.platPlc.includes(f.dong) ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600 font-semibold'}`}>
+              대장 주소: {parcel.platPlc} {parcel.platPlc.includes(f.dong) ? '✓ 입력 동 일치' : `✗ 입력 동(${f.dong})과 불일치 — 법정동코드 확인!`}
+            </div>
+          )}
           <div className="grid grid-cols-3 gap-2">
             <div><label className={lbl}>대지면적㎡</label><input className={inp} value={m.plat_area} onChange={e => setMv('plat_area', e.target.value)} placeholder="예: 20876" /></div>
             <div><label className={lbl}>현재 용적률%</label><input className={inp} value={m.far} onChange={e => setMv('far', e.target.value)} placeholder="예: 179" /></div>
