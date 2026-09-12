@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import AddNvpModal from './AddNvpModal'
 
 const LAMBDA_URL = 'https://33bujx6lkx33gqxalne4ufncsy0lchzk.lambda-url.ap-northeast-2.on.aws/'
 const PY = 3.3058
@@ -133,6 +134,7 @@ export default function NvpAdminPage() {
   const [fontPx, setFontPx] = useState(12)
   const [widths, setWidths] = useState<Record<string, number>>(() => Object.fromEntries(COLS.map(c => [c.key, c.w])))
   const [savedKey, setSavedKey] = useState('')  // 방금 저장된 셀 "id:field" → ✓ 표시
+  const [showAdd, setShowAdd] = useState(false)  // NVP 추가 모달
 
   const fetchRows = useCallback(async () => {
     setLoading(true)
@@ -184,15 +186,6 @@ export default function NvpAdminPage() {
     if (!confirm(`${rows.length}개 단지 실거래를 모두 조회합니다. 진행할까요?`)) return
     for (const row of rows) await refreshOne(row)
     setMsg('전체 갱신 완료')
-  }
-
-  async function addRow() {
-    const ref_code = prompt('새 단지 refCode (예: NVP-GN-XXX-001):')
-    if (!ref_code) return
-    const name = prompt('단지명:') || '(신규)'
-    const { error } = await supabase.from('nvp_reference').insert({ ref_code, name, gu: '강남구', dong: '', ref_status: 'pending' })
-    if (error) setMsg('추가 실패: ' + error.message)
-    else fetchRows()
   }
 
   async function delRow(row: NvpRef) {
@@ -262,7 +255,7 @@ export default function NvpAdminPage() {
             <span className="text-xs w-6 text-center">{fontPx}</span>
             <button onClick={() => setFontPx(f => Math.min(18, f + 1))} className="w-6 h-6 rounded bg-white/20 hover:bg-white/30 text-sm">＋</button>
           </div>
-          <button onClick={addRow} className="text-sm px-3 py-1.5 rounded-lg border border-blue-300 text-blue-100 hover:bg-white/10">+ 단지 추가</button>
+          <button onClick={() => setShowAdd(true)} className="text-sm px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold">+ 단지 추가</button>
           <button onClick={refreshAll} disabled={!!busy} className="text-sm px-3 py-1.5 rounded-lg bg-white text-[#1B3A5C] font-semibold disabled:opacity-50">전체 갱신</button>
           <a href="/admin" className="text-xs text-blue-200 underline">← 대시보드</a>
         </div>
@@ -323,6 +316,7 @@ export default function NvpAdminPage() {
           </table>
         </div>
       </div>
+      {showAdd && <AddNvpModal existing={rows} onClose={() => setShowAdd(false)} onSaved={fetchRows} />}
     </div>
   )
 }
