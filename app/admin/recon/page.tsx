@@ -324,6 +324,7 @@ export default function ReconAdminPage() {
       if (!r) { if (!silent) setMsg(`${row.short_name || row.name}: 실거래 없음`); return false }
       const upd = {
         avg_ppp: r.avgPy, latest_price: r.price, latest_area: r.area, latest_floor: r.floor,
+        latest_exclu_py: r.area ? Math.round(r.area / PY * 10) / 10 : null,  // 전용평 = 면적㎡/3.3058
         trade_count: r.count, latest_date: r.latest, price_updated: new Date().toISOString().slice(0, 10),
       }
       await supabase.from('recon_master').update(upd).eq('id', row.id)
