@@ -9,13 +9,14 @@ import { calcAll, type ReconRow } from '@/lib/indexCalc'
 function toHtmlRecords(rows: Record<string, unknown>[]) {
   const calc = calcAll(rows as unknown as ReconRow[])
   return rows
-    .filter(r => (r.gu as string) === '강남구' && r.ticker && ((r.status as string) || 'active') === 'active')
+    // 다구 지원: 구 무관, 티커 있고 active인 재건축 단지 전부 (통합 랭킹). gu는 화면에서 필터.
+    .filter(r => r.ticker && ((r.status as string) || 'active') === 'active')
     .map(r => {
       const id = String((r.id as string) ?? r.ticker)
       const c = calc.get(id)
       return {
         // 식별·원천 (그대로)
-        gu: r.gu, dong: r.dong, jibun: r.jibun, bjdong: r.bjdong,
+        gu: r.gu, dong: r.dong, jibun: r.jibun, bjdong: r.bjdong, lawd: r.lawd,
         ticker: r.ticker, name: r.name, shortName: r.short_name,
         assetId: r.asset_id,
         eta: r.eta, stage: r.stage, etaProvisional: r.eta_provisional,

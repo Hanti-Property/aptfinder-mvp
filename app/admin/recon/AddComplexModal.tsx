@@ -4,15 +4,30 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { fetchParcelData, type ParcelResult } from '@/lib/fetchParcelData'
 
-// 동 → 자산코드 동코드 (기존 asset_id 규칙 SEL-GN-XXX-###)
-const DONG_CODE: Record<string, string> = {
-  대치동: 'DCH', 개포동: 'GPO', 일원동: 'ILW', 도곡동: 'DGK',
-  압구정동: 'APG', 청담동: 'CDM', 삼성동: 'SSD', 역삼동: 'YSM', 논현동: 'NHY',
-}
-// 동 → 법정동코드(bjdong) 자동 (강남구)
-const DONG_BJDONG: Record<string, string> = {
-  대치동: '10600', 개포동: '10300', 일원동: '11400', 도곡동: '10500',
-  압구정동: '11000', 청담동: '10400', 삼성동: '10500', 역삼동: '10100', 논현동: '10800',
+// 구 → {lawd, guCode(자산코드 중간), 동별 {동코드, bjdong}}
+// 자산코드 규칙: SEL-{guCode}-{동코드}-###
+const GU_META: Record<string, { lawd: string; guCode: string; dongs: Record<string, { code: string; bjdong: string }> }> = {
+  강남구: {
+    lawd: '11680', guCode: 'GN',
+    dongs: {
+      대치동: { code: 'DCH', bjdong: '10600' }, 개포동: { code: 'GPO', bjdong: '10300' },
+      일원동: { code: 'ILW', bjdong: '11400' }, 도곡동: { code: 'DGK', bjdong: '10500' },
+      압구정동: { code: 'APG', bjdong: '11000' }, 청담동: { code: 'CDM', bjdong: '10400' },
+      삼성동: { code: 'SSD', bjdong: '10500' }, 역삼동: { code: 'YSM', bjdong: '10100' },
+      논현동: { code: 'NHY', bjdong: '10800' },
+    },
+  },
+  송파구: {
+    lawd: '11710', guCode: 'SP',
+    dongs: {
+      잠실동: { code: 'JSL', bjdong: '10100' }, 신천동: { code: 'SCN', bjdong: '10200' },
+      풍납동: { code: 'PNP', bjdong: '10300' }, 송파동: { code: 'SPD', bjdong: '10400' },
+      방이동: { code: 'BGI', bjdong: '10500' }, 오금동: { code: 'OGM', bjdong: '10600' },
+      가락동: { code: 'GRK', bjdong: '10700' }, 문정동: { code: 'MJD', bjdong: '10800' },
+      장지동: { code: 'JJD', bjdong: '10900' }, 거여동: { code: 'GYD', bjdong: '11000' },
+      마천동: { code: 'MCN', bjdong: '11100' },
+    },
+  },
 }
 
 interface Props {
@@ -38,16 +53,26 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
   const set = (k: string, v: string) => {
     setF(prev => {
       const next = { ...prev, [k]: v }
-      // 동 입력 시 bjdong 자동
-      if (k === 'dong' && DONG_BJDONG[v]) next.bjdong = DONG_BJDONG[v]
+      if (k === 'gu') {
+        // 구 변경 시 lawd 자동, 동/bjdong 초기화
+        next.lawd = GU_META[v]?.lawd || prev.lawd
+        next.dong = ''; next.bjdong = ''
+      }
+      if (k === 'dong') {
+        // 동 입력 시 현재 구 기준 bjdong 자동
+        const d = GU_META[prev.gu]?.dongs[v]
+        if (d) next.bjdong = d.bjdong
+      }
       return next
     })
   }
 
-  // 자산코드 자동 제안 (동코드 + 기존 최대순번+1)
+  // 자산코드 자동 제안: SEL-{guCode}-{동코드}-### (기존 최대순번+1)
   function suggestAssetId(): string {
-    const code = DONG_CODE[f.dong] || 'XXX'
-    const prefix = `SEL-GN-${code}-`
+    const meta = GU_META[f.gu]
+    const guCode = meta?.guCode || 'XX'
+    const dongCode = meta?.dongs[f.dong]?.code || 'XXX'
+    const prefix = `SEL-${guCode}-${dongCode}-`
     const nums = existing
       .map(r => String(r.asset_id || ''))
       .filter(a => a.startsWith(prefix))
@@ -55,6 +80,8 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
     const next = (nums.length ? Math.max(...nums) : 0) + 1
     return prefix + String(next).padStart(3, '0')
   }
+
+  const dongOptions = Object.keys(GU_META[f.gu]?.dongs || {})
 
   async function autoFetch() {
     if (!f.lawd || !f.bjdong || !f.jibun) { setMsg('시군구코드·법정동코드·지번을 먼저 입력하세요'); return }
@@ -121,11 +148,12 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
         <p className="text-xs text-gray-500 mb-3">지번 입력 → <b>[자동 조회]</b>로 대지면적·용적률·세대수·시세를 국토부에서 수집 → 확인 후 저장(작성중). 값 검증 후 목록에서 &apos;운영&apos;으로 전환하세요.</p>
 
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <div><label className={lbl}>단지명 *</label><input className={inp} value={f.name} onChange={e => set('name', e.target.value)} placeholder="예: 압구정한양8차" /></div>
-          <div><label className={lbl}>약칭</label><input className={inp} value={f.short_name} onChange={e => set('short_name', e.target.value)} placeholder="예: 압구정한양8" /></div>
-          <div><label className={lbl}>티커</label><input className={inp} value={f.ticker} onChange={e => set('ticker', e.target.value)} placeholder="예: APHY8" /></div>
-          <div><label className={lbl}>동 * (bjdong 자동)</label><input className={inp} value={f.dong} onChange={e => set('dong', e.target.value)} placeholder="예: 압구정동" list="dong-list" /><datalist id="dong-list">{Object.keys(DONG_BJDONG).map(d => <option key={d} value={d} />)}</datalist></div>
-          <div><label className={lbl}>지번 *</label><input className={inp} value={f.jibun} onChange={e => set('jibun', e.target.value)} placeholder="예: 490 또는 658-1" /></div>
+          <div><label className={lbl}>구 * (lawd 자동)</label><select className={inp} value={f.gu} onChange={e => set('gu', e.target.value)}>{Object.keys(GU_META).map(g => <option key={g} value={g}>{g}</option>)}</select></div>
+          <div><label className={lbl}>동 * (bjdong 자동)</label><input className={inp} value={f.dong} onChange={e => set('dong', e.target.value)} placeholder="예: 잠실동" list="dong-list" /><datalist id="dong-list">{dongOptions.map(d => <option key={d} value={d} />)}</datalist></div>
+          <div><label className={lbl}>단지명 *</label><input className={inp} value={f.name} onChange={e => set('name', e.target.value)} placeholder="예: 잠실주공5단지" /></div>
+          <div><label className={lbl}>약칭</label><input className={inp} value={f.short_name} onChange={e => set('short_name', e.target.value)} placeholder="예: 잠실5" /></div>
+          <div><label className={lbl}>티커</label><input className={inp} value={f.ticker} onChange={e => set('ticker', e.target.value)} placeholder="예: JS5" /></div>
+          <div><label className={lbl}>지번 *</label><input className={inp} value={f.jibun} onChange={e => set('jibun', e.target.value)} placeholder="예: 27 또는 658-1" /></div>
           <div><label className={lbl}>실거래명 (쉼표구분)</label><input className={inp} value={f.trade_name} onChange={e => set('trade_name', e.target.value)} placeholder="지도/실거래에 뜨는 이름" /></div>
           <div><label className={lbl}>시군구코드(lawd)</label><input className={inp} value={f.lawd} onChange={e => set('lawd', e.target.value)} /></div>
           <div><label className={lbl}>법정동코드(bjdong)</label><input className={inp} value={f.bjdong} onChange={e => set('bjdong', e.target.value)} /></div>

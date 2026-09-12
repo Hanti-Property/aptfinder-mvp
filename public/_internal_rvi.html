@@ -302,8 +302,14 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   <tbody id="tradeBody"><tr><td colspan="5" style="text-align:center;color:#666">단지를 선택하세요</td></tr></tbody></table>
 
   <!-- RVI 랭킹 테이블 -->
-  <div class="section-title" id="rankTitle">⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순 (티커 단지 38개)</div>
-  <div style="font-size:11px;color:#888;margin:-6px 0 8px;">💡 컬럼 헤더(CMC·단계·ETA·RVI·용적률·현재가)를 클릭하면 그 기준으로 정렬됩니다. 티커/단지명 클릭 시 해당 단지 분석이 열립니다.</div>
+  <div class="section-title" id="rankTitle">⏱️ 재건축 ETA 랭킹 — 진행 빠른 순</div>
+  <div style="font-size:11px;color:#888;margin:-6px 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <span>지역:</span>
+    <select id="rankGuSel" onchange="setRankGu(this.value)" style="background:#0e2c4a;color:#fff;border:1px solid #1c466e;border-radius:4px;font-size:11px;padding:2px 6px;cursor:pointer;">
+      <option value="all">전체</option>
+    </select>
+    <span style="margin-left:8px;">💡 컬럼 헤더 클릭 정렬 · 티커/단지명 클릭 시 분석 열림</span>
+  </div>
   <div style="overflow-x:auto;margin-bottom:16px;">
     <table class="trade-table" id="rriRankTable">
       <thead><tr><th>#</th><th>티커</th><th>단지명</th><th class="sortable" data-sort="cmc" onclick="sortRanking('cmc')">CMC</th><th>등급</th><th class="sortable" data-sort="stage" onclick="sortRanking('stage')">단계</th><th class="sortable" data-sort="eta" onclick="sortRanking('eta')">ETA</th><th class="sortable" data-sort="moveIn" onclick="sortRanking('moveIn')">입주</th><th class="sortable" data-sort="rvi" onclick="sortRanking('rvi')" style="white-space:nowrap;">RVI <select id="rviVerSel" onchange="setRviVer(this.value)" onclick="event.stopPropagation();" style="background:#0e2c4a;color:#fff;border:1px solid #1c466e;border-radius:4px;font-size:11px;padding:1px 3px;cursor:pointer;"><option value="v2">v2 종합</option><option value="v1">v1 물리</option></select></th><th class="sortable" data-sort="rar" onclick="sortRanking('rar')">RAR</th><th class="sortable" data-sort="far" onclick="sortRanking('far')">용적률</th><th class="sortable" data-sort="currentPrice" onclick="sortRanking('currentPrice')">현재가</th></tr></thead>
@@ -1234,7 +1240,7 @@ window.addEventListener('message', function(ev){
 function preloadMasterData(){
   getMasterData().then(data=>{
     data.forEach(d=>{
-      if(d.gu==='강남구'&&d.ticker){
+      if(d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
         ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion};
@@ -1249,7 +1255,7 @@ preloadMasterData();  // 초기 로드 (주입 없으면 JSON 폴백)
 function loadRRIRanking(){
   if(_rriRankLoaded)return;
   getMasterData().then(data=>{
-    const gangnam=data.filter(d=>d.gu==='강남구'&&d.ticker&&d.far>0&&d.avgPPP>0);
+    const gangnam=data.filter(d=>d.ticker&&d.far>0&&d.avgPPP>0);
     // NVP 기준: 상세 카드/NCMC와 통일 (NVP_V2_BASE 사용, 특성 프리미엄 스위치도 동일 적용)
     const RATE=0.03;
     // LOC 등급
@@ -1297,9 +1303,10 @@ function loadRRIRanking(){
       // 엔진 주입값(d.rvi/d.rviV1) 우선. 없으면(JSON 폴백) 로컬 재계산.
       const rviV1=(d.rviV1!=null)?d.rviV1:physScore;
       const rvi=(d.rvi!=null)?d.rvi:Math.round(physScore*realizeF); // v2
-      results.push({name:d.name,dong:d.dong,far:d.far,currentPrice,rri:(d.rri!=null?d.rri:rri),cagr,area,rvi,rviV1,jibun:d.jibun,bjdong:d.bjdong,ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||'',farTBD:!!d.farTBD,rar:(d.rar!=null?d.rar:null),ncmc:(d.ncmc!=null?d.ncmc:null)});
+      results.push({gu:d.gu||'',name:d.name,dong:d.dong,far:d.far,currentPrice,rri:(d.rri!=null?d.rri:rri),cagr,area,rvi,rviV1,jibun:d.jibun,bjdong:d.bjdong,lawd:d.lawd||'',ticker:d.ticker||'',shortName:d.shortName||'',moveIn:d.moveIn||null,stage:d.stage||null,eta:(d.eta!=null?d.eta:null),etaProvisional:!!d.etaProvisional,cmc:(d.cmc!=null?d.cmc:null),capGrade:d.capGrade||'',farTBD:!!d.farTBD,rar:(d.rar!=null?d.rar:null),ncmc:(d.ncmc!=null?d.ncmc:null)});
     });
     _rankRows=results;
+    populateGuFilter();  // 구 필터 드롭다운 채움
     renderRanking(); // 기본: ETA 오름차순
     _rriRankLoaded=true;
   }).catch(()=>{});
@@ -1309,11 +1316,22 @@ function loadRRIRanking(){
 let _rankRows=[];
 let _rankSort={key:'eta', dir:'asc'}; // 기본 ETA 오름차순
 let _rankRviVer='v2'; // 랭킹 RVI 표시/정렬 버전: 'v2'(종합) | 'v1'(물리)
+let _rankGu='all';    // 지역(구) 필터: 'all' | '강남구' | '송파구' ...
 function setRviVer(v){ _rankRviVer = (v==='v1')?'v1':'v2'; renderRanking(); }
+function setRankGu(v){ _rankGu = v||'all'; renderRanking(); }
+// 로드된 데이터에서 구 목록 뽑아 드롭다운 채움
+function populateGuFilter(){
+  const sel=document.getElementById('rankGuSel'); if(!sel)return;
+  const gus=[...new Set(_rankRows.map(r=>r.gu).filter(Boolean))].sort();
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">전체 ('+_rankRows.length+')</option>'+
+    gus.map(g=>{const n=_rankRows.filter(r=>r.gu===g).length;return `<option value="${g}">${g} (${n})</option>`;}).join('');
+  sel.value=cur&&[...sel.options].some(o=>o.value===cur)?cur:'all';
+}
 const rviOf=(r)=> _rankRviVer==='v1' ? (r.rviV1!=null?r.rviV1:r.rvi) : r.rvi;
 const RANK_STAGE_NAME={3:'추진위',4:'조합설립',5:'사업시행',6:'관리처분',7:'이주/철거',8:'착공',9:'입주'};
 const RANK_STAGE_COLOR={3:'#EF5350',4:'#FFA726',5:'#C79A5B',6:'#42A5F5',7:'#66BB6A',8:'#66BB6A',9:'#66BB6A'};
-const RANK_TITLE={eta:'⏱️ 강남구 ETA 랭킹 — 재건축 진행 빠른 순',cmc:'🏦 강남구 CMC 랭킹 — 자산 시가총액 순',far:'📐 강남구 용적률 랭킹',rvi:'📊 강남구 RVI 랭킹',rar:'🚀 강남구 RAR 랭킹 — 재건축 성장배수 순',currentPrice:'💰 강남구 현재가 랭킹',stage:'🏗️ 강남구 재건축 단계 랭킹'};
+const RANK_TITLE={eta:'⏱️ ETA 랭킹 — 재건축 진행 빠른 순',cmc:'🏦 CMC 랭킹 — 자산 시가총액 순',far:'📐 용적률 랭킹',rvi:'📊 RVI 랭킹',rar:'🚀 RAR 랭킹 — 재건축 성장배수 순',currentPrice:'💰 현재가 랭킹',stage:'🏗️ 재건축 단계 랭킹'};
 
 function sortRanking(key){
   // 같은 컬럼 재클릭 시 방향 토글. 새 컬럼이면 기본 방향(값 큰 순, ETA만 오름차순)
@@ -1324,7 +1342,8 @@ function sortRanking(key){
 
 function renderRanking(){
   const key=_rankSort.key, dir=_rankSort.dir;
-  const rows=_rankRows.slice();
+  // 구(gu) 필터 적용
+  const rows=(_rankGu==='all'?_rankRows:_rankRows.filter(r=>r.gu===_rankGu)).slice();
   const val=(r)=>{
     let v = key==='rvi' ? rviOf(r) : r[key];
     if(v==null) return (dir==='asc')? Infinity : -Infinity; // 결측은 항상 뒤로
@@ -1335,9 +1354,10 @@ function renderRanking(){
     if(va!==vb) return dir==='asc'? va-vb : vb-va;
     return (b.rvi||0)-(a.rvi||0); // 동률이면 RVI 높은 순
   });
-  // 제목 갱신
+  // 제목 갱신 (지역 반영)
   const titleEl=document.getElementById('rankTitle');
-  if(titleEl) titleEl.textContent=`${RANK_TITLE[key]||'강남구 랭킹'} (티커 단지 ${rows.length}개)`;
+  const guLabel=_rankGu==='all'?'':`[${_rankGu}] `;
+  if(titleEl) titleEl.textContent=`${guLabel}${RANK_TITLE[key]||'재건축 랭킹'} (${rows.length}개)`;
   const tbody=document.getElementById('rriRankBody');
   tbody.innerHTML='';
   const GRADE_COLOR={'Mega Cap':'#C79A5B','Large Cap':'#66BB6A','Mid Cap':'#42A5F5','Small Cap':'#888'};
@@ -1349,7 +1369,9 @@ function renderRanking(){
     const rarColor=r.rar==null?'#666':r.rar>=3.5?'#66BB6A':r.rar>=2.5?'#42A5F5':r.rar>=2?'#FFA726':'#EF5350';
     const rarCell=r.rar!=null?`<span style="color:${rarColor};font-weight:700" title="재건축후 시총 ÷ 현재 시총 (분담금 전)">${r.rar.toFixed(2)}x</span>`:'<span style="color:#666">—</span>';
     const bjdong=r.bjdong||'11000';
-    const clickAttr=`onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="cursor:pointer;"`;
+    const guNm=r.gu||'강남구';
+    const lawdCd=r.lawd||'11680';
+    const clickAttr=`onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 ${guNm} ${r.dong} ${r.jibun}','${lawdCd}','${bjdong}','${r.jibun}')" style="cursor:pointer;"`;
     const tickerCell=r.ticker?`<span ${clickAttr} style="font-family:monospace;font-weight:700;color:#C79A5B;cursor:pointer;text-decoration:underline;text-decoration-color:#665;">${r.ticker}</span>`:'<span style="color:#666">—</span>';
     const nameDisp=r.shortName||r.name;
     const stageCell=r.stage?`<span style="color:${RANK_STAGE_COLOR[r.stage]||'#bbb'};font-weight:700">${r.stage} ${RANK_STAGE_NAME[r.stage]||''}</span>`:'<span style="color:#666">—</span>';
@@ -1358,7 +1380,7 @@ function renderRanking(){
     const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
     const cmcCell=r.cmc!=null?`<span style="color:#C79A5B;font-weight:700">${r.cmc.toFixed(1)}조</span>`:'<span style="color:#666">—</span>';
     const gradeCell=r.capGrade?`<span style="color:${GRADE_COLOR[r.capGrade]||'#bbb'};font-size:12px;font-weight:700">${gradeShort[r.capGrade]||r.capGrade}</span>`:'—';
-    tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 강남구 ${r.dong} ${r.jibun}','11680','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700" title="${_rankRviVer==='v1'?'RVI v1 물리 잠재력':'RVI v2 종합(ETA 반영)'}">${rviShown}<span style="font-size:9px;color:#666"> ${_rankRviVer}</span></td><td>${rarCell}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
+    tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 ${guNm} ${r.dong} ${r.jibun}','${lawdCd}','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${guNm} ${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700" title="${_rankRviVer==='v1'?'RVI v1 물리 잠재력':'RVI v2 종합(ETA 반영)'}">${rviShown}<span style="font-size:9px;color:#666"> ${_rankRviVer}</span></td><td>${rarCell}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
   });
   // 정렬 표시(▲▼)를 헤더에 반영
   document.querySelectorAll('#rriRankTable thead th[data-sort]').forEach(th=>{
