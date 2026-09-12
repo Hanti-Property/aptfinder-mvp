@@ -481,13 +481,36 @@ function renderInvestNote(a, ctx){
   const stageNm=a.stage?`${a.stage}단계(${STAGE_LABEL[a.stage]||''})`:'단계 미정';
   const sizeNm=SIZE_LABEL[a.sizeGrade]||'';
 
+  // 정비계획 확정 여부
+  const planOn = a.planConfirmed===true;
+  const planFar = a.planFar!=null?Number(a.planFar):null;
+  const planRatio = a.planRatio!=null?Number(a.planRatio):null;
+  const planUnits = a.planUnitsNew!=null?Number(a.planUnitsNew):null;
+  const planRental = a.planUnitsRental!=null?Number(a.planUnitsRental):null;
+  const planDon = a.planDonationRate!=null?Number(a.planDonationRate):null;
+
   // --- 한 줄 요약 ---
   let summary=`${dong} ${h?h.toLocaleString()+'세대 ':''}${sizeNm}, 재건축 ${stageNm}`;
   if(rar!=null) summary+=` · 성장배수 ${rar.toFixed(2)}배`;
   if(eta!=null) summary+=` · 예상 ${eta}년 후 입주${moveIn?`(${moveIn}년)`:''}`;
-  document.getElementById('noteSummary').textContent=summary;
+  const sumEl=document.getElementById('noteSummary');
+  if(planOn){
+    sumEl.innerHTML=`${summary} <span style="background:#1B5E20;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:4px">📄 정비계획 확정</span>`;
+  } else {
+    sumEl.textContent=summary;
+  }
 
   // --- 투자 매력 (pros) ---
+  // 정비계획 확정값 우선 (실측 데이터 → 신뢰도 최상)
+  if(planOn){
+    if(planRatio!=null){
+      const rq = planRatio>=100?'조합원 부담 적음, 사업성 우수':planRatio>=95?'조합원 부담 낮은 편':'비례율 확인 필요';
+      pros.push(`<b>비례율 ${planRatio.toFixed(0)}%</b> 확정 — ${rq} <span style="color:#888;font-size:12px">(정비계획)</span>`);
+    }
+    if(planFar!=null) pros.push(`목표 용적률 <b>${planFar.toFixed(0)}%</b> 확정 — 고밀 개발 인가, 사업성 근거 확보 <span style="color:#888;font-size:12px">(정비계획)</span>`);
+    if(planUnits!=null&&h) pros.push(`세대수 ${h.toLocaleString()}→<b>${planUnits.toLocaleString()}세대</b> 확정 (약 ${(planUnits/h).toFixed(1)}배 증가) <span style="color:#888;font-size:12px">(정비계획)</span>`);
+    if(planDon!=null) pros.push(`기부채납 <b>${(planDon*100).toFixed(1)}%</b> 확정 — 가정치보다 부담 ${planDon<0.20?'낮아 사업성 유리':'수준'} <span style="color:#888;font-size:12px">(정비계획)</span>`);
+  }
   if(rar!=null&&rar>=2.5) pros.push(`재건축 시 자산가치 약 <b>${rar.toFixed(1)}배</b> 상승 예상 (성장배수 높음)`);
   else if(rar!=null&&rar>=1.8) pros.push(`재건축 시 자산가치 약 ${rar.toFixed(1)}배 상승 예상`);
   if(far>0&&far<=180) pros.push(`현재 용적률 <b>${far.toFixed(0)}%</b>로 낮아 재건축 증축 여력·사업성 양호`);
@@ -515,7 +538,13 @@ function renderInvestNote(a, ctx){
   if(a.sizeGrade==='xs'||a.sizeGrade==='s') cons.push(`소규모 단지 — 사업성·분담금 부담 상대적으로 불리할 수 있음`);
   if(a.nvpValid===false) cons.push(`현재가가 이미 목표 신축가 이상 — 추가 상승여력 제한적`);
   if(a.risk&&String(a.risk).trim()) cons.push(`현장 리스크: ${String(a.risk).trim()}`);
-  cons.push(`NCMC·RAR은 목표용적률 300%·상승률 3%·기부채납 20% 등 <b>가정(TBD)</b> 기반 추정치`);
+  if(planOn){
+    const fv=planFar!=null?`${planFar.toFixed(0)}%`:'확정';
+    const dv=planDon!=null?`${(planDon*100).toFixed(1)}%`:'확정';
+    cons.push(`NCMC·RAR은 <b>정비계획 확정값</b>(용적률 ${fv}·기부채납 ${dv}) 기반 — 상승률 3%는 가정치`);
+  } else {
+    cons.push(`NCMC·RAR은 목표용적률 300%·상승률 3%·기부채납 20% 등 <b>가정(TBD)</b> 기반 추정치`);
+  }
 
   document.getElementById('notePros').innerHTML=pros.map(p=>`<li>${p}</li>`).join('');
   document.getElementById('noteCons').innerHTML=cons.map(c=>`<li>${c}</li>`).join('');
@@ -1376,7 +1405,7 @@ function preloadMasterData(){
       if(d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,name:d.name,dong:d.dong,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage,eta:d.eta,moveIn:d.moveIn,rvi:d.rvi,rviV1:d.rviV1,rar:d.rar,nvpValid:d.nvpValid,risk:d.risk,features:d.features,research_memo:d.research_memo};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,name:d.name,dong:d.dong,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage,eta:d.eta,moveIn:d.moveIn,rvi:d.rvi,rviV1:d.rviV1,rar:d.rar,nvpValid:d.nvpValid,risk:d.risk,features:d.features,research_memo:d.research_memo,planConfirmed:d.planConfirmed,planFar:d.planFar,planUnitsNew:d.planUnitsNew,planUnitsRental:d.planUnitsRental,planDonationRate:d.planDonationRate,planRatio:d.planRatio,planGfaNew:d.planGfaNew,planBcr:d.planBcr,planSource:d.planSource};
         // 지도·구선택·TOP10용 단지 리스트 (구 무관 전체)
         list.push({gu:d.gu||'',dong:d.dong||'',name:d.name||'',shortName:d.shortName||'',ticker:d.ticker,jibun:d.jibun||'',h:d.h||d.hhldCnt||0,bjdong:d.bjdong||'',lawd:d.lawd||'',far:d.far||0});
       }

@@ -46,6 +46,16 @@ function toHtmlRecords(rows: Record<string, unknown>[]) {
         nvpValid: r.nvp_valid ?? null,
         features: r.features ?? null,
         research_memo: r.research_memo ?? null,
+        // 정비계획 확정값 (투자노트 배지·비례율·확정용적률 표시용)
+        planConfirmed: r.plan_confirmed ?? false,
+        planFar: r.plan_far ?? null,
+        planUnitsNew: r.plan_units_new ?? null,
+        planUnitsRental: r.plan_units_rental ?? null,
+        planDonationRate: r.plan_donation_rate ?? null,
+        planRatio: r.plan_ratio ?? null,
+        planGfaNew: r.plan_gfa_new ?? null,
+        planBcr: r.plan_bcr ?? null,
+        planSource: r.plan_source ?? null,
       }
     })
 }

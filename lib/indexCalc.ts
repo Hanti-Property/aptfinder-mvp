@@ -110,6 +110,12 @@ export interface ReconRow {
   nvp_final?: number | null      // 최종 NVP (만원/전용평), 매핑 산출
   nvp_base?: number | null
   nvp_valid?: boolean | null
+  // 정비계획 확정값 (plan_confirmed=true면 가정 대신 우선 사용)
+  plan_confirmed?: boolean | null
+  plan_far?: number | null       // 확정 목표용적률(%)
+  plan_donation_rate?: number | null // 확정 기부채납 비율(0~1)
+  plan_units_new?: number | null
+  plan_ratio?: number | null     // 비례율(%)
   [k: string]: unknown
 }
 
@@ -236,9 +242,13 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
   if (r.ticker && cmc && curFarPct && plat) {
     const curFar = curFarPct / 100
     // 목표용적률: 수동입력(target_far) 우선, 없으면 자동규칙(override/고밀예외/기본300%)
+    // 목표용적률 우선순위: ① 정비계획 확정(plan_far) → ② 수동입력(target_far) → ③ 자동규칙
     let ftar: number, rule: string
+    const planConfirmed = !!r.plan_confirmed
+    const planFar = r.plan_far != null && Number(r.plan_far) > 0 ? Number(r.plan_far) : null
     const manualTf = r.target_far != null && Number(r.target_far) > 0 ? Number(r.target_far) : null
-    if (manualTf) { ftar = manualTf / 100; rule = 'manual(수동입력)' }
+    if (planConfirmed && planFar) { ftar = planFar / 100; rule = 'plan(정비계획 확정)' }
+    else if (manualTf) { ftar = manualTf / 100; rule = 'manual(수동입력)' }
     else { const a = targetFar(r.name || '', curFar); ftar = a.ftar; rule = a.rule }
     tfRule = rule
     targetFarPct = Math.round(ftar * 100)
@@ -251,8 +261,10 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
       nvpSrc = 'dong_const'
     }
     newPpp = nvpBaseUsed * Math.pow(1 + CONSTANTS.ANNUAL_RATE, eta + (r.rdt != null ? Number(r.rdt) : 0))
+    // 기부채납: 정비계획 확정(plan_donation_rate) 우선, 없으면 가정 0.20
+    const donation = (planConfirmed && r.plan_donation_rate != null) ? Number(r.plan_donation_rate) : CONSTANTS.DONATION_RATE
     const gfaPy = plat * ftar / PY
-    const excluPy = gfaPy * CONSTANTS.EXCLUSIVE_RATE * (1 - CONSTANTS.DONATION_RATE)
+    const excluPy = gfaPy * CONSTANTS.EXCLUSIVE_RATE * (1 - donation)
     ncmc = pyRound(excluPy * newPpp / 1e8, 2)
     rar = cmc ? pyRound(ncmc / cmc, 2) : null
     newPpp = pyRound(newPpp)
