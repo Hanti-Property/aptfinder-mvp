@@ -168,7 +168,7 @@ export default function NvpAdminPage() {
       let upd: Record<string, unknown>
       if (!r) {
         upd = { ref_status: 'pending', price_updated: new Date().toISOString() }
-        setMsg(`${row.short_name || row.name}: 최근 12개월 84㎡ 거래 없음 (pending)`)
+        setMsg(`${row.short_name || row.name}: 최근 12개월 거래빈도 낮음 (pending)`)
       } else {
         upd = {
           std_ppp_exclu: r.ppp, std_price_m2: r.m2, std_area: r.area,

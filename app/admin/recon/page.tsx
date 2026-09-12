@@ -321,7 +321,7 @@ export default function ReconAdminPage() {
     try {
       const trades = await fetchTrades(lawd, 12)
       const r = calcCurrent(trades, row)
-      if (!r) { if (!silent) setMsg(`${row.short_name || row.name}: 실거래 없음`); return false }
+      if (!r) { if (!silent) setMsg(`${row.short_name || row.name}: 최근 12개월 거래빈도 낮음 (실거래 없음)`); return false }
       const upd = {
         avg_ppp: r.avgPy, latest_price: r.price, latest_area: r.area, latest_floor: r.floor,
         latest_exclu_py: r.area ? Math.round(r.area / PY * 10) / 10 : null,  // 전용평 = 면적㎡/3.3058
@@ -343,17 +343,17 @@ export default function ReconAdminPage() {
   async function refreshAllTrades() {
     if (!confirm(`재건축 ${rows.length}개 단지 실거래를 모두 조회합니다. 몇 분 걸릴 수 있어요. 진행할까요?`)) return
     setBusy('__all__')
-    let ok = 0, fail = 0
-    const failed: string[] = []
+    let ok = 0, low = 0
+    const lowList: string[] = []
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i]
-      setMsg(`전체 갱신 중... ${i + 1}/${rows.length} · ${String(row.short_name || row.name)} (성공 ${ok} / 실패 ${fail})`)
+      setMsg(`전체 갱신 중... ${i + 1}/${rows.length} · ${String(row.short_name || row.name)} (갱신 ${ok} / 거래빈도 낮음 ${low})`)
       const done = await refreshTrade(row, true)
-      if (done) ok++; else { fail++; failed.push(String(row.short_name || row.name)) }
+      if (done) ok++; else { low++; lowList.push(String(row.short_name || row.name)) }
     }
     setBusy(null)
     // refreshTrade가 각 행을 로컬 갱신하므로 전체 재조회 불필요 (스크롤 유지)
-    setMsg(`전체 갱신 완료: 성공 ${ok} / 실패 ${fail}${failed.length ? ` (실패: ${failed.join(', ')})` : ''}`)
+    setMsg(`전체 갱신 완료: 갱신 ${ok}개${lowList.length ? ` · 거래빈도 낮음 ${low}개 (${lowList.join(', ')})` : ''}`)
   }
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">로딩 중...</div>
