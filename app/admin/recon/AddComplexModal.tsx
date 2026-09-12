@@ -28,6 +28,25 @@ const GU_META: Record<string, { lawd: string; guCode: string; dongs: Record<stri
       마천동: { code: 'MCN', bjdong: '11100' },
     },
   },
+  서초구: {
+    lawd: '11650', guCode: 'SC',
+    dongs: {
+      방배동: { code: 'BBE', bjdong: '10100' }, 양재동: { code: 'YJE', bjdong: '10200' },
+      우면동: { code: 'UMN', bjdong: '10300' }, 원지동: { code: 'WJI', bjdong: '10400' },
+      잠원동: { code: 'JWN', bjdong: '10500' }, 반포동: { code: 'BAN', bjdong: '10700' },
+      서초동: { code: 'SCH', bjdong: '10800' }, 내곡동: { code: 'NGK', bjdong: '10900' },
+    },
+  },
+  강동구: {
+    lawd: '11740', guCode: 'GD',
+    dongs: {
+      명일동: { code: 'MYD', bjdong: '10100' }, 고덕동: { code: 'GDK', bjdong: '10200' },
+      상일동: { code: 'SID', bjdong: '10300' }, 길동: { code: 'GIL', bjdong: '10400' },
+      둔촌동: { code: 'DCN', bjdong: '10500' }, 암사동: { code: 'ASA', bjdong: '10600' },
+      성내동: { code: 'SND', bjdong: '10700' }, 천호동: { code: 'CHO', bjdong: '10800' },
+      강일동: { code: 'GID', bjdong: '11000' },
+    },
+  },
 }
 
 interface Props {

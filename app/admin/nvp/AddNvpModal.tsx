@@ -18,8 +18,9 @@ const GU_META: Record<string, { lawd: string; guCode: string; dongs: Record<stri
   서초구: {
     lawd: '11650', guCode: 'SC',
     dongs: {
-      반포동: { code: 'BAN', bjdong: '10700' }, 잠원동: { code: 'JWN', bjdong: '10800' },
-      서초동: { code: 'SCH', bjdong: '10600' }, 방배동: { code: 'BBE', bjdong: '10100' },
+      반포동: { code: 'BAN', bjdong: '10700' }, 잠원동: { code: 'JWN', bjdong: '10500' },
+      서초동: { code: 'SCH', bjdong: '10800' }, 방배동: { code: 'BBE', bjdong: '10100' },
+      양재동: { code: 'YJE', bjdong: '10200' },
     },
   },
   송파구: {
@@ -30,6 +31,16 @@ const GU_META: Record<string, { lawd: string; guCode: string; dongs: Record<stri
       방이동: { code: 'BGI', bjdong: '10500' }, 오금동: { code: 'OGM', bjdong: '10600' },
       가락동: { code: 'GRK', bjdong: '10700' }, 문정동: { code: 'MJD', bjdong: '10800' },
       거여동: { code: 'GYD', bjdong: '11000' }, 마천동: { code: 'MCN', bjdong: '11100' },
+    },
+  },
+  강동구: {
+    lawd: '11740', guCode: 'GD',
+    dongs: {
+      명일동: { code: 'MYD', bjdong: '10100' }, 고덕동: { code: 'GDK', bjdong: '10200' },
+      상일동: { code: 'SID', bjdong: '10300' }, 길동: { code: 'GIL', bjdong: '10400' },
+      둔촌동: { code: 'DCN', bjdong: '10500' }, 암사동: { code: 'ASA', bjdong: '10600' },
+      성내동: { code: 'SND', bjdong: '10700' }, 천호동: { code: 'CHO', bjdong: '10800' },
+      강일동: { code: 'GID', bjdong: '11000' },
     },
   },
 }
