@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { calcAll, type ReconRow, type CalcResult } from '@/lib/indexCalc'
 import AddComplexModal from './AddComplexModal'
@@ -174,6 +174,17 @@ export default function ReconAdminPage() {
   const [refs, setRefs] = useState<NvpRefLite[]>([])                // NVP 레퍼런스 목록 (매핑용)
   const [showAdd, setShowAdd] = useState(false)                     // 단지 추가 모달
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'hold' | 'draft'>('all')
+  const scrollRef = useRef<HTMLDivElement>(null)                    // 표 스크롤 컨테이너
+  const savedScroll = useRef<number | null>(null)                   // 리렌더 시 복원할 스크롤 위치
+
+  // 매핑/편집으로 rows가 바뀌어 리렌더돼도 표 스크롤 위치 유지 (가중치 변경 시 위로 튀는 문제 방지)
+  function keepScroll() { savedScroll.current = scrollRef.current?.scrollTop ?? null }
+  useLayoutEffect(() => {
+    if (savedScroll.current != null && scrollRef.current) {
+      scrollRef.current.scrollTop = savedScroll.current
+      savedScroll.current = null
+    }
+  })
 
   // 컬럼 리사이즈 (헤더 경계 드래그)
   function startResize(wkey: string, curW: number, e: React.MouseEvent) {
@@ -218,6 +229,7 @@ export default function ReconAdminPage() {
     if (norm(value) === norm(prev)) return
     // 입주년(move_in)은 엔진이 ETA+RDT로 실시간 계산 → DB에 별도 저장 안 함.
     const payload: Record<string, unknown> = { [field]: value, updated_at: new Date().toISOString() }
+    keepScroll()
     setRows(p => p.map(r => r.id === id ? { ...r, [field]: value } : r))
     const { error } = await supabase.from('recon_master').update(payload).eq('id', id)
     if (error) { setMsg(`저장 실패(${field}): ` + error.message); return }
@@ -228,6 +240,7 @@ export default function ReconAdminPage() {
   async function saveMapping(id: string, patch: { nvp_ref_codes?: string[]; nvp_loc_weight?: number }) {
     const cur = rows.find(r => r.id === id)
     if (!cur) return
+    keepScroll()   // 리렌더 후 스크롤 위치 복원 (가중치/ref 변경 시 화면 튐 방지)
     const next = { ...cur, ...patch }
     const m = calcMapping(next, refMap)
     const payload: Record<string, unknown> = {
@@ -502,7 +515,7 @@ export default function ReconAdminPage() {
       {msg && <div className="bg-blue-50 text-[#1B3A5C] text-sm px-6 py-2 border-b border-blue-100">{msg}</div>}
 
       <div className="p-3">
-       <div className="overflow-auto border border-gray-200 rounded-lg" style={{ maxHeight: 'calc(100vh - 170px)' }}>
+       <div ref={scrollRef} className="overflow-auto border border-gray-200 rounded-lg" style={{ maxHeight: 'calc(100vh - 170px)' }}>
         <table className="border-collapse" style={{ fontSize: fontPx }}>
           <thead><tr>
             <th className={th} style={{ width: 44 }}>#</th>
