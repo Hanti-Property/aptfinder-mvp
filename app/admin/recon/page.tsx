@@ -556,8 +556,8 @@ export default function ReconAdminPage() {
        <div ref={scrollRef} className="overflow-auto border border-gray-200 rounded-lg" style={{ maxHeight: 'calc(100vh - 170px)' }}>
         <table className="border-collapse" style={{ fontSize: fontPx }}>
           <thead><tr>
-            <th className={th + ' sticky left-0 z-30 !bg-gray-200'} style={{ width: 44 }}>#</th>
-            <th className={th + ' sticky z-30 !bg-gray-200'} style={{ width: 100, left: 44 }}><span onClick={() => toggleSort('short_name')} className="cursor-pointer select-none hover:text-blue-600" title="클릭하여 정렬">단지{sortKey === 'short_name' && <span className="ml-0.5 text-blue-600">{sortDir === 'asc' ? '▲' : '▼'}</span>}</span></th>
+            <th className={th} style={{ width: 44 }}>#</th>
+            <th className={th} style={{ width: 100 }}><span onClick={() => toggleSort('short_name')} className="cursor-pointer select-none hover:text-blue-600" title="클릭하여 정렬">단지{sortKey === 'short_name' && <span className="ml-0.5 text-blue-600">{sortDir === 'asc' ? '▲' : '▼'}</span>}</span></th>
             {cols.map((c, i) => {
               const w = wOf(i, c)
               return (
@@ -581,8 +581,8 @@ export default function ReconAdminPage() {
               const st = stOf(r)
               return (
               <tr key={r.id} className={`hover:bg-blue-50/30 ${st === 'hold' ? 'opacity-50' : st === 'draft' ? 'bg-amber-50/40' : ''}`}>
-                <td className={td + ' text-center text-gray-400 sticky left-0 z-10 bg-white'}>{i + 1}</td>
-                <td className={td + ' font-semibold whitespace-nowrap sticky z-10 bg-white'} style={{ left: 44 }}>
+                <td className={td + ' text-center text-gray-400'}>{i + 1}</td>
+                <td className={td + ' font-semibold whitespace-nowrap'}>
                   {String(r.short_name || r.name)}
                   {typeof r.stage === 'number' && <span className="text-gray-400 text-[0.8em] ml-1">{STAGE_NAME[r.stage as number] || r.stage}</span>}
                   {st !== 'active' && <span className={`ml-1 text-[0.7em] px-1 rounded ${st === 'hold' ? 'bg-gray-300 text-gray-700' : 'bg-amber-300 text-amber-900'}`}>{st === 'hold' ? '보류' : '작성중'}</span>}
