@@ -151,6 +151,7 @@ export interface ParcelResult {
   farRule: string
   warnings: string[]
   platPlc: string | null   // 대장이 반환한 지번주소 (예: "서울특별시 송파구 오금동 43") — 입력 동과 대조용
+  estPlatArea: number | null // 연면적÷용적률 역산 대지면적(다필지 추정) — 토지대장값과 갭 클 때 참고
 }
 
 /**
@@ -189,6 +190,20 @@ export async function fetchParcelData(
   if (!far) warnings.push('용적률 미확보 — 수동 입력 필요')
   if (!households) warnings.push('세대수 미확보 — 수동 입력 필요')
 
+  // [다필지 감지] 토지대장 대지면적 vs 연면적÷용적률 역산값 비교.
+  // 다필지 단지는 토지대장이 대표지번 한 필지만 반환 → 역산값보다 크게 작음.
+  // 두 값 갭 10% 이상이면 경고 + 역산 추정값 제안.
+  let estPlatArea: number | null = null
+  if (vlRatEstm && far > 0) {
+    estPlatArea = Math.round(vlRatEstm / (far / 100))   // 연면적 ÷ 용적률 = 추정 대지면적(총량 기반)
+    if (platArea > 0) {
+      const gap = Math.abs(platArea - estPlatArea) / estPlatArea
+      if (gap >= 0.10) {
+        warnings.push(`⚠️ 대지면적 갭 ${(gap * 100).toFixed(0)}% — 토지대장 ${Math.round(platArea).toLocaleString()}㎡ vs 연면적역산 ${estPlatArea.toLocaleString()}㎡. 다필지 단지 가능성 → 정비구역 실면적 확인 권장`)
+      }
+    }
+  }
+
   const tr = calcTrade(trades, dong, jibun, tradeNames.length ? tradeNames : [])
   if (!tr) warnings.push('실거래 미확보 — 실거래명(trade_name) 확인 필요')
 
@@ -213,5 +228,6 @@ export async function fetchParcelData(
     farRule,
     warnings,
     platPlc,
+    estPlatArea,
   }
 }

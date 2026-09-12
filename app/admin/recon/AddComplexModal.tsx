@@ -194,6 +194,12 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
               대장 주소: {parcel.platPlc} {parcel.platPlc.includes(f.dong) ? '✓ 입력 동 일치' : `✗ 입력 동(${f.dong})과 불일치 — 법정동코드 확인!`}
             </div>
           )}
+          {parcel?.estPlatArea && m.plat_area && Math.abs(Number(m.plat_area) - parcel.estPlatArea) / parcel.estPlatArea >= 0.10 && (
+            <div className="text-xs mb-2 px-2 py-1 rounded bg-amber-50 text-amber-700 flex items-center gap-2 flex-wrap">
+              <span>⚠️ 대지면적 갭 큼(다필지 의심): 토지대장 {Number(m.plat_area).toLocaleString()}㎡ vs 연면적역산 <b>{parcel.estPlatArea.toLocaleString()}㎡</b>. 정비구역 실면적 확인 권장.</span>
+              <button onClick={() => setMv('plat_area', String(parcel.estPlatArea))} className="px-2 py-0.5 rounded bg-amber-500 text-white text-[0.85em]">역산값 적용</button>
+            </div>
+          )}
           <div className="grid grid-cols-3 gap-2">
             <div><label className={lbl}>대지면적㎡</label><input className={inp} value={m.plat_area} onChange={e => setMv('plat_area', e.target.value)} placeholder="예: 20876" /></div>
             <div><label className={lbl}>현재 용적률%</label><input className={inp} value={m.far} onChange={e => setMv('far', e.target.value)} placeholder="예: 179" /></div>
