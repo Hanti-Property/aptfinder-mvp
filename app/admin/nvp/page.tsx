@@ -221,12 +221,21 @@ export default function NvpAdminPage() {
   const td = 'border border-gray-200 px-1 py-0.5 align-middle'
 
   // 편집 가능한 셀 (입력칸처럼 보이고, 저장되면 ✓)
-  function EditCell({ row, field, num = false, arr = false, w }: { row: NvpRef; field: string; num?: boolean; arr?: boolean; w: number }) {
+  // 왼쪽 고정 열 오프셋: # (40) → refCode → ticker → short_name (누적 너비)
+  const NUM_W = 40
+  const leftOf: Record<string, number> = {
+    ref_code: NUM_W,
+    ticker: NUM_W + widths.ref_code,
+    short_name: NUM_W + widths.ref_code + widths.ticker,
+  }
+
+  function EditCell({ row, field, num = false, arr = false, w, stickyLeft }: { row: NvpRef; field: string; num?: boolean; arr?: boolean; w: number; stickyLeft?: number }) {
     const raw = (row as unknown as Record<string, unknown>)[field]
     const shown = arr ? ((raw as string[] | null) || []).join(', ') : (raw ?? '')
     const saved = savedKey === `${row.id}:${field}`
+    const stickyCls = stickyLeft != null ? ' sticky z-10 bg-white' : ''
     return (
-      <td className={td} style={{ width: w }}>
+      <td className={td + stickyCls} style={{ width: w, ...(stickyLeft != null ? { left: stickyLeft } : {}) }}>
         <div className="relative">
           <input
             className="w-full border border-gray-200 rounded px-1.5 py-0.5 bg-white hover:border-blue-300 focus:bg-yellow-50 focus:border-blue-500 focus:outline-none transition-colors"
@@ -272,23 +281,28 @@ export default function NvpAdminPage() {
           <table className="border-collapse" style={{ fontSize: fontPx, tableLayout: 'fixed' }}>
             <thead>
               <tr>
-                {COLS.map((c, i) => (
-                  <th key={c.key}
-                    className={th + (c.hi ? ' !bg-amber-100' : '') + ' sticky top-0' + (i === 0 ? ' left-0 z-30 !bg-gray-200' : ' z-20')}
-                    style={{ width: widths[c.key], minWidth: widths[c.key] }}>
-                    {c.label}
-                    <span onMouseDown={e => startResize(c.key, e)}
-                      className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize hover:bg-blue-400/40" />
-                  </th>
-                ))}
+                <th className={th + ' sticky top-0 left-0 z-30 !bg-gray-200 text-center'} style={{ width: NUM_W, minWidth: NUM_W }}>#</th>
+                {COLS.map((c) => {
+                  const froze = leftOf[c.key] != null
+                  return (
+                    <th key={c.key}
+                      className={th + (c.hi ? ' !bg-amber-100' : '') + ' sticky top-0' + (froze ? ' z-30 !bg-gray-200' : ' z-20')}
+                      style={{ width: widths[c.key], minWidth: widths[c.key], ...(froze ? { left: leftOf[c.key] } : {}) }}>
+                      {c.label}
+                      <span onMouseDown={e => startResize(c.key, e)}
+                        className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize hover:bg-blue-400/40" />
+                    </th>
+                  )
+                })}
               </tr>
             </thead>
             <tbody>
-              {rows.map(r => (
+              {rows.map((r, i) => (
                 <tr key={r.id} className={r.ref_status === 'active' ? 'hover:bg-blue-50/30' : 'bg-gray-50/40 hover:bg-blue-50/30'}>
-                  <td className={td + ' font-mono text-[0.85em] whitespace-nowrap text-gray-500 sticky left-0 z-10 bg-white'} style={{ width: widths.ref_code }}>{r.ref_code}</td>
-                  <EditCell row={r} field="ticker" w={widths.ticker} />
-                  <EditCell row={r} field="short_name" w={widths.short_name} />
+                  <td className={td + ' text-center text-gray-400 sticky left-0 z-10 bg-white'} style={{ width: NUM_W }}>{i + 1}</td>
+                  <td className={td + ' font-mono text-[0.85em] whitespace-nowrap text-gray-500 sticky z-10 bg-white'} style={{ width: widths.ref_code, left: leftOf.ref_code }}>{r.ref_code}</td>
+                  <EditCell row={r} field="ticker" w={widths.ticker} stickyLeft={leftOf.ticker} />
+                  <EditCell row={r} field="short_name" w={widths.short_name} stickyLeft={leftOf.short_name} />
                   <EditCell row={r} field="name" w={widths.name} />
                   <EditCell row={r} field="gu" w={widths.gu} />
                   <EditCell row={r} field="dong" w={widths.dong} />
