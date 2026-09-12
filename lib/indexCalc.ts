@@ -31,7 +31,7 @@ export function pyRound(x: number, ndigits = 0): number {
 
 // ── 튜닝 상수 (한 곳에서 관리) ───────────────────────────────
 export const CONSTANTS = {
-  NVP_PREMIUM: 1.20,      // 신축 프리미엄 (매핑 없을 때만 적용)
+  NVP_PREMIUM: 1.00,      // 신축 프리미엄 제거(2026-09): NVP는 ref 매핑+가중치로만 결정. 1.0=미적용.
   ANNUAL_RATE: 0.03,      // 연 상승률
   EXCLUSIVE_RATE: 0.75,   // 전용률 (연면적→전용)
   DONATION_RATE: 0.20,    // 기부채납 비율

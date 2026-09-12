@@ -49,7 +49,7 @@ NVP_V2_BASE = {
 NVP_BASE_DEFAULT = 13000
 
 # --- 가정 상수 (TBD) ---
-NVP_PREMIUM = 1.20          # 신축 프리미엄 (헌집→새집)
+NVP_PREMIUM = 1.00          # 신축 프리미엄 제거(2026-09): NVP는 ref 매핑+가중치로만 결정
 ANNUAL_RATE = 0.03          # 연 상승률
 EXCLUSIVE_RATE = 0.75       # 전용률 (연면적→전용)
 DONATION_RATE = 0.20        # 기부채납 비율 (보수적)
