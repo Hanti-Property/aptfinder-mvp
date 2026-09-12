@@ -217,7 +217,7 @@ export default function NvpAdminPage() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">로딩 중...</div>
 
-  const th = 'relative border border-gray-200 px-2 py-1 font-semibold text-gray-700 bg-gray-100 text-left select-none'
+  const th = 'border border-gray-200 px-2 py-1 font-semibold text-gray-700 bg-gray-100 text-left select-none'
   const td = 'border border-gray-200 px-1 py-0.5 align-middle'
 
   // 편집 가능한 셀 (입력칸처럼 보이고, 저장되면 ✓)
@@ -268,12 +268,14 @@ export default function NvpAdminPage() {
 
       <div className="p-3">
         <p className="text-xs text-gray-500 mb-2">✏️ <b>흰 입력칸</b>은 클릭해 수정 → 다른 곳 클릭하면 <b>DB에 자동 저장</b>(✓ 표시) · 헤더 경계 드래그로 너비 조절 · [조회]로 표준가 산출 · 총 {rows.length}개</p>
-        <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
+        <div className="overflow-auto border border-gray-200 rounded-lg bg-white" style={{ maxHeight: 'calc(100vh - 150px)' }}>
           <table className="border-collapse" style={{ fontSize: fontPx, tableLayout: 'fixed' }}>
             <thead>
               <tr>
-                {COLS.map(c => (
-                  <th key={c.key} className={th + (c.hi ? ' !bg-amber-100' : '')} style={{ width: widths[c.key], minWidth: widths[c.key] }}>
+                {COLS.map((c, i) => (
+                  <th key={c.key}
+                    className={th + (c.hi ? ' !bg-amber-100' : '') + ' sticky top-0' + (i === 0 ? ' left-0 z-30 !bg-gray-200' : ' z-20')}
+                    style={{ width: widths[c.key], minWidth: widths[c.key] }}>
                     {c.label}
                     <span onMouseDown={e => startResize(c.key, e)}
                       className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize hover:bg-blue-400/40" />
@@ -284,7 +286,7 @@ export default function NvpAdminPage() {
             <tbody>
               {rows.map(r => (
                 <tr key={r.id} className={r.ref_status === 'active' ? 'hover:bg-blue-50/30' : 'bg-gray-50/40 hover:bg-blue-50/30'}>
-                  <td className={td + ' font-mono text-[0.85em] whitespace-nowrap text-gray-500'} style={{ width: widths.ref_code }}>{r.ref_code}</td>
+                  <td className={td + ' font-mono text-[0.85em] whitespace-nowrap text-gray-500 sticky left-0 z-10 bg-white'} style={{ width: widths.ref_code }}>{r.ref_code}</td>
                   <EditCell row={r} field="ticker" w={widths.ticker} />
                   <EditCell row={r} field="short_name" w={widths.short_name} />
                   <EditCell row={r} field="name" w={widths.name} />
