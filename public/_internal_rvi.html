@@ -707,14 +707,19 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   // 총괄표제부 + 표제부 병합 (인덱스 대시보드와 동일한 mergeBuildingData 로직)
   const merged = mergeBldData(recapData, titleItems);
 
-  let households=parseInt(merged.hhldCnt||0);
-  // fallback: quickLoad2에서 전달된 마스터리스트 세대수
+  // [세대수 우선순위] admin 마스터 값 최우선, 없으면 대장(merged), 없으면 quickLoad 전달값
+  const _mH=ASSET_FROM_MASTER[bjdongCd+'-'+jibun];
+  let households=(_mH&&_mH.h)?parseInt(_mH.h):parseInt(merged.hhldCnt||0);
   if(!households&&knownHouseholds>0) households=knownHouseholds;
   const totArea=parseFloat(merged.totArea||0);
   const vlRatEstm=parseFloat(merged.vlRatEstmTotArea||0);
   const archArea=parseFloat(merged.archArea||0);
   const bcRat=parseFloat(merged.bcRat||0);
-  let platArea=landData?parseFloat(landData.lndpclAr||0):0;
+  // [대지면적 우선순위] admin에서 확정 입력한 마스터 값(정비구역 총면적)을 최우선.
+  // 토지대장 API는 다필지 단지에서 대표지번 한 필지만 반환해 과소하므로 폴백으로만 사용.
+  const _mAll=ASSET_FROM_MASTER[bjdongCd+'-'+jibun];
+  let platArea=(_mAll&&_mAll.platArea)?parseFloat(_mAll.platArea):0;
+  if(!platArea)platArea=landData?parseFloat(landData.lndpclAr||0):0;
   if(!platArea)platArea=parseFloat(merged.platArea||0);
 
   // [P1 FIX] 용적률 fallback 로직 강화
@@ -734,6 +739,8 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   }
   // 용적률 범위 검증 (50~500% 범위 밖이면 신뢰할 수 없음)
   if(far>0&&(far<50||far>500))far=0;
+  // [용적률 우선순위] admin 마스터 far가 있으면 최우선 (다필지 단지는 대장 vlRat이 부정확)
+  if(_mAll&&_mAll.far&&parseFloat(_mAll.far)>0) far=parseFloat(_mAll.far);
   // fallback: ALL_COMPLEXES에서 전달된 용적률
   if(!far&&knownFar>0) far=knownFar;
 
