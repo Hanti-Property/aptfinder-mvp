@@ -89,7 +89,9 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'move_start_year', label: '이주개시(연도)', w: 120, moveStart: true },
     { key: 'target_far', label: '목표용적률', w: 110, step: 10 },
     { key: 'eta_provisional', label: '잠정ETA', w: 60, edit: true, bool: true },
-    { key: 'risk', label: '리스크·이벤트', w: 240, edit: true },
+    { key: 'risk', label: '리스크·이벤트', w: 220, edit: true },
+    { key: 'features', label: '특성태그(쉼표)', w: 180, edit: true, arr: true },
+    { key: 'research_memo', label: '리서치메모', w: 260, edit: true },
   ],
   // 평당가: 토지(대지) vs 건축(전용) 구분 + 각각 만원/평 · 만원/㎡ 나란히
   // 파생값은 계산엔진(_calc)에서 실시간 산출 → 실거래·매핑 편집 즉시 반영

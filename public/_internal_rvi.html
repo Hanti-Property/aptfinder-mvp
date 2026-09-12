@@ -218,6 +218,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
         <ul id="noteCons" style="margin:0;padding-left:20px;font-size:15px;color:#fed;line-height:1.9;"></ul>
       </div>
     </div>
+    <div id="noteMemo" style="display:none;margin-top:16px;padding:12px 14px;background:#12233a;border-left:3px solid #C79A5B;border-radius:6px;font-size:14px;color:#e8e0d0;line-height:1.7;"></div>
   </div>
 
   <!-- RVI 총점 -->
@@ -490,11 +491,19 @@ function renderInvestNote(a, ctx){
   if(rar!=null&&rar>=2.5) pros.push(`재건축 시 자산가치 약 <b>${rar.toFixed(1)}배</b> 상승 예상 (성장배수 높음)`);
   else if(rar!=null&&rar>=1.8) pros.push(`재건축 시 자산가치 약 ${rar.toFixed(1)}배 상승 예상`);
   if(far>0&&far<=180) pros.push(`현재 용적률 <b>${far.toFixed(0)}%</b>로 낮아 재건축 증축 여력·사업성 양호`);
-  if(a.sizeGrade==='xl') pros.push(`1,000세대 이상 대단지 — 사업 추진력·환금성 유리`);
+  // 규모: 대지면적(평) 기준 세분 — 5만평↑ 초대형은 커뮤니티 프리미엄 강조
+  const platPy=(ctx.platArea||a.platArea||0)/3.3058;
+  if(platPy>=50000) pros.push(`대지 <b>${(platPy/10000).toFixed(1)}만평</b>·${h?h.toLocaleString()+'세대 ':''}<b>초대형 단지</b> — 커뮤니티·조경 등 프리미엄급 인프라, 지역 랜드마크 잠재력`);
+  else if(platPy>=30000||(h&&h>=2000)) pros.push(`대지 ${Math.round(platPy).toLocaleString()}평·${h?h.toLocaleString()+'세대 ':''}대형 단지 — 사업 추진력·환금성 유리`);
+  else if(h&&h>=1000) pros.push(`1,000세대 이상 대단지 — 사업 추진력·환금성 양호`);
   if(a.nvpGapRate!=null&&a.nvpGapRate<=-15) pros.push(`현재가가 동 평균 대비 낮아(${a.nvpGapRate.toFixed(0)}%) 상대적 저평가 구간`);
   if(a.nvpValid===true) pros.push(`인근 신축 대비 상승여력 있음 (현재가 < 목표 신축가)`);
   if(eta!=null&&eta<=7) pros.push(`입주까지 ${eta}년 — 재건축 후반부, 대기기간 짧음`);
   if(rvi!=null&&rvi>=70) pros.push(`RVI 종합 <b>${rvi}점</b> — 물리·시간 종합 투자매력 상위`);
+  // 소프트 데이터: 특성 태그 반영
+  const FEAT_DESC={'한강변':'한강 조망·프리미엄 입지','학군':'우수 학군','학원가':'학원가 인접','역세권':'역세권 교통 편의','대장주':'지역 대장주','초대형':'초대형 단지','조망':'조망 프리미엄','상권':'상권 인접'};
+  const feats=Array.isArray(a.features)?a.features:[];
+  feats.forEach(f=>{ const d=FEAT_DESC[f]||f; pros.push(`${d} <span style="color:#888;font-size:12px">(리서치팀 특성)</span>`); });
   if(!pros.length) pros.push(`표준적인 재건축 대상 단지 (특별한 강점 지표 없음)`);
 
   // --- 리스크·주의 (cons) ---
@@ -510,6 +519,14 @@ function renderInvestNote(a, ctx){
 
   document.getElementById('notePros').innerHTML=pros.map(p=>`<li>${p}</li>`).join('');
   document.getElementById('noteCons').innerHTML=cons.map(c=>`<li>${c}</li>`).join('');
+  // 리서치팀 메모 (있을 때만)
+  const memoEl=document.getElementById('noteMemo');
+  if(memoEl){
+    if(a.research_memo&&String(a.research_memo).trim()){
+      memoEl.style.display='block';
+      memoEl.innerHTML=`<span style="color:#C79A5B;font-weight:700">📝 리서치팀 코멘트</span> &nbsp;${String(a.research_memo).trim()}`;
+    } else memoEl.style.display='none';
+  }
 }
 
 function interpolateCost(far){
@@ -1359,7 +1376,7 @@ function preloadMasterData(){
       if(d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,name:d.name,dong:d.dong,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage,eta:d.eta,moveIn:d.moveIn,rvi:d.rvi,rviV1:d.rviV1,rar:d.rar,nvpValid:d.nvpValid,risk:d.risk};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,name:d.name,dong:d.dong,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage,eta:d.eta,moveIn:d.moveIn,rvi:d.rvi,rviV1:d.rviV1,rar:d.rar,nvpValid:d.nvpValid,risk:d.risk,features:d.features,research_memo:d.research_memo};
         // 지도·구선택·TOP10용 단지 리스트 (구 무관 전체)
         list.push({gu:d.gu||'',dong:d.dong||'',name:d.name||'',shortName:d.shortName||'',ticker:d.ticker,jibun:d.jibun||'',h:d.h||d.hhldCnt||0,bjdong:d.bjdong||'',lawd:d.lawd||'',far:d.far||0});
       }

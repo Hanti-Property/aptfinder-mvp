@@ -44,6 +44,8 @@ function toHtmlRecords(rows: Record<string, unknown>[]) {
         rviV1: c?.rviV1 ?? null,
         rri: c?.rri ?? null,
         nvpValid: r.nvp_valid ?? null,
+        features: r.features ?? null,
+        research_memo: r.research_memo ?? null,
       }
     })
 }
