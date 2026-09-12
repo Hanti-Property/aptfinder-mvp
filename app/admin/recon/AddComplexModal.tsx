@@ -158,8 +158,8 @@ export default function AddComplexModal({ existing, onClose, onSaved }: Props) {
   const lbl = 'text-xs text-gray-500 mb-0.5 block'
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-auto p-5" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-auto p-5">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-semibold text-[#1B3A5C]">🏗 재건축 단지 추가</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-xl leading-none">×</button>
