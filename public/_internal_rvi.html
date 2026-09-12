@@ -285,13 +285,12 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   </div>
 
   <!-- NVP 비교 -->
-  <div class="nvp-compare" id="nvpCompare">
+  <!-- NVP 비교 섹션 숨김(2026-09): NVP는 별도 DB(nvp_reference)+매핑으로 관리. 옛 v1(API)/v2(동별×프리미엄) 설명 불필요. -->
+  <div class="nvp-compare" id="nvpCompare" style="display:none;">
     <h4>🏠 NVP 비교 신축 단지 (v1: API 기반)</h4>
     <div id="nvpRows"></div>
   </div>
-
-  <!-- NVP v2: 동별 기준 -->
-  <div class="nvp-compare" id="nvpV2Compare" style="margin-top:12px;border-top:1px dashed #1c466e;padding-top:12px;">
+  <div class="nvp-compare" id="nvpV2Compare" style="display:none;margin-top:12px;border-top:1px dashed #1c466e;padding-top:12px;">
     <h4>🏗️ NVP v2 (동별 기준가 × 프리미엄)</h4>
     <div id="nvpV2Rows" style="font-size:13px;color:#bbb;line-height:2;"></div>
   </div>
