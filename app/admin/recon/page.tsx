@@ -461,7 +461,7 @@ export default function ReconAdminPage() {
       const raw = row[col.key]
       if (typeof raw === 'number') num = raw
       else if (raw != null && raw !== '' && !isNaN(Number(raw))) num = Number(raw)
-      else return <td className={td + ' text-right text-gray-600'} style={{ width: w }}>{raw != null && raw !== '' ? String(raw) : '—'}</td>
+      else return <td className={td + ' text-left text-gray-600'} style={{ width: w }}>{raw != null && raw !== '' ? String(raw) : '—'}</td>
     }
     if (num == null) return <td className={td + ' text-right text-gray-400'} style={{ width: w }}>—</td>
     // ㎡당가 변환
