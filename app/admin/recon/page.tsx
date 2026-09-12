@@ -176,6 +176,15 @@ export default function ReconAdminPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'hold' | 'draft'>('all')
   const scrollRef = useRef<HTMLDivElement>(null)                    // 표 스크롤 컨테이너
   const savedScroll = useRef<number | null>(null)                   // 리렌더 시 복원할 스크롤 위치
+  const [sortKey, setSortKey] = useState<string | null>(null)      // 정렬 컬럼 key (null=기본 동·티커)
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+
+  // 헤더 클릭 정렬: 같은 컬럼 재클릭 시 방향 토글, 새 컬럼이면 asc
+  function toggleSort(key: string) {
+    keepScroll()
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('asc') }
+  }
 
   // 매핑/편집으로 rows가 바뀌어 리렌더돼도 표 스크롤 위치 유지 (가중치 변경 시 위로 튀는 문제 방지)
   function keepScroll() { savedScroll.current = scrollRef.current?.scrollTop ?? null }
@@ -221,7 +230,30 @@ export default function ReconAdminPage() {
 
   // status 필터 (기본 all). status 미설정(구데이터)은 active로 간주.
   const stOf = (r: Recon) => (r.status as string) || 'active'
-  const visibleRows = statusFilter === 'all' ? rows : rows.filter(r => stOf(r) === statusFilter)
+  const filteredRows = statusFilter === 'all' ? rows : rows.filter(r => stOf(r) === statusFilter)
+
+  // 정렬 값 추출: 엔진 계산 컬럼(calc/txt)은 _calc에서, 나머지는 원천값에서
+  function sortVal(r: Recon, key: string): number | string | null {
+    const withCalc = { ...r, _calc: calcOf(r) } as Recon
+    const col = GROUPS[group].find(c => c.key === key)
+    if (col?.calc) return col.calc(withCalc)
+    if (col?.txt) return col.txt(withCalc)
+    const v = r[key]
+    if (v == null || v === '') return null
+    if (typeof v === 'number') return v
+    if (!isNaN(Number(v))) return Number(v)
+    return String(v)
+  }
+  const visibleRows = sortKey
+    ? [...filteredRows].sort((a, b) => {
+        const va = sortVal(a, sortKey), vb = sortVal(b, sortKey)
+        if (va == null && vb == null) return 0
+        if (va == null) return 1              // 결측은 항상 뒤로
+        if (vb == null) return -1
+        const cmp = typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb), 'ko')
+        return sortDir === 'asc' ? cmp : -cmp
+      })
+    : filteredRows
   const statusCounts = { active: rows.filter(r => stOf(r) === 'active').length, hold: rows.filter(r => stOf(r) === 'hold').length, draft: rows.filter(r => stOf(r) === 'draft').length }
 
   async function saveField(id: string, field: string, value: unknown, prev: unknown) {
@@ -499,7 +531,7 @@ export default function ReconAdminPage() {
       {/* 보기 그룹 탭 */}
       <div className="bg-white border-b px-6 py-2 flex gap-2">
         {(Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map(g => (
-          <button key={g} onClick={() => setGroup(g)}
+          <button key={g} onClick={() => { setGroup(g); setSortKey(null) }}
             className={`px-3 py-1.5 rounded-lg text-sm ${group === g ? 'bg-[#1B3A5C] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{g}</button>
         ))}
         <span className="text-xs text-gray-400 self-center ml-2">{group === '인덱스' ? 'NVP ref·가중치 편집 → 인덱스 실시간 재계산(엔진)' : group === '평당가' ? '실거래·매핑 기반 실시간 계산(엔진)' : group === '실거래' ? '읽기 전용 ([조회]로 갱신)' : '흰 칸 클릭해 편집 → DB 자동저장(✓)'}</span>
@@ -519,12 +551,16 @@ export default function ReconAdminPage() {
         <table className="border-collapse" style={{ fontSize: fontPx }}>
           <thead><tr>
             <th className={th} style={{ width: 44 }}>#</th>
-            <th className={th} style={{ width: 100 }}>단지</th>
+            <th className={th} style={{ width: 100 }}><span onClick={() => toggleSort('short_name')} className="cursor-pointer select-none hover:text-blue-600" title="클릭하여 정렬">단지{sortKey === 'short_name' && <span className="ml-0.5 text-blue-600">{sortDir === 'asc' ? '▲' : '▼'}</span>}</span></th>
             {cols.map((c, i) => {
               const w = wOf(i, c)
               return (
                 <th key={`${group}#${i}`} className={th + (c.ro ? ' !bg-amber-50' : '')} style={{ width: w, minWidth: w }}>
-                  {c.label}
+                  {c.refsel
+                    ? c.label
+                    : <span onClick={() => toggleSort(c.key)} className="cursor-pointer select-none hover:text-blue-600" title="클릭하여 정렬">
+                        {c.label}{sortKey === c.key && <span className="ml-0.5 text-blue-600">{sortDir === 'asc' ? '▲' : '▼'}</span>}
+                      </span>}
                   <span onMouseDown={e => startResize(`${group}#${i}`, w, e)}
                     className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize hover:bg-blue-400/40" />
                 </th>
