@@ -165,18 +165,21 @@ export default function NvpAdminPage() {
     try {
       const trades = await fetchTrades(row.lawd, 12)
       const r = calcStdPrice(trades, row)
+      let upd: Record<string, unknown>
       if (!r) {
-        await supabase.from('nvp_reference').update({ ref_status: 'pending', price_updated: new Date().toISOString() }).eq('id', row.id)
+        upd = { ref_status: 'pending', price_updated: new Date().toISOString() }
         setMsg(`${row.short_name || row.name}: 최근 12개월 84㎡ 거래 없음 (pending)`)
       } else {
-        await supabase.from('nvp_reference').update({
+        upd = {
           std_ppp_exclu: r.ppp, std_price_m2: r.m2, std_area: r.area,
           trade_count: r.count, latest_date: r.latest,
           price_updated: new Date().toISOString(), ref_status: 'active',
-        }).eq('id', row.id)
+        }
         setMsg(`${row.short_name || row.name}: ${r.ppp.toLocaleString()}만원/평 (${r.count}건, ${r.latest})`)
       }
-      await fetchRows()
+      await supabase.from('nvp_reference').update(upd).eq('id', row.id)
+      // 전체 재조회 대신 해당 행만 로컬 갱신 → 화면 튐 방지
+      setRows(prev => prev.map(x => x.id === row.id ? { ...x, ...(upd as Partial<NvpRef>) } : x))
     } catch (e: unknown) {
       setMsg('조회 실패: ' + (e instanceof Error ? e.message : String(e)))
     } finally { setBusy(null) }

@@ -294,6 +294,7 @@ export default function ReconAdminPage() {
 
   // 상태 변경 (active/hold/draft)
   async function setStatus(row: Recon, status: string) {
+    keepScroll()
     setRows(p => p.map(r => r.id === row.id ? { ...r, status } : r))
     const { error } = await supabase.from('recon_master').update({ status, updated_at: new Date().toISOString() }).eq('id', row.id)
     if (error) { setMsg('상태 변경 실패: ' + error.message); return }
@@ -307,6 +308,7 @@ export default function ReconAdminPage() {
     if (!confirm(`정말 삭제하시겠어요? "${nm}"`)) return
     const { error } = await supabase.from('recon_master').delete().eq('id', row.id)
     if (error) { setMsg('삭제 실패: ' + error.message); return }
+    keepScroll()
     setRows(p => p.filter(r => r.id !== row.id))
     setMsg(`${nm} 삭제됨`)
   }
@@ -320,13 +322,16 @@ export default function ReconAdminPage() {
       const trades = await fetchTrades(lawd, 12)
       const r = calcCurrent(trades, row)
       if (!r) { if (!silent) setMsg(`${row.short_name || row.name}: 실거래 없음`); return false }
-      await supabase.from('recon_master').update({
+      const upd = {
         avg_ppp: r.avgPy, latest_price: r.price, latest_area: r.area, latest_floor: r.floor,
         trade_count: r.count, latest_date: r.latest, price_updated: new Date().toISOString().slice(0, 10),
-      }).eq('id', row.id)
+      }
+      await supabase.from('recon_master').update(upd).eq('id', row.id)
+      // 전체 재조회(fetchRows) 대신 해당 행만 로컬 갱신 → 로딩 언마운트 없이 스크롤 유지
+      keepScroll()
+      setRows(p => p.map(x => x.id === row.id ? { ...x, ...upd } : x))
       if (!silent) {
         setMsg(`${row.short_name || row.name}: 최근 ${(r.price / 10000).toFixed(1)}억 · 평균 ${r.avgPy.toLocaleString()}만/평 (${r.count}건, ${r.latest})`)
-        await fetchRows()
       }
       return true
     } catch (e: unknown) { if (!silent) setMsg('조회 실패: ' + (e instanceof Error ? e.message : String(e))); return false }
@@ -346,7 +351,7 @@ export default function ReconAdminPage() {
       if (done) ok++; else { fail++; failed.push(String(row.short_name || row.name)) }
     }
     setBusy(null)
-    await fetchRows()
+    // refreshTrade가 각 행을 로컬 갱신하므로 전체 재조회 불필요 (스크롤 유지)
     setMsg(`전체 갱신 완료: 성공 ${ok} / 실패 ${fail}${failed.length ? ` (실패: ${failed.join(', ')})` : ''}`)
   }
 
