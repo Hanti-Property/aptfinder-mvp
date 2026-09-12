@@ -149,6 +149,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
     <div class="info-card"><div class="label">대지면적</div><div class="value" id="v-land">—</div></div>
     <div class="info-card"><div class="label">용적률</div><div class="value" id="v-far">—</div></div>
     <div class="info-card"><div class="label">세대당 대지지분</div><div class="value" id="v-station">—</div></div>
+    <div class="info-card"><div class="label">재건축 단계</div><div class="value" id="v-stage">—</div></div>
   </div>
 
   <!-- 자산 시가총액 (CMC) 카드 -->
@@ -163,6 +164,11 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
       <div class="label">대지 실거래 평당가</div>
       <div class="value" id="v-landppp">—</div>
       <div style="font-size:11px;color:#888;margin-top:2px;">시세 ÷ 세대 대지지분</div>
+    </div>
+    <div class="info-card">
+      <div class="label">현재 전용 평당가</div>
+      <div class="value" id="v-excluppp" style="color:#FFA726;">—</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;">84㎡ 기준 실거래</div>
     </div>
     <div class="info-card">
       <div class="label">티커 / 자산번호</div>
@@ -687,7 +693,7 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   document.getElementById('complexAddr').textContent=address;
 
   // 즉시 모든 필드 리셋 (이전 데이터 잔류 방지)
-  ['v-year','v-age','v-units','v-land','v-far','v-station'].forEach(id=>document.getElementById(id).textContent='—');
+  ['v-year','v-age','v-units','v-land','v-far','v-station','v-stage','v-excluppp'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
   document.getElementById('rviScore').textContent='—';
   document.getElementById('rviGrade').textContent='';
   document.getElementById('rviDesc').textContent='산출 중...';
@@ -813,7 +819,9 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   document.getElementById('v-year').textContent=builtYear?builtYear+'년':'—';
   document.getElementById('v-age').textContent=age?age+'년':'—';
   document.getElementById('v-units').textContent=households?households.toLocaleString()+'세대':'—';
-  document.getElementById('v-land').textContent=platArea>0?Math.round(platArea).toLocaleString()+'㎡':'—';
+  document.getElementById('v-land').textContent=platArea>0?`${Math.round(platArea).toLocaleString()}㎡ (${Math.round(platArea/3.3058).toLocaleString()}평)`:'—';
+  // 재건축 단계 (마스터 stage)
+  { const el=document.getElementById('v-stage'); if(el){ const st=(ASSET_FROM_MASTER[bjdongCd+'-'+jibun]||{}).stage; el.textContent = st?`${st} ${RANK_STAGE_NAME[st]||''}`:'—'; } }
   document.getElementById('v-far').textContent=far>0?far.toFixed(0)+'%':'—';
   document.getElementById('v-station').textContent=lps>0?(lps/3.3058).toFixed(1)+'평':'—';
 
@@ -859,6 +867,8 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     if(reg.ok) myAvgPPP=reg.ppp84;
     else{ let p=pairs.map(x=>x.ppp); p=removeOutliers(p); myAvgPPP=p.length?p.reduce((a,b)=>a+b,0)/p.length:0; }
   }
+  // 현재 전용 평당가 표시
+  { const el=document.getElementById('v-excluppp'); if(el) el.textContent=myAvgPPP>0?Math.round(myAvgPPP).toLocaleString()+'만원/평':'—'; }
 
   // [P1 FIX] NVP — 비교 단지 부족 시 3km까지 확대
   // [한강벨트] 압구정/청담/반포/잠원동은 벨트 내 전체 신축과 비교 (5km)
@@ -1269,7 +1279,7 @@ function preloadMasterData(){
       if(d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage};
         // 지도·구선택·TOP10용 단지 리스트 (구 무관 전체)
         list.push({gu:d.gu||'',dong:d.dong||'',name:d.name||'',shortName:d.shortName||'',ticker:d.ticker,jibun:d.jibun||'',h:d.h||d.hhldCnt||0,bjdong:d.bjdong||'',lawd:d.lawd||'',far:d.far||0});
       }
