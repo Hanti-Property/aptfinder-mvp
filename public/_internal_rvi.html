@@ -553,6 +553,18 @@ function grade(s){return s>=85?'S':s>=70?'A':s>=55?'B':s>=40?'C':'D';}
 function gradeDesc(s){return s>=85?'최상위 투자 매력':s>=70?'우수 · 투자 매력 높음':s>=55?'양호':s>=40?'보통':'매력 낮음';}
 function weightScale(h){const t=[[300,1],[500,1.5],[800,2],[1000,2.5],[1500,3.5],[2000,4.5],[2500,5.5],[3000,6],[5000,7]];if(h<300)return 0;if(h>=5000)return 7;for(let i=0;i<t.length-1;i++){if(h>=t[i][0]&&h<t[i+1][0])return t[i][1]+(t[i+1][1]-t[i][1])*(h-t[i][0])/(t[i+1][0]-t[i][0]);}return 7;}
 function removeOutliers(arr){if(arr.length<4)return arr;const s=[...arr].sort((a,b)=>a-b);const q1=s[Math.floor(s.length*.25)],q3=s[Math.floor(s.length*.75)],iqr=q3-q1;return arr.filter(v=>v>=q1-iqr&&v<=q3+iqr);}
+// 면적-평당가 선형회귀로 84㎡ 평당가 추정 (84 실거래 없을 때). {ppp84, ok}
+function regress84Ppp(pairs){
+  const n=pairs.length; const areas=new Set(pairs.map(p=>Math.round(p.area)));
+  if(n<3||areas.size<2) return {ppp84:0,ok:false};
+  const sx=pairs.reduce((s,p)=>s+p.area,0), sy=pairs.reduce((s,p)=>s+p.ppp,0);
+  const sxx=pairs.reduce((s,p)=>s+p.area*p.area,0), sxy=pairs.reduce((s,p)=>s+p.area*p.ppp,0);
+  const den=n*sxx-sx*sx; if(den===0) return {ppp84:0,ok:false};
+  const slope=(n*sxy-sx*sy)/den, ic=(sy-slope*sx)/n;
+  const ppp84=Math.round(slope*84+ic);
+  if(ppp84<2000||ppp84>30000) return {ppp84:0,ok:false};
+  return {ppp84,ok:true};
+}
 
 async function fetchTrades(lawdCd,months,type){
   const now=new Date(),promises=[];
@@ -835,10 +847,18 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
     }
   })();
 
-  // 평당가
-  let myPPPs=myTrades.map(t=>{const a=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return ar>0?a/(ar/3.3058):0;}).filter(v=>v>0);
-  myPPPs=removeOutliers(myPPPs);
-  const myAvgPPP=myPPPs.length?myPPPs.reduce((a,b)=>a+b,0)/myPPPs.length:0;
+  // 평당가: 84㎡(76~90) 있으면 그 평균, 없으면 면적-평당가 회귀로 84㎡ 추정(소형↑·대형↓ 반영)
+  const my84=myTrades.filter(t=>{const a=parseFloat(t.excluUseAr||0);return a>=76&&a<=90;});
+  let myAvgPPP=0;
+  if(my84.length){
+    let p=my84.map(t=>{const a=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return ar>0?a/(ar/3.3058):0;}).filter(v=>v>0);
+    p=removeOutliers(p); myAvgPPP=p.length?p.reduce((a,b)=>a+b,0)/p.length:0;
+  } else {
+    const pairs=myTrades.map(t=>{const a=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return{area:ar,ppp:ar>0?a/(ar/3.3058):0};}).filter(p=>p.area>0&&p.ppp>0);
+    const reg=regress84Ppp(pairs);
+    if(reg.ok) myAvgPPP=reg.ppp84;
+    else{ let p=pairs.map(x=>x.ppp); p=removeOutliers(p); myAvgPPP=p.length?p.reduce((a,b)=>a+b,0)/p.length:0; }
+  }
 
   // [P1 FIX] NVP — 비교 단지 부족 시 3km까지 확대
   // [한강벨트] 압구정/청담/반포/잠원동은 벨트 내 전체 신축과 비교 (5km)
@@ -1012,36 +1032,35 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   // === RRI 투자수익률 산출 ===
   // 면적 선택 규칙:
   // 1순위: 76~90㎡ (84타입) 거래 → 그대로 사용
-  // 2순위: 150㎡ 미만 거래 중, 84㎡에 가장 가까운 면적의 평당가로 84㎡ 환산
-  //        (150㎡+ 대형은 면적할인으로 평당가 왜곡 → 제외)
+  // 2순위(84 없음): 면적-평당가 선형회귀로 84㎡ 평당가 추정 (소형↑·대형↓ 관계 반영)
+  //        회귀 불가(데이터 부족) 시 84 최근접 1건 폴백
   let rriTrades=myTrades.filter(t=>{const a=parseFloat(t.excluUseAr||0);return a>=76&&a<=90;});
   let rriUse84Conversion=false;
-  if(!rriTrades.length){
-    // 150㎡ 미만 거래만 대상, 84에 가까운 순 정렬
-    const candidates=myTrades.filter(t=>parseFloat(t.excluUseAr||0)<150&&parseFloat(t.excluUseAr||0)>0);
-    if(candidates.length){
-      candidates.sort((a,b)=>Math.abs(parseFloat(a.excluUseAr)-84)-Math.abs(parseFloat(b.excluUseAr)-84));
-      rriTrades=[candidates[0]]; // 84에 가장 가까운 1건
-    } else {
-      rriTrades=myTrades.slice(); // 정말 없으면 전체
-    }
-    rriUse84Conversion=true;
-  }
-  const latestTrade = rriTrades.length > 0 ? rriTrades[0] : null;
-  
-  // 84 환산 시: 평당가 × 25.4평으로 현재가/면적 재산출
   let rriArea, rriPrice, rriTradeInfo;
-  if(rriUse84Conversion && latestTrade){
-    const ppp=parseInt((latestTrade.dealAmount||'0').replace(/,/g,''))/( parseFloat(latestTrade.excluUseAr||76)/3.3058);
-    rriArea=84; // 84㎡ 기준
-    rriPrice=Math.round(ppp*84/3.3058); // 평당가 × 25.4평
-    rriTradeInfo=`84㎡ 환산 (평당 ${Math.round(ppp).toLocaleString()}만 기준)`;
-  } else if(latestTrade){
+  if(rriTrades.length){
+    // 84㎡ 실거래 있음 → 최신 거래 그대로
+    const latestTrade=rriTrades[0];
     rriArea=parseFloat(latestTrade.excluUseAr||0);
     rriPrice=parseInt((latestTrade.dealAmount||'0').replace(/,/g,''));
     rriTradeInfo=`${latestTrade.dealYear}.${String(latestTrade.dealMonth).padStart(2,'0')} | 전용${latestTrade.excluUseAr}㎡ | ${latestTrade.floor}층`;
   } else {
-    rriArea=0; rriPrice=0; rriTradeInfo='';
+    // 84 없음 → 회귀 추정
+    const pairs=myTrades.map(t=>{const amt=parseInt((t.dealAmount||'0').replace(/,/g,'')),ar=parseFloat(t.excluUseAr||0);return{area:ar,ppp:ar>0?amt/(ar/3.3058):0};}).filter(p=>p.area>0&&p.ppp>0);
+    const reg=regress84Ppp(pairs);
+    rriUse84Conversion=true;
+    if(reg.ok){
+      rriArea=84;
+      rriPrice=Math.round(reg.ppp84*84/3.3058);
+      rriTradeInfo=`84㎡ 회귀추정 (평당 ${reg.ppp84.toLocaleString()}만, ${pairs.length}건)`;
+    } else {
+      // 회귀 불가 → 84 최근접 1건 폴백
+      const cand=myTrades.filter(t=>parseFloat(t.excluUseAr||0)<150&&parseFloat(t.excluUseAr||0)>0).sort((a,b)=>Math.abs(parseFloat(a.excluUseAr)-84)-Math.abs(parseFloat(b.excluUseAr)-84));
+      if(cand.length){
+        const ppp=parseInt((cand[0].dealAmount||'0').replace(/,/g,''))/(parseFloat(cand[0].excluUseAr||76)/3.3058);
+        rriArea=84; rriPrice=Math.round(ppp*84/3.3058);
+        rriTradeInfo=`84㎡ 환산 (평당 ${Math.round(ppp).toLocaleString()}만, 최근접·데이터부족)`;
+      } else { rriArea=0; rriPrice=0; rriTradeInfo=''; }
+    }
   }
 
   window._rriData = {
