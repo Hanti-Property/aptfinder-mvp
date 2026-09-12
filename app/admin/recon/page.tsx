@@ -371,11 +371,14 @@ export default function ReconAdminPage() {
       </td>
     }
     const shown = col.arr ? ((raw as string[] | null) || []).join(', ') : (raw ?? '')
+    // 대지면적 다필지 갭 경고: 저장값 vs 연면적역산 갭 10%↑
+    const gapWarn = col.key === 'plat_area' && (() => { const c = cc(row); return c?.platAreaGap != null && c.platAreaGap >= 0.10 ? c : null })()
     return <td className={td} style={{ width: w }}>
       <div className="relative">
-        <input className="w-full border border-gray-200 rounded px-1.5 py-0.5 bg-white hover:border-blue-300 focus:bg-yellow-50 focus:border-blue-500 focus:outline-none"
+        <input className={'w-full border rounded px-1.5 py-0.5 bg-white hover:border-blue-300 focus:bg-yellow-50 focus:border-blue-500 focus:outline-none ' + (gapWarn ? 'border-amber-400 bg-amber-50' : 'border-gray-200')}
           defaultValue={String(shown)}
           onBlur={e => { const v = e.target.value; const nv = col.arr ? (v ? v.split(',').map(s => s.trim()) : null) : col.num ? (v ? Number(v) : null) : v; saveField(row.id, col.key, nv, raw) }} />
+        {gapWarn && <span className="absolute -right-1 -top-1 text-amber-500 text-xs" title={`다필지 의심: 연면적역산 ${gapWarn.platAreaEst?.toLocaleString()}㎡ (갭 ${Math.round(gapWarn.platAreaGap! * 100)}%). 정비구역 실면적 확인 권장`}>⚠️</span>}
         {saved && <span className="absolute -right-1 -top-1 text-green-600 text-xs bg-white rounded-full">✓</span>}
       </div>
     </td>

@@ -141,6 +141,9 @@ export interface CalcResult {
   rvi: number | null            // v2 (ETA 반영)
   rri: number | null            // 재건축 수익률(%)
   cagr: number | null           // 연복리(%)
+  // 대지면적 검증
+  platAreaEst: number | null    // 연면적÷용적률 역산 대지면적
+  platAreaGap: number | null    // |plat_area - est| / est (비율). null=계산불가
 }
 
 // ── 공용 헬퍼 ────────────────────────────────────────────────
@@ -307,6 +310,14 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
     rvi = Math.round(physScore * realizeF)
   }
 
+  // 대지면적 검증: 연면적(vlrat_estm_area) ÷ 현재용적률 = 역산 대지면적. plat_area와 갭 계산.
+  const vlEstm = r.vlrat_estm_area ? Number(r.vlrat_estm_area) : 0
+  let platAreaEst: number | null = null, platAreaGap: number | null = null
+  if (vlEstm > 0 && curFarPct > 0) {
+    platAreaEst = Math.round(vlEstm / (curFarPct / 100))
+    if (plat > 0) platAreaGap = Math.abs(plat - platAreaEst) / platAreaEst
+  }
+
   return {
     cmc, landPppMarket: landPpp, capGrade: grade,
     targetFar: targetFarPct, targetFarRule: tfRule, ncmcNvpBase: nvpBaseUsed, ncmcNvpSource: nvpSrc,
@@ -314,6 +325,7 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
     moveIn, moveStartYear,
     sizeGrade: sg, tradeReliability: rel, latestMonthsAgo: ma, nvpGapRate: gap, warnDistortion: warn,
     rviV1, rvi, rri, cagr,
+    platAreaEst, platAreaGap,
   }
 }
 
