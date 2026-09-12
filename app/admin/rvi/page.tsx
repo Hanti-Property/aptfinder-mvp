@@ -19,7 +19,7 @@ function toHtmlRecords(rows: Record<string, unknown>[]) {
         gu: r.gu, dong: r.dong, jibun: r.jibun, bjdong: r.bjdong, lawd: r.lawd,
         ticker: r.ticker, name: r.name, shortName: r.short_name,
         assetId: r.asset_id,
-        eta: r.eta, stage: r.stage, etaProvisional: r.eta_provisional,
+        eta: r.eta, stage: r.stage, etaProvisional: r.eta_provisional, risk: r.risk,
         far: r.far, farTBD: r.far_tbd,
         platArea: r.plat_area, h: r.households, hhldCnt: r.households,
         totArea: r.tot_area, vlRatEstmTotArea: r.vlrat_estm_area,
@@ -43,6 +43,7 @@ function toHtmlRecords(rows: Record<string, unknown>[]) {
         rvi: c?.rvi ?? null,
         rviV1: c?.rviV1 ?? null,
         rri: c?.rri ?? null,
+        nvpValid: r.nvp_valid ?? null,
       }
     })
 }

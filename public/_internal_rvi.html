@@ -204,6 +204,22 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   <div id="flagRow" style="display:none;margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;"></div>
   <div id="warnBox" style="display:none;margin-top:8px;padding:8px 12px;background:#3a2a1a;border:1px solid #7a5a2a;border-radius:8px;font-size:12px;color:#FFCC80;line-height:1.6;"></div>
 
+  <!-- 📋 투자노트 (자동 생성 — 데이터 기반 객관 설명 + 리스크) -->
+  <div class="section-title">📋 투자노트 <span style="font-size:11px;font-weight:400;color:#888;">— 데이터 기반 자동 요약 (투자 권유 아님)</span></div>
+  <div id="investNote" style="display:none;background:#0e2c4a;border:1px solid #1c466e;border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+    <div id="noteSummary" style="font-size:15px;color:#fff;font-weight:600;line-height:1.6;margin-bottom:14px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div>
+        <div style="font-size:12px;color:#66BB6A;font-weight:700;margin-bottom:6px;">✅ 투자 매력</div>
+        <ul id="notePros" style="margin:0;padding-left:18px;font-size:13px;color:#cfe;line-height:1.7;"></ul>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#FFB74D;font-weight:700;margin-bottom:6px;">⚠️ 리스크·주의</div>
+        <ul id="noteCons" style="margin:0;padding-left:18px;font-size:13px;color:#fdc;line-height:1.7;"></ul>
+      </div>
+    </div>
+  </div>
+
   <!-- RVI 총점 -->
   <div class="rvi-hero" id="rviHero">
     <div class="rvi-label">RVI RECONSTRUCTION VALUE INDEX &nbsp;·&nbsp; <span style="color:#888;font-size:12px;">v1 물리 잠재력 · v2 종합(ETA 반영)</span></div>
@@ -443,6 +459,59 @@ const COST_SAMPLES=[
   {far:175, costPerPy:394},     // 개포주공6·7단지
   {far:204, costPerPy:1830},    // 은마아파트
 ];
+// === 📋 투자노트 자동 생성 ===
+// a: ASSET_FROM_MASTER 레코드, ctx: {myAvgPPP, far, households, platArea, rviV2}
+const STAGE_LABEL={3:'추진위',4:'조합설립',5:'사업시행',6:'관리처분',7:'이주/철거',8:'착공',9:'입주'};
+const SIZE_LABEL={xs:'초소형',s:'소형',m:'중소형',l:'준대형',xl:'대단지'};
+function renderInvestNote(a, ctx){
+  const box=document.getElementById('investNote');
+  if(!box) return;
+  if(!a || a.cmc==null){ box.style.display='none'; return; }
+  box.style.display='block';
+  const pros=[], cons=[];
+  const nm=a.shortName||a.name||'';
+  const dong=a.dong||'';
+  const h=a.h||ctx.households||0;
+  const far=ctx.far||a.far||0;
+  const eta=a.eta!=null?a.eta:null;
+  const moveIn=a.moveIn||null;
+  const rar=a.rar!=null?a.rar:null;
+  const rvi=ctx.rviV2!=null?ctx.rviV2:(a.rvi!=null?a.rvi:null);
+  const stageNm=a.stage?`${a.stage}단계(${STAGE_LABEL[a.stage]||''})`:'단계 미정';
+  const sizeNm=SIZE_LABEL[a.sizeGrade]||'';
+
+  // --- 한 줄 요약 ---
+  let summary=`${dong} ${h?h.toLocaleString()+'세대 ':''}${sizeNm}, 재건축 ${stageNm}`;
+  if(rar!=null) summary+=` · 성장배수 ${rar.toFixed(2)}배`;
+  if(eta!=null) summary+=` · 예상 ${eta}년 후 입주${moveIn?`(${moveIn}년)`:''}`;
+  document.getElementById('noteSummary').textContent=summary;
+
+  // --- 투자 매력 (pros) ---
+  if(rar!=null&&rar>=2.5) pros.push(`재건축 시 자산가치 약 <b>${rar.toFixed(1)}배</b> 상승 예상 (성장배수 높음)`);
+  else if(rar!=null&&rar>=1.8) pros.push(`재건축 시 자산가치 약 ${rar.toFixed(1)}배 상승 예상`);
+  if(far>0&&far<=180) pros.push(`현재 용적률 <b>${far.toFixed(0)}%</b>로 낮아 재건축 증축 여력·사업성 양호`);
+  if(a.sizeGrade==='xl') pros.push(`1,000세대 이상 대단지 — 사업 추진력·환금성 유리`);
+  if(a.nvpGapRate!=null&&a.nvpGapRate<=-15) pros.push(`현재가가 동 평균 대비 낮아(${a.nvpGapRate.toFixed(0)}%) 상대적 저평가 구간`);
+  if(a.nvpValid===true) pros.push(`인근 신축 대비 상승여력 있음 (현재가 < 목표 신축가)`);
+  if(eta!=null&&eta<=7) pros.push(`입주까지 ${eta}년 — 재건축 후반부, 대기기간 짧음`);
+  if(rvi!=null&&rvi>=70) pros.push(`RVI 종합 <b>${rvi}점</b> — 물리·시간 종합 투자매력 상위`);
+  if(!pros.length) pros.push(`표준적인 재건축 대상 단지 (특별한 강점 지표 없음)`);
+
+  // --- 리스크·주의 (cons) ---
+  if(eta!=null&&eta>=12) cons.push(`입주까지 <b>${eta}년+</b> 예상 — 장기 대기 필요, 자금 묶임`);
+  if(a.stage&&a.stage<=4) cons.push(`재건축 초기(${STAGE_LABEL[a.stage]}) — 사업 확정성 낮고 변수 많음`);
+  if(a.tradeReliability==='low') cons.push(`거래 빈도 낮음 — 현재가 신뢰도 주의, 실거래 표본 부족`);
+  else if(a.tradeReliability==='mid') cons.push(`거래 빈도 보통 — 현재가 참고 수준`);
+  if(a.warnDistortion) cons.push(`데이터 왜곡 주의 플래그 — 지표 해석에 신중 필요`);
+  if(a.sizeGrade==='xs'||a.sizeGrade==='s') cons.push(`소규모 단지 — 사업성·분담금 부담 상대적으로 불리할 수 있음`);
+  if(a.nvpValid===false) cons.push(`현재가가 이미 목표 신축가 이상 — 추가 상승여력 제한적`);
+  if(a.risk&&String(a.risk).trim()) cons.push(`현장 리스크: ${String(a.risk).trim()}`);
+  cons.push(`NCMC·RAR은 목표용적률 300%·상승률 3%·기부채납 20% 등 <b>가정(TBD)</b> 기반 추정치`);
+
+  document.getElementById('notePros').innerHTML=pros.map(p=>`<li>${p}</li>`).join('');
+  document.getElementById('noteCons').innerHTML=cons.map(c=>`<li>${c}</li>`).join('');
+}
+
 function interpolateCost(far){
   if(!far||far<=0) return 750; // 미확보 시 중간값
   const samples=COST_SAMPLES.slice().sort((a,b)=>a.far-b.far);
@@ -853,10 +922,13 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
       if(a.farTBD){const fe=document.getElementById('v-far'); if(fe && !/TBD/.test(fe.textContent)) fe.textContent=fe.textContent+' (TBD)';}
       // === 데이터 신뢰도 플래그 배지 ===
       renderDataFlags(a);
+      // === 투자노트 (데이터 기반 자동 요약) ===
+      renderInvestNote(a, {far:far, households:households, platArea:platArea, rviV2:a.rvi});
     } else {
       ['v-cmc','v-landppp','v-ticker','v-ncmc','v-rar','v-newppp','v-hdr-ticker'].forEach(id=>setTxt(id,'—'));
       ['v-capgrade','v-assetid','v-hdr-short','v-hdr-assetid'].forEach(id=>setTxt(id,''));
       setTxt('v-ncmc-sub','재건축 티커 단지만 산출');
+      const inNote=document.getElementById('investNote'); if(inNote) inNote.style.display='none';
       setTxt('v-targetfar','목표 용적률 —');
       const fr=document.getElementById('flagRow'); if(fr) fr.style.display='none';
       const wb=document.getElementById('warnBox'); if(wb) wb.style.display='none';
@@ -1287,7 +1359,7 @@ function preloadMasterData(){
       if(d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,name:d.name,dong:d.dong,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage,eta:d.eta,moveIn:d.moveIn,rvi:d.rvi,rviV1:d.rviV1,rar:d.rar,nvpValid:d.nvpValid,risk:d.risk};
         // 지도·구선택·TOP10용 단지 리스트 (구 무관 전체)
         list.push({gu:d.gu||'',dong:d.dong||'',name:d.name||'',shortName:d.shortName||'',ticker:d.ticker,jibun:d.jibun||'',h:d.h||d.hhldCnt||0,bjdong:d.bjdong||'',lawd:d.lawd||'',far:d.far||0});
       }
