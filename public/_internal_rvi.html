@@ -141,7 +141,14 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   <div class="dash-header"><h2 id="complexName">—</h2><p id="complexAddr">단지를 선택하세요</p></div>
 
   <!-- 기본정보 -->
-  <div class="section-title">🏢 기본 정보</div>
+  <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <span>🏢 기본 정보</span>
+    <span style="font-size:12px;font-weight:400;color:#bbb;font-family:monospace;">
+      <span id="v-hdr-ticker" style="color:#C79A5B;font-weight:700">—</span>
+      <span id="v-hdr-short" style="color:#fff;margin-left:6px">—</span>
+      <span id="v-hdr-assetid" style="color:#888;margin-left:6px">—</span>
+    </span>
+  </div>
   <div class="grid-3" id="basicInfo">
     <div class="info-card"><div class="label">준공년도</div><div class="value" id="v-year">—</div></div>
     <div class="info-card"><div class="label">경과년수</div><div class="value" id="v-age">—</div></div>
@@ -170,12 +177,9 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
       <div class="value" id="v-excluppp" style="color:#FFA726;">—</div>
       <div style="font-size:11px;color:#888;margin-top:2px;">84㎡ 기준 실거래</div>
     </div>
-    <div class="info-card">
-      <div class="label">티커 / 자산번호</div>
-      <div class="value" id="v-ticker" style="font-family:monospace;">—</div>
-      <div style="font-size:11px;color:#888;margin-top:2px;font-family:monospace;" id="v-assetid">—</div>
-    </div>
   </div>
+  <!-- 티커·자산번호는 기본정보 헤더 우측으로 이동. JS 참조용 숨김 유지. -->
+  <span id="v-ticker" style="display:none">—</span><span id="v-assetid" style="display:none"></span>
 
   <!-- 재건축 후 자산 시가총액 (NCMC) / 성장배수 (RAR) 카드 -->
   <div class="grid-3" id="ncmcCard" style="margin-top:12px;">
@@ -835,6 +839,10 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
       setTxt('v-landppp', a.landPppMarket?a.landPppMarket.toLocaleString()+'만원/평':'—');
       setTxt('v-ticker', a.ticker||'—');
       setTxt('v-assetid', a.assetId||'');
+      // 기본정보 헤더 우측: 티커·약칭·자산번호
+      setTxt('v-hdr-ticker', a.ticker||'—');
+      setTxt('v-hdr-short', a.shortName||'');
+      setTxt('v-hdr-assetid', a.assetId||'');
       // 재건축후 시총(NCMC) / 성장배수(RAR)
       setTxt('v-ncmc', a.ncmc!=null?`₩${a.ncmc.toFixed(1)}조`:'—');
       setTxt('v-ncmc-sub', (a.cmc!=null&&a.ncmc!=null)?`현재 ₩${a.cmc.toFixed(1)}조 → 재건축후 (분담금 전, 가정 TBD)`:'재건축후 예상');
@@ -846,8 +854,8 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
       // === 데이터 신뢰도 플래그 배지 ===
       renderDataFlags(a);
     } else {
-      ['v-cmc','v-landppp','v-ticker','v-ncmc','v-rar','v-newppp'].forEach(id=>setTxt(id,'—'));
-      ['v-capgrade','v-assetid'].forEach(id=>setTxt(id,''));
+      ['v-cmc','v-landppp','v-ticker','v-ncmc','v-rar','v-newppp','v-hdr-ticker'].forEach(id=>setTxt(id,'—'));
+      ['v-capgrade','v-assetid','v-hdr-short','v-hdr-assetid'].forEach(id=>setTxt(id,''));
       setTxt('v-ncmc-sub','재건축 티커 단지만 산출');
       setTxt('v-targetfar','목표 용적률 —');
       const fr=document.getElementById('flagRow'); if(fr) fr.style.display='none';
