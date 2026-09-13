@@ -134,6 +134,7 @@ const GROUPS: Record<string, Col[]> = {
   // 편집 즉시 DB 자동저장 + 인덱스 재계산. 분담금 상세표(plan_contribution)는 문서/추출 패널에서 관리.
   정비계획: [
     { key: 'plan_confirmed', label: '계획확정', w: 65, edit: true, bool: true },
+    { key: 'built_year', label: '준공연도', w: 75, edit: true, num: true },
     { key: 'far', label: '현재용적률%', w: 90, edit: true, num: true },
     { key: 'plan_far', label: '목표용적률%', w: 95, edit: true, num: true },
     { key: 'plan_ratio', label: '비례율%', w: 80, edit: true, num: true },

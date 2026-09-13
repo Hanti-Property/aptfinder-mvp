@@ -938,9 +938,17 @@ async function loadRVI(name,address,lat,lng,lawdCd,bjdongCd,jibun,knownHousehold
   myTrades=myTrades.filter(t=>parseInt(t.floor||0)>1&&!(t.cdealType&&t.cdealType.trim()));
 
   let builtYear=0;
-  const ua=merged.useAprDay||'';
-  if(ua.length>=4&&parseInt(ua.substring(0,4))>1900){
-    builtYear=parseInt(ua.substring(0,4));
+  // 1순위: 마스터 검수값(built_year) — 건축물대장이 상가동 등 오값 반환하는 다지번 단지 대응
+  const _mYear=(ASSET_FROM_MASTER[bjdongCd+'-'+jibun]||{}).builtYear;
+  if(_mYear&&parseInt(_mYear)>1900){
+    builtYear=parseInt(_mYear);
+  }
+  // 2순위: 건축물대장 사용승인일
+  if(!builtYear){
+    const ua=merged.useAprDay||'';
+    if(ua.length>=4&&parseInt(ua.substring(0,4))>1900){
+      builtYear=parseInt(ua.substring(0,4));
+    }
   }
   // 최종 fallback: 실거래 데이터의 buildYear
   if(!builtYear&&myTrades.length&&myTrades[0].buildYear){
@@ -1419,7 +1427,7 @@ function preloadMasterData(){
       if(d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,name:d.name,dong:d.dong,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage,eta:d.eta,moveIn:d.moveIn,rvi:d.rvi,rviV1:d.rviV1,rar:d.rar,nvpValid:d.nvpValid,risk:d.risk,features:d.features,research_memo:d.research_memo,planConfirmed:d.planConfirmed,planFar:d.planFar,planUnitsNew:d.planUnitsNew,planUnitsRental:d.planUnitsRental,planDonationRate:d.planDonationRate,planRatio:d.planRatio,planGfaNew:d.planGfaNew,planBcr:d.planBcr,planSource:d.planSource,gfaCurrent:d.gfaCurrent,planContrib84:d.planContrib84,planMaxFloor:d.planMaxFloor,builder:d.builder,faer:d.faer};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,name:d.name,dong:d.dong,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage,eta:d.eta,moveIn:d.moveIn,rvi:d.rvi,rviV1:d.rviV1,rar:d.rar,nvpValid:d.nvpValid,risk:d.risk,features:d.features,research_memo:d.research_memo,planConfirmed:d.planConfirmed,planFar:d.planFar,planUnitsNew:d.planUnitsNew,planUnitsRental:d.planUnitsRental,planDonationRate:d.planDonationRate,planRatio:d.planRatio,planGfaNew:d.planGfaNew,planBcr:d.planBcr,planSource:d.planSource,gfaCurrent:d.gfaCurrent,planContrib84:d.planContrib84,planMaxFloor:d.planMaxFloor,builder:d.builder,faer:d.faer,builtYear:d.builtYear};
         // 지도·구선택·TOP10용 단지 리스트 (구 무관 전체)
         list.push({gu:d.gu||'',dong:d.dong||'',name:d.name||'',shortName:d.shortName||'',ticker:d.ticker,jibun:d.jibun||'',h:d.h||d.hhldCnt||0,bjdong:d.bjdong||'',lawd:d.lawd||'',far:d.far||0});
       }

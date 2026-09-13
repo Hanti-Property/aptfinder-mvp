@@ -61,6 +61,7 @@ function toHtmlRecords(rows: Record<string, unknown>[]) {
         planContrib84: r.plan_contrib_84 ?? null,
         planMaxFloor: r.plan_max_floor ?? null,
         builder: r.builder ?? null,
+        builtYear: r.built_year ?? null,   // 준공연도 (마스터 검수값 우선)
       }
     })
 }

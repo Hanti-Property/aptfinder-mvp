@@ -118,6 +118,7 @@ export interface ReconRow {
   plan_ratio?: number | null     // 비례율(%)
   gfa_current?: number | null    // 현재(재건축 전) 연면적(㎡)
   plan_gfa_new?: number | null   // 재건축후 연면적(㎡)
+  built_year?: number | null     // 준공연도(사용승인). AGE 점수 기준.
   [k: string]: unknown
 }
 
@@ -314,7 +315,10 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
     const tlaScore = sTLA(plat)
     const nvpScore = sNVP(nvpRate)
     const farScore = sFAR(curFarPct)
-    const ageScore = sAGE(47)
+    // 연식: 마스터 built_year 있으면 실제 경과년수, 없으면 47 폴백(기존 동작 유지)
+    const builtYear = r.built_year != null && Number(r.built_year) > 1900 ? Number(r.built_year) : null
+    const ageYears = builtYear ? CONSTANTS.BASE_YEAR - builtYear : 47
+    const ageScore = sAGE(ageYears)
     const lpsScore = lps >= 18 ? 100 : lps >= 12 ? 75 : lps >= 8 ? 50 : 25
     const nrtScore = 50
     const physScore = Math.round(tlaScore * 0.30 + locScore * 0.20 + nvpScore * 0.15 + farScore * 0.20 + ageScore * 0.05 + lpsScore * 0.05 + nrtScore * 0.05)
