@@ -460,6 +460,33 @@ const COST_SAMPLES=[
   {far:175, costPerPy:394},     // 개포주공6·7단지
   {far:204, costPerPy:1830},    // 은마아파트
 ];
+
+// === 84형 분담금 보간 (v2, 2026-09) — 용적률 증가배수 기준 ===
+// 분담금은 '현재 용적률'이 아니라 '얼마나 더 짓나(증가배수=목표/현재)'가 결정한다.
+// 마스터 실측 84형 분담금(plan_contrib_84) 기반. 증가배수 클수록 일반분양 물량↑ → 분담금↓.
+//  은마 1.60→4.5억 / 오금현대 1.80→1.0억 / 개포6-7 2.07→0.5억 / 잠실5 2.12→0.5억
+const CONTRIB84_SAMPLES=[
+  {ratio:1.60, contrib84:4.5},  // 은마 (200→320)
+  {ratio:1.80, contrib84:1.0},  // 오금현대 (200→360)
+  {ratio:2.07, contrib84:0.5},  // 개포6-7 (145→300)
+  {ratio:2.12, contrib84:0.5},  // 잠실5 (152→322)
+];
+const CONTRIB84_AREA=84; // 기준 전용면적(㎡). 다른 평형은 면적 비례 환산.
+
+// 증가배수(목표용적률/현재용적률) → 84형 분담금(억) 선형보간. 범위 밖은 양끝값.
+function interpolateContrib84(ratio){
+  if(ratio==null||!isFinite(ratio)) return null;
+  const s=CONTRIB84_SAMPLES.slice().sort((a,b)=>a.ratio-b.ratio);
+  if(ratio<=s[0].ratio) return s[0].contrib84;                       // 증가 적음 → 분담금 최대
+  if(ratio>=s[s.length-1].ratio) return s[s.length-1].contrib84;     // 증가 많음 → 최소
+  for(let i=0;i<s.length-1;i++){
+    if(ratio>=s[i].ratio&&ratio<=s[i+1].ratio){
+      const t=(ratio-s[i].ratio)/(s[i+1].ratio-s[i].ratio);
+      return Math.round((s[i].contrib84+t*(s[i+1].contrib84-s[i].contrib84))*100)/100;
+    }
+  }
+  return s[s.length-1].contrib84;
+}
 // === 📋 투자노트 자동 생성 ===
 // a: ASSET_FROM_MASTER 레코드, ctx: {myAvgPPP, far, households, platArea, rviV2}
 const STAGE_LABEL={3:'추진위',4:'조합설립',5:'사업시행',6:'관리처분',7:'이주/철거',8:'착공',9:'입주'};
@@ -1252,17 +1279,28 @@ function updateRRI(){
   // 현재 매매가 (최근 거래 기준)
   const currentPrice=d.currentPrice;
 
-  // 분담금 결정: 정비계획 확정 84형 분담금(plan_contrib_84, 억) 우선. 없으면 용적률 보간.
-  //  - 보간 모델은 '현재 용적률' 기반이라 목표용적률 높은 단지를 못 잡음 → 확정값이 있으면 우선.
-  const _mCon=(ASSET_FROM_MASTER[(selectedBjdongCd)+'-'+(selectedJibun)]||{}).planContrib84;
+  // 분담금 결정 (우선순위):
+  //  ① 정비계획 확정 84형 분담금(plan_contrib_84, 억) — 실측
+  //  ② 용적률 증가배수(목표/현재) 보간 → 84형 분담금 → 내 평형 면적비례 환산
+  //  ③ 목표용적률 없으면 기존 현재용적률 보간(폴백)
+  const _mAsset=ASSET_FROM_MASTER[(selectedBjdongCd)+'-'+(selectedJibun)]||{};
+  const _mCon=_mAsset.planContrib84;
+  const _curFar=d.far, _tgtFar=_mAsset.targetFar;   // targetFar=엔진 목표용적률(정비계획 확정 반영)
   let addCost, costSrc;
   if(_mCon!=null && !isNaN(Number(_mCon))){
     addCost=Number(_mCon)*10000;   // 억 → 만원. 음수(환급)도 그대로 반영
     costSrc='정비계획 84형 확정';
+  } else if(_curFar>0 && _tgtFar>0){
+    const ratio=_tgtFar/_curFar;                          // 용적률 증가배수
+    const con84=interpolateContrib84(ratio);              // 84형 분담금(억)
+    // 내 평형 = 84형 × (내전용면적 / 84㎡). 분담금은 전용면적 비례.
+    const con=con84!=null ? con84*(d.avgArea/CONTRIB84_AREA) : 0;
+    addCost=con*10000;
+    costSrc=`증가배수 ${ratio.toFixed(2)}배 보간 → 84형 ${con84}억 (면적환산 ${con.toFixed(1)}억)`;
   } else {
-    const costPerPy=interpolateCost(d.far);
+    const costPerPy=interpolateCost(_curFar);
     addCost=excluPy*costPerPy;
-    costSrc=`용적률 ${d.far?d.far.toFixed(0)+'%':'미확보'} 보간 → ${costPerPy.toLocaleString()}만/전용평`;
+    costSrc=`용적률 ${_curFar?_curFar.toFixed(0)+'%':'미확보'} 보간(목표용적률 미확보) → ${costPerPy.toLocaleString()}만/전용평`;
   }
 
   // 총 투자비
