@@ -298,7 +298,7 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
       <span style="font-size:12px;color:#ccc;min-width:50px;" id="rriRateLabel">연 3%</span>
     </div>
     <div style="font-size:14px;color:#bbb;margin-top:10px;line-height:1.5;">
-      ※ 동일 평형 재건축 가정 | 사업기간 = ETA(단지별) | 분담금 = 실데이터 보간 (잠실5·개포6·7·은마 기준)
+      ※ 동일 평형 재건축 가정 | 사업기간 = ETA(단지별) | 분담금 = 정비계획 84형 확정값 우선, 없으면 용적률 보간(잠실5·개포6·7·은마 기준)
     </div>
     <div style="margin-top:12px;background:#082e4d;border-radius:8px;padding:14px;">
       <div style="font-size:13px;color:#ccc;font-weight:600;margin-bottom:8px;">📐 RVI 평가지표 가중치</div>
@@ -1246,17 +1246,24 @@ function updateRRI(){
   const annualRate=parseInt(document.getElementById('rriSliderRate').value)/100;
   document.getElementById('rriRateLabel').textContent='연 '+(annualRate*100).toFixed(0)+'%';
 
-  // 분담금: 실데이터 보간 모델
-  let costPerPy=interpolateCost(d.far);
-
   // 전용면적 기준 (전용평)
   const excluPy=d.avgArea/3.3058;
 
   // 현재 매매가 (최근 거래 기준)
   const currentPrice=d.currentPrice;
 
-  // 추가비용 = 전용평 × 분담금 단가
-  const addCost=excluPy*costPerPy;
+  // 분담금 결정: 정비계획 확정 84형 분담금(plan_contrib_84, 억) 우선. 없으면 용적률 보간.
+  //  - 보간 모델은 '현재 용적률' 기반이라 목표용적률 높은 단지를 못 잡음 → 확정값이 있으면 우선.
+  const _mCon=(ASSET_FROM_MASTER[(selectedBjdongCd)+'-'+(selectedJibun)]||{}).planContrib84;
+  let addCost, costSrc;
+  if(_mCon!=null && !isNaN(Number(_mCon))){
+    addCost=Number(_mCon)*10000;   // 억 → 만원. 음수(환급)도 그대로 반영
+    costSrc='정비계획 84형 확정';
+  } else {
+    const costPerPy=interpolateCost(d.far);
+    addCost=excluPy*costPerPy;
+    costSrc=`용적률 ${d.far?d.far.toFixed(0)+'%':'미확보'} 보간 → ${costPerPy.toLocaleString()}만/전용평`;
+  }
 
   // 총 투자비
   const totalInvest=currentPrice+addCost;
@@ -1291,7 +1298,7 @@ function updateRRI(){
   document.getElementById('rri-future-sub').textContent=`NVP(v2) ${Math.round(nvpForRRI).toLocaleString()}만 × (1+${(annualRate*100).toFixed(0)}%)^${eta} = ${Math.round(futurePPP).toLocaleString()}만/전용평`;
   document.getElementById('rri-area').textContent=excluPy.toFixed(1)+'평(전용)';
   document.getElementById('rri-cost').textContent=fmtP(addCost);
-  document.getElementById('rri-cost').title=`용적률 ${d.far?d.far.toFixed(0)+'%':'미확보'} → ${costPerPy.toLocaleString()}만/전용평`;
+  document.getElementById('rri-cost').title=costSrc;
   document.getElementById('rri-total').textContent=fmtP(totalInvest);
 
   // RRI 색상
