@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 
 // recon_docs 관리 페이지 — 단지별 문서(정비계획·조합공지·시공사자료·분석노트) CRUD.
@@ -67,6 +67,17 @@ export default function AdminDocsPage() {
   const [msg, setMsg] = useState('')
   const [preview, setPreview] = useState(true)
   const [filterAsset, setFilterAsset] = useState('')  // 목록 단지 필터
+  // 자동저장 상태: idle(변경없음) / dirty(변경됨, 저장대기) / saving / saved
+  const [status, setStatus] = useState<'idle' | 'dirty' | 'saving' | 'saved'>('idle')
+  const [savedAt, setSavedAt] = useState<Date | null>(null)
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const skipDirty = useRef(false)   // 문서 선택/저장직후 draft 갱신은 dirty로 치지 않음
+
+  const loadListOnly = useCallback(async () => {
+    // 편집 중 draft를 건드리지 않고 좌측 목록만 새로고침
+    const { data: d } = await supabase.from('recon_docs').select('*').order('updated_at', { ascending: false })
+    setDocs((d as Doc[]) || [])
+  }, [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -90,6 +101,9 @@ export default function AdminDocsPage() {
 
   const selectDoc = (doc: Doc | null) => {
     setMsg('')
+    if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null }
+    skipDirty.current = true      // 선택으로 인한 draft 교체는 dirty 아님
+    setStatus('idle'); setSavedAt(null)
     if (!doc) { setSelId(null); setDraft(emptyDoc()); return }
     setSelId(doc.id || null)
     setDraft({ ...doc })
@@ -100,30 +114,34 @@ export default function AdminDocsPage() {
     setDraft(d => ({ ...d, asset_id: assetId || null, ticker: m?.ticker ?? d.ticker }))
   }
 
-  const save = async () => {
-    if (!draft.title.trim()) { setMsg('제목을 입력하세요.'); return }
-    setSaving(true); setMsg('')
+  // 저장 (자동/수동 공용). 신규면 insert 후 새 id를 selId로 승격 → 이후 update로 이어짐.
+  const save = useCallback(async (d: Doc, curId: string | null): Promise<boolean> => {
+    if (!d.title.trim()) { setMsg('제목을 입력하면 저장됩니다.'); return false }
+    setSaving(true); setStatus('saving'); setMsg('')
     const payload = {
-      asset_id: draft.asset_id, ticker: draft.ticker, doc_type: draft.doc_type,
-      title: draft.title.trim(), body: draft.body, source: draft.source, doc_date: draft.doc_date,
+      asset_id: d.asset_id, ticker: d.ticker, doc_type: d.doc_type,
+      title: d.title.trim(), body: d.body, source: d.source, doc_date: d.doc_date,
       updated_at: new Date().toISOString(),
     }
-    let error
-    if (selId) {
-      ({ error } = await supabase.from('recon_docs').update(payload).eq('id', selId))
+    if (curId) {
+      const { error } = await supabase.from('recon_docs').update(payload).eq('id', curId)
+      setSaving(false)
+      if (error) { setStatus('dirty'); setMsg('저장 실패: ' + error.message); return false }
     } else {
-      ({ error } = await supabase.from('recon_docs').insert(payload))
+      const { data: ins, error } = await supabase.from('recon_docs').insert(payload).select('id').single()
+      setSaving(false)
+      if (error) { setStatus('dirty'); setMsg('저장 실패: ' + error.message); return false }
+      if (ins?.id) setSelId(ins.id as string)   // 신규→기존 전환 (다음 저장은 update)
     }
-    setSaving(false)
-    if (error) { setMsg('저장 실패: ' + error.message); return }
-    setMsg('저장됨 ✓')
-    await load()
-    if (!selId) selectDoc(null)
-  }
+    setStatus('saved'); setSavedAt(new Date())
+    loadListOnly()
+    return true
+  }, [loadListOnly])
 
   const del = async () => {
     if (!selId) return
     if (!confirm('이 문서를 삭제할까요? 되돌릴 수 없습니다.')) return
+    if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null }
     setSaving(true)
     const { error } = await supabase.from('recon_docs').delete().eq('id', selId)
     setSaving(false)
@@ -132,6 +150,31 @@ export default function AdminDocsPage() {
     selectDoc(null)
     await load()
   }
+
+  // draft 변경 감지 → dirty 표시 + 1.5초 debounce 자동저장
+  useEffect(() => {
+    if (skipDirty.current) { skipDirty.current = false; return }  // 선택/초기화로 인한 변경은 무시
+    if (!draft.title.trim()) return   // 제목 없으면 자동저장 안 함
+    setStatus('dirty')
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
+    autosaveTimer.current = setTimeout(() => { save(draft, selId) }, 1500)
+    return () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current) }
+    // selId는 의존성에서 제외: 저장 중 selId 승격이 타이머를 재설정하지 않도록
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, save])
+
+  // Cmd/Ctrl+S → 즉시 저장
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null }
+        save(draft, selId)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [draft, selId, save])
 
   const shown = filterAsset ? docs.filter(d => d.asset_id === filterAsset) : docs
   const label = (d: Doc) => {
@@ -191,7 +234,10 @@ export default function AdminDocsPage() {
           </select>
           <input value={draft.doc_date || ''} onChange={e => setDraft(d => ({ ...d, doc_date: e.target.value }))} placeholder="일자(예:2026)" style={{ ...input, width: 100 }} />
           <div style={{ flex: 1 }} />
-          <button onClick={save} disabled={saving} style={btnPrimary}>{saving ? '저장 중…' : (selId ? '저장' : '작성')}</button>
+          <SaveStatus status={status} savedAt={savedAt} />
+          <button onClick={() => { if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null } save(draft, selId) }} disabled={saving} style={btnPrimary} title="Cmd/Ctrl+S">
+            {saving ? '저장 중…' : '저장'}
+          </button>
           {selId && <button onClick={del} disabled={saving} style={btnDanger}>삭제</button>}
         </div>
 
@@ -204,7 +250,7 @@ export default function AdminDocsPage() {
 
         {/* 본문: 편집 + 미리보기 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 20px', color: '#888', fontSize: 12 }}>
-          <span>본문 (마크다운: ## 제목, - 목록, **강조**)</span>
+          <span>본문 (마크다운: ## 제목, - 목록, **강조**) · 입력 멈추면 자동 저장</span>
           <label style={{ cursor: 'pointer' }}>
             <input type="checkbox" checked={preview} onChange={e => setPreview(e.target.checked)} /> 미리보기
           </label>
@@ -227,3 +273,15 @@ export default function AdminDocsPage() {
 const input: React.CSSProperties = { background: '#1a1a1a', color: '#eee', border: '1px solid #333', borderRadius: 5, padding: '7px 10px', fontSize: 13 }
 const btnPrimary: React.CSSProperties = { background: '#2E7D32', color: '#fff', border: 'none', borderRadius: 5, padding: '7px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }
 const btnDanger: React.CSSProperties = { background: '#5a2020', color: '#f0c0c0', border: '1px solid #7a3030', borderRadius: 5, padding: '7px 14px', fontSize: 13, cursor: 'pointer' }
+
+// 자동저장 상태 뱃지: 편집 중 / 저장 중 / 저장됨(시각)
+function SaveStatus({ status, savedAt }: { status: 'idle' | 'dirty' | 'saving' | 'saved'; savedAt: Date | null }) {
+  const base: React.CSSProperties = { fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, whiteSpace: 'nowrap' }
+  if (status === 'saving') return <span style={{ ...base, background: '#333', color: '#ffd54f' }}>저장 중…</span>
+  if (status === 'dirty') return <span style={{ ...base, background: '#332a00', color: '#ffca28' }}>● 편집 중 (자동저장 대기)</span>
+  if (status === 'saved') {
+    const t = savedAt ? savedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : ''
+    return <span style={{ ...base, background: '#1b3320', color: '#81c784' }}>저장됨 ✓ {t}</span>
+  }
+  return <span style={{ ...base, color: '#666' }}>—</span>
+}
