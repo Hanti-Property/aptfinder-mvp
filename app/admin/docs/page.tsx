@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { extractPlanFields, type ExtractField } from '@/lib/planExtract'
 
 // recon_docs 관리 페이지 — 단지별 문서(정비계획·조합공지·시공사자료·분석노트) CRUD.
 // 마스터 관리(/admin/recon)와 동일 방식: authenticated 세션으로 직접 조회·저장·삭제.
@@ -72,6 +73,13 @@ export default function AdminDocsPage() {
   const [savedAt, setSavedAt] = useState<Date | null>(null)
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const skipDirty = useRef(false)   // 문서 선택/저장직후 draft 갱신은 dirty로 치지 않음
+  // 숫자 추출 제안 패널
+  const [extractOpen, setExtractOpen] = useState(false)
+  const [fields, setFields] = useState<ExtractField[]>([])
+  // 필드별 사용자 선택: key → { on(반영여부), value(반영할 값) }
+  const [picks, setPicks] = useState<Record<string, { on: boolean; value: number }>>({})
+  const [curMaster, setCurMaster] = useState<Record<string, unknown>>({})  // 현재 마스터값
+  const [applying, setApplying] = useState(false)
 
   const loadListOnly = useCallback(async () => {
     // 편집 중 draft를 건드리지 않고 좌측 목록만 새로고침
@@ -137,6 +145,40 @@ export default function AdminDocsPage() {
     loadListOnly()
     return true
   }, [loadListOnly])
+
+  // 🔍 숫자 추출 제안: 파서 실행 + 현재 마스터값 조회 → 검수 패널 오픈
+  const runExtract = async () => {
+    setMsg('')
+    if (!draft.asset_id) { setMsg('먼저 상단에서 단지를 선택하세요 (추출값을 어느 단지에 반영할지 필요).'); return }
+    const fs = extractPlanFields(draft.body || '')
+    if (!fs.length) { setMsg('본문에서 추출할 수 있는 숫자를 찾지 못했습니다.'); return }
+    // 현재 마스터값 조회 (변경 미리보기용)
+    const { data } = await supabase.from('recon_master')
+      .select('far,plan_far,plan_units_new,plan_units_rental,plan_donation_rate,plan_gfa_new,plan_bcr,plan_ratio')
+      .eq('asset_id', draft.asset_id).single()
+    setCurMaster((data as Record<string, unknown>) || {})
+    // 기본 선택: 추천값, 반영 ON
+    const p: Record<string, { on: boolean; value: number }> = {}
+    fs.forEach(f => { if (f.suggested != null) p[f.key] = { on: true, value: f.suggested } })
+    setFields(fs); setPicks(p); setExtractOpen(true)
+  }
+
+  // 승인 → 마스터 반영 (선택된 항목만 UPDATE + plan_confirmed=true)
+  const applyToMaster = async () => {
+    if (!draft.asset_id) return
+    const upd: Record<string, unknown> = {}
+    fields.forEach(f => { const pk = picks[f.key]; if (pk?.on) upd[f.key] = pk.value })
+    if (!Object.keys(upd).length) { setMsg('반영할 항목을 하나 이상 선택하세요.'); return }
+    upd.plan_confirmed = true
+    upd.updated_at = new Date().toISOString()
+    setApplying(true)
+    const { error } = await supabase.from('recon_master').update(upd).eq('asset_id', draft.asset_id)
+    setApplying(false)
+    if (error) { setMsg('마스터 반영 실패: ' + error.message); return }
+    const n = Object.keys(upd).length - 2  // plan_confirmed, updated_at 제외
+    setMsg(`✓ 마스터 반영 완료 (${n}개 항목 + 정비계획 확정). RVI 투자노트에 자동 반영됩니다.`)
+    setExtractOpen(false)
+  }
 
   const del = async () => {
     if (!selId) return
@@ -235,6 +277,9 @@ export default function AdminDocsPage() {
           <input value={draft.doc_date || ''} onChange={e => setDraft(d => ({ ...d, doc_date: e.target.value }))} placeholder="일자(예:2026)" style={{ ...input, width: 100 }} />
           <div style={{ flex: 1 }} />
           <SaveStatus status={status} savedAt={savedAt} />
+          <button onClick={runExtract} disabled={!draft.asset_id || !((draft.body || '').trim())} style={btnExtract} title="문서에서 용적률·세대·비례율 등 숫자 후보를 뽑아 마스터에 반영">
+            🔍 숫자 추출 제안
+          </button>
           <button onClick={() => { if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null } save(draft, selId) }} disabled={saving} style={btnPrimary} title="Cmd/Ctrl+S">
             {saving ? '저장 중…' : '저장'}
           </button>
@@ -266,6 +311,67 @@ export default function AdminDocsPage() {
           )}
         </div>
       </div>
+
+      {/* 🔍 숫자 추출 제안 패널 */}
+      {extractOpen && (
+        <div style={overlay} onClick={() => setExtractOpen(false)}>
+          <div style={modal} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <h3 style={{ margin: 0, fontSize: 17 }}>🔍 숫자 추출 제안 → 검수 → 마스터 반영</h3>
+              <button onClick={() => setExtractOpen(false)} style={{ ...btnDanger, padding: '4px 10px' }}>닫기</button>
+            </div>
+            <div style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>
+              단지: <b style={{ color: '#C79A5B' }}>{masterByAsset[draft.asset_id || '']?.short_name || draft.asset_id}</b>
+              {' '}· 후보가 여러 개면 드롭다운에서 선택하거나 값을 직접 수정하세요. 체크된 항목만 반영됩니다.
+            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ color: '#888', textAlign: 'left', borderBottom: '1px solid #333' }}>
+                  <th style={{ padding: '6px 4px', width: 40 }}>반영</th>
+                  <th style={{ padding: '6px 4px' }}>항목</th>
+                  <th style={{ padding: '6px 4px' }}>추출값(선택/수정)</th>
+                  <th style={{ padding: '6px 4px' }}>현재 마스터값</th>
+                  <th style={{ padding: '6px 4px' }}>근거</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fields.map(f => {
+                  const pk = picks[f.key] || { on: false, value: f.suggested ?? 0 }
+                  const cur = curMaster[f.key]
+                  const chosen = f.candidates.find(c => c.value === pk.value)
+                  return (
+                    <tr key={f.key} style={{ borderBottom: '1px solid #222' }}>
+                      <td style={{ padding: '8px 4px' }}>
+                        <input type="checkbox" checked={pk.on} onChange={e => setPicks(p => ({ ...p, [f.key]: { ...pk, on: e.target.checked } }))} />
+                      </td>
+                      <td style={{ padding: '8px 4px', fontWeight: 600 }}>{f.label} <span style={{ color: '#666', fontWeight: 400 }}>{f.unit}</span></td>
+                      <td style={{ padding: '8px 4px' }}>
+                        {f.candidates.length > 1 && (
+                          <select value={pk.value} onChange={e => setPicks(p => ({ ...p, [f.key]: { ...pk, value: Number(e.target.value) } }))} style={{ ...input, marginRight: 6, padding: '4px 6px' }}>
+                            {f.candidates.map((c, i) => <option key={i} value={c.value}>{c.value}{c.hint ? ` (${c.hint})` : ''}</option>)}
+                          </select>
+                        )}
+                        <input type="number" step="any" value={pk.value} onChange={e => setPicks(p => ({ ...p, [f.key]: { ...pk, value: Number(e.target.value) } }))}
+                          style={{ ...input, width: 100, padding: '4px 6px', color: '#81c784', fontWeight: 700 }} />
+                      </td>
+                      <td style={{ padding: '8px 4px', color: cur == null ? '#666' : '#bbb' }}>
+                        {cur == null ? '—' : String(cur)}
+                        {cur != null && Number(cur) !== pk.value && <span style={{ color: '#ffca28', marginLeft: 6, fontSize: 11 }}>변경</span>}
+                      </td>
+                      <td style={{ padding: '8px 4px', color: '#777', fontSize: 11 }}>{chosen?.raw || f.candidates[0]?.raw || ''}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16, alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: '#999', marginRight: 'auto' }}>승인 시 선택 항목이 recon_master에 저장되고 <b style={{ color: '#81c784' }}>정비계획 확정(plan_confirmed=true)</b>으로 표시됩니다.</span>
+              <button onClick={() => setExtractOpen(false)} style={{ ...btnDanger, background: '#333', color: '#ccc', border: '1px solid #444' }}>취소</button>
+              <button onClick={applyToMaster} disabled={applying} style={btnPrimary}>{applying ? '반영 중…' : '✓ 승인 → 마스터 반영'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -273,6 +379,9 @@ export default function AdminDocsPage() {
 const input: React.CSSProperties = { background: '#1a1a1a', color: '#eee', border: '1px solid #333', borderRadius: 5, padding: '7px 10px', fontSize: 13 }
 const btnPrimary: React.CSSProperties = { background: '#2E7D32', color: '#fff', border: 'none', borderRadius: 5, padding: '7px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }
 const btnDanger: React.CSSProperties = { background: '#5a2020', color: '#f0c0c0', border: '1px solid #7a3030', borderRadius: 5, padding: '7px 14px', fontSize: 13, cursor: 'pointer' }
+const btnExtract: React.CSSProperties = { background: '#1e3a5f', color: '#9ecbff', border: '1px solid #2d5580', borderRadius: 5, padding: '7px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }
+const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }
+const modal: React.CSSProperties = { background: '#1a1a1a', border: '1px solid #444', borderRadius: 10, padding: '20px 24px', width: 'min(860px, 92vw)', maxHeight: '86vh', overflowY: 'auto', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }
 
 // 자동저장 상태 뱃지: 편집 중 / 저장 중 / 저장됨(시각)
 function SaveStatus({ status, savedAt }: { status: 'idle' | 'dirty' | 'saving' | 'saved'; savedAt: Date | null }) {
