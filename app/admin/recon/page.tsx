@@ -127,6 +127,26 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'avg_ppp', label: '[전용]평균 만원/평', w: 120, ro: true },
     { key: 'price_updated', label: '갱신일', w: 90, ro: true },
   ],
+  // 정비계획 확정값: 문서(recon_docs)→추출·검수→여기 저장. plan_confirmed=true면 엔진이 가정 대신 우선 사용.
+  // 편집 즉시 DB 자동저장 + 인덱스 재계산. 분담금 상세표(plan_contribution)는 문서/추출 패널에서 관리.
+  정비계획: [
+    { key: 'plan_confirmed', label: '계획확정', w: 65, edit: true, bool: true },
+    { key: 'far', label: '현재용적률%', w: 90, edit: true, num: true },
+    { key: 'plan_far', label: '목표용적률%', w: 95, edit: true, num: true },
+    { key: 'plan_ratio', label: '비례율%', w: 80, edit: true, num: true },
+    { key: 'plan_donation_rate', label: '기부채납(0~1)', w: 110, edit: true, num: true },
+    { key: 'households', label: '현재세대', w: 75, edit: true, num: true },
+    { key: 'plan_units_new', label: '재건축후세대', w: 100, edit: true, num: true },
+    { key: 'plan_units_rental', label: '임대세대', w: 80, edit: true, num: true },
+    { key: 'gfa_current', label: '현재연면적㎡', w: 105, edit: true, num: true },
+    { key: 'plan_gfa_new', label: '재건축후연면적㎡', w: 125, edit: true, num: true },
+    { key: 'plan_bcr', label: '건폐율%', w: 75, edit: true, num: true },
+    { key: 'plan_max_floor', label: '최고층', w: 60, edit: true, num: true },
+    { key: 'plan_infra_area', label: '정비기반시설㎡', w: 115, edit: true, num: true },
+    { key: 'plan_contrib_84', label: '84형분담금(억)', w: 105, edit: true, num: true },
+    { key: 'builder', label: '시공사', w: 120, edit: true },
+    { key: 'plan_source', label: '출처·비고', w: 280, edit: true },
+  ],
 }
 
 type Trade = { aptNm: string; excluUseAr: string; dealAmount: string; floor: string; cdealType: string; dealYear: string; dealMonth: string; jibun: string; umdNm: string }

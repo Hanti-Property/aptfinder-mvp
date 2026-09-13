@@ -107,12 +107,43 @@ export function extractPlanFields(body: string): ExtractField[] {
   })
   if (donCands.length) fields.push(mk('plan_donation_rate', '기부채납 비율', '(0~1)', donCands))
 
-  // --- 연면적(㎡) : 재건축후(최댓값) ---
+  // --- 연면적(㎡) : 재건축후(최댓값) / 현재(최솟값 또는 '현재' 힌트) ---
   const gfaCands = collect(text, /연면적[^0-9]{0,10}?약?\s*([\d,]+(?:\.\d+)?)\s*(?:㎡|m2|㎥)?/g, (m) => {
     const v = parseNum(m[1]); if (v == null || v < 10000) return null  // 만㎡ 이상만
     return { value: v, raw: m[0].trim(), hint: hintOf(text, m.index) }
   })
-  if (gfaCands.length) fields.push(mk('plan_gfa_new', '재건축후 연면적', '㎡', gfaCands.sort((a, b) => b.value - a.value)))
+  if (gfaCands.length) {
+    // 재건축후: '재건축후' 힌트 우선, 없으면 최댓값
+    const gfaNew = [...gfaCands].sort((a, b) => {
+      const ap = a.hint === '재건축후' ? 1 : 0, bp = b.hint === '재건축후' ? 1 : 0
+      if (ap !== bp) return bp - ap
+      return b.value - a.value
+    })
+    fields.push(mk('plan_gfa_new', '재건축후 연면적', '㎡', gfaNew))
+    // 현재: '현재/기존' 힌트 우선, 없으면 최솟값. 값이 2개 이상일 때만 제안.
+    if (gfaCands.length > 1) {
+      const gfaCur = [...gfaCands].sort((a, b) => {
+        const ap = a.hint === '현재/기존' ? 1 : 0, bp = b.hint === '현재/기존' ? 1 : 0
+        if (ap !== bp) return bp - ap
+        return a.value - b.value
+      })
+      fields.push(mk('gfa_current', '현재 연면적', '㎡', gfaCur))
+    }
+  }
+
+  // --- 정비기반시설 면적(㎡) ---
+  const infraCands = collect(text, /정비기반시설[^0-9]{0,10}?약?\s*([\d,]+(?:\.\d+)?)\s*(?:㎡|m2)?/g, (m) => {
+    const v = parseNum(m[1]); if (v == null || v < 100) return null
+    return { value: v, raw: m[0].trim() }
+  })
+  if (infraCands.length) fields.push(mk('plan_infra_area', '정비기반시설 면적', '㎡', infraCands))
+
+  // --- 최고 층수 : "지상 37층" 등 ---
+  const floorCands = collect(text, /지상\s*([\d]{1,2})\s*층/g, (m) => {
+    const v = parseNum(m[1]); if (v == null || v < 5) return null
+    return { value: v, raw: m[0].trim() }
+  })
+  if (floorCands.length) fields.push(mk('plan_max_floor', '최고 층수', '층', floorCands.sort((a, b) => b.value - a.value)))
 
   // --- 건폐율(%) ---
   const bcrCands = collect(text, /건폐율[^0-9]{0,10}?약?\s*([\d.]+)\s*%/g, (m) => {
