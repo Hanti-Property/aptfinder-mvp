@@ -510,6 +510,17 @@ function renderInvestNote(a, ctx){
     if(planFar!=null) pros.push(`목표 용적률 <b>${planFar.toFixed(0)}%</b> 확정 — 고밀 개발 인가, 사업성 근거 확보 <span style="color:#888;font-size:12px">(정비계획)</span>`);
     if(planUnits!=null&&h) pros.push(`세대수 ${h.toLocaleString()}→<b>${planUnits.toLocaleString()}세대</b> 확정 (약 ${(planUnits/h).toFixed(1)}배 증가) <span style="color:#888;font-size:12px">(정비계획)</span>`);
     if(planDon!=null) pros.push(`기부채납 <b>${(planDon*100).toFixed(1)}%</b> 확정 — 가정치보다 부담 ${planDon<0.20?'낮아 사업성 유리':'수준'} <span style="color:#888;font-size:12px">(정비계획)</span>`);
+    // 연면적 증가배수 (현재→재건축후)
+    const gfaCur=a.gfaCurrent!=null?Number(a.gfaCurrent):null, gfaNew=a.planGfaNew!=null?Number(a.planGfaNew):null;
+    if(gfaCur&&gfaNew&&gfaCur>0) pros.push(`연면적 ${(gfaCur/10000).toFixed(1)}만→<b>${(gfaNew/10000).toFixed(1)}만㎡</b> (약 ${(gfaNew/gfaCur).toFixed(1)}배 확대) <span style="color:#888;font-size:12px">(정비계획)</span>`);
+    // 84형 분담금 (국민평형 대표): 환급/소액은 강점, 큰 납부는 아래 리스크에서 처리
+    if(a.planContrib84!=null){ const c84=Number(a.planContrib84);
+      if(c84<0) pros.push(`84㎡ 조합원 <b>약 ${Math.abs(c84).toFixed(1)}억 환급</b> 예상 — 사업성 우수 <span style="color:#888;font-size:12px">(정비계획)</span>`);
+      else if(c84<=3) pros.push(`84㎡ 추가분담금 약 <b>${c84.toFixed(1)}억</b> (국민평형, 부담 크지 않음) <span style="color:#888;font-size:12px">(정비계획)</span>`);
+    }
+    // 최고층·시공사
+    if(a.planMaxFloor!=null&&Number(a.planMaxFloor)>=35) pros.push(`최고 <b>${Number(a.planMaxFloor)}층</b> 초고층 계획 — 조망·랜드마크성 <span style="color:#888;font-size:12px">(정비계획)</span>`);
+    if(a.builder&&String(a.builder).trim()) pros.push(`시공사 <b>${String(a.builder).trim()}</b> <span style="color:#888;font-size:12px">(정비계획)</span>`);
   }
   if(rar!=null&&rar>=2.5) pros.push(`재건축 시 자산가치 약 <b>${rar.toFixed(1)}배</b> 상승 예상 (성장배수 높음)`);
   else if(rar!=null&&rar>=1.8) pros.push(`재건축 시 자산가치 약 ${rar.toFixed(1)}배 상승 예상`);
@@ -539,6 +550,8 @@ function renderInvestNote(a, ctx){
   if(a.nvpValid===false) cons.push(`현재가가 이미 목표 신축가 이상 — 추가 상승여력 제한적`);
   if(a.risk&&String(a.risk).trim()) cons.push(`현장 리스크: ${String(a.risk).trim()}`);
   if(planOn){
+    // 84형 분담금이 큰 납부면 리스크로 안내
+    if(a.planContrib84!=null&&Number(a.planContrib84)>3) cons.push(`84㎡ 추가분담금 약 <b>${Number(a.planContrib84).toFixed(1)}억</b> 예상 — 국민평형 기준 부담 있는 편, 자금계획 필요 <span style="color:#888;font-size:12px">(정비계획)</span>`);
     const fv=planFar!=null?`${planFar.toFixed(0)}%`:'확정';
     const dv=planDon!=null?`${(planDon*100).toFixed(1)}%`:'확정';
     cons.push(`NCMC·RAR은 <b>정비계획 확정값</b>(용적률 ${fv}·기부채납 ${dv}) 기반 — 상승률 3%는 가정치`);
@@ -1405,7 +1418,7 @@ function preloadMasterData(){
       if(d.ticker){
         const k=d.bjdong+'-'+d.jibun;
         if(d.eta!=null) ETA_FROM_MASTER[k]=d.eta;
-        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,name:d.name,dong:d.dong,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage,eta:d.eta,moveIn:d.moveIn,rvi:d.rvi,rviV1:d.rviV1,rar:d.rar,nvpValid:d.nvpValid,risk:d.risk,features:d.features,research_memo:d.research_memo,planConfirmed:d.planConfirmed,planFar:d.planFar,planUnitsNew:d.planUnitsNew,planUnitsRental:d.planUnitsRental,planDonationRate:d.planDonationRate,planRatio:d.planRatio,planGfaNew:d.planGfaNew,planBcr:d.planBcr,planSource:d.planSource};
+        ASSET_FROM_MASTER[k]={cmc:d.cmc,landPppMarket:d.landPppMarket,capGrade:d.capGrade,ticker:d.ticker,shortName:d.shortName,name:d.name,dong:d.dong,assetId:d.assetId,farTBD:!!d.farTBD,platArea:d.platArea,h:d.h,far:d.far,ncmc:d.ncmc,rar:d.rar,ncmcNewPpp:d.ncmcNewPpp,targetFar:d.targetFar,tradeName:d.tradeName,sizeGrade:d.sizeGrade,tradeReliability:d.tradeReliability,nvpGapRate:d.nvpGapRate,latestMonthsAgo:d.latestMonthsAgo,warnDistortion:d.warnDistortion,stage:d.stage,eta:d.eta,moveIn:d.moveIn,rvi:d.rvi,rviV1:d.rviV1,rar:d.rar,nvpValid:d.nvpValid,risk:d.risk,features:d.features,research_memo:d.research_memo,planConfirmed:d.planConfirmed,planFar:d.planFar,planUnitsNew:d.planUnitsNew,planUnitsRental:d.planUnitsRental,planDonationRate:d.planDonationRate,planRatio:d.planRatio,planGfaNew:d.planGfaNew,planBcr:d.planBcr,planSource:d.planSource,gfaCurrent:d.gfaCurrent,planContrib84:d.planContrib84,planMaxFloor:d.planMaxFloor,builder:d.builder};
         // 지도·구선택·TOP10용 단지 리스트 (구 무관 전체)
         list.push({gu:d.gu||'',dong:d.dong||'',name:d.name||'',shortName:d.shortName||'',ticker:d.ticker,jibun:d.jibun||'',h:d.h||d.hhldCnt||0,bjdong:d.bjdong||'',lawd:d.lawd||'',far:d.far||0});
       }

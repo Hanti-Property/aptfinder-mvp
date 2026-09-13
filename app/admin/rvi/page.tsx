@@ -56,6 +56,10 @@ function toHtmlRecords(rows: Record<string, unknown>[]) {
         planGfaNew: r.plan_gfa_new ?? null,
         planBcr: r.plan_bcr ?? null,
         planSource: r.plan_source ?? null,
+        gfaCurrent: r.gfa_current ?? null,
+        planContrib84: r.plan_contrib_84 ?? null,
+        planMaxFloor: r.plan_max_floor ?? null,
+        builder: r.builder ?? null,
       }
     })
 }
