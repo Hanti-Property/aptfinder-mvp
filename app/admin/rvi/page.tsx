@@ -43,6 +43,7 @@ function toHtmlRecords(rows: Record<string, unknown>[]) {
         rvi: c?.rvi ?? null,
         rviV1: c?.rviV1 ?? null,
         rri: c?.rri ?? null,
+        faer: c?.faer ?? null,   // 연면적 확장률(%)
         nvpValid: r.nvp_valid ?? null,
         features: r.features ?? null,
         research_memo: r.research_memo ?? null,

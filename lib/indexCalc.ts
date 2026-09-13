@@ -116,6 +116,8 @@ export interface ReconRow {
   plan_donation_rate?: number | null // 확정 기부채납 비율(0~1)
   plan_units_new?: number | null
   plan_ratio?: number | null     // 비례율(%)
+  gfa_current?: number | null    // 현재(재건축 전) 연면적(㎡)
+  plan_gfa_new?: number | null   // 재건축후 연면적(㎡)
   [k: string]: unknown
 }
 
@@ -147,6 +149,7 @@ export interface CalcResult {
   rvi: number | null            // v2 (ETA 반영)
   rri: number | null            // 재건축 수익률(%)
   cagr: number | null           // 연복리(%)
+  faer: number | null           // 연면적 확장률(%) = (재건축후연면적/현재연면적 - 1)×100. gfa 둘다 있을때만
   // 대지면적 검증
   platAreaEst: number | null    // 연면적÷용적률 역산 대지면적
   platAreaGap: number | null    // |plat_area - est| / est (비율). null=계산불가
@@ -322,6 +325,12 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
     rvi = Math.round(physScore * realizeF)
   }
 
+  // FAER (연면적 확장률, %) = (재건축후 연면적 / 현재 연면적 - 1) × 100.
+  // gfa_current·plan_gfa_new 둘 다 있을 때만. RVI 점수엔 미반영(병행 표시), 데이터 축적 후 반영 판단.
+  const gfaCur = r.gfa_current != null ? Number(r.gfa_current) : 0
+  const gfaNew = r.plan_gfa_new != null ? Number(r.plan_gfa_new) : 0
+  const faer = (gfaCur > 0 && gfaNew > 0) ? Math.round((gfaNew / gfaCur - 1) * 100 * 10) / 10 : null
+
   // 대지면적 검증: 연면적(vlrat_estm_area) ÷ 현재용적률 = 역산 대지면적. plat_area와 갭 계산.
   const vlEstm = r.vlrat_estm_area ? Number(r.vlrat_estm_area) : 0
   let platAreaEst: number | null = null, platAreaGap: number | null = null
@@ -336,7 +345,7 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
     ncmcNewPpp: newPpp, ncmc, rar,
     moveIn, moveStartYear,
     sizeGrade: sg, tradeReliability: rel, latestMonthsAgo: ma, nvpGapRate: gap, warnDistortion: warn,
-    rviV1, rvi, rri, cagr,
+    rviV1, rvi, rri, cagr, faer,
     platAreaEst, platAreaGap,
   }
 }
