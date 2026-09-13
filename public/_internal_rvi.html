@@ -186,15 +186,15 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
     <div class="info-card" style="background:linear-gradient(135deg,#0e2c4a,#0e2c4a);border-color:#1c466e;">
       <div class="label">재건축후 시총 (NCMC)</div>
       <div class="value" id="v-ncmc" style="color:#66BB6A;">—</div>
-      <div style="font-size:11px;color:#888;margin-top:2px;" id="v-ncmc-sub">—</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;" id="v-ncmc-sub">지금 재건축 완료 시 시총 (현재 신축시세 기준)</div>
     </div>
     <div class="info-card">
       <div class="label">성장배수 (RAR)</div>
       <div class="value" id="v-rar" style="color:#FFA726;">—</div>
-      <div style="font-size:11px;color:#888;margin-top:2px;">NCMC ÷ CMC (분담금 전)</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;">NCMC ÷ CMC · 단지 규모 확장 배수 (개인 수익 아님)</div>
     </div>
     <div class="info-card">
-      <div class="label">재건축후 전용평당가</div>
+      <div class="label">재건축후 평당가 (현재 신축시세)</div>
       <div class="value" id="v-newppp">—</div>
       <div style="font-size:11px;color:#888;margin-top:2px;" id="v-targetfar">목표 용적률 —</div>
     </div>
@@ -491,7 +491,7 @@ function renderInvestNote(a, ctx){
 
   // --- 한 줄 요약 ---
   let summary=`${dong} ${h?h.toLocaleString()+'세대 ':''}${sizeNm}, 재건축 ${stageNm}`;
-  if(rar!=null) summary+=` · 성장배수 ${rar.toFixed(2)}배`;
+  if(rar!=null) summary+=` · 규모확장 ${rar.toFixed(2)}배`;
   if(eta!=null) summary+=` · 예상 ${eta}년 후 입주${moveIn?`(${moveIn}년)`:''}`;
   const sumEl=document.getElementById('noteSummary');
   if(planOn){
@@ -523,8 +523,8 @@ function renderInvestNote(a, ctx){
     if(a.planMaxFloor!=null&&Number(a.planMaxFloor)>=35) pros.push(`최고 <b>${Number(a.planMaxFloor)}층</b> 초고층 계획 — 조망·랜드마크성 <span style="color:#888;font-size:12px">(정비계획)</span>`);
     if(a.builder&&String(a.builder).trim()) pros.push(`시공사 <b>${String(a.builder).trim()}</b> <span style="color:#888;font-size:12px">(정비계획)</span>`);
   }
-  if(rar!=null&&rar>=2.5) pros.push(`재건축 시 자산가치 약 <b>${rar.toFixed(1)}배</b> 상승 예상 (성장배수 높음)`);
-  else if(rar!=null&&rar>=1.8) pros.push(`재건축 시 자산가치 약 ${rar.toFixed(1)}배 상승 예상`);
+  if(rar!=null&&rar>=2.5) pros.push(`재건축 시 단지 전체 규모가 약 <b>${rar.toFixed(1)}배</b>로 확대 (규모·분양물량 확대, 사업성 양호)`);
+  else if(rar!=null&&rar>=1.8) pros.push(`재건축 시 단지 규모 약 ${rar.toFixed(1)}배 확대`);
   if(far>0&&far<=180) pros.push(`현재 용적률 <b>${far.toFixed(0)}%</b>로 낮아 재건축 증축 여력·사업성 양호`);
   // 규모: 대지면적(평) 기준 세분 — 5만평↑ 초대형은 커뮤니티 프리미엄 강조
   const platPy=(ctx.platArea||a.platArea||0)/3.3058;
@@ -555,9 +555,9 @@ function renderInvestNote(a, ctx){
     if(a.planContrib84!=null&&Number(a.planContrib84)>3) cons.push(`84㎡ 추가분담금 약 <b>${Number(a.planContrib84).toFixed(1)}억</b> 예상 — 국민평형 기준 부담 있는 편, 자금계획 필요 <span style="color:#888;font-size:12px">(정비계획)</span>`);
     const fv=planFar!=null?`${planFar.toFixed(0)}%`:'확정';
     const dv=planDon!=null?`${(planDon*100).toFixed(1)}%`:'확정';
-    cons.push(`NCMC·RAR은 <b>정비계획 확정값</b>(용적률 ${fv}·기부채납 ${dv}) 기반 — 상승률 3%는 가정치`);
+    cons.push(`NCMC·RAR은 <b>정비계획 확정값</b>(용적률 ${fv}·기부채납 ${dv}) + 현재 신축시세 기준 — 단지 규모 지표(개인 수익 아님)`);
   } else {
-    cons.push(`NCMC·RAR은 목표용적률 300%·상승률 3%·기부채납 20% 등 <b>가정(TBD)</b> 기반 추정치`);
+    cons.push(`NCMC·RAR은 목표용적률 300%·기부채납 20% 등 <b>가정(TBD)</b> + 현재 신축시세 기준 추정치 (단지 규모 지표)`);
   }
 
   document.getElementById('notePros').innerHTML=pros.map(p=>`<li>${p}</li>`).join('');

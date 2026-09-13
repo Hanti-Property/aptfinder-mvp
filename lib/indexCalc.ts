@@ -264,7 +264,10 @@ export function calcOne(r: ReconRow, dongAvgLandPpp?: number): CalcResult {
       nvpBaseUsed = Math.round((NVP_V2_BASE[r.dong || ''] ?? NVP_BASE_DEFAULT) * CONSTANTS.NVP_PREMIUM)
       nvpSrc = 'dong_const'
     }
-    newPpp = nvpBaseUsed * Math.pow(1 + CONSTANTS.ANNUAL_RATE, eta + (r.rdt != null ? Number(r.rdt) : 0))
+    // NCMC 재건축후 평당가 = 현재 신축 시세(NVP). "지금 재건축 완료됐다면"의 가치.
+    // 미래 시세상승(^eta)은 제거 — CMC(현재)와 동일 시점 비교로 RAR이 순수 재건축 효과만 반영.
+    // 미래 상승·수익률은 RRI·CAGR 지표가 별도로 담당.
+    newPpp = nvpBaseUsed
     // 기부채납: 정비계획 확정(plan_donation_rate) 우선, 없으면 가정 0.20
     const donation = (planConfirmed && r.plan_donation_rate != null) ? Number(r.plan_donation_rate) : CONSTANTS.DONATION_RATE
     const gfaPy = plat * ftar / PY
