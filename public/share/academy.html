@@ -208,7 +208,7 @@ function setStatus(msg) { document.getElementById('status').textContent = msg; }
 // SDK 로드 후 자동 초기화
 window.addEventListener('load', () => {
   if (typeof kakao === 'undefined' || !kakao.maps) {
-    setStatus('카카오맵 SDK 로드 실패. 네트워크 또는 도메인 등록(aptfinder.net)을 확인하세요.');
+    setStatus('카카오맵 SDK 로드 실패. 네트워크 또는 카카오 도메인 등록(aptfinder.net · hanti-property.com)을 확인하세요.');
     return;
   }
   kakao.maps.load(initMap);
