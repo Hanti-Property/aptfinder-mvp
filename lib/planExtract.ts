@@ -13,7 +13,10 @@ export interface ExtractField {
   label: string               // 화면 라벨
   unit: string                // 표시 단위
   candidates: Candidate[]     // 후보들 (첫번째가 기본 추천)
-  suggested: number | null    // 추천값 (candidates[0]?.value)
+  suggested: number | null    // 추천값 (candidates[0]?.value). 텍스트 필드면 null.
+  isText?: boolean            // true면 텍스트 필드 (시공사 등). suggestedText 사용.
+  suggestedText?: string      // 텍스트 추천값 (isText일 때)
+  raw?: string                // 근거 원문 (텍스트 필드용)
 }
 
 // 숫자 문자열 → number (콤마 제거, 범위 "98~99"는 중앙값)
@@ -158,6 +161,32 @@ export function extractPlanFields(body: string): ExtractField[] {
     return { value: Math.round(v * 10) / 10, raw: m[0].trim() }
   })
   if (ratioCands.length) fields.push(mk('plan_ratio', '비례율', '%', ratioCands))
+
+  // --- 준공연도 : "1986년 준공" / "준공: 1986" / "1986년 12월" (1970~2010 범위) ---
+  const yearCands = collect(text, /(19[7-9]\d|20[0-2]\d)\s*년?\s*(?:\d{1,2}\s*월)?\s*(?:준공|사용승인|입주)/g, (m) => {
+    const v = parseNum(m[1]); if (v == null || v < 1970 || v > 2010) return null
+    return { value: v, raw: m[0].trim() }
+  })
+  // "준공: 1986" 처럼 준공이 앞에 오는 경우도
+  const yearCands2 = collect(text, /(?:준공|사용승인)[^0-9]{0,6}?(19[7-9]\d|20[0-2]\d)/g, (m) => {
+    const v = parseNum(m[1]); if (v == null || v < 1970 || v > 2010) return null
+    return { value: v, raw: m[0].trim() }
+  })
+  const allYear = [...yearCands, ...yearCands2].filter((c, i, a) => a.findIndex(x => x.value === c.value) === i)
+  if (allYear.length) fields.push(mk('built_year', '준공연도', '년', allYear.sort((a, b) => a.value - b.value)))
+
+  // 참고: 84형 분담금(plan_contrib_84)은 파서 자동추출 제외.
+  //  이유: 문서 서술이 "신축 15.4억, 6천만~8.4억 납부"처럼 분양가+분담금 혼재 + 천만/억 단위혼용 + 범위라
+  //        정규식 오판 위험이 큼(잘못 잡으면 UPI 왜곡). 수동 입력/검수 유지가 정확.
+
+  // --- 시공사 (텍스트) : "시공사: 현대건설" / "시공사 현대건설·GS건설" ---
+  const builderM = text.match(/시공사\s*[:：]?\s*([가-힣A-Za-z0-9·,\/\s]{2,30}?)(?:\s|$|\.|,(?=\s*[가-힣]{2,}\s*[:：]))/)
+  if (builderM) {
+    const b = builderM[1].trim().replace(/\s+/g, ' ')
+    if (b && b.length >= 2 && b.length <= 30) {
+      fields.push({ key: 'builder', label: '시공사', unit: '', candidates: [], suggested: null, isText: true, suggestedText: b, raw: builderM[0].trim() })
+    }
+  }
 
   return fields
 }

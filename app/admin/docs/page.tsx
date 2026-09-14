@@ -77,7 +77,7 @@ export default function AdminDocsPage() {
   const [extractOpen, setExtractOpen] = useState(false)
   const [fields, setFields] = useState<ExtractField[]>([])
   // 필드별 사용자 선택: key → { on(반영여부), value(반영할 값) }
-  const [picks, setPicks] = useState<Record<string, { on: boolean; value: number }>>({})
+  const [picks, setPicks] = useState<Record<string, { on: boolean; value: number | string }>>({})
   const [curMaster, setCurMaster] = useState<Record<string, unknown>>({})  // 현재 마스터값
   const [applying, setApplying] = useState(false)
 
@@ -157,9 +157,12 @@ export default function AdminDocsPage() {
       .select('far,plan_far,plan_units_new,plan_units_rental,plan_donation_rate,plan_gfa_new,plan_bcr,plan_ratio')
       .eq('asset_id', draft.asset_id).single()
     setCurMaster((data as Record<string, unknown>) || {})
-    // 기본 선택: 추천값, 반영 ON
-    const p: Record<string, { on: boolean; value: number }> = {}
-    fs.forEach(f => { if (f.suggested != null) p[f.key] = { on: true, value: f.suggested } })
+    // 기본 선택: 추천값, 반영 ON. 텍스트 필드(시공사)는 suggestedText.
+    const p: Record<string, { on: boolean; value: number | string }> = {}
+    fs.forEach(f => {
+      if (f.isText && f.suggestedText != null) p[f.key] = { on: true, value: f.suggestedText }
+      else if (f.suggested != null) p[f.key] = { on: true, value: f.suggested }
+    })
     setFields(fs); setPicks(p); setExtractOpen(true)
   }
 
@@ -336,9 +339,9 @@ export default function AdminDocsPage() {
               </thead>
               <tbody>
                 {fields.map(f => {
-                  const pk = picks[f.key] || { on: false, value: f.suggested ?? 0 }
+                  const pk = picks[f.key] || { on: false, value: (f.isText ? (f.suggestedText ?? '') : (f.suggested ?? 0)) }
                   const cur = curMaster[f.key]
-                  const chosen = f.candidates.find(c => c.value === pk.value)
+                  const chosen = !f.isText ? f.candidates.find(c => c.value === pk.value) : undefined
                   return (
                     <tr key={f.key} style={{ borderBottom: '1px solid #222' }}>
                       <td style={{ padding: '8px 4px' }}>
@@ -346,19 +349,26 @@ export default function AdminDocsPage() {
                       </td>
                       <td style={{ padding: '8px 4px', fontWeight: 600 }}>{f.label} <span style={{ color: '#666', fontWeight: 400 }}>{f.unit}</span></td>
                       <td style={{ padding: '8px 4px' }}>
-                        {f.candidates.length > 1 && (
-                          <select value={pk.value} onChange={e => setPicks(p => ({ ...p, [f.key]: { ...pk, value: Number(e.target.value) } }))} style={{ ...input, marginRight: 6, padding: '4px 6px' }}>
-                            {f.candidates.map((c, i) => <option key={i} value={c.value}>{c.value}{c.hint ? ` (${c.hint})` : ''}</option>)}
-                          </select>
+                        {f.isText ? (
+                          <input type="text" value={String(pk.value)} onChange={e => setPicks(p => ({ ...p, [f.key]: { ...pk, value: e.target.value } }))}
+                            style={{ ...input, width: 150, padding: '4px 6px', color: '#81c784', fontWeight: 700 }} />
+                        ) : (
+                          <>
+                            {f.candidates.length > 1 && (
+                              <select value={pk.value} onChange={e => setPicks(p => ({ ...p, [f.key]: { ...pk, value: Number(e.target.value) } }))} style={{ ...input, marginRight: 6, padding: '4px 6px' }}>
+                                {f.candidates.map((c, i) => <option key={i} value={c.value}>{c.value}{c.hint ? ` (${c.hint})` : ''}</option>)}
+                              </select>
+                            )}
+                            <input type="number" step="any" value={pk.value} onChange={e => setPicks(p => ({ ...p, [f.key]: { ...pk, value: Number(e.target.value) } }))}
+                              style={{ ...input, width: 100, padding: '4px 6px', color: '#81c784', fontWeight: 700 }} />
+                          </>
                         )}
-                        <input type="number" step="any" value={pk.value} onChange={e => setPicks(p => ({ ...p, [f.key]: { ...pk, value: Number(e.target.value) } }))}
-                          style={{ ...input, width: 100, padding: '4px 6px', color: '#81c784', fontWeight: 700 }} />
                       </td>
                       <td style={{ padding: '8px 4px', color: cur == null ? '#666' : '#bbb' }}>
                         {cur == null ? '—' : String(cur)}
-                        {cur != null && Number(cur) !== pk.value && <span style={{ color: '#ffca28', marginLeft: 6, fontSize: 11 }}>변경</span>}
+                        {cur != null && String(cur) !== String(pk.value) && <span style={{ color: '#ffca28', marginLeft: 6, fontSize: 11 }}>변경</span>}
                       </td>
-                      <td style={{ padding: '8px 4px', color: '#777', fontSize: 11 }}>{chosen?.raw || f.candidates[0]?.raw || ''}</td>
+                      <td style={{ padding: '8px 4px', color: '#777', fontSize: 11 }}>{f.isText ? (f.raw || '') : (chosen?.raw || f.candidates[0]?.raw || '')}</td>
                     </tr>
                   )
                 })}
