@@ -121,6 +121,68 @@
   .dpop .iw { width:auto; cursor:auto; }
   /* 스크롤/클릭 상호작용 요소는 드래그와 분리 */
   .dpop .dpop-body .sib, .dpop .dpop-body img { cursor:pointer; }
+
+  /* 목록 시트 손잡이: 기본(데스크톱)은 숨김 */
+  #sheetHandle { display:none; }
+
+  /* ===== 모바일 대응 (≤768px): 좌우분할 → 위(지도)/아래(목록 시트) ===== */
+  @media (max-width: 768px) {
+    header { padding:11px 14px; }
+    header h1 { font-size:16px; }
+    header p { font-size:11px; }
+    #status { padding:7px 14px; }
+    .keybar { padding:8px 14px; }
+    .keybar input { min-width:0; }
+
+    /* 세로 스택 + 시트 방식: layout을 화면에 꽉 채우고 지도/목록 높이를 상태로 제어 */
+    .layout { flex-direction:column; height:calc(100vh - 92px); }
+    #mapWrap { flex:1 1 auto; width:100%; min-height:200px; }
+    #splitter { display:none; }
+
+    /* 목록 패널을 하단 시트로 */
+    .side {
+      width:100% !important; border-left:none; border-top:1px solid #e5e5e5;
+      flex:0 0 auto; display:flex; flex-direction:column;
+      max-height:78vh; box-shadow:0 -4px 16px rgba(0,0,0,.12);
+    }
+    .side > h2, .side > .filters, .side > .legend, .side > #list {
+      overflow-y:auto;
+    }
+
+    /* 손잡이 바: 항상 보이고 탭하면 목록 펼침/접힘 */
+    #sheetHandle {
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      width:100%; border:none; background:#fff; cursor:pointer;
+      padding:10px 16px 8px; position:relative; flex:0 0 auto;
+      border-bottom:1px solid #eee; font-family:inherit;
+    }
+    #sheetHandle .sh-grip {
+      position:absolute; top:6px; left:50%; transform:translateX(-50%);
+      width:38px; height:4px; border-radius:2px; background:#cfd6df;
+    }
+    #sheetHandle .sh-label { font-size:14px; font-weight:700; color:#1B3A5C; }
+    #sheetHandle .sh-label b { color:#c0392b; }
+    #sheetHandle .sh-caret { font-size:11px; color:#8a94a0; transition:transform .2s; }
+
+    /* 접힘 상태(기본): 지도 최대, 목록은 손잡이만 */
+    .side.collapsed { max-height:none; }
+    .side.collapsed > h2,
+    .side.collapsed > .filters,
+    .side.collapsed > .legend,
+    .side.collapsed > #list { display:none; }
+    .side.collapsed #sheetHandle .sh-caret { transform:rotate(180deg); }
+
+    /* 펼침 상태: 목록이 화면 상당부분 차지, 지도는 위에 남김 */
+    .side:not(.collapsed) { flex:1 1 auto; }
+
+    .side h2 { position:sticky; top:0; }
+
+    /* 터치 타깃/가독성 소폭 확대 */
+    .card { padding:14px 16px; }
+    #labelToggle .seg-btn { font-size:12px; padding:5px 10px; }
+    .dpop { width:min(264px, 86vw); }
+    .dpop .dpop-body { max-height:38vh; }
+  }
 </style>
 </head>
 <body>
@@ -143,6 +205,12 @@
   </div>
   <div id="splitter" title="드래그하여 지도/목록 넓이 조절"></div>
   <div class="side">
+    <!-- 모바일 전용: 목록 펼치기/접기 손잡이 -->
+    <button id="sheetHandle" type="button" onclick="toggleListSheet()" aria-expanded="false">
+      <span class="sh-grip"></span>
+      <span class="sh-label">매물 목록 <b id="sheetCount">0</b>건</span>
+      <span class="sh-caret">▲</span>
+    </button>
     <h2>필터</h2>
     <div class="filters">
       <label><input type="checkbox" id="fActive" checked onchange="renderAll()"> 거래가능(active)만 보기</label>
@@ -194,6 +262,43 @@ window.addEventListener('load', () => {
   }
   kakao.maps.load(initMap);
   setupSplitter();
+  setupListSheet();
+});
+
+// ===== 모바일 목록 시트 (지도 크게 ↔ 목록 펼치기) =====
+const MOBILE_Q = '(max-width: 768px)';
+function isMobile(){ return window.matchMedia(MOBILE_Q).matches; }
+
+function setupListSheet() {
+  const side = document.querySelector('.side');
+  if (!side) return;
+  // 모바일 진입 시 기본은 접힘(지도 크게). 데스크톱은 collapsed 무시됨(미디어쿼리)
+  if (isMobile()) side.classList.add('collapsed');
+  // 데스크톱↔모바일 전환 시 상태 보정
+  try {
+    window.matchMedia(MOBILE_Q).addEventListener('change', (e) => {
+      if (e.matches && !side.classList.contains('collapsed')) side.classList.add('collapsed');
+      if (map) setTimeout(() => map.relayout(), 200);
+    });
+  } catch(_) { /* 구형 브라우저: addEventListener 미지원 무시 */ }
+}
+
+// 손잡이 탭 → 목록 펼침/접힘 전환 (지도 타일 재배치 포함)
+function toggleListSheet() {
+  const side = document.querySelector('.side');
+  const handle = document.getElementById('sheetHandle');
+  if (!side) return;
+  const collapsed = side.classList.toggle('collapsed');
+  if (handle) handle.setAttribute('aria-expanded', String(!collapsed));
+  if (map) setTimeout(() => map.relayout(), 220);  // 높이 전환 후 재배치
+}
+
+// 화면 크기 변경(회전/데스크톱↔모바일 전환) 시 지도 타일 재배치
+let __relayoutTimer = null;
+window.addEventListener('resize', () => {
+  if (!map) return;
+  clearTimeout(__relayoutTimer);
+  __relayoutTimer = setTimeout(() => map.relayout(), 150);
 });
 
 // 지도/사이드 넓이 드래그 조절
@@ -486,6 +591,8 @@ function renderAll() {
   const listEl = document.getElementById('list');
   listEl.innerHTML = '';
   document.getElementById('count').textContent = data.length;
+  const scEl = document.getElementById('sheetCount');
+  if (scEl) scEl.textContent = data.length;
 
   // 그룹핑 — 같은 건물 판정: 좌표(5자리)가 같으면 같은 건물. 좌표 없으면 지번으로.
   // (지번 표기 흔들림 "756-11" vs "756-11 스카" 로 갈리는 문제 방지 → 마커/우측목록 동일 그룹 사용)
@@ -915,6 +1022,16 @@ function toggleAccordion(id, wrap, panel, htmlFn, focusFn) {
 }
 // 마커 클릭 → 목록에서 해당 카드를 펼치고 그쪽으로 스크롤
 function openAccByKey(key) {
+  // 모바일: 마커 탭 시 접혀있던 목록 시트를 자동으로 펼쳐 해당 매물이 보이게
+  if (isMobile()) {
+    const side = document.querySelector('.side');
+    if (side && side.classList.contains('collapsed')) {
+      side.classList.remove('collapsed');
+      const h = document.getElementById('sheetHandle');
+      if (h) h.setAttribute('aria-expanded', 'true');
+      if (map) setTimeout(() => map.relayout(), 220);
+    }
+  }
   // querySelector는 key의 특수문자(공백·하이픈)로 실패할 수 있어 JS 순회로 탐색
   const wraps = document.querySelectorAll('#list > div[data-gkey]');
   let wrap = null;
