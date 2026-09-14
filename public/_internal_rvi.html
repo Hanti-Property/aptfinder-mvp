@@ -79,11 +79,12 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 
 /* 거래내역 */
 .trade-table{width:100%;border-collapse:collapse;margin-bottom:16px}
-.trade-table th{background:#082e4d;padding:10px 8px;font-size:14px;color:#bbb;text-align:left;font-weight:600}
+/* 모바일 규칙: 셀은 한 줄 고정(nowrap). 넘치면 컨테이너(overflow-x:auto)에서 좌우 스크롤. */
+.trade-table th{background:#082e4d;padding:10px 8px;font-size:14px;color:#bbb;text-align:left;font-weight:600;white-space:nowrap}
 .trade-table th.sortable{cursor:pointer;user-select:none}
 .trade-table th.sortable:hover{color:#fff;background:#0b2c4a}
 .trade-table th .sort-ind{color:#C79A5B;font-size:12px}
-.trade-table td{padding:10px 8px;border-bottom:1px solid #0e2c4a;font-size:13px}
+.trade-table td{padding:10px 8px;border-bottom:1px solid #0e2c4a;font-size:13px;white-space:nowrap}
 .trade-table .price{color:#ff6b6b;font-weight:700}
 
 .quick-section{padding:16px 24px;border-top:1px solid #1c466e}
@@ -338,8 +339,8 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
   </div>
   <div style="overflow-x:auto;margin-bottom:16px;">
     <table class="trade-table" id="rriRankTable">
-      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th class="sortable" data-sort="cmc" onclick="sortRanking('cmc')">CMC</th><th>등급</th><th class="sortable" data-sort="stage" onclick="sortRanking('stage')">단계</th><th class="sortable" data-sort="eta" onclick="sortRanking('eta')">ETA</th><th class="sortable" data-sort="moveIn" onclick="sortRanking('moveIn')">입주</th><th class="sortable" data-sort="rvi" onclick="sortRanking('rvi')" style="white-space:nowrap;">RVI <select id="rviVerSel" onchange="setRviVer(this.value)" onclick="event.stopPropagation();" style="background:#0e2c4a;color:#fff;border:1px solid #1c466e;border-radius:4px;font-size:11px;padding:1px 3px;cursor:pointer;"><option value="v2">v2 종합</option><option value="v1">v1 물리</option></select></th><th class="sortable" data-sort="rar" onclick="sortRanking('rar')">RAR</th><th class="sortable" data-sort="far" onclick="sortRanking('far')">용적률</th><th class="sortable" data-sort="currentPrice" onclick="sortRanking('currentPrice')">현재가</th></tr></thead>
-      <tbody id="rriRankBody"><tr><td colspan="12" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
+      <thead><tr><th>#</th><th>티커</th><th>단지명</th><th class="sortable" data-sort="cmc" onclick="sortRanking('cmc')">CMC</th><th>규모</th><th class="sortable" data-sort="stage" onclick="sortRanking('stage')">단계</th><th class="sortable" data-sort="eta" onclick="sortRanking('eta')">ETA</th><th class="sortable" data-sort="rar" onclick="sortRanking('rar')">RAR</th><th class="sortable" data-sort="far" onclick="sortRanking('far')">용적률</th><th class="sortable" data-sort="currentPrice" onclick="sortRanking('currentPrice')">현재가</th></tr></thead>
+      <tbody id="rriRankBody"><tr><td colspan="10" style="text-align:center;color:#666">로딩 중...</td></tr></tbody>
     </table>
     <p style="font-size:11px;color:#888;margin-top:6px;">* ETA는 단계 기준 잠정 자동부여값 (추진위 12년·리스크시 최대 14년 / 조합설립 10년·리스크시 11년). 확정 시 대체됩니다.</p>
   </div>
@@ -1601,20 +1602,21 @@ function renderRanking(){
     const rviShown=rviOf(r);
     const rviColor=rviShown>=80?'#66BB6A':rviShown>=60?'#42A5F5':rviShown>=40?'#FFA726':'#EF5350';
     const rarColor=r.rar==null?'#666':r.rar>=3.5?'#66BB6A':r.rar>=2.5?'#42A5F5':r.rar>=2?'#FFA726':'#EF5350';
-    const rarCell=r.rar!=null?`<span style="color:${rarColor};font-weight:700" title="재건축후 시총 ÷ 현재 시총 (분담금 전)">${r.rar.toFixed(2)}x</span>`:'<span style="color:#666">—</span>';
+    const rarCell=r.rar!=null?`<span style="color:${rarColor};font-weight:700" title="단지 규모 확장 배수 (NCMC÷CMC, 현재 신축시세 기준)">${r.rar.toFixed(2)}x</span>`:'<span style="color:#666">—</span>';
     const bjdong=r.bjdong||'11000';
     const guNm=r.gu||'강남구';
     const lawdCd=r.lawd||'11680';
     const clickAttr=`onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 ${guNm} ${r.dong} ${r.jibun}','${lawdCd}','${bjdong}','${r.jibun}')" style="cursor:pointer;"`;
     const tickerCell=r.ticker?`<span ${clickAttr} style="font-family:monospace;font-weight:700;color:#C79A5B;cursor:pointer;text-decoration:underline;text-decoration-color:#665;">${r.ticker}</span>`:'<span style="color:#666">—</span>';
     const nameDisp=r.shortName||r.name;
-    const stageCell=r.stage?`<span style="color:${RANK_STAGE_COLOR[r.stage]||'#bbb'};font-weight:700">${r.stage} ${RANK_STAGE_NAME[r.stage]||''}</span>`:'<span style="color:#666">—</span>';
+    // 단계: 숫자만 (이름 제거, 모바일 폭 절약). 색상은 단계별 유지.
+    const stageCell=r.stage?`<span style="color:${RANK_STAGE_COLOR[r.stage]||'#bbb'};font-weight:700" title="${RANK_STAGE_NAME[r.stage]||''}">${r.stage}</span>`:'<span style="color:#666">—</span>';
     const etaColor=r.eta==null?'#666':r.eta<=7?'#66BB6A':r.eta<=10?'#42A5F5':r.eta<=12?'#FFA726':'#EF5350';
     const etaCell=r.eta!=null?`<span style="color:${etaColor};font-weight:700" title="${r.etaProvisional?'잠정(단계기준 자동부여)':'확정'}">${r.eta}년${r.etaProvisional?'*':''}</span>`:'<span style="color:#666">—</span>';
-    const moveInCell=r.moveIn?`${r.moveIn}`:'<span style="color:#666">—</span>';
     const cmcCell=r.cmc!=null?`<span style="color:#C79A5B;font-weight:700">${r.cmc.toFixed(1)}조</span>`:'<span style="color:#666">—</span>';
     const gradeCell=r.capGrade?`<span style="color:${GRADE_COLOR[r.capGrade]||'#bbb'};font-size:12px;font-weight:700">${gradeShort[r.capGrade]||r.capGrade}</span>`:'—';
-    tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 ${guNm} ${r.dong} ${r.jibun}','${lawdCd}','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a><br><span style="color:#bbb;font-size:12px">${guNm} ${r.dong} | 전용${r.area.toFixed(0)}㎡</span></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${moveInCell}</td><td style="color:${rviColor};font-weight:700" title="${_rankRviVer==='v1'?'RVI v1 물리 잠재력':'RVI v2 종합(ETA 반영)'}">${rviShown}<span style="font-size:9px;color:#666"> ${_rankRviVer}</span></td><td>${rarCell}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
+    // 단지명: 약칭만 (서브텍스트 제거 → 세로 늘어남 방지). 클릭 시 분석 열림.
+    tbody.innerHTML+=`<tr><td>${i+1}</td><td>${tickerCell}</td><td><a href="javascript:void(0)" onclick="quickLoad2('${r.name.replace(/'/g,"\\'")}','서울 ${guNm} ${r.dong} ${r.jibun}','${lawdCd}','${bjdong}','${r.jibun}')" style="color:#fff;text-decoration:none;border-bottom:1px solid #444;cursor:pointer;">${nameDisp}</a></td><td>${cmcCell}</td><td>${gradeCell}</td><td>${stageCell}</td><td>${etaCell}</td><td>${rarCell}</td><td>${r.far.toFixed(0)}%${r.farTBD?'<span style="color:#FFA726;font-size:10px"> (TBD)</span>':''}</td><td>${cur}</td></tr>`;
   });
   // 정렬 표시(▲▼)를 헤더에 반영
   document.querySelectorAll('#rriRankTable thead th[data-sort]').forEach(th=>{
