@@ -715,6 +715,17 @@ function openGroupInfo(marker, key, items) {
 // ===== 드래그 가능한 팝업 (CustomOverlay 기반) =====
 // position(LatLng), title(헤더 텍스트), innerHtml(본문 HTML)
 function showDraggablePopup(position, title, innerHtml) {
+  // 모바일: 지도 위 팝업은 좁은 화면에서 잘리고 겹쳐 보기 나쁨 → 팝업 대신 하단 목록 시트에서 상세 확인
+  if (isMobile()) {
+    const side = document.querySelector('.side');
+    if (side && side.classList.contains('collapsed')) {
+      side.classList.remove('collapsed');
+      const h = document.getElementById('sheetHandle');
+      if (h) h.setAttribute('aria-expanded', 'true');
+      if (map) setTimeout(() => map.relayout(), 220);
+    }
+    return;  // 지도 팝업 생략
+  }
   closeDragPopup();
   const el = document.createElement('div');
   el.className = 'dpop';
