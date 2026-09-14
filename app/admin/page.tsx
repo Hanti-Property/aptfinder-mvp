@@ -244,7 +244,7 @@ export default function AdminDashboard() {
         {/* DB 관리 (데이터 자산) */}
         <section>
           <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Database Management</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <a href="/admin/recon" className="bg-gradient-to-br from-[#2a2416] to-[#1e1e3f] border border-[#C49A3C]/40 rounded-xl p-4 hover:border-[#C49A3C] transition-all group">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-lg">🏗️</span>
@@ -252,6 +252,14 @@ export default function AdminDashboard() {
               </div>
               <p className="text-[13px] font-semibold text-white">재건축 단지 마스터</p>
               <p className="text-[10px] text-gray-500 mt-0.5">단계·ETA·시공사·리스크·인덱스 관리</p>
+            </a>
+            <a href="/admin/docs" className="bg-gradient-to-br from-[#16291c] to-[#1e1e3f] border border-emerald-500/40 rounded-xl p-4 hover:border-emerald-400 transition-all group">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg">📄</span>
+                <span className="text-2xl font-extrabold text-emerald-400">DOCS</span>
+              </div>
+              <p className="text-[13px] font-semibold text-white">정비계획·문서 관리</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">문서 작성·숫자 추출→마스터 반영</p>
             </a>
             <a href="/admin/nvp" className="bg-gradient-to-br from-[#16292a] to-[#1e1e3f] border border-teal-500/40 rounded-xl p-4 hover:border-teal-400 transition-all group">
               <div className="flex items-center justify-between mb-2">
