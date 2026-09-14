@@ -87,6 +87,13 @@ header .badge::before{content:'';width:6px;height:6px;border-radius:50%;backgrou
 .trade-table td{padding:10px 8px;border-bottom:1px solid #0e2c4a;font-size:13px;white-space:nowrap}
 .trade-table .price{color:#ff6b6b;font-weight:700}
 
+/* 랭킹 테이블 좌측 고정(sticky): 1열(#)·2열(티커) — 좌우 스크롤해도 항상 보임.
+   sticky 셀은 배경 필수(뒤 내용 비침 방지). #rriRankTable에만 적용(다른 표 영향 없음). */
+#rriRankTable th:nth-child(1),#rriRankTable td:nth-child(1){position:sticky;left:0;z-index:2;width:38px;min-width:38px;padding-left:6px;padding-right:4px}
+#rriRankTable th:nth-child(2),#rriRankTable td:nth-child(2){position:sticky;left:38px;z-index:2;box-shadow:2px 0 4px rgba(0,0,0,0.3)}
+#rriRankTable td:nth-child(1),#rriRankTable td:nth-child(2){background:#083458}
+#rriRankTable thead th:nth-child(1),#rriRankTable thead th:nth-child(2){background:#082e4d;z-index:3}
+
 .quick-section{padding:16px 24px;border-top:1px solid #1c466e}
 .quick-section h3{font-size:14px;color:#bbb;margin-bottom:8px}
 .quick-btns{display:flex;flex-wrap:wrap;gap:8px}
