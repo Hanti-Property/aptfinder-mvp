@@ -129,6 +129,30 @@
   /* 목록 시트 손잡이: 기본(데스크톱)은 숨김 */
   #sheetHandle { display:none; }
 
+  /* ===== 모바일 매물 상세 전체화면 오버레이 (기본 숨김) ===== */
+  #mobileDetail { display:none; }
+  #mobileDetail.open { display:flex; }
+  #mobileDetail {
+    position:fixed; inset:0; z-index:2000; background:#fff;
+    flex-direction:column; animation:mdIn .18s ease-out;
+  }
+  @keyframes mdIn { from{ transform:translateX(12px); opacity:.4; } to{ transform:none; opacity:1; } }
+  #mobileDetail .md-bar {
+    display:flex; align-items:center; gap:10px; flex:0 0 auto;
+    background:#1B3A5C; color:#fff; padding:12px 14px;
+    padding-top:max(12px, env(safe-area-inset-top));
+  }
+  #mobileDetail .md-back {
+    display:flex; align-items:center; gap:4px; background:rgba(255,255,255,.14);
+    border:none; color:#fff; font-size:14px; font-weight:700; border-radius:8px;
+    padding:8px 12px; cursor:pointer; font-family:inherit; flex-shrink:0;
+  }
+  #mobileDetail .md-back:active { background:rgba(255,255,255,.28); }
+  #mobileDetail .md-title { font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #mobileDetail .md-body { flex:1 1 auto; overflow-y:auto; padding:16px; -webkit-overflow-scrolling:touch; }
+  #mobileDetail .dv-photos img { height:200px; }
+  #mobileDetail .md-body .glcard { margin-bottom:14px; }
+
   /* ===== 모바일 대응 (≤768px): 좌우분할 → 위(지도)/아래(목록 시트) ===== */
   @media (max-width: 768px) {
     header { padding:9px 14px; gap:10px; }
@@ -245,6 +269,15 @@
   </div>
 </div>
 
+<!-- 모바일 전용: 매물 상세 전체화면 뷰 -->
+<div id="mobileDetail" aria-hidden="true">
+  <div class="md-bar">
+    <button class="md-back" type="button" onclick="closeMobileDetail()">‹ 지도로</button>
+    <span class="md-title" id="mdTitle"></span>
+  </div>
+  <div class="md-body" id="mdBody"></div>
+</div>
+
 <!-- 카카오 지도 SDK (aptfinder 공통 앱키) -->
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ac5ad10b0ae27c4e8ed8b5a5fe68f15b&libraries=services&autoload=false"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -301,6 +334,47 @@ function toggleListSheet() {
   if (handle) handle.setAttribute('aria-expanded', String(!collapsed));
   if (map) setTimeout(() => map.relayout(), 220);  // 높이 전환 후 재배치
 }
+
+// ===== 모바일: 매물 상세 전체화면 뷰 (지도 ↔ 상세 분리) =====
+let mdOpen = false;
+function openMobileDetail(key) {
+  const groups = window.__groups;
+  const items = groups && groups.get(key);
+  if (!items || !items.length) return;
+  const body = document.getElementById('mdBody');
+  const titleEl = document.getElementById('mdTitle');
+  if (items.length === 1) {
+    const l = items[0];
+    titleEl.textContent = l.title || '매물 상세';
+    body.innerHTML = detailHtml(l);
+  } else {
+    titleEl.textContent = groupLabel(items);
+    body.innerHTML = groupAccHtml(key, items);
+  }
+  const md = document.getElementById('mobileDetail');
+  md.classList.add('open');
+  md.setAttribute('aria-hidden', 'false');
+  body.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  const b = items.find(i => i.lat && i.lng);
+  if (b && map) { map.setCenter(new kakao.maps.LatLng(b.lat, b.lng)); }
+  if (!mdOpen) { history.pushState({ md: true }, ''); }
+  mdOpen = true;
+}
+function closeMobileDetail(fromPop) {
+  const md = document.getElementById('mobileDetail');
+  if (!md.classList.contains('open')) return;
+  md.classList.remove('open');
+  md.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  const wasOpen = mdOpen;
+  mdOpen = false;
+  if (map) setTimeout(() => map.relayout(), 120);
+  if (!fromPop && wasOpen) { history.back(); }
+}
+window.addEventListener('popstate', () => {
+  if (mdOpen) closeMobileDetail(true);
+});
 
 // 화면 크기 변경(회전/데스크톱↔모바일 전환) 시 지도 타일 재배치
 let __relayoutTimer = null;
@@ -613,6 +687,7 @@ function renderAll() {
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(l);
   });
+  window.__groups = groups;   // 모바일 상세 오버레이에서 그룹 items 접근용
 
   // --- 마커: 위 그룹(좌표 기준)을 그대로 사용 ---
   groups.forEach((items, key) => {
@@ -622,7 +697,10 @@ function renderAll() {
       const pos = new kakao.maps.LatLng(l.lat, l.lng);
       const marker = new kakao.maps.Marker({ position: pos, map, image: markerImage(usageColor(l.usage), cardLabel(l)), zIndex: 5 });
       marker.__lid = l.id;
-      kakao.maps.event.addListener(marker, 'click', () => { openAccByKey(key); openInfo(marker, l); });
+      kakao.maps.event.addListener(marker, 'click', () => {
+        if (isMobile()) { openMobileDetail(key); return; }
+        openAccByKey(key); openInfo(marker, l);
+      });
       markers.push(marker);
     } else {
       // 같은 건물(2건 이상): 대표 매물(지상층 중 전용면적 최대) 1개만 표시 + 사선 겹침 + 개수 배지
@@ -637,7 +715,10 @@ function renderAll() {
         zIndex: 6
       });
       marker.__lid = rep.id;
-      kakao.maps.event.addListener(marker, 'click', () => { openAccByKey(key); openInfo(marker, rep); });
+      kakao.maps.event.addListener(marker, 'click', () => {
+        if (isMobile()) { openMobileDetail(key); return; }
+        openAccByKey(key); openInfo(marker, rep);
+      });
       markers.push(marker);
     }
   });
@@ -653,7 +734,10 @@ function renderAll() {
       card.innerHTML = cardHtml(l);
       const panel = document.createElement('div');
       panel.className = 'acc';   // 펼침 영역
-      card.onclick = () => toggleAccordion(l.id, wrap, panel, () => detailHtml(l), () => focusOn(l));
+      card.onclick = () => {
+        if (isMobile()) { openMobileDetail(key); return; }
+        toggleAccordion(l.id, wrap, panel, () => detailHtml(l), () => focusOn(l));
+      };
       wrap.appendChild(card); wrap.appendChild(panel);
       listEl.appendChild(wrap);
     } else {
@@ -670,7 +754,10 @@ function renderAll() {
         <div class="meta">${items.map(i=>floorStr(i)).filter(Boolean).join(', ')||'여러 층'}</div>`;
       const panel = document.createElement('div');
       panel.className = 'acc';
-      card.onclick = () => toggleAccordion(key, wrap, panel, () => groupAccHtml(key, items), () => { const b=items.find(i=>i.lat&&i.lng); if(b) focusOn(b); });
+      card.onclick = () => {
+        if (isMobile()) { openMobileDetail(key); return; }
+        toggleAccordion(key, wrap, panel, () => groupAccHtml(key, items), () => { const b=items.find(i=>i.lat&&i.lng); if(b) focusOn(b); });
+      };
       wrap.appendChild(card); wrap.appendChild(panel);
       listEl.appendChild(wrap);
     }
