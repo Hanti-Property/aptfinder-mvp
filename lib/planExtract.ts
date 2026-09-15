@@ -54,7 +54,8 @@ function hintOf(text: string, idx: number): string | undefined {
 }
 
 export function extractPlanFields(body: string): ExtractField[] {
-  const text = (body || '').replace(/\s+/g, ' ')
+  // 마크다운 볼드(**)·표 구분자(|)를 공백으로 치환 후 공백 정규화 → 서술형/표형 모두 대응
+  const text = (body || '').replace(/\*\*/g, ' ').replace(/\|/g, ' ').replace(/\s+/g, ' ')
   const fields: ExtractField[] = []
 
   const mk = (key: string, label: string, unit: string, cands: Candidate[]): ExtractField => ({
@@ -71,19 +72,26 @@ export function extractPlanFields(body: string): ExtractField[] {
     const v = parseNum(m[1]); if (v == null) return null
     return { value: v, raw: m[0].trim(), hint: '통합평균' }
   })
-  const allFar = [...farCands, ...farCands2].filter((c, i, a) => a.findIndex(x => x.value === c.value) === i)
-  // 목표 용적률(plan_far): 통합평균 힌트 우선, 없으면 가장 큰 값(고밀 결과)
+  // 표/서술의 "재건축후 299.91%" — '재건축후/재건축 후' 바로 뒤 % 는 목표용적률로 강제
+  const farCands3 = collect(text, /재건축\s*후\s*([\d,]+(?:\.\d+)?)\s*%/g, (m) => {
+    const v = parseNum(m[1]); if (v == null) return null
+    return { value: v, raw: m[0].trim(), hint: '재건축후' }
+  })
+  const allFar = [...farCands, ...farCands2, ...farCands3].filter((c, i, a) => a.findIndex(x => x.value === c.value) === i)
+  // 목표 용적률(plan_far): 재건축후 > 통합평균 힌트 우선, 없으면 가장 큰 값(고밀 결과)
+  const farRank = (h?: string) => h === '재건축후' ? 2 : h === '통합평균' ? 1 : 0
   const planFarSorted = [...allFar].sort((a, b) => {
-    const ap = a.hint === '통합평균' ? 1 : 0, bp = b.hint === '통합평균' ? 1 : 0
-    if (ap !== bp) return bp - ap
+    const d = farRank(b.hint) - farRank(a.hint)
+    if (d !== 0) return d
     return b.value - a.value
   })
   if (planFarSorted.length) fields.push(mk('plan_far', '목표 용적률', '%', planFarSorted))
-  // 현재 용적률(far): '현재/기존' 힌트 우선, 없으면 가장 작은 값
+  // 현재 용적률(far): '현재/기존' 힌트 우선. '재건축후'는 현재값이 아니므로 뒤로.
   const curFarSorted = [...allFar].sort((a, b) => {
-    const ap = a.hint === '현재/기존' ? 1 : 0, bp = b.hint === '현재/기존' ? 1 : 0
+    const ap = a.hint === '현재/기존' ? 2 : a.hint === '재건축후' ? -1 : 0
+    const bp = b.hint === '현재/기존' ? 2 : b.hint === '재건축후' ? -1 : 0
     if (ap !== bp) return bp - ap
-    return a.value - b.value
+    return a.value - b.value   // 나머지는 작은 값(현재가 보통 낮음)
   })
   if (curFarSorted.length) fields.push(mk('far', '현재 용적률', '%', curFarSorted))
 
@@ -111,10 +119,29 @@ export function extractPlanFields(body: string): ExtractField[] {
   if (donCands.length) fields.push(mk('plan_donation_rate', '기부채납 비율', '(0~1)', donCands))
 
   // --- 연면적(㎡) : 재건축후(최댓값) / 현재(최솟값 또는 '현재' 힌트) ---
-  const gfaCands = collect(text, /연면적[^0-9]{0,10}?약?\s*([\d,]+(?:\.\d+)?)\s*(?:㎡|m2|㎥)?/g, (m) => {
-    const v = parseNum(m[1]); if (v == null || v < 10000) return null  // 만㎡ 이상만
-    return { value: v, raw: m[0].trim(), hint: hintOf(text, m.index) }
-  })
+  // 연면적: "연면적" 단어 등장마다 그 뒤 60자 윈도우에서 ㎡ 값들을 수집.
+  //  - 서술형(오금현대: "연면적 약 156,000㎡ / 사업부지 110,232㎡")·표형(삼익맨숀: "연면적 | 약 83,000㎡ | 약 125,000㎡")
+  //    둘 다 커버. 값 직전 6자에 대지/부지/기반시설 키워드 있으면 제외(연면적 아님).
+  const gfaCands: Candidate[] = []
+  const seenGfa = new Set<number>()
+  const gfaWordRe = /연면적/g
+  let wm: RegExpExecArray | null
+  while ((wm = gfaWordRe.exec(text)) !== null) {
+    const win = text.slice(wm.index, wm.index + 60)   // '연면적' 뒤 60자
+    const numRe = /([\d,]{5,}(?:\.\d+)?)\s*(?:㎡|m2|㎥)/g
+    let nm: RegExpExecArray | null
+    while ((nm = numRe.exec(win)) !== null) {
+      const v = parseNum(nm[1]); if (v == null || v < 10000 || v > 3000000) continue
+      const pre = win.slice(Math.max(0, nm.index - 8), nm.index)
+      if (/대지|부지|정비구역|기반시설|공원|녹지|공공|기부/.test(pre)) continue   // 연면적 아닌 면적 제외
+      if (seenGfa.has(v)) continue; seenGfa.add(v)
+      // 힌트: 값 직후 ~12자에 '재건축후/내외/증가' 있으면 재건축후. 값 앞 12자에 '현재/기존' 있으면 현재.
+      const near = win.slice(nm.index, nm.index + 12)
+      const preNear = win.slice(Math.max(0, nm.index - 12), nm.index)
+      const hint = /재건축\s*후|내외|증가/.test(near) ? '재건축후' : (/현재|기존/.test(preNear) ? '현재/기존' : undefined)
+      gfaCands.push({ value: v, raw: nm[0].trim(), hint })
+    }
+  }
   if (gfaCands.length) {
     // 재건축후: '재건축후' 힌트 우선, 없으면 최댓값
     const gfaNew = [...gfaCands].sort((a, b) => {
@@ -163,12 +190,13 @@ export function extractPlanFields(body: string): ExtractField[] {
   if (ratioCands.length) fields.push(mk('plan_ratio', '비례율', '%', ratioCands))
 
   // --- 준공연도 : "1986년 준공" / "준공: 1986" / "1986년 12월" (1970~2010 범위) ---
-  const yearCands = collect(text, /(19[7-9]\d|20[0-2]\d)\s*년?\s*(?:\d{1,2}\s*월)?\s*(?:준공|사용승인|입주)/g, (m) => {
+  // 기존 건물 준공연도만 (1970~2010). "2030 준공 예정" 같은 미래는 범위로 제외.
+  const yearCands = collect(text, /(19[7-9]\d|200\d|2010)\s*년?\s*(?:\d{1,2}\s*월)?\s*(?:준공|사용승인)/g, (m) => {
     const v = parseNum(m[1]); if (v == null || v < 1970 || v > 2010) return null
     return { value: v, raw: m[0].trim() }
   })
-  // "준공: 1986" 처럼 준공이 앞에 오는 경우도
-  const yearCands2 = collect(text, /(?:준공|사용승인)[^0-9]{0,6}?(19[7-9]\d|20[0-2]\d)/g, (m) => {
+  // "준공: 1986" / "준공연도(기존): 1985" — 준공 뒤 괄호·라벨 껴도 인식(간격 0~12)
+  const yearCands2 = collect(text, /(?:준공|사용승인)[^0-9]{0,12}?(19[7-9]\d|200\d|2010)\s*년/g, (m) => {
     const v = parseNum(m[1]); if (v == null || v < 1970 || v > 2010) return null
     return { value: v, raw: m[0].trim() }
   })
@@ -179,8 +207,9 @@ export function extractPlanFields(body: string): ExtractField[] {
   //  이유: 문서 서술이 "신축 15.4억, 6천만~8.4억 납부"처럼 분양가+분담금 혼재 + 천만/억 단위혼용 + 범위라
   //        정규식 오판 위험이 큼(잘못 잡으면 UPI 왜곡). 수동 입력/검수 유지가 정확.
 
-  // --- 시공사 (텍스트) : "시공사: 현대건설" / "시공사 현대건설·GS건설" ---
-  const builderM = text.match(/시공사\s*[:：]?\s*([가-힣A-Za-z0-9·,\/\s]{2,30}?)(?:\s|$|\.|,(?=\s*[가-힣]{2,}\s*[:：]))/)
+  // --- 시공사 (텍스트) : "시공사: 현대건설" / "시공사: GS건설 (브랜드명...)" / "현대건설·GS건설" ---
+  //  괄호 '(' 나 '(브랜드' 만나면 종료 → "GS건설"만 잡음.
+  const builderM = text.match(/시공사\s*[:：]?\s*([가-힣A-Za-z0-9·,\/]+(?:\s*[·,\/]\s*[가-힣A-Za-z0-9]+)*)/)
   if (builderM) {
     const b = builderM[1].trim().replace(/\s+/g, ' ')
     if (b && b.length >= 2 && b.length <= 30) {
