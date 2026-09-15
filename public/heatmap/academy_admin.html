@@ -287,7 +287,7 @@ let selectedId = null;
 let colW = {};   // 컬럼 폭 오버라이드
 let checked = new Set();   // 현재 "뷰 포함" 체크된 매물 id
 let views = {};            // { 뷰이름: [id, ...] }
-let sortKey = null, sortDir = 1;   // 정렬 컬럼/방향(1 오름, -1 내림)
+let sortKey = 'lot_address', sortDir = 1;   // 기본 정렬: 지번주소(동 가나다→지번 숫자) 오름차순
 let heatmapDisplay = null;         // 전역 히트맵 표시설정 {mode, fields{}}
 const USAGE_OPTS = ['학원','교습소','스터디카페','기타'];
 // 전역 표시설정 대상 필드 (라벨)
