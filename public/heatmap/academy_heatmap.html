@@ -762,6 +762,26 @@ function renderAll() {
       listEl.appendChild(wrap);
     }
   });
+
+  // 최초 렌더 시: 매물들이 모두 화면에 들어오도록 지도 범위 자동 맞춤
+  // (고정 중심으로 열려 매물이 한쪽으로 치우치거나 화면 밖으로 잘리던 문제 해결)
+  fitMapToData(data);
+}
+// 지도 범위를 매물 좌표 전체에 맞춤. 최초 1회만(사용자가 이후 이동/줌한 걸 방해하지 않음)
+let __fitDone = false;
+function fitMapToData(data) {
+  if (__fitDone || !map) return;
+  const pts = (data || []).filter(l => l.lat && l.lng);
+  if (!pts.length) return;
+  __fitDone = true;
+  if (pts.length === 1) {
+    map.setCenter(new kakao.maps.LatLng(pts[0].lat, pts[0].lng));
+    map.setLevel(4);
+    return;
+  }
+  const bounds = new kakao.maps.LatLngBounds();
+  pts.forEach(l => bounds.extend(new kakao.maps.LatLng(l.lat, l.lng)));
+  map.setBounds(bounds, 60, 60, 60, 60);   // 상하좌우 60px 여백
 }
 function esc0(s){ return String(s==null?'':s).replace(/</g,'&lt;'); }
 // 그룹(같은 건물) 표시 라벨: 건물명 우선, 없으면 동+지번
