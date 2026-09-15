@@ -75,9 +75,9 @@ const GROUPS: Record<string, Col[]> = {
     { key: 'name', label: '단지명', w: 150, edit: true },
     { key: 'dong', label: '동', w: 70, edit: true },
     { key: 'jibun', label: '지번', w: 60, edit: true },
-    { key: 'households', label: '세대', w: 60, edit: true, num: true },
-    { key: 'far', label: '현용적률', w: 70, edit: true, num: true },
-    { key: 'plat_area', label: '대지면적㎡', w: 90, edit: true, num: true },
+    { key: 'households', label: '세대', w: 60, ro: true, num: true },   // 편집은 정비계획 탭 (중복 편집 방지)
+    { key: 'far', label: '현용적률', w: 70, ro: true, num: true },       // 편집은 정비계획 탭
+    { key: 'plat_area', label: '대지면적㎡', w: 90, ro: true, num: true }, // 편집은 정비계획 탭
     { key: 'trade_name', label: '실거래명', w: 130, edit: true, arr: true },
   ],
   운영: [
@@ -135,6 +135,7 @@ const GROUPS: Record<string, Col[]> = {
   정비계획: [
     { key: 'plan_confirmed', label: '계획확정', w: 65, edit: true, bool: true },
     { key: 'built_year', label: '준공연도', w: 75, edit: true, num: true },
+    { key: 'plat_area', label: '대지면적㎡', w: 95, edit: true, num: true },
     { key: 'far', label: '현재용적률%', w: 90, edit: true, num: true },
     { key: 'plan_far', label: '목표용적률%', w: 95, edit: true, num: true },
     { key: 'plan_ratio', label: '비례율%', w: 80, edit: true, num: true },
