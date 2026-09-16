@@ -185,6 +185,29 @@ export default function CollectorPage() {
               style={{ marginTop: 14, width: '100%', padding: '10px', borderRadius: 6, border: 'none', background: existing ? '#2E7D32' : '#C79A5B', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
               {saving ? '반영 중…' : existing ? '✓ 기존 단지 업데이트' : '+ 신규 단지 등록 (작성중)'}
             </button>
+            {result.trade && result.trade.recent && result.trade.recent.length > 0 && (
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#1B3A5C', marginBottom: 4 }}>💰 최근 실거래 {result.trade.recent.length}건 <span style={{ fontWeight: 400, color: '#888' }}>(6개월, 해제거래 제외)</span></div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5 }}>
+                  <thead><tr style={{ color: '#888', textAlign: 'left', borderBottom: '1px solid #eee' }}>
+                    <th style={{ padding: '3px 2px' }}>거래일</th><th style={{ padding: '3px 2px' }}>전용㎡</th>
+                    <th style={{ padding: '3px 2px', textAlign: 'right' }}>거래가</th><th style={{ padding: '3px 2px' }}>층</th>
+                    <th style={{ padding: '3px 2px', textAlign: 'right' }}>평당</th>
+                  </tr></thead>
+                  <tbody>
+                    {result.trade.recent.map((t, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid #f2f2f2' }}>
+                        <td style={{ padding: '4px 2px', whiteSpace: 'nowrap' }}>{t.date}</td>
+                        <td style={{ padding: '4px 2px' }}>{t.area}</td>
+                        <td style={{ padding: '4px 2px', textAlign: 'right', fontWeight: 700, color: '#1B3A5C' }}>{(t.amount / 10000).toFixed(1)}억</td>
+                        <td style={{ padding: '4px 2px', color: '#888' }}>{t.floor}</td>
+                        <td style={{ padding: '4px 2px', textAlign: 'right', color: '#666' }}>{t.ppp.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
             {result.trade && !result.trade.avgPpp && result.trade.names.length > 0 && (
               <div style={{ fontSize: 11, color: '#888', marginTop: 8 }}>이 동 실거래 단지: {result.trade.names.join(', ')}</div>
             )}

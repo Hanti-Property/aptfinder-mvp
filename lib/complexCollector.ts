@@ -24,7 +24,8 @@ export interface BuildingInfo {
   dongCnt: number | null
 }
 export interface LandInfo { area: number | null; jimok: string | null }
-export interface TradeInfo { count: number; avgPpp: number | null; aptNm: string | null; names: string[] }
+export interface TradeItem { date: string; area: number; amount: number; floor: string; ppp: number }  // 개별 거래
+export interface TradeInfo { count: number; avgPpp: number | null; aptNm: string | null; names: string[]; recent: TradeItem[] }
 
 // bjdong 후보 순회 → 응답 주소 동명 매칭으로 확정 + 건축물대장 요약
 export async function collectBuilding(lawd: string, dong: string, bun: string | number, ji: string | number): Promise<BuildingInfo> {
@@ -81,23 +82,34 @@ export async function collectLand(lawd: string, bjdong: string, bun: string | nu
 
 export async function collectTrade(lawd: string, dong: string, aptNm: string | null): Promise<TradeInfo | null> {
   const now = new Date(); const jobs: string[] = []
-  for (let i = 0; i < 3; i++) { const dt = new Date(now.getFullYear(), now.getMonth() - i, 1); jobs.push(dt.getFullYear() + String(dt.getMonth() + 1).padStart(2, '0')) }
+  for (let i = 0; i < 6; i++) { const dt = new Date(now.getFullYear(), now.getMonth() - i, 1); jobs.push(dt.getFullYear() + String(dt.getMonth() + 1).padStart(2, '0')) }  // 최근 6개월
   try {
     const xmls = await Promise.all(jobs.map(ym => fetch(`${TRADE_LAMBDA}?LAWD_CD=${lawd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`).then(r => r.text()).catch(() => '')))
-    const items: { apt: string; amt: number; area: number }[] = []
+    const items: { apt: string; amt: number; area: number; date: string; floor: string; cancel: boolean }[] = []
     xmls.forEach(xml => {
       (xml.match(/<item>([\s\S]*?)<\/item>/g) || []).forEach(it => {
         const g = (t: string) => { const m = it.match(new RegExp('<' + t + '>(.*?)</' + t + '>')); return m ? m[1].trim() : '' }
         if (g('umdNm') !== dong) return
-        items.push({ apt: g('aptNm'), amt: parseInt((g('dealAmount') || '0').replace(/,/g, '')), area: parseFloat(g('excluUseAr') || '0') })
+        const y = g('dealYear'), m = g('dealMonth').padStart(2, '0'), day = g('dealDay').padStart(2, '0')
+        items.push({
+          apt: g('aptNm'), amt: parseInt((g('dealAmount') || '0').replace(/,/g, '')),
+          area: parseFloat(g('excluUseAr') || '0'), date: `${y}.${m}.${day}`, floor: g('floor'),
+          cancel: !!g('cdealType'),  // 해제거래
+        })
       })
     })
-    const mine = aptNm ? items.filter(x => x.apt && (x.apt.includes(aptNm) || aptNm.includes(x.apt))) : []
+    const mine = (aptNm ? items.filter(x => x.apt && (x.apt.includes(aptNm) || aptNm.includes(x.apt))) : []).filter(x => !x.cancel)
     const names = [...new Set(items.map(x => x.apt))].slice(0, 10)
-    if (!mine.length) return { count: 0, avgPpp: null, aptNm, names }
-    const ppps = mine.filter(x => x.amt > 0 && x.area > 0).map(x => x.amt / (x.area / PY))
+    if (!mine.length) return { count: 0, avgPpp: null, aptNm, names, recent: [] }
+    const valid = mine.filter(x => x.amt > 0 && x.area > 0)
+    const ppps = valid.map(x => x.amt / (x.area / PY))
     const avg = ppps.length ? Math.round(ppps.reduce((a, b) => a + b, 0) / ppps.length) : null
-    return { count: mine.length, avgPpp: avg, aptNm, names }
+    // 최근순 정렬 후 10건
+    const recent: TradeItem[] = valid
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 10)
+      .map(x => ({ date: x.date, area: x.area, amount: x.amt, floor: x.floor, ppp: Math.round(x.amt / (x.area / PY)) }))
+    return { count: mine.length, avgPpp: avg, aptNm, names, recent }
   } catch { return null }
 }
 
