@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { collectByAddress, type CollectResult } from '@/lib/complexCollector'
+import { fmtNum, parseNum } from '@/lib/numberFormat'
 
 // 단지 정보 자동수집·검수·입력 (collector)
 // 지도 클릭 → 주소 → 건축물대장·토지대장·실거래 자동조회 → 교차검증 표 → 마스터 신규/업데이트.
@@ -107,7 +108,11 @@ export default function CollectorPage() {
   const applyToMaster = async () => {
     if (!result) return
     const upd: Record<string, unknown> = {}
-    rows.forEach(r => { if (r.on && r.value != null) upd[r.key] = r.value })
+    rows.forEach(r => {
+      if (!r.on || r.value == null || r.value === '') return
+      // bjdong은 코드(문자열), 나머지는 숫자로 저장(콤마 제거)
+      upd[r.key] = r.key === 'bjdong' ? String(r.value) : (parseNum(r.value) ?? r.value)
+    })
     if (!Object.keys(upd).length) { setMsg('반영할 항목을 선택하세요.'); return }
     setSaving(true); setMsg('')
     if (existing) {
@@ -159,23 +164,29 @@ export default function CollectorPage() {
                 : <span style={{ marginLeft: 8, color: '#C79A5B', fontWeight: 700 }}>○ 신규 (등록 가능)</span>}
             </div>
             {!result.lawd && <div style={{ color: '#c0392b', fontSize: 12, marginBottom: 8 }}>지원 구가 아닙니다(구코드 미등록).</div>}
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead><tr style={{ color: '#888', fontSize: 11, textAlign: 'left' }}>
-                <th style={{ padding: '4px 2px', width: 30 }}>반영</th><th style={{ padding: '4px 2px' }}>항목</th>
-                <th style={{ padding: '4px 2px' }}>자동값</th><th style={{ padding: '4px 2px' }}>기존값</th>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+              <thead><tr style={{ color: '#888', fontSize: 12, textAlign: 'left' }}>
+                <th style={{ padding: '6px 3px', width: 34 }}>반영</th><th style={{ padding: '6px 3px' }}>항목</th>
+                <th style={{ padding: '6px 3px' }}>자동값</th><th style={{ padding: '6px 3px', textAlign: 'right' }}>기존값</th>
               </tr></thead>
               <tbody>
                 {rows.map(r => {
-                  const diff = existing && r.master != null && String(r.master) !== String(r.value)
+                  const diff = existing && r.master != null && parseNum(r.master) !== parseNum(r.value)
+                  const isBjdong = r.key === 'bjdong'  // 코드는 콤마 없이
+                  const disp = isBjdong ? (r.value == null ? '' : String(r.value)) : fmtNum(r.value, r.key)
                   return (
                     <tr key={r.key} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '7px 2px' }}><input type="checkbox" checked={r.on} onChange={e => setRows(rs => rs.map(x => x.key === r.key ? { ...x, on: e.target.checked } : x))} /></td>
-                      <td style={{ padding: '7px 2px' }}>{r.label}<div style={{ fontSize: 10, color: '#999' }}>{r.note}</div></td>
-                      <td style={{ padding: '7px 2px', fontWeight: 700, color: '#1B3A5C' }}>
-                        <input value={r.value == null ? '' : String(r.value)} onChange={e => setRows(rs => rs.map(x => x.key === r.key ? { ...x, value: e.target.value } : x))}
-                          style={{ width: 70, padding: '2px 4px', border: '1px solid #ddd', borderRadius: 4 }} />{r.unit}
+                      <td style={{ padding: '9px 3px' }}><input type="checkbox" checked={r.on} style={{ width: 16, height: 16 }} onChange={e => setRows(rs => rs.map(x => x.key === r.key ? { ...x, on: e.target.checked } : x))} /></td>
+                      <td style={{ padding: '9px 3px' }}><span style={{ fontWeight: 600 }}>{r.label}</span><div style={{ fontSize: 10.5, color: '#999' }}>{r.note}</div></td>
+                      <td style={{ padding: '9px 3px', whiteSpace: 'nowrap' }}>
+                        <input value={disp}
+                          onFocus={e => { if (!isBjdong) e.target.value = e.target.value.replace(/,/g, '') }}
+                          onChange={e => setRows(rs => rs.map(x => x.key === r.key ? { ...x, value: e.target.value.replace(/,/g, '') } : x))}
+                          onBlur={e => { if (!isBjdong) e.target.value = fmtNum(e.target.value, r.key) }}
+                          style={{ width: 96, padding: '6px 8px', border: '1px solid #ccc', borderRadius: 5, fontSize: 15, fontWeight: 700, color: '#1B3A5C', textAlign: 'right' }} />
+                        <span style={{ fontSize: 12, color: '#888', marginLeft: 3 }}>{r.unit}</span>
                       </td>
-                      <td style={{ padding: '7px 2px', color: diff ? '#e67e22' : '#999' }}>{fmt(r.master)}{diff && <span style={{ fontSize: 10, marginLeft: 3 }}>변경</span>}</td>
+                      <td style={{ padding: '9px 3px', textAlign: 'right', color: diff ? '#e67e22' : '#999', fontSize: 13, whiteSpace: 'nowrap' }}>{isBjdong ? fmt(r.master) : fmtNum(r.master, r.key)}{diff && <span style={{ fontSize: 10, marginLeft: 3 }}>변경</span>}</td>
                     </tr>
                   )
                 })}
