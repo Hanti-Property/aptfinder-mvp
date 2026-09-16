@@ -181,6 +181,25 @@ export default function CollectorPage() {
                 })}
               </tbody>
             </table>
+
+            {/* 연면적 주거/비주거 구분 (표시 전용, 저장은 전체 tot_area). 비주거 없으면 전체만. */}
+            {result.building.totArea && (
+              <div style={{ marginTop: 12, padding: '8px 10px', background: '#f7f9fb', borderRadius: 6, fontSize: 12 }}>
+                <div style={{ fontWeight: 700, color: '#1B3A5C', marginBottom: 4 }}>📐 현재 연면적 구분 <span style={{ fontWeight: 400, color: '#888', fontSize: 11 }}>(건축물대장 용도별)</span></div>
+                {result.building.gfaComm != null ? (
+                  <table style={{ width: '100%', fontSize: 12 }}>
+                    <tbody>
+                      <tr><td style={{ padding: '2px 0', color: '#555' }}>주거(공동주택)</td><td style={{ textAlign: 'right', fontWeight: 700, color: '#1B3A5C' }}>{Math.round(result.building.gfaResi || 0).toLocaleString()}㎡</td></tr>
+                      <tr><td style={{ padding: '2px 0', color: '#555' }}>비주거(상가·근생 등)</td><td style={{ textAlign: 'right', fontWeight: 700, color: '#C79A5B' }}>{Math.round(result.building.gfaComm).toLocaleString()}㎡</td></tr>
+                      <tr style={{ borderTop: '1px solid #ddd' }}><td style={{ padding: '3px 0', color: '#888' }}>전체</td><td style={{ textAlign: 'right', fontWeight: 700 }}>{Math.round(result.building.totArea).toLocaleString()}㎡</td></tr>
+                    </tbody>
+                  </table>
+                ) : (
+                  <div style={{ color: '#888' }}>전체 {Math.round(result.building.totArea).toLocaleString()}㎡ <span style={{ fontSize: 11 }}>(비주거 구분 없음 — 주거 전용 단지 또는 용도 미상)</span></div>
+                )}
+              </div>
+            )}
+
             <button onClick={applyToMaster} disabled={saving || !result.lawd}
               style={{ marginTop: 14, width: '100%', padding: '10px', borderRadius: 6, border: 'none', background: existing ? '#2E7D32' : '#C79A5B', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
               {saving ? '반영 중…' : existing ? '✓ 기존 단지 업데이트' : '+ 신규 단지 등록 (작성중)'}

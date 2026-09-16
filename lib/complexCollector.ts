@@ -19,7 +19,9 @@ export interface BuildingInfo {
   households: number | null
   builtYear: number | null
   far: number | null           // 현재 용적률(%). 대장 vlRat 0이면 vlRatEstm÷대지로 역산.
-  totArea: number | null       // 현재 연면적(㎡)
+  totArea: number | null       // 현재 연면적(㎡) 전체
+  gfaResi: number | null       // 주거(공동주택) 연면적(㎡)
+  gfaComm: number | null       // 비주거(상가·근생·판매 등) 연면적(㎡). 없으면 null
   vlRatEstm: number | null     // 용적률산정 연면적(㎡) — 총괄표제부. 용적률 역산용.
   dongCnt: number | null
 }
@@ -39,13 +41,18 @@ export async function collectBuilding(lawd: string, dong: string, bun: string | 
       const items = Array.isArray(it) ? it : [it]
       const addr0 = items[0].platPlc || items[0].newPlatPlc || ''
       if (!addr0.includes(dong)) continue   // 동명 매칭 = bjdong 확정
-      const resi = items.filter((x: Record<string, unknown>) => (x.mainPurpsCdNm as string || '') === '공동주택' || /아파트|공동주택|주거/.test(x.etcPurps as string || ''))
+      const isResi = (x: Record<string, unknown>) => (x.mainPurpsCdNm as string || '') === '공동주택' || /아파트|공동주택|주거/.test(x.etcPurps as string || '')
+      const resi = items.filter(isResi)
       const tgt = resi.length ? resi : items
       const households = tgt.reduce((s: number, x: Record<string, unknown>) => s + parseInt(x.hhldCnt as string || '0'), 0) || null
       const dates = tgt.map((x: Record<string, unknown>) => x.useAprDay as string).filter((v: string) => v && v.length >= 4)
       const builtYear = dates.length ? Math.min(...dates.map((v: string) => parseInt(v.substring(0, 4)))) : null
       let far = tgt.map((x: Record<string, unknown>) => parseFloat(x.vlRat as string || '0')).find((v: number) => v > 0) || null
-      let totArea = tgt.reduce((s: number, x: Record<string, unknown>) => s + parseFloat(x.totArea as string || '0'), 0) || null
+      // 용도별 연면적 (표제부 동별 합산): 주거(공동주택) / 비주거(판매·근린 등)
+      const gfaResi = items.filter(isResi).reduce((s: number, x: Record<string, unknown>) => s + parseFloat(x.totArea as string || '0'), 0) || null
+      const gfaCommRaw = items.filter((x: Record<string, unknown>) => !isResi(x)).reduce((s: number, x: Record<string, unknown>) => s + parseFloat(x.totArea as string || '0'), 0)
+      const gfaComm = gfaCommRaw > 0 ? gfaCommRaw : null   // 비주거 없으면 null(주거만/구분불가)
+      let totArea = items.reduce((s: number, x: Record<string, unknown>) => s + parseFloat(x.totArea as string || '0'), 0) || null
       let vlRatEstm: number | null = null
       const aptNm = ((items[0].bldNm as string) || '').replace(/\d+동.*$/, '').trim() || null
       // 총괄표제부 보강: 연면적·용적률산정연면적·용적률 (표제부는 동별이라 부정확할 수 있음)
@@ -63,10 +70,10 @@ export async function collectBuilding(lawd: string, dong: string, bun: string | 
           if (rFar > 0) far = rFar
         }
       } catch { /* 총괄 없으면 표제부값 유지 */ }
-      return { bjdong: bj, aptNm, households, builtYear, far, totArea, vlRatEstm, dongCnt: resi.length || items.length }
+      return { bjdong: bj, aptNm, households, builtYear, far, totArea, gfaResi, gfaComm, vlRatEstm, dongCnt: resi.length || items.length }
     } catch { /* 다음 후보 */ }
   }
-  return { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, vlRatEstm: null, dongCnt: null }
+  return { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, gfaResi: null, gfaComm: null, vlRatEstm: null, dongCnt: null }
 }
 
 export async function collectLand(lawd: string, bjdong: string, bun: string | number, ji: string | number): Promise<LandInfo | null> {
@@ -124,7 +131,7 @@ export interface CollectResult {
 export async function collectByAddress(gu: string, dong: string, bun: string | number, ji: string | number): Promise<CollectResult> {
   const jibun = ji && ji !== '0' ? `${bun}-${ji}` : `${bun}`
   const lawd = LAWD_MAP[gu] || null
-  if (!lawd) return { gu, dong, jibun, lawd: null, building: { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, vlRatEstm: null, dongCnt: null }, land: null, trade: null, platAreaEst: null, landCheck: null }
+  if (!lawd) return { gu, dong, jibun, lawd: null, building: { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, gfaResi: null, gfaComm: null, vlRatEstm: null, dongCnt: null }, land: null, trade: null, platAreaEst: null, landCheck: null }
   const building = await collectBuilding(lawd, dong, bun, ji)
   const [land, trade] = await Promise.all([
     building.bjdong ? collectLand(lawd, building.bjdong, bun, ji) : Promise.resolve(null),
