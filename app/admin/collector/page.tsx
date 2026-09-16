@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { collectByAddress, type CollectResult } from '@/lib/complexCollector'
+import { collectByAddress, collectTrade, type CollectResult } from '@/lib/complexCollector'
 import { fmtNum, parseNum } from '@/lib/numberFormat'
 
 // 단지 정보 자동수집·검수·입력 (collector)
@@ -82,7 +82,7 @@ export default function CollectorPage() {
       { key: 'built_year', label: '준공연도', unit: '', auto: b.builtYear, master: ex?.built_year ?? null, on: b.builtYear != null, value: b.builtYear, note: '건축물대장(사용승인)' },
       { key: 'tot_area', label: '현재 연면적', unit: '㎡', auto: b.totArea ? Math.round(b.totArea) : null, master: ex?.tot_area ?? null, on: b.totArea != null, value: b.totArea ? Math.round(b.totArea) : null, note: '건축물대장(총괄)' },
       { key: 'plat_area', label: '대지면적', unit: '㎡', auto: r.land?.area ?? null, master: ex?.plat_area ?? null, on: r.land?.area != null, value: r.land?.area ?? null, note: `토지대장${r.landCheck === 'warn' ? ' ⚠️역산과 갭' : r.landCheck === 'ok' ? ' ✓역산일치' : ''}` },
-      { key: 'avg_ppp', label: '전용평당가', unit: '만/평', auto: r.trade?.avgPpp ?? null, master: ex?.avg_ppp ?? null, on: false, value: r.trade?.avgPpp ?? null, note: r.trade?.count ? `실거래 ${r.trade.count}건` : '거래매칭 없음' },
+      { key: 'avg_ppp', label: '전용평당가', unit: '만/평', auto: r.trade?.avgPpp ?? null, master: ex?.avg_ppp ?? null, on: false, value: r.trade?.avgPpp ?? null, note: r.trade?.count ? `실거래 ${r.trade.count}건 (${r.trade.matchBy === 'jibun' ? '지번매칭✓' : r.trade.matchBy === 'name' ? '단지명매칭' : ''})` : '거래매칭 없음' },
       { key: 'bjdong', label: '법정동코드', unit: '', auto: b.bjdong, master: ex?.bjdong ?? null, on: b.bjdong != null, value: b.bjdong, note: '동명매칭 확정' },
     ]
     setRows(rr)

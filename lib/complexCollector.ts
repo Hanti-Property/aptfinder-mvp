@@ -27,7 +27,7 @@ export interface BuildingInfo {
 }
 export interface LandInfo { area: number | null; jimok: string | null }
 export interface TradeItem { date: string; area: number; amount: number; floor: string; ppp: number }  // 개별 거래
-export interface TradeInfo { count: number; avgPpp: number | null; aptNm: string | null; names: string[]; recent: TradeItem[] }
+export interface TradeInfo { count: number; avgPpp: number | null; aptNm: string | null; names: string[]; recent: TradeItem[]; matchBy: 'jibun' | 'name' | null }
 
 // bjdong 후보 순회 → 응답 주소 동명 매칭으로 확정 + 건축물대장 요약
 export async function collectBuilding(lawd: string, dong: string, bun: string | number, ji: string | number): Promise<BuildingInfo> {
@@ -87,12 +87,16 @@ export async function collectLand(lawd: string, bjdong: string, bun: string | nu
   } catch { return null }
 }
 
-export async function collectTrade(lawd: string, dong: string, aptNm: string | null): Promise<TradeInfo | null> {
+// 실거래 매칭 규칙 (공통): ① 지번(jibun) 일치 우선 — 단지명이 소스마다 달라도 정확
+//                          ② 지번으로 못 잡으면 단지명 근사매칭 폴백
+//                          (실패 시 화면에서 후보 목록으로 사용자 선택 — collector UI)
+export async function collectTrade(lawd: string, dong: string, aptNm: string | null, jibun?: string | number | null): Promise<TradeInfo | null> {
   const now = new Date(); const jobs: string[] = []
   for (let i = 0; i < 6; i++) { const dt = new Date(now.getFullYear(), now.getMonth() - i, 1); jobs.push(dt.getFullYear() + String(dt.getMonth() + 1).padStart(2, '0')) }  // 최근 6개월
+  const targetJibun = jibun != null ? String(jibun).replace(/^0+/, '') : null  // 앞 0 제거 정규화
   try {
     const xmls = await Promise.all(jobs.map(ym => fetch(`${TRADE_LAMBDA}?LAWD_CD=${lawd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`).then(r => r.text()).catch(() => '')))
-    const items: { apt: string; amt: number; area: number; date: string; floor: string; cancel: boolean }[] = []
+    const items: { apt: string; amt: number; area: number; date: string; floor: string; jibun: string; cancel: boolean }[] = []
     xmls.forEach(xml => {
       (xml.match(/<item>([\s\S]*?)<\/item>/g) || []).forEach(it => {
         const g = (t: string) => { const m = it.match(new RegExp('<' + t + '>(.*?)</' + t + '>')); return m ? m[1].trim() : '' }
@@ -101,13 +105,18 @@ export async function collectTrade(lawd: string, dong: string, aptNm: string | n
         items.push({
           apt: g('aptNm'), amt: parseInt((g('dealAmount') || '0').replace(/,/g, '')),
           area: parseFloat(g('excluUseAr') || '0'), date: `${y}.${m}.${day}`, floor: g('floor'),
-          cancel: !!g('cdealType'),  // 해제거래
+          jibun: g('jibun').replace(/^0+/, ''), cancel: !!g('cdealType'),  // 지번(앞0제거), 해제거래
         })
       })
     })
-    const mine = (aptNm ? items.filter(x => x.apt && (x.apt.includes(aptNm) || aptNm.includes(x.apt))) : []).filter(x => !x.cancel)
+    // ① 지번 일치 우선 (이름 무관, 가장 정확)
+    let mine = targetJibun ? items.filter(x => x.jibun && x.jibun === targetJibun) : []
+    let matchBy: 'jibun' | 'name' | null = mine.length ? 'jibun' : null
+    // ② 지번 매칭 실패 시 단지명 근사매칭
+    if (!mine.length && aptNm) { mine = items.filter(x => x.apt && (x.apt.includes(aptNm) || aptNm.includes(x.apt))); if (mine.length) matchBy = 'name' }
+    mine = mine.filter(x => !x.cancel)
     const names = [...new Set(items.map(x => x.apt))].slice(0, 10)
-    if (!mine.length) return { count: 0, avgPpp: null, aptNm, names, recent: [] }
+    if (!mine.length) return { count: 0, avgPpp: null, aptNm, names, recent: [], matchBy: null }
     const valid = mine.filter(x => x.amt > 0 && x.area > 0)
     const ppps = valid.map(x => x.amt / (x.area / PY))
     const avg = ppps.length ? Math.round(ppps.reduce((a, b) => a + b, 0) / ppps.length) : null
@@ -116,7 +125,7 @@ export async function collectTrade(lawd: string, dong: string, aptNm: string | n
       .sort((a, b) => b.date.localeCompare(a.date))
       .slice(0, 10)
       .map(x => ({ date: x.date, area: x.area, amount: x.amt, floor: x.floor, ppp: Math.round(x.amt / (x.area / PY)) }))
-    return { count: mine.length, avgPpp: avg, aptNm, names, recent }
+    return { count: mine.length, avgPpp: avg, aptNm, names, recent, matchBy }
   } catch { return null }
 }
 
@@ -137,7 +146,7 @@ export async function collectByAddress(gu: string, dong: string, bun: string | n
   const building = await collectBuilding(lawd, dong, bun, ji)
   const [land, trade] = await Promise.all([
     building.bjdong ? collectLand(lawd, building.bjdong, bun, ji) : Promise.resolve(null),
-    collectTrade(lawd, dong, building.aptNm),
+    collectTrade(lawd, dong, building.aptNm, bun),   // 지번 우선 매칭 (이름 무관)
   ])
   // 상가/근생 단독 필지 판정: 주거 세대 0 이고 비주거 연면적만 있음 (아파트 본체 아님)
   const commercialOnly = (!building.households || building.households === 0) && !building.gfaResi && !!building.gfaComm
