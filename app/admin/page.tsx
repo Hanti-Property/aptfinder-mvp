@@ -147,21 +147,21 @@ export default function AdminDashboard() {
             <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>학원 매물 (임대차) · BETA
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <a href="/admin/academy-heatmap" className="bg-gradient-to-br from-[#16321f] to-[#1e1e3f] border border-emerald-500/50 rounded-xl p-4 hover:border-emerald-400 transition-all group">
+            <a href="/admin/academy-heatmap" target="_blank" rel="noopener" className="bg-gradient-to-br from-[#16321f] to-[#1e1e3f] border border-emerald-500/50 rounded-xl p-4 hover:border-emerald-400 transition-all group">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🗺️</span>
                 <p className="text-[14px] font-bold text-white group-hover:text-emerald-300">학원 매물 히트맵</p>
               </div>
               <p className="text-[11px] text-gray-400">대치·역삼 학원 매물 지도 · 용도별 색상 · 커스텀 뷰</p>
             </a>
-            <a href="/admin/academy-listings" className="bg-gradient-to-br from-[#1a2436] to-[#1e1e3f] border border-blue-500/50 rounded-xl p-4 hover:border-blue-400 transition-all group">
+            <a href="/admin/academy-listings" target="_blank" rel="noopener" className="bg-gradient-to-br from-[#1a2436] to-[#1e1e3f] border border-blue-500/50 rounded-xl p-4 hover:border-blue-400 transition-all group">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">📋</span>
                 <p className="text-[14px] font-bold text-white group-hover:text-blue-300">학원 매물 관리</p>
               </div>
               <p className="text-[11px] text-gray-400">매물 등록·수정·사진·강의실·좌표 자동 · 뷰 저장</p>
             </a>
-            <a href="/admin/building-extractor" className="bg-gradient-to-br from-[#2a1e36] to-[#1e1e3f] border border-purple-500/50 rounded-xl p-4 hover:border-purple-400 transition-all group">
+            <a href="/admin/building-extractor" target="_blank" rel="noopener" className="bg-gradient-to-br from-[#2a1e36] to-[#1e1e3f] border border-purple-500/50 rounded-xl p-4 hover:border-purple-400 transition-all group">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">📐</span>
                 <p className="text-[14px] font-bold text-white group-hover:text-purple-300">동별 좌표 추출기</p>
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
             <span className="w-1.5 h-1.5 bg-[#C49A3C] rounded-full animate-pulse"></span>Core Analytics
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <a href="/admin/rvi" className="relative overflow-hidden bg-gradient-to-br from-[#2a2416] via-[#1e1e3f] to-[#1e1e3f] border border-[#C49A3C]/50 rounded-2xl p-6 hover:border-[#C49A3C] hover:shadow-lg hover:shadow-[#C49A3C]/10 transition-all group">
+            <a href="/admin/rvi" target="_blank" rel="noopener" className="relative overflow-hidden bg-gradient-to-br from-[#2a2416] via-[#1e1e3f] to-[#1e1e3f] border border-[#C49A3C]/50 rounded-2xl p-6 hover:border-[#C49A3C] hover:shadow-lg hover:shadow-[#C49A3C]/10 transition-all group">
               <div className="absolute top-4 right-4 w-2.5 h-2.5 bg-[#C49A3C] rounded-full animate-pulse"></div>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-xl bg-[#C49A3C]/15 flex items-center justify-center text-2xl">🏗️</div>
@@ -214,11 +214,11 @@ export default function AdminDashboard() {
               <p className="text-3xl font-extrabold text-white group-hover:text-[#C49A3C] transition-colors">{stats.totalNotes}</p>
               <p className="text-[11px] text-gray-500 mt-1">리서치 노트</p>
             </a>
-            <a href="/admin/columns/list" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
+            <a href="/admin/columns/list" target="_blank" rel="noopener" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
               <p className="text-3xl font-extrabold text-[#C49A3C]">{stats.totalColumns}</p>
               <p className="text-[11px] text-gray-500 mt-1">전문가 칼럼</p>
             </a>
-            <a href="/admin/inquiries" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
+            <a href="/admin/inquiries" target="_blank" rel="noopener" className="bg-[#1e1e3f] border border-[#2a2a4a] rounded-xl p-4 text-center hover:border-[#3a3a5a] transition-colors group">
               <p className="text-3xl font-extrabold text-white group-hover:text-[#C49A3C] transition-colors">{stats.totalInquiries}</p>
               <p className="text-[11px] text-gray-500 mt-1">상담 문의</p>
             </a>
@@ -230,11 +230,11 @@ export default function AdminDashboard() {
               <p className="text-3xl font-extrabold text-blue-400">{stats.totalComplexes}</p>
               <p className="text-[11px] text-gray-500 mt-1">등록 단지</p>
             </a>
-            <a href="/admin/recon" className="bg-[#1e1e3f] border border-[#C49A3C]/30 rounded-xl p-4 text-center hover:border-[#C49A3C] transition-colors group">
+            <a href="/admin/recon" target="_blank" rel="noopener" className="bg-[#1e1e3f] border border-[#C49A3C]/30 rounded-xl p-4 text-center hover:border-[#C49A3C] transition-colors group">
               <p className="text-3xl font-extrabold text-[#C49A3C]">{stats.totalRecon}</p>
               <p className="text-[11px] text-gray-500 mt-1">재건축 마스터</p>
             </a>
-            <a href="/admin/nvp" className="bg-[#1e1e3f] border border-teal-500/30 rounded-xl p-4 text-center hover:border-teal-400 transition-colors group">
+            <a href="/admin/nvp" target="_blank" rel="noopener" className="bg-[#1e1e3f] border border-teal-500/30 rounded-xl p-4 text-center hover:border-teal-400 transition-colors group">
               <p className="text-3xl font-extrabold text-teal-400">{stats.totalNvp}</p>
               <p className="text-[11px] text-gray-500 mt-1">NVP 레퍼런스</p>
             </a>
@@ -348,7 +348,7 @@ export default function AdminDashboard() {
               <p className="text-[11px] font-semibold text-white">단지 인덱스</p>
               <p className="text-[9px] text-gray-500 mt-0.5">9개 평가지수</p>
             </a>
-            <a href="/admin/rvi" className="bg-[#1e1e3f] border border-[#C49A3C]/30 rounded-xl p-4 text-center hover:border-[#C49A3C] hover:bg-[#1e1e4f] transition-all group relative">
+            <a href="/admin/rvi" target="_blank" rel="noopener" className="bg-[#1e1e3f] border border-[#C49A3C]/30 rounded-xl p-4 text-center hover:border-[#C49A3C] hover:bg-[#1e1e4f] transition-all group relative">
               <div className="absolute top-2 right-2 w-2 h-2 bg-[#C49A3C] rounded-full animate-pulse"></div>
               <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-[#C49A3C]/10 flex items-center justify-center">
                 <span className="text-lg">🏗️</span>
@@ -356,7 +356,7 @@ export default function AdminDashboard() {
               <p className="text-[11px] font-semibold text-[#C49A3C]">재건축 RVI</p>
               <p className="text-[9px] text-gray-500 mt-0.5">143개 단지</p>
             </a>
-            <a href="/admin/academy-heatmap" className="bg-[#1e1e3f] border border-emerald-500/30 rounded-xl p-4 text-center hover:border-emerald-400 hover:bg-[#1e1e4f] transition-all group relative">
+            <a href="/admin/academy-heatmap" target="_blank" rel="noopener" className="bg-[#1e1e3f] border border-emerald-500/30 rounded-xl p-4 text-center hover:border-emerald-400 hover:bg-[#1e1e4f] transition-all group relative">
               <div className="absolute top-2 right-2 text-[8px] bg-emerald-500/30 text-emerald-300 px-1 rounded">NEW</div>
               <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                 <span className="text-lg">🗺️</span>
@@ -364,7 +364,7 @@ export default function AdminDashboard() {
               <p className="text-[11px] font-semibold text-emerald-300">학원 매물 히트맵</p>
               <p className="text-[9px] text-gray-500 mt-0.5">임대차 · 지도</p>
             </a>
-            <a href="/admin/academy-listings" className="bg-[#1e1e3f] border border-blue-500/30 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-[#1e1e4f] transition-all group relative">
+            <a href="/admin/academy-listings" target="_blank" rel="noopener" className="bg-[#1e1e3f] border border-blue-500/30 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-[#1e1e4f] transition-all group relative">
               <div className="absolute top-2 right-2 text-[8px] bg-blue-500/30 text-blue-300 px-1 rounded">NEW</div>
               <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <span className="text-lg">📋</span>
@@ -372,7 +372,7 @@ export default function AdminDashboard() {
               <p className="text-[11px] font-semibold text-blue-300">학원 매물 관리</p>
               <p className="text-[9px] text-gray-500 mt-0.5">등록·수정·뷰</p>
             </a>
-            <a href="/admin/building-extractor" className="bg-[#1e1e3f] border border-purple-500/30 rounded-xl p-4 text-center hover:border-purple-400 hover:bg-[#1e1e4f] transition-all group relative">
+            <a href="/admin/building-extractor" target="_blank" rel="noopener" className="bg-[#1e1e3f] border border-purple-500/30 rounded-xl p-4 text-center hover:border-purple-400 hover:bg-[#1e1e4f] transition-all group relative">
               <div className="absolute top-2 right-2 text-[8px] bg-purple-500/30 text-purple-300 px-1 rounded">NEW</div>
               <div className="w-9 h-9 mx-auto mb-2 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <span className="text-lg">📐</span>
@@ -387,16 +387,16 @@ export default function AdminDashboard() {
         <section>
           <h2 className="text-[13px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">Quick Actions</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <a href="/admin/inquiries" className="bg-gradient-to-r from-[#C49A3C] to-[#d4aa4c] text-[#0f0f23] rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#C49A3C]/20 transition-all">
+            <a href="/admin/inquiries" target="_blank" rel="noopener" className="bg-gradient-to-r from-[#C49A3C] to-[#d4aa4c] text-[#0f0f23] rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#C49A3C]/20 transition-all">
               상담 신청 목록
             </a>
-            <a href="/admin/notes" className="bg-gradient-to-r from-[#1B3A5C] to-[#2a4f78] text-white rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#1B3A5C]/30 transition-all">
+            <a href="/admin/notes" target="_blank" rel="noopener" className="bg-gradient-to-r from-[#1B3A5C] to-[#2a4f78] text-white rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#1B3A5C]/30 transition-all">
               + 노트 작성
             </a>
-            <a href="/admin/columns" className="bg-gradient-to-r from-[#1B3A5C] to-[#2a4f78] text-white rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#1B3A5C]/30 transition-all">
+            <a href="/admin/columns" target="_blank" rel="noopener" className="bg-gradient-to-r from-[#1B3A5C] to-[#2a4f78] text-white rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#1B3A5C]/30 transition-all">
               + 칼럼 작성
             </a>
-            <a href="/admin/register" className="bg-gradient-to-r from-[#1B3A5C] to-[#2a4f78] text-white rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#1B3A5C]/30 transition-all">
+            <a href="/admin/register" target="_blank" rel="noopener" className="bg-gradient-to-r from-[#1B3A5C] to-[#2a4f78] text-white rounded-xl p-3.5 text-center text-sm font-bold hover:shadow-lg hover:shadow-[#1B3A5C]/30 transition-all">
               + 매물 등록
             </a>
           </div>
