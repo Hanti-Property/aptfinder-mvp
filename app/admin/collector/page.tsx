@@ -79,6 +79,7 @@ export default function CollectorPage() {
       { key: 'far', label: '현재 용적률', unit: '%', auto: b.far, master: ex?.far ?? null, on: b.far != null, value: b.far, note: '건축물대장' },
       { key: 'households', label: '현재 세대수', unit: '세대', auto: b.households, master: ex?.households ?? null, on: b.households != null, value: b.households, note: '건축물대장' },
       { key: 'built_year', label: '준공연도', unit: '', auto: b.builtYear, master: ex?.built_year ?? null, on: b.builtYear != null, value: b.builtYear, note: '건축물대장(사용승인)' },
+      { key: 'tot_area', label: '현재 연면적', unit: '㎡', auto: b.totArea ? Math.round(b.totArea) : null, master: ex?.tot_area ?? null, on: b.totArea != null, value: b.totArea ? Math.round(b.totArea) : null, note: '건축물대장(총괄)' },
       { key: 'plat_area', label: '대지면적', unit: '㎡', auto: r.land?.area ?? null, master: ex?.plat_area ?? null, on: r.land?.area != null, value: r.land?.area ?? null, note: `토지대장${r.landCheck === 'warn' ? ' ⚠️역산과 갭' : r.landCheck === 'ok' ? ' ✓역산일치' : ''}` },
       { key: 'avg_ppp', label: '전용평당가', unit: '만/평', auto: r.trade?.avgPpp ?? null, master: ex?.avg_ppp ?? null, on: false, value: r.trade?.avgPpp ?? null, note: r.trade?.count ? `실거래 ${r.trade.count}건` : '거래매칭 없음' },
       { key: 'bjdong', label: '법정동코드', unit: '', auto: b.bjdong, master: ex?.bjdong ?? null, on: b.bjdong != null, value: b.bjdong, note: '동명매칭 확정' },

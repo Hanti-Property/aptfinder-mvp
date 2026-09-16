@@ -18,8 +18,9 @@ export interface BuildingInfo {
   aptNm: string | null
   households: number | null
   builtYear: number | null
-  far: number | null       // 현재 용적률(%)
-  totArea: number | null   // 현재 연면적(㎡)
+  far: number | null           // 현재 용적률(%). 대장 vlRat 0이면 vlRatEstm÷대지로 역산.
+  totArea: number | null       // 현재 연면적(㎡)
+  vlRatEstm: number | null     // 용적률산정 연면적(㎡) — 총괄표제부. 용적률 역산용.
   dongCnt: number | null
 }
 export interface LandInfo { area: number | null; jimok: string | null }
@@ -42,13 +43,29 @@ export async function collectBuilding(lawd: string, dong: string, bun: string | 
       const households = tgt.reduce((s: number, x: Record<string, unknown>) => s + parseInt(x.hhldCnt as string || '0'), 0) || null
       const dates = tgt.map((x: Record<string, unknown>) => x.useAprDay as string).filter((v: string) => v && v.length >= 4)
       const builtYear = dates.length ? Math.min(...dates.map((v: string) => parseInt(v.substring(0, 4)))) : null
-      const far = tgt.map((x: Record<string, unknown>) => parseFloat(x.vlRat as string || '0')).find((v: number) => v > 0) || null
-      const totArea = tgt.reduce((s: number, x: Record<string, unknown>) => s + parseFloat(x.totArea as string || '0'), 0) || null
+      let far = tgt.map((x: Record<string, unknown>) => parseFloat(x.vlRat as string || '0')).find((v: number) => v > 0) || null
+      let totArea = tgt.reduce((s: number, x: Record<string, unknown>) => s + parseFloat(x.totArea as string || '0'), 0) || null
+      let vlRatEstm: number | null = null
       const aptNm = ((items[0].bldNm as string) || '').replace(/\d+동.*$/, '').trim() || null
-      return { bjdong: bj, aptNm, households, builtYear, far, totArea, dongCnt: resi.length || items.length }
+      // 총괄표제부 보강: 연면적·용적률산정연면적·용적률 (표제부는 동별이라 부정확할 수 있음)
+      try {
+        const ru = `https://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawd}&bjdongCd=${bj}&bun=${bunP}&ji=${jiP}&numOfRows=5&pageNo=1&_type=json`
+        const rr = await fetch(ru); const rd = await rr.json()
+        let rit = rd?.response?.body?.items?.item
+        if (rit) {
+          const recap = Array.isArray(rit) ? rit[0] : rit
+          const rTot = parseFloat(recap.totArea || '0')
+          const rEstm = parseFloat(recap.vlRatEstmTotArea || '0')
+          const rFar = parseFloat(recap.vlRat || '0')
+          if (rTot > 0) totArea = rTot        // 총괄 연면적 우선(전체 합산)
+          if (rEstm > 0) vlRatEstm = rEstm
+          if (rFar > 0) far = rFar
+        }
+      } catch { /* 총괄 없으면 표제부값 유지 */ }
+      return { bjdong: bj, aptNm, households, builtYear, far, totArea, vlRatEstm, dongCnt: resi.length || items.length }
     } catch { /* 다음 후보 */ }
   }
-  return { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, dongCnt: null }
+  return { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, vlRatEstm: null, dongCnt: null }
 }
 
 export async function collectLand(lawd: string, bjdong: string, bun: string | number, ji: string | number): Promise<LandInfo | null> {
@@ -95,12 +112,16 @@ export interface CollectResult {
 export async function collectByAddress(gu: string, dong: string, bun: string | number, ji: string | number): Promise<CollectResult> {
   const jibun = ji && ji !== '0' ? `${bun}-${ji}` : `${bun}`
   const lawd = LAWD_MAP[gu] || null
-  if (!lawd) return { gu, dong, jibun, lawd: null, building: { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, dongCnt: null }, land: null, trade: null, platAreaEst: null, landCheck: null }
+  if (!lawd) return { gu, dong, jibun, lawd: null, building: { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, vlRatEstm: null, dongCnt: null }, land: null, trade: null, platAreaEst: null, landCheck: null }
   const building = await collectBuilding(lawd, dong, bun, ji)
   const [land, trade] = await Promise.all([
     building.bjdong ? collectLand(lawd, building.bjdong, bun, ji) : Promise.resolve(null),
     collectTrade(lawd, dong, building.aptNm),
   ])
+  // 용적률이 대장에서 0이면: 용적률산정연면적 ÷ 대지면적(토지대장) × 100 으로 역산
+  if ((building.far == null || building.far === 0) && building.vlRatEstm && land?.area) {
+    building.far = Math.round(building.vlRatEstm / land.area * 100 * 10) / 10
+  }
   const platAreaEst = (building.totArea && building.far) ? Math.round(building.totArea / (building.far / 100)) : null
   let landCheck: 'ok' | 'warn' | null = null
   if (land?.area && platAreaEst) landCheck = Math.abs(land.area - platAreaEst) / platAreaEst <= 0.10 ? 'ok' : 'warn'
