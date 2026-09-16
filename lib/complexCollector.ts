@@ -125,24 +125,36 @@ export interface CollectResult {
   building: BuildingInfo; land: LandInfo | null; trade: TradeInfo | null
   platAreaEst: number | null   // 연면적÷용적률 역산 (교차검증)
   landCheck: 'ok' | 'warn' | null  // 토지대장 vs 역산 갭
+  commercialOnly: boolean      // 상가/근생 단독 필지(주거 세대 0) — 아파트 본체 아님
+  farNote: string | null       // 용적률 못 구한 사유 (있으면 표시)
 }
 
 // 주소(구·동·지번) → 전체 수집 + 교차검증
 export async function collectByAddress(gu: string, dong: string, bun: string | number, ji: string | number): Promise<CollectResult> {
   const jibun = ji && ji !== '0' ? `${bun}-${ji}` : `${bun}`
   const lawd = LAWD_MAP[gu] || null
-  if (!lawd) return { gu, dong, jibun, lawd: null, building: { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, gfaResi: null, gfaComm: null, vlRatEstm: null, dongCnt: null }, land: null, trade: null, platAreaEst: null, landCheck: null }
+  if (!lawd) return { gu, dong, jibun, lawd: null, building: { bjdong: null, aptNm: null, households: null, builtYear: null, far: null, totArea: null, gfaResi: null, gfaComm: null, vlRatEstm: null, dongCnt: null }, land: null, trade: null, platAreaEst: null, landCheck: null, commercialOnly: false, farNote: null }
   const building = await collectBuilding(lawd, dong, bun, ji)
   const [land, trade] = await Promise.all([
     building.bjdong ? collectLand(lawd, building.bjdong, bun, ji) : Promise.resolve(null),
     collectTrade(lawd, dong, building.aptNm),
   ])
-  // 용적률이 대장에서 0이면: 용적률산정연면적 ÷ 대지면적(토지대장) × 100 으로 역산
-  if ((building.far == null || building.far === 0) && building.vlRatEstm && land?.area) {
-    building.far = Math.round(building.vlRatEstm / land.area * 100 * 10) / 10
+  // 상가/근생 단독 필지 판정: 주거 세대 0 이고 비주거 연면적만 있음 (아파트 본체 아님)
+  const commercialOnly = (!building.households || building.households === 0) && !building.gfaResi && !!building.gfaComm
+  // 용적률: 대장 vlRat 0이면 ① 용적률산정연면적÷대지 ② (없으면) 연면적÷대지 순으로 역산
+  let farNote: string | null = null
+  if (building.far == null || building.far === 0) {
+    if (building.vlRatEstm && land?.area) {
+      building.far = Math.round(building.vlRatEstm / land.area * 100 * 10) / 10
+    } else if (building.totArea && land?.area && !commercialOnly) {
+      building.far = Math.round(building.totArea / land.area * 100 * 10) / 10
+      farNote = '연면적÷대지 역산(근사)'
+    } else {
+      farNote = commercialOnly ? '상가/부속 필지 — 아파트 본체 클릭 권장' : '용적률 산정불가(대장·대지 데이터 부족)'
+    }
   }
   const platAreaEst = (building.totArea && building.far) ? Math.round(building.totArea / (building.far / 100)) : null
   let landCheck: 'ok' | 'warn' | null = null
   if (land?.area && platAreaEst) landCheck = Math.abs(land.area - platAreaEst) / platAreaEst <= 0.10 ? 'ok' : 'warn'
-  return { gu, dong, jibun, lawd, building, land, trade, platAreaEst, landCheck }
+  return { gu, dong, jibun, lawd, building, land, trade, platAreaEst, landCheck, commercialOnly, farNote }
 }

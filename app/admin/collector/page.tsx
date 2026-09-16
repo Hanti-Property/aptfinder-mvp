@@ -77,7 +77,7 @@ export default function CollectorPage() {
   const buildRows = (r: CollectResult, ex: Record<string, unknown> | null) => {
     const b = r.building
     const rr: FieldRow[] = [
-      { key: 'far', label: '현재 용적률', unit: '%', auto: b.far, master: ex?.far ?? null, on: b.far != null, value: b.far, note: '건축물대장' },
+      { key: 'far', label: '현재 용적률', unit: '%', auto: b.far, master: ex?.far ?? null, on: b.far != null, value: b.far, note: r.farNote || '건축물대장' },
       { key: 'households', label: '현재 세대수', unit: '세대', auto: b.households, master: ex?.households ?? null, on: b.households != null, value: b.households, note: '건축물대장' },
       { key: 'built_year', label: '준공연도', unit: '', auto: b.builtYear, master: ex?.built_year ?? null, on: b.builtYear != null, value: b.builtYear, note: '건축물대장(사용승인)' },
       { key: 'tot_area', label: '현재 연면적', unit: '㎡', auto: b.totArea ? Math.round(b.totArea) : null, master: ex?.tot_area ?? null, on: b.totArea != null, value: b.totArea ? Math.round(b.totArea) : null, note: '건축물대장(총괄)' },
@@ -164,6 +164,11 @@ export default function CollectorPage() {
                 : <span style={{ marginLeft: 8, color: '#C79A5B', fontWeight: 700 }}>○ 신규 (등록 가능)</span>}
             </div>
             {!result.lawd && <div style={{ color: '#c0392b', fontSize: 12, marginBottom: 8 }}>지원 구가 아닙니다(구코드 미등록).</div>}
+            {result.commercialOnly && (
+              <div style={{ background: '#fff3cd', border: '1px solid #ffe08a', color: '#8a6d00', fontSize: 12, borderRadius: 6, padding: '8px 10px', marginBottom: 8, lineHeight: 1.5 }}>
+                ⚠️ <b>상가/부속 필지</b>를 클릭했어요 (주거 세대 없음). 용적률·세대 등은 <b>아파트 본체 동</b>을 클릭해야 정확합니다.
+              </div>
+            )}
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
               <thead><tr style={{ color: '#888', fontSize: 12, textAlign: 'left' }}>
                 <th style={{ padding: '6px 3px', width: 34 }}>반영</th><th style={{ padding: '6px 3px' }}>항목</th>
