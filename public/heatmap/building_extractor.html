@@ -58,10 +58,10 @@
 <div class="layout">
   <div id="map"></div>
   <div class="side">
-    <h2>🔍 지도 클릭 → 단지 자동조회 <span id="probeBadge" style="font-weight:400;font-size:11px;color:#888"></span></h2>
+    <h2>📍 지도 터치 → 위치·주소 <span id="probeBadge" style="font-weight:400;font-size:11px;color:#888"></span></h2>
     <div id="probePanel" class="step" style="line-height:1.7">
-      <b>지도에서 재건축 단지를 터치하세요.</b><br>
-      <small>클릭 지점 주소 → 건축물대장·토지대장·실거래를 자동 조회해 여기 표시합니다. (검수용)</small>
+      <b>지도의 건물/지점을 터치하세요.</b><br>
+      <small>클릭 지점의 좌표 · 지번주소 · 도로명주소를 표시합니다. (매물 등록·현장 확인용)</small>
     </div>
     <h2>사용법 (동별 좌표 추출)</h2>
     <div class="step">
@@ -111,13 +111,11 @@ window.addEventListener('load', () => {
       const ll = e.latLng;
       probeAt(ll.getLat(), ll.getLng());
     });
-    setStatus('지도 준비됨. 재건축 단지를 클릭하면 우측에 자동조회 결과가 나옵니다.');
+    setStatus('지도 준비됨. 지점을 터치하면 좌표·주소가 우측에 표시됩니다.');
   });
 });
 
-// ── 지도 클릭 지점 자동조회 (다중 소스 교차검증) ──────────────
-const LAWD_MAP = { '강남구':'11680','서초구':'11650','송파구':'11710','강동구':'11740','양천구':'11470','노원구':'11350','영등포구':'11560','마포구':'11440','성동구':'11200','용산구':'11170' };
-
+// ── 지도 클릭 지점 → 좌표·지번·도로명 주소 표시 (매물등록·현장확인용) ──
 function probeSet(html){ document.getElementById('probePanel').innerHTML = html; }
 function probeBadge(t){ document.getElementById('probeBadge').textContent = t; }
 
@@ -126,128 +124,30 @@ async function probeAt(lat, lng){
   if (probeMarker) probeMarker.setMap(null);
   probeMarker = new kakao.maps.Marker({ position: new kakao.maps.LatLng(lat,lng) });
   probeMarker.setMap(map);
-  probeBadge('조회 중…');
+  probeBadge('확인 중…');
   probeSet('<b>주소 확인 중…</b>');
 
-  // 1) 좌표 → 행정주소 (법정동/지번)
-  geocoder.coord2Address(lng, lat, async (res, st) => {
+  // 좌표 → 지번주소 + 도로명주소 (매물등록·현장확인용)
+  geocoder.coord2Address(lng, lat, (res, st) => {
     if (st !== kakao.maps.services.Status.OK || !res.length) { probeSet('주소를 찾지 못했습니다. 다른 지점을 눌러보세요.'); probeBadge(''); return; }
-    const addr = res[0].address; // {region_1depth_name(시), region_2depth_name(구), region_3depth_name(동), main_address_no(본번), sub_address_no(부번)}
-    const gu = addr.region_2depth_name;   // 예: 송파구
-    const dong = addr.region_3depth_name; // 예: 송파동
-    const bun = addr.main_address_no;      // 본번
-    const ji = addr.sub_address_no || '0'; // 부번
-    const jibun = ji && ji !== '0' ? `${bun}-${ji}` : `${bun}`;
-    const lawd = LAWD_MAP[gu];
-    probeSet(`<b>${gu} ${dong} ${jibun}</b><br><small>좌표 ${lat.toFixed(5)}, ${lng.toFixed(5)}</small><br><small>건축물대장 조회 중…</small>`);
-    if (!lawd) { probeSet(`<b>${gu} ${dong} ${jibun}</b><br><small style="color:#c0392b">지원 구가 아님(구코드 미등록). 강남·서초·송파·강동 등만 자동조회.</small>`); probeBadge(''); return; }
-
-    // 2) bjdong 자동확정 + 건축물대장 조회
-    const info = await collectBuilding(lawd, gu, dong, bun, ji);
-    // 3) 토지대장(대지면적) + 실거래(시세) 병렬
-    const [land, trade] = await Promise.all([
-      info.bjdong ? collectLand(lawd, info.bjdong, bun, ji) : Promise.resolve(null),
-      collectTrade(lawd, dong, info.aptNm || null),
-    ]);
-    renderProbe({ gu, dong, jibun, lawd, ...info, land, trade });
+    const a = res[0];
+    const jibunAddr = a.address ? a.address.address_name : '—';       // 지번 주소
+    const roadAddr = a.road_address ? a.road_address.address_name : null; // 도로명 주소
+    const bldNm = a.road_address && a.road_address.building_name ? a.road_address.building_name : '';
+    const copyBtn = (label, val) => `<button onclick="navigator.clipboard&&navigator.clipboard.writeText('${val.replace(/'/g,"\\'")}');this.textContent='복사됨';setTimeout(()=>this.textContent='${label}',1000)" style="margin-left:6px;padding:1px 7px;font-size:11px;border:1px solid #1B3A5C;background:#fff;color:#1B3A5C;border-radius:5px;cursor:pointer">${label}</button>`;
+    let html = '<table style="width:100%;border-collapse:collapse;font-size:13px">';
+    html += `<tr style="border-bottom:1px solid #eee"><td style="padding:7px 4px;color:#888;white-space:nowrap">지번주소</td><td style="padding:7px 4px;font-weight:700;color:#1B3A5C">${jibunAddr}${copyBtn('복사', jibunAddr)}</td></tr>`;
+    if (roadAddr) html += `<tr style="border-bottom:1px solid #eee"><td style="padding:7px 4px;color:#888">도로명</td><td style="padding:7px 4px;color:#1B3A5C">${roadAddr}${copyBtn('복사', roadAddr)}</td></tr>`;
+    if (bldNm) html += `<tr style="border-bottom:1px solid #eee"><td style="padding:7px 4px;color:#888">건물명</td><td style="padding:7px 4px">${bldNm}</td></tr>`;
+    const coord = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    html += `<tr><td style="padding:7px 4px;color:#888">좌표</td><td style="padding:7px 4px;font-family:monospace;font-size:12px">${coord}${copyBtn('복사', coord)}</td></tr>`;
+    html += '</table>';
+    probeSet(html);
     probeBadge('완료');
   });
 }
 
-// bjdong 후보 순회 → 응답 주소의 동명이 일치하는 코드 확정 + 건축물대장 세대/용적/연면적/준공
-async function collectBuilding(lawd, gu, dong, bun, ji){
-  const bunP = String(bun).padStart(4,'0'), jiP = String(ji||'0').padStart(4,'0');
-  // 후보 bjdong: 10100~11500 (구별 법정동 범위). 응답 platPlc의 동명이 클릭 동과 일치하는 것 채택.
-  for (let n = 101; n <= 115; n++){
-    const bj = String(n*100).padStart(5,'0');
-    try {
-      const url = `https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?serviceKey=${BLD_KEY}&sigunguCd=${lawd}&bjdongCd=${bj}&bun=${bunP}&ji=${jiP}&numOfRows=50&pageNo=1&_type=json`;
-      const r = await fetch(url); const d = await r.json();
-      let it = d?.response?.body?.items?.item; if (!it) continue;
-      const items = Array.isArray(it) ? it : [it];
-      const addr0 = items[0].platPlc || items[0].newPlatPlc || '';
-      if (!addr0.includes(dong)) continue;  // 다른 동이면 스킵 (동명 매칭 = bjdong 확정)
-      // 주거동만 (공동주택). 없으면 전체.
-      const resi = items.filter(x => (x.mainPurpsCdNm||'')==='공동주택' || /아파트|공동주택|주거/.test(x.etcPurps||''));
-      const tgt = resi.length ? resi : items;
-      const households = tgt.reduce((s,x)=>s+parseInt(x.hhldCnt||0),0);
-      const dates = tgt.map(x=>x.useAprDay).filter(v=>v && v.length>=4);
-      const builtYear = dates.length ? Math.min(...dates.map(v=>parseInt(v.substring(0,4)))) : null;
-      const far = tgt.map(x=>parseFloat(x.vlRat||0)).find(v=>v>0) || null;
-      const totArea = tgt.reduce((s,x)=>s+parseFloat(x.totArea||0),0) || null;
-      const aptNm = (items[0].bldNm||'').replace(/\d+동.*$/,'').trim() || null;
-      return { bjdong: bj, aptNm, households, builtYear, far, totArea, dongCnt: resi.length||items.length, bldItems: items.length };
-    } catch(e){ /* 다음 후보 */ }
-  }
-  return { bjdong:null, aptNm:null, households:null, builtYear:null, far:null, totArea:null };
-}
-
-async function collectLand(lawd, bjdong, bun, ji){
-  const bunP = String(bun).padStart(4,'0'), jiP = String(ji||'0').padStart(4,'0');
-  const pnu = lawd + bjdong + '1' + bunP + jiP;
-  try {
-    const r = await fetch(`${LAND_LAMBDA}?pnu=${pnu}`); const d = await r.json();
-    const it = d?.landCharacteristicss?.field; if (!it || !it.length) return null;
-    const latest = [...it].sort((a,b)=>parseInt(b.stdrYear||0)-parseInt(a.stdrYear||0))[0];
-    return { area: parseFloat(latest.lndpclAr||0) || null, jimok: latest.lndcgrCodeNm || null };
-  } catch(e){ return null; }
-}
-
-async function collectTrade(lawd, dong, aptNm){
-  // 최근 3개월 실거래에서 해당 동 + (단지명 근사매칭) 평균 전용평당가
-  const now = new Date(); const jobs = [];
-  for (let i=0;i<3;i++){ const dt=new Date(now.getFullYear(), now.getMonth()-i, 1); jobs.push(dt.getFullYear()+String(dt.getMonth()+1).padStart(2,'0')); }
-  try {
-    const xmls = await Promise.all(jobs.map(ym => fetch(`${TRADE_LAMBDA}?LAWD_CD=${lawd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`).then(r=>r.text()).catch(()=> '')));
-    const items = [];
-    xmls.forEach(xml => {
-      (xml.match(/<item>([\s\S]*?)<\/item>/g)||[]).forEach(it => {
-        const g = (t)=>{ const m=it.match(new RegExp('<'+t+'>(.*?)</'+t+'>')); return m?m[1].trim():''; };
-        const umd=g('umdNm'); if (umd!==dong) return;
-        items.push({ apt:g('aptNm'), amt:parseInt((g('dealAmount')||'0').replace(/,/g,'')), area:parseFloat(g('excluUseAr')||0), y:g('dealYear'), m:g('dealMonth') });
-      });
-    });
-    // 단지명 매칭 (aptNm 근사)
-    let mine = aptNm ? items.filter(x=> x.apt && (x.apt.includes(aptNm)||aptNm.includes(x.apt))) : [];
-    const uniqNames = [...new Set(items.map(x=>x.apt))];
-    if (!mine.length) return { count:0, names:uniqNames.slice(0,8) };
-    const ppps = mine.filter(x=>x.amt>0&&x.area>0).map(x=> x.amt / (x.area/PY)); // 만원/전용평
-    const avg = ppps.length ? Math.round(ppps.reduce((a,b)=>a+b,0)/ppps.length) : null;
-    return { count: mine.length, avgPpp: avg, aptNm, names:uniqNames.slice(0,8) };
-  } catch(e){ return null; }
-}
-
-// 교차검증 렌더
-function renderProbe(x){
-  const won = (v)=> v==null?'—':v.toLocaleString();
-  // 대지면적 교차: 토지대장 vs 연면적÷용적률 역산
-  const landArea = x.land?.area || null;
-  const farEst = (x.totArea && x.far) ? Math.round(x.totArea/(x.far/100)) : null;
-  let landCheck = '';
-  if (landArea && farEst){ const gap=Math.abs(landArea-farEst)/farEst; landCheck = gap<=0.10?'🟢':'🟡'; }
-  // 준공 교차: 건축물대장
-  const rows = [
-    ['위치', `${x.gu} ${x.dong} ${x.jibun}`, x.bjdong?`bjdong ${x.bjdong} 🟢`:'bjdong 미확정 🟡'],
-    ['단지명(대장)', x.aptNm||'—', x.trade?.aptNm||''],
-    ['현재 세대수', won(x.households)+'세대', '건축물대장'],
-    ['준공연도', x.builtYear||'—', '건축물대장(사용승인)'],
-    ['현재 용적률', x.far!=null?x.far+'%':'—', '건축물대장'],
-    ['현재 연면적', x.totArea?won(Math.round(x.totArea))+'㎡':'—', '건축물대장'],
-    ['대지면적(토지대장)', landArea?won(landArea)+'㎡':'—', landCheck+' 토지대장'],
-    ['대지(연면적÷용적 역산)', farEst?won(farEst)+'㎡':'—', '교차검증용'],
-    ['현재 전용평당가', x.trade?.avgPpp?won(x.trade.avgPpp)+'만/평':'—', x.trade?.count?`실거래 ${x.trade.count}건`:'거래 매칭 없음'],
-  ];
-  let html = '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-  rows.forEach(([k,v,note])=>{
-    html += `<tr style="border-bottom:1px solid #eee"><td style="padding:5px 4px;color:#888;white-space:nowrap">${k}</td><td style="padding:5px 4px;font-weight:700;color:#1B3A5C">${v}</td><td style="padding:5px 4px;color:#999;font-size:11px">${note}</td></tr>`;
-  });
-  html += '</table>';
-  if (x.trade && !x.trade.avgPpp && x.trade.names?.length){
-    html += `<div style="padding:6px 4px;font-size:11px;color:#888">이 동 실거래 단지명: ${x.trade.names.join(', ')} <br>→ 단지명 매칭 실패 시 위 목록에서 확인</div>`;
-  }
-  html += '<div style="padding:8px 4px;font-size:11px;color:#c0392b">⚠️ 자동조회 결과는 검수용입니다. 정비계획(목표용적률·비례율 등)은 별도 문서 확인 필요.</div>';
-  probeSet(html);
-}
+// 단지 정보 자동조회(세대·용적·대지·시세)는 /admin/collector 로 분리됨.
 
 // 주소/장소 검색 → 지도 이동
 function searchAndMove() {
